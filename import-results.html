@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Import résultats – VTT Points</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .wrap { max-width: 1000px; margin: 30px auto; padding: 0 16px; }
+    .card { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+    .row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+    .grow { flex:1; }
+    .muted { color:#667085; }
+    .pill { display:inline-block; padding: 4px 10px; border-radius: 999px; background:#f1f5f9; }
+    .ok { color:#067647; }
+    .bad { color:#b42318; }
+    table { width:100%; border-collapse: collapse; margin-top: 12px; background:#fff; }
+    th, td { border-bottom: 1px solid #e5e7eb; padding: 10px; text-align:left; }
+    th { background:#f8fafc; }
+    .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+    button { cursor:pointer; }
+    .btn2 { padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; background:#fff; }
+    .btn-primary { padding: 10px 14px; border-radius: 8px; border: 0; background:#2563eb; color:#fff; }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+    .msg { margin-top:10px; }
+    code { background:#f1f5f9; padding:2px 6px; border-radius:6px; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Import des résultats</h1>
+  <nav>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="course.html">Créer une course</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="row">
+      <div class="grow">
+        <div><strong>Épreuve :</strong> <span id="eventName">Marathon VTT (démo)</span></div>
+        <div class="muted"><strong>Score de l’épreuve :</strong> <span id="eventScore">133</span> pts</div>
+      </div>
+      <div class="pill">Organisateur</div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+
+    <div class="row">
+      <div class="grow">
+        <div><strong>1) Télécharger le modèle</strong></div>
+        <div class="muted">Colonnes attendues : <code>nom</code>, <code>prenom</code>, <code>temps</code> (HH:MM:SS), optionnel : <code>categorie</code>, <code>club</code></div>
+      </div>
+      <button class="btn2" id="downloadTemplateBtn">Télécharger modèle CSV</button>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+
+    <div class="row">
+      <div class="grow">
+        <div><strong>2) Importer un fichier</strong></div>
+        <div class="muted">V1 : CSV (Excel pourra être ajouté ensuite)</div>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,text/csv">
+    </div>
+
+    <div class="msg" id="statusMsg"></div>
+
+    <div id="previewBlock" style="display:none; margin-top:16px;">
+      <h3 style="margin:0 0 8px 0;">Aperçu des résultats importés</h3>
+      <div class="muted" id="summaryLine"></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Temps</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+
+      <div class="actions">
+        <button class="btn2" id="resetBtn">Réinitialiser</button>
+        <button class="btn-primary" id="validateBtn" disabled>Valider & calculer les scores</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- Helpers temps ----
+  function parseHMS(hms) {
+    // "HH:MM:SS" -> seconds, return null if invalid
+    if (!hms || typeof hms !== "string") return null;
+    const m = hms.trim().match(/^(\d{1,2}):([0-5]\d):([0-5]\d)$/);
+    if (!m) return null;
+    const hh = Number(m[1]), mm = Number(m[2]), ss = Number(m[3]);
+    return hh * 3600 + mm * 60 + ss;
+  }
+
+  function formatHMS(totalSec) {
+    const hh = Math.floor(totalSec / 3600);
+    const mm = Math.floor((totalSec % 3600) / 60);
+    const ss = totalSec % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+  }
+
+  // ---- CSV parser simple (sans guillemets complexes) ----
+  function parseCSV(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (lines.length < 2) return { headers: [], rows: [] };
+
+    const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+    const rows = lines.slice(1).map(line => {
+      const cols = line.split(",").map(c => c.trim());
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = cols[i] ?? "");
+      return obj;
+    });
+
+    return { headers, rows };
+  }
+
+  function hasRequiredHeaders(headers) {
+    const required = ["nom", "prenom", "temps"];
+    return required.every(r => headers.includes(r));
+  }
+
+  // ---- Coeff de place (V1) ----
+  function coeffForPlace(place) {
+    if (place === 1) return 1.00;
+    if (place === 2) return 0.80;
+    if (place === 3) return 0.65;
+    if (place === 4) return 0.55;
+    if (place === 5) return 0.45;
+    if (place >= 6 && place <= 10) {
+      // dégressif 0.40 -> 0.15 sur places 6..10
+      const start = 0.40, end = 0.15;
+      const t = (place - 6) / (10 - 6);
+      return start + (end - start) * t;
+    }
+    // finishers au-delà
+    return 0; // on gérera le fixe (5-15) ensuite
+  }
+
+  // ---- UI ----
+  const fileInput = document.getElementById("fileInput");
+  const statusMsg = document.getElementById("statusMsg");
+  const previewBlock = document.getElementById("previewBlock");
+  const previewBody = document.getElementById("previewBody");
+  const summaryLine = document.getElementById("summaryLine");
+  const validateBtn = document.getElementById("validateBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const downloadTemplateBtn = document.getElementById("downloadTemplateBtn");
+
+  const eventScore = Number(document.getElementById("eventScore").textContent) || 100;
+
+  let imported = []; // {nom, prenom, tempsStr, timeSec, ok, err}
+
+  downloadTemplateBtn.addEventListener("click", () => {
+    const template = "nom,prenom,temps,categorie,club\nDUPONT,Julien,03:42:18,M40,VTT Limoges\nMARTIN,Paul,03:45:02,M30,Club X\n";
+    const blob = new Blob([template], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "modele_resultats_vtt_points.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    imported = [];
+    fileInput.value = "";
+    previewBlock.style.display = "none";
+    statusMsg.textContent = "";
+    statusMsg.className = "msg";
+  });
+
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const text = await file.text();
+    const { headers, rows } = parseCSV(text);
+
+    if (!hasRequiredHeaders(headers)) {
+      statusMsg.className = "msg bad";
+      statusMsg.textContent = "❌ Colonnes manquantes. Il faut : nom, prenom, temps (HH:MM:SS).";
+      previewBlock.style.display = "none";
+      return;
+    }
+
+    imported = rows.map((r, idx) => {
+      const nom = (r.nom || "").trim();
+      const prenom = (r.prenom || "").trim();
+      const tempsStr = (r.temps || "").trim();
+      const timeSec = parseHMS(tempsStr);
+
+      if (!nom || !prenom) {
+        return { nom, prenom, tempsStr, timeSec, ok: false, err: `Ligne ${idx+2}: nom/prénom manquant` };
+      }
+      if (timeSec === null) {
+        return { nom, prenom, tempsStr, timeSec, ok: false, err: `Ligne ${idx+2}: temps invalide` };
+      }
+      return { nom, prenom, tempsStr, timeSec, ok: true, err: "" };
+    });
+
+    renderPreview();
+  });
+
+  function renderPreview() {
+    previewBody.innerHTML = "";
+
+    const errors = imported.filter(x => !x.ok);
+    const okCount = imported.length - errors.length;
+
+    // Aperçu: trier les OK par temps
+    const okRows = imported.filter(x => x.ok).slice().sort((a,b) => a.timeSec - b.timeSec);
+
+    // Status
+    if (errors.length === 0) {
+      statusMsg.className = "msg ok";
+      statusMsg.textContent = `✅ Import OK (${okCount} lignes valides).`;
+    } else {
+      statusMsg.className = "msg bad";
+      statusMsg.textContent = `❌ ${errors.length} erreur(s) détectée(s). Corrige avant validation.`;
+      console.warn("Erreurs import:", errors.map(e => e.err));
+    }
+
+    summaryLine.textContent = `Lignes valides : ${okCount} • Erreurs : ${errors.length}`;
+
+    // Remplir tableau : on montre les 30 premiers (OK + erreurs en fin)
+    const toShow = okRows.slice(0, 25).concat(errors.slice(0, 5)); // aperçu
+    toShow.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      const status = r.ok ? "✔ OK" : "❌ Erreur";
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td>${escapeHTML(r.nom)}</td>
+        <td>${escapeHTML(r.prenom)}</td>
+        <td>${escapeHTML(r.tempsStr)}</td>
+        <td class="${r.ok ? "ok" : "bad"}">${status}${r.ok ? "" : ` — ${escapeHTML(r.err)}`}</td>
+      `;
+      previewBody.appendChild(tr);
+    });
+
+    previewBlock.style.display = "block";
+    validateBtn.disabled = errors.length > 0 || okCount === 0;
+  }
+
+  validateBtn.addEventListener("click", () => {
+    // Calcul classement + scores (démo côté client)
+    const okRows = imported.filter(x => x.ok).slice().sort((a,b) => a.timeSec - b.timeSec);
+
+    const enriched = okRows.map((r, idx) => {
+      const place = idx + 1;
+      const coeff = coeffForPlace(place);
+      const score = coeff > 0 ? Math.round(eventScore * coeff) : 10; // TODO: finishers hors top10
+      return { ...r, place, coeff, score };
+    });
+
+    console.table(enriched.map(x => ({ place: x.place, nom: x.nom, prenom: x.prenom, temps: x.tempsStr, score: x.score })));
+    alert("✅ Résultats validés (démo). Ouvre la console (F12) pour voir le classement + scores.");
+  });
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+</script>
+</body>
+</html>

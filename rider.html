@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil cycliste – VTT Points</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
+    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    header h1{font-size:18px;margin:0}
+    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
+    .wrap{max-width:950px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+    .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+    .avatar{width:96px;height:96px;border-radius:999px;object-fit:cover;background:#f1f5f9}
+    .muted{color:#667085}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#f1f5f9;margin-right:8px;margin-top:6px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left}
+    th{background:#f8fafc}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Profil cycliste</h1>
+    <nav>
+      <a href="public-ranking.html">Classement</a>
+      <a href="events.html">Épreuves</a>
+      <a href="login.html">Connexion</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="row">
+        <img id="photo" class="avatar" alt="Photo cycliste" />
+        <div style="flex:1;">
+          <h2 id="name" style="margin:0;">—</h2>
+          <div class="muted">
+            <span id="nat">—</span> • <span id="team">—</span>
+          </div>
+          <div class="muted" style="margin-top:6px;">
+            <span id="sex">—</span> • <span id="birthYear">—</span> • <span id="ageCat">—</span>
+          </div>
+
+          <div style="margin-top:6px;">
+            <span class="pill">Score : <strong id="score">—</strong></span>
+            <span class="pill">Courses valides : <strong id="races">—</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:18px;">Historique (démo)</h3>
+      <div class="muted">On branchera ici les vraies épreuves + résultats.</div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Épreuve</th>
+            <th>Score</th>
+            <th>Place</th>
+          </tr>
+        </thead>
+        <tbody id="history"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/uci.js"></script>
+  <script src="js/rider.js"></script>
+</body>
+</html>

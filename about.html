@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title data-i18n="about.title">À propos – VTT Points</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
+    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    header h1{font-size:18px;margin:0}
+    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
+    .wrap{max-width:900px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+    .muted{color:#667085}
+    .lang{margin-left:auto;display:flex;gap:8px}
+    .btn{padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
+    .btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+  </style>
+</head>
+<body>
+<header>
+  <h1 data-i18n="about.h1">À propos</h1>
+  <nav>
+    <a href="index.html" data-i18n="nav.home">Accueil</a>
+    <a href="meetings.html" data-i18n="nav.events">Épreuves</a>
+    <a href="public-ranking.html" data-i18n="nav.ranking">Classement</a>
+    <a href="about.html" data-i18n="nav.about">À propos</a>
+  </nav>
+
+  <div class="lang">
+    <button class="btn" id="btnFR">FR</button>
+    <button class="btn" id="btnEN">EN</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2 data-i18n="about.what">C’est quoi VTT Points ?</h2>
+    <p class="muted" data-i18n="about.p1">
+      <section style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06);line-height:1.6;color:#334155;">
+  
+  <h2 style="margin-top:0;">À propos des MTB Points</h2>
+
+  <p>
+    Je suis un <strong>vététiste licencié en club</strong>, passionné de VTT et de compétition.
+    En tant que pratiquant régulier d’épreuves de cross-country, d’enduro et de marathon,
+    j’ai constaté qu’il était difficile de comparer objectivement les performances des cyclistes
+    d’une course à l’autre, tant les parcours et leurs difficultés peuvent varier.
+  </p>
+
+  <p>
+    C’est dans ce contexte qu’est né le système des <strong>MTB Points</strong>, un système de classement
+    inspiré des <strong>points ITRA</strong> utilisés dans le trail, et spécifiquement adapté aux
+    exigences et à la diversité des disciplines du VTT.
+  </p>
+
+  <h3>Méthodologie</h3>
+
+  <p>
+    Les MTB Points reposent sur une <strong>analyse mathématique avancée</strong> de la difficulté réelle
+    des parcours. Cette analyse s’appuie principalement sur l’exploitation de la
+    <strong>trace GPX</strong> fournie par les organisateurs.
+  </p>
+
+  <p>
+    À partir de cette trace, le système calcule automatiquement la <strong>distance</strong>,
+    le <strong>dénivelé positif</strong>, le <strong>profil altimétrique</strong> et la
+    <strong>répartition des pentes</strong> tout au long du parcours. Ces éléments permettent
+    d’établir un <strong>score physique</strong>, représentant l’exigence d’endurance et d’effort
+    nécessaire pour terminer l’épreuve.
+  </p>
+
+  <p>
+    La difficulté technique est évaluée à partir de critères complémentaires tels que la nature
+    du terrain, la proportion de sentiers étroits, la présence d’obstacles, ainsi que le niveau
+    de technicité globale du parcours. Ces informations, combinées à l’analyse automatique,
+    permettent de calculer un <strong>score technique</strong> cohérent et représentatif.
+  </p>
+
+  <p>
+    Le <strong>score global</strong> d’une épreuve résulte de la combinaison du score physique et du
+    score technique. Il est ensuite pondéré selon le <strong>niveau de l’événement</strong>
+    (local, régional, national ou international), afin de refléter l’attractivité et l’envergure
+    de la compétition.
+  </p>
+
+  <p>
+    Les points sont attribués aux cyclistes en fonction de leur <strong>classement final</strong>
+    et cumulés sur une <strong>fenêtre glissante de 24 mois</strong>. Les classements sont établis
+    par discipline, catégorie d’âge, sexe et type de vélo, avec une séparation claire entre
+    pratique musculaire et assistance électrique.
+  </p>
+<p>Les classements MTB Points distinguent systématiquement la pratique musculaire et la pratique à assistance électrique.
+Les cyclistes utilisant un VTT à assistance électrique sont classés dans des catégories dédiées, séparées des classements musculaires, afin de garantir une comparaison équitable des performances.
+Les points sont calculés selon la même méthodologie, mais les classements et cumuls sont indépendants.</p>
+  <p>
+    L’objectif des MTB Points est de proposer un <strong>système fiable, transparent et équitable</strong>,
+    capable de représenter fidèlement la difficulté des parcours et le niveau de performance
+    des cyclistes, au service des pratiquants comme des organisateurs.
+  </p>
+
+</section>
+
+
+    <h2 data-i18n="about.features">Fonctionnalités</h2>
+    <ul>
+      <li data-i18n="about.f1">Épreuves + fiche complète (distance, D+, barrières horaires, ravitos, etc.)</li>
+      <li data-i18n="about.f2">Classements par sexe et catégories d’âge</li>
+      <li data-i18n="about.f3">Support des disciplines (XC, Enduro, DH, Gravel…)</li>
+      <li data-i18n="about.f4">Sous-catégorie Assistance électrique (E-Bike)</li>
+    </ul>
+  </div>
+</div>
+
+<script src="js/i18n.js"></script>
+<script>
+  bindLangButtons();
+  applyI18n();
+</script>
+</body>
+</html>

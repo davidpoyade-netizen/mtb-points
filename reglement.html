@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Règlement Officiel MTB Points</title>
+  <meta name="description" content="Règlement officiel du classement MTB Points : calcul des points, TechScore, catégories, DNF/DNS, classement annuel." />
+  <style>
+    :root { --fg:#111; --muted:#555; --bg:#fff; --card:#f6f7f9; --line:#e5e7eb; --accent:#0b5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--fg); background:var(--bg); line-height:1.55; }
+    header { padding: 28px 18px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #f6fff9, #fff); }
+    main { max-width: 980px; margin: 0 auto; padding: 18px; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    .meta { color: var(--muted); font-size: 14px; }
+    nav { margin-top: 14px; display:flex; flex-wrap:wrap; gap:10px; }
+    nav a { font-size: 13px; text-decoration: none; padding: 6px 10px; border:1px solid var(--line); border-radius: 999px; color: var(--fg); background: #fff; }
+    nav a:hover { border-color: #cbd5e1; }
+    section { margin: 22px 0; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    section h2 { margin: 0 0 10px; font-size: 20px; }
+    h3 { margin: 16px 0 8px; font-size: 16px; }
+    .callout { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 12px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    pre { padding: 12px; background: #0b1020; color: #e6edf3; border-radius: 12px; overflow:auto; }
+    table { width: 100%; border-collapse: collapse; overflow:hidden; border-radius: 12px; border: 1px solid var(--line); }
+    th, td { padding: 10px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { text-align: left; background: #fafafa; font-size: 13px; }
+    td { font-size: 14px; }
+    .small { font-size: 13px; color: var(--muted); }
+    .badge { display:inline-block; padding: 2px 8px; border-radius: 999px; background: #eafff3; border:1px solid #b7f7d3; color:#065f46; font-size: 12px; }
+    ul { margin: 8px 0 0 18px; }
+    footer { border-top: 1px solid var(--line); padding: 18px; color: var(--muted); font-size: 13px; }
+    .two { display:grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 860px){ .two { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+
+<body>
+  <header>
+    <main>
+      <h1>Règlement Officiel MTB Points</h1>
+      <div class="meta">
+        Version : <strong>1.0</strong> — Date d’entrée en vigueur : <strong>25/12/2025</strong> — Projet : <strong>MTB Points</strong>
+      </div>
+      <nav aria-label="Sommaire">
+        <a href="#objet">Objet</a>
+        <a href="#definitions">Définitions</a>
+        <a href="#eligibilite">Éligibilité</a>
+        <a href="#score-epreuve">Score Épreuve (MRS)</a>
+        <a href="#techscore">TechScore</a>
+        <a href="#points-coureur">Points Coureur</a>
+        <a href="#classements">Classements</a>
+        <a href="#resultats">Résultats & Import</a>
+        <a href="#controle">Contrôle & Modération</a>
+        <a href="#litiges">Litiges</a>
+      </nav>
+    </main>
+  </header>
+
+  <main>
+    <section id="objet">
+      <h2>1. Objet</h2>
+      <p>
+        Le système <strong>MTB Points</strong> a pour objectif d’établir un classement des coureurs VTT
+        à partir de leurs performances en compétition, en tenant compte de la <strong>difficulté réelle</strong>
+        des parcours (distance, dénivelé et technicité).
+      </p>
+      <div class="callout">
+        <p class="small">
+          MTB Points est une méthodologie de classement propre au projet. Les appellations et calculs présentés ici
+          constituent les règles officielles applicables aux épreuves intégrées dans la plateforme.
+        </p>
+      </div>
+    </section>
+
+    <section id="definitions">
+      <h2>2. Définitions</h2>
+      <ul>
+        <li><strong>Épreuve</strong> : course VTT (XC, marathon, etc.) disposant d’un parcours défini et d’un classement officiel.</li>
+        <li><strong>Finisher</strong> : participant ayant franchi la ligne d’arrivée <em>dans les délais officiels</em>.</li>
+        <li><strong>DNF</strong> (Did Not Finish) : abandon ou non-arrivée.</li>
+        <li><strong>DNS</strong> (Did Not Start) : non-partant.</li>
+        <li><strong>OTL</strong> (Out of Time Limit) : hors barrière horaire / hors délai.</li>
+        <li><strong>MRS</strong> : <em>MTB Race Score</em>, score maximal de points attribuable pour une épreuve.</li>
+        <li><strong>TechScore</strong> : score de technicité du parcours (de <strong>0</strong> à <strong>1</strong>).</li>
+      </ul>
+    </section>
+
+    <section id="eligibilite">
+      <h2>3. Éligibilité des épreuves et des résultats</h2>
+      <h3>3.1 Conditions minimales pour une épreuve</h3>
+      <ul>
+        <li>Résultats officiels publiés par l’organisateur (classement et temps).</li>
+        <li>Parcours disponible (trace GPX ou équivalent) permettant d’estimer distance et dénivelé.</li>
+        <li>Catégories cohérentes (au minimum un classement général et un temps de référence par participant).</li>
+      </ul>
+
+      <h3>3.2 Données nécessaires</h3>
+      <ul>
+        <li><strong>Distance</strong> (km), <strong>D+</strong> (m), <strong>temps du vainqueur</strong> et <strong>temps du coureur</strong>.</li>
+        <li>État de course : Finisher / DNF / DNS / OTL.</li>
+      </ul>
+
+      <div class="callout">
+        <span class="badge">Important</span>
+        <p class="small">
+          En cas de données manquantes (GPX indisponible, D+ incertain), la plateforme peut appliquer des valeurs estimées
+          ou demander une validation administrative avant publication.
+        </p>
+      </div>
+    </section>
+
+    <section id="score-epreuve">
+      <h2>4. Score de l’épreuve : MTB Race Score (MRS)</h2>
+      <p>
+        Le <strong>MRS</strong> représente la valeur maximale de points qu’une épreuve peut attribuer au vainqueur.
+        Il est calculé à partir de la distance, du dénivelé positif et du TechScore.
+      </p>
+
+      <h3>4.1 Formule officielle</h3>
+      <pre aria-label="Formule MRS">
+MRS = D × (1 + D+ / 1000) × (1 + TechScore)
+
+où :
+- D  = distance en kilomètres (km)
+- D+ = dénivelé positif en mètres (m)
+- TechScore ∈ [0 ; 1]</pre>
+
+      <h3>4.2 Bornes et arrondis</h3>
+      <ul>
+        <li>Le TechScore est borné à l’intervalle <strong>[0 ; 1]</strong>.</li>
+        <li>Les points peuvent être stockés en décimal (ex : 2 décimales) et affichés arrondis.</li>
+      </ul>
+    </section>
+
+    <section id="techscore">
+      <h2>5. TechScore (technicité du parcours)</h2>
+      <p>
+        Le TechScore est un coefficient de technicité compris entre <strong>0</strong> (roulant) et <strong>1</strong> (très technique),
+        déterminé à partir de la nature des terrains empruntés.
+      </p>
+
+      <div class="two">
+        <div>
+          <h3>5.1 Échelle officielle (valeurs)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Type de terrain</th>
+                <th>Valeur</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Route / piste cyclable</td><td><strong>0.0</strong></td></tr>
+              <tr><td>Piste large, roulante</td><td><strong>0.2</strong></td></tr>
+              <tr><td>Chemin forestier</td><td><strong>0.4</strong></td></tr>
+              <tr><td>Singletrack</td><td><strong>0.6</strong></td></tr>
+              <tr><td>Singletrack technique</td><td><strong>0.8</strong></td></tr>
+              <tr><td>Monotrace très rocailleuse / alpine</td><td><strong>1.0</strong></td></tr>
+            </tbody>
+          </table>
+          <p class="small">
+            Cette échelle est utilisée pour calculer un TechScore global via une moyenne pondérée par la distance.
+          </p>
+        </div>
+
+        <div>
+          <h3>5.2 Calcul du TechScore global</h3>
+          <pre aria-label="Formule TechScore global">
+TechScore = ( Σ (valeur_segment × distance_segment) ) / ( Σ distance_segment )</pre>
+
+          <h3>5.3 Détermination automatique (GPX + cartographie)</h3>
+          <ul>
+            <li>La trace GPX fournit la géométrie du parcours.</li>
+            <li>La classification des terrains peut être réalisée par rapprochement (map-matching) avec une base cartographique.</li>
+            <li>Un indicateur <strong>TechConfidence</strong> peut être associé selon la qualité du matching et la richesse des tags terrain.</li>
+          </ul>
+
+          <div class="callout">
+            <p class="small">
+              En cas d’incertitude élevée (matching faible, données terrain insuffisantes), la plateforme peut imposer
+              une validation administrative du TechScore avant publication.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="points-coureur">
+      <h2>6. Points du coureur</h2>
+      <p>
+        Les points d’un coureur sont calculés à partir du MRS et de sa performance relative au vainqueur.
+      </p>
+
+      <h3>6.1 Formule officielle (performance relative)</h3>
+      <pre aria-label="Formule points coureur">
+Points_coureur = MRS × (Temps_vainqueur / Temps_coureur)</pre>
+
+      <h3>6.2 Règles DNF / DNS / OTL</h3>
+      <ul>
+        <li><strong>Finisher</strong> : points calculés selon la formule, avec un minimum garanti (voir 6.3).</li>
+        <li><strong>DNF</strong>, <strong>DNS</strong>, <strong>OTL</strong> : <strong>0 point</strong>.</li>
+      </ul>
+
+      <h3>6.3 Plancher Finisher</h3>
+      <div class="callout">
+        <p>
+          Tout <strong>Finisher</strong> reçoit au minimum <strong>5 points</strong>.
+          <br><span class="small">Si la formule donne un résultat inférieur à 5, le score est relevé à 5.</span>
+        </p>
+      </div>
+
+      <h3>6.4 Cas particuliers</h3>
+      <ul>
+        <li>Si le temps du vainqueur est indisponible, le calcul peut être suspendu jusqu’à correction des résultats.</li>
+        <li>En cas d’ex-aequo, le temps officiel fait foi ; sinon, l’organisateur peut publier un classement ex-aequo.</li>
+      </ul>
+    </section>
+
+    <section id="classements">
+      <h2>7. Classements MTB Points</h2>
+
+      <h3>7.1 Classements disponibles</h3>
+      <ul>
+        <li><strong>Classement général</strong> (toutes épreuves confondues).</li>
+        <li><strong>Classement par année</strong> (année civile).</li>
+        <li><strong>Classement par catégorie</strong> (si les données le permettent).</li>
+        <li><strong>Classement par format</strong> (optionnel selon le projet : XC, marathon, etc.).</li>
+      </ul>
+
+      <h3>7.2 Score annuel d’un coureur</h3>
+      <p>
+        Le score annuel est calculé à partir des <strong>X meilleures épreuves</strong> de l’année.
+        <span class="small">(La valeur X est un paramètre de la plateforme, par défaut recommandé : 5.)</span>
+      </p>
+      <pre aria-label="Score annuel">
+Score_annuel = moyenne(Top X Points_coureur sur l'année)</pre>
+
+      <h3>7.3 Publication</h3>
+      <ul>
+        <li>Les classements sont mis à jour à chaque import/validation de résultats.</li>
+        <li>Les modifications (corrections, suppressions, litiges) peuvent entraîner une mise à jour rétroactive.</li>
+      </ul>
+    </section>
+
+    <section id="resultats">
+      <h2>8. Résultats, import et intégrité</h2>
+
+      <h3>8.1 Source des résultats</h3>
+      <ul>
+        <li>Les résultats doivent provenir de l’organisateur ou d’une source officielle/fiable publiée.</li>
+        <li>Les imports peuvent être réalisés via <strong>fichier XLS</strong> (format défini par la plateforme).</li>
+      </ul>
+
+      <h3>8.2 Contrôles automatiques</h3>
+      <ul>
+        <li>Détection des doublons (même course, même coureur, même temps).</li>
+        <li>Contrôle des temps aberrants (ex : temps nul, trop faible, incohérent).</li>
+        <li>Contrôle d’intégrité du GPX (distance/D+ plausibles).</li>
+      </ul>
+
+      <h3>8.3 Corrections</h3>
+      <p class="small">
+        Toute correction doit être traçable (qui, quand, quoi). Les modifications majeures peuvent être soumises à validation.
+      </p>
+    </section>
+
+    <section id="controle">
+      <h2>9. Comptes, rôles et modération</h2>
+
+      <h3>9.1 Rôles</h3>
+      <ul>
+        <li><strong>Cycliste</strong> : consultation, suivi de profil, revendication éventuelle de résultats selon règles plateforme.</li>
+        <li><strong>Organisateur</strong> : création/gestion d’événements et épreuves, dépôt GPX, import résultats, demandes de correction.</li>
+        <li><strong>Administrateur</strong> : validation, modération, suppression d’épreuves, résolution de litiges, correction TechScore.</li>
+      </ul>
+
+      <h3>9.2 Modération / suppression</h3>
+      <div class="callout">
+        <p>
+          L’administrateur peut <strong>supprimer</strong> ou <strong>dépublier</strong> une épreuve en cas de fraude,
+          incohérence manifeste, absence de source officielle, ou non-respect du présent règlement.
+        </p>
+      </div>
+    </section>
+
+    <section id="litiges">
+      <h2>10. Litiges, contestations et mises à jour du règlement</h2>
+
+      <h3>10.1 Contestation d’un résultat</h3>
+      <ul>
+        <li>Une contestation doit être accompagnée d’éléments vérifiables (lien officiel, document organisateur, etc.).</li>
+        <li>La décision finale appartient à l’administrateur, avec archivage de la justification.</li>
+      </ul>
+
+      <h3>10.2 Contestation du TechScore</h3>
+      <ul>
+        <li>Le TechScore peut être recalculé si une nouvelle trace GPX officielle est fournie.</li>
+        <li>Une correction manuelle peut être appliquée si les données cartographiques sont insuffisantes ou erronées.</li>
+      </ul>
+
+      <h3>10.3 Évolutions</h3>
+      <p class="small">
+        Le règlement peut évoluer (ajustements de coefficients, ajout de catégories, amélioration TechScore).
+        Les changements sont versionnés et datés. Sauf mention contraire, ils s’appliquent à partir de la date de publication.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <main>
+      <p>
+        © MTB Points — Règlement officiel (HTML). Pour toute question : page Contact du projet.
+      </p>
+      <p class="small">
+        Note : les formules et paramètres peuvent être implémentés avec arrondis internes ; l’affichage utilisateur
+        peut être simplifié (ex : 1 décimale) sans modifier la logique de calcul.
+      </p>
+    </main>
+  </footer>
+</body>
+</html>
+

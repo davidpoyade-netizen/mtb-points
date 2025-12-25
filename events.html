@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Épreuves</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
+    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border-radius:12px;padding:14px;border:1px solid #e5e7eb;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .filters{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;align-items:end}
+    label{font-weight:700;display:block;margin-bottom:6px}
+    input,select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px}
+    .muted{color:#667085}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#f1f5f9}
+    @media(max-width:900px){.filters{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="events.html">Épreuves</a>
+    <a href="public-ranking.html">Classement</a>
+  </nav>
+  <div class="muted">Liste des épreuves & difficulté</div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="filters">
+      <div>
+        <label>Recherche</label>
+        <input id="q" type="text" placeholder="Nom, lieu..." />
+      </div>
+
+      <div>
+        <label>Discipline</label>
+        <select id="fDisc">
+          <option value="">Toutes</option>
+          <option value="XC">XC</option>
+          <option value="Enduro">Enduro</option>
+          <option value="DH">DH</option>
+          <option value="Gravel">Gravel</option>
+          <option value="Marathon">Marathon</option>
+          <option value="Ultra">Ultra</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Niveau</label>
+        <select id="fLevel">
+          <option value="">Tous</option>
+          <option value="Local">Locale</option>
+          <option value="Régional">Régionale</option>
+          <option value="National">Nationale</option>
+          <option value="International">Internationale</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Type vélo</label>
+        <select id="fEbike">
+          <option value="">Tous</option>
+          <option value="0">Musculaire</option>
+          <option value="1">Assistance électrique</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Tri</label>
+        <select id="sortBy">
+          <option value="date_desc">Plus récentes</option>
+          <option value="date_asc">Plus anciennes</option>
+          <option value="global_desc">Difficulté (Global) ↓</option>
+          <option value="global_asc">Difficulté (Global) ↑</option>
+          <option value="phys_desc">Physique ↓</option>
+          <option value="tech_desc">Technique ↓</option>
+          <option value="name_asc">Nom A→Z</option>
+          <div class="item" style="margin-top:12px;">
+  <div class="label">Résumé</div>
+  <div class="value" id="autoSummary" style="font-size:14px;font-weight:800;">—</div>
+  <div class="muted">Synthèse automatique depuis la trace GPX</div>
+</div>
+
+        </select>
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button id="clearBtn" style="width:100%;padding:10px;border:0;border-radius:10px;background:#2563eb;color:#fff;cursor:pointer;">
+          Réinitialiser
+        </button>
+      </div>
+
+      <div class="muted" style="grid-column:1/-1;">
+        Astuce : tu peux filtrer par <span class="tag">E-Bike</span> / <span class="tag">Musculaire</span> et trier par difficulté.
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;" class="muted">
+    Résultats : <strong id="count">0</strong>
+  </div>
+
+  <div id="eventsList" style="margin-top:12px;"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/events.js"></script>
+
+</body>
+</html>
+
+
+
+
+

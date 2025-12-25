@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
+    .card { background:#fff; border-radius:12px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .btn2 { display:inline-block; padding:12px 16px; border-radius:10px; text-decoration:none; border:1px solid #cbd5e1; }
+    .primary { background:#2563eb; color:#fff; border:0; }
+    .muted { color:#667085; }
+    @media (max-width: 800px){ .grid{ grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <h1>MTB Points</h1>
+  <nav>
+<a href="meeting-create.html">Créer un événement</a>
+</a>    <a href="public-ranking.html">Classement</a>
+    <a href="login.html">Connexion</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="about.html">A propos</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2 style="margin-top:0;">Un classement VTT comparable entre courses</h2>
+    <p class="muted">
+     
+<section style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.06);">
+  <h2 style="margin:0 0 10px 0;">Qu’est-ce que les points MTB&nbsp;?</h2>
+
+  <p style="margin:0 0 12px 0;color:#334155;line-height:1.6;">
+    Les <strong>points MTB</strong> sont un système de classement destiné aux cyclistes participant à des épreuves de VTT.
+    Ils permettent d’obtenir des points en fonction de la <strong>difficulté réelle</strong> des courses, en prenant en compte
+    des critères objectifs comme la <strong>distance</strong>, le <strong>dénivelé</strong>, le <strong>profil</strong> et le <strong>terrain</strong>.
+  </p>
+
+  <h3 style="margin:14px 0 8px 0;">Pour les cyclistes</h3>
+  <p style="margin:0 0 10px 0;color:#334155;line-height:1.6;">
+    Chaque participant cumule des points selon les épreuves auxquelles il prend part et ses performances.
+    Les points sont calculés sur une <strong>fenêtre glissante de 24 mois</strong>, permettant de se comparer de manière équitable
+    sur un <strong>classement public</strong>.
+  </p>
+
+  <p style="margin:0 0 10px 0;color:#334155;line-height:1.6;">
+    Les classements sont organisés par :
+  </p>
+  <ul style="margin:0 0 12px 20px;color:#334155;line-height:1.6;">
+    <li><strong>Catégories d’âge</strong></li>
+    <li><strong>Sexe</strong></li>
+    <li><strong>Disciplines</strong> (XC, Enduro, DH, Gravel, Marathon, etc.)</li>
+  </ul>
+
+  <p style="margin:0 0 12px 0;color:#334155;line-height:1.6;">
+    Ce système offre une lecture claire du niveau des cyclistes et peut ouvrir l’accès à certaines épreuves ou à des
+    <strong>récompenses</strong>.
+  </p>
+
+  <h3 style="margin:14px 0 8px 0;">Pour les organisateurs</h3>
+  <p style="margin:0;color:#334155;line-height:1.6;">
+    Les organisateurs peuvent analyser leur épreuve à partir de la <strong>trace GPX</strong> du parcours afin d’obtenir :
+    la distance et le dénivelé calculés automatiquement, le <strong>profil altimétrique</strong>, une <strong>carte du tracé</strong>,
+    ainsi qu’un <strong>score de difficulté</strong> physique et technique. Une fois l’épreuve créée, ils peuvent ensuite
+    <strong>importer les résultats</strong> des participants pour attribuer automatiquement les points MTB.
+  </p>
+</section>
+
+
+    <div class="grid" style="margin-top:14px;">
+      <div class="card" style="box-shadow:none;border:1px solid #e5e7eb;">
+        <h3 style="margin-top:0;">Espace Organisateur</h3>
+        <p class="muted">Créer une course, saisir les infos, importer les résultats, publier le classement.</p>
+        <a class="btn2 primary" href="login.html">Je suis organisateur</a>
+      </div>
+
+      <div class="card" style="box-shadow:none;border:1px solid #e5e7eb;">
+        <h3 style="margin-top:0;">Espace Cycliste</h3>
+        <p class="muted">Voir les épreuves, consulter les classements, rechercher un nom, suivre son profil.</p>
+        <a class="btn2" href="public-ranking.html">Voir le classement</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

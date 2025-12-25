@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Classement – MTB Points</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0;color:#0f172a}
+    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
+    .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    h1{margin:0;font-size:22px}
+    .muted{color:#667085;font-size:13px}
+    .filters{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
+    label{display:block;font-size:12px;color:#667085;margin-bottom:6px}
+    select,input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:10px;border:0;background:#2563eb;color:#fff;cursor:pointer;font-weight:800}
+    .btn.secondary{background:#f1f5f9;color:#0f172a;border:1px solid #e5e7eb}
+    table{width:100%;border-collapse:collapse;margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:14px}
+    th{background:#f8fafc;font-size:12px;color:#334155;text-transform:uppercase;letter-spacing:.04em}
+    tr:hover td{background:#f8fafc}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e5e7eb;font-weight:800;font-size:12px}
+    .pillDot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
+    .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    @media(max-width:1100px){ .filters{grid-template-columns:repeat(3,1fr);} }
+    @media(max-width:650px){ .filters{grid-template-columns:repeat(2,1fr);} }
+  </style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="events.html">Épreuves</a>
+    <a href="meetings.html">Événements</a>
+    <a href="ranking.html">Classement</a>
+  </nav>
+  <div class="right">
+    <span class="pill" id="periodPill"><span class="pillDot" id="periodDot"></span><span id="periodLabel">24 mois</span></span>
+    <span class="muted" id="lastUpdate">—</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+      <div>
+        <h1>Classement MTB Points</h1>
+        <div class="muted">Filtre par discipline, sexe, âge, type vélo et période (24 mois ou année).</div>
+      </div>
+      <div class="row" style="margin-top:0;">
+        <button class="btn secondary" id="resetBtn" type="button">Réinitialiser</button>
+        <button class="btn" id="refreshBtn" type="button">Recalculer</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div>
+        <label for="disc">Discipline</label>
+        <select id="disc">
+          <option value="ALL">Toutes</option>
+          <option value="XC">XC</option>
+          <option value="Enduro">Enduro</option>
+          <option value="DH">DH</option>
+          <option value="Gravel">Gravel</option>
+          <option value="Marathon">Marathon</option>
+          <option value="Ultra">Ultra</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="sex">Sexe</label>
+        <select id="sex">
+          <option value="ALL">Tous</option>
+          <option value="M">Hommes</option>
+          <option value="F">Femmes</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="age">Catégorie d’âge</label>
+        <select id="age">
+          <option value="ALL">Toutes</option>
+          <option value="U7">U7</option>
+          <option value="U9">U9</option>
+          <option value="U11">U11</option>
+          <option value="U13">U13</option>
+          <option value="U15">U15</option>
+          <option value="U17">U17</option>
+          <option value="U19">U19</option>
+          <option value="U23">U23</option>
+          <option value="U23PLUS">U23+</option>
+          <option value="SENIOR">Seniors</option>
+          <option value="M1">Masters 1</option>
+          <option value="M2">Masters 2</option>
+          <option value="M3">Masters 3</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="ebike">Type vélo</label>
+        <select id="ebike">
+          <option value="ALL">Tous</option>
+          <option value="0">Musculaire</option>
+          <option value="1">Assistance électrique</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="period">Période</label>
+        <select id="period">
+          <option value="24M" selected>24 mois (glissant)</option>
+          <option value="YEAR">Année</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="year">Année</label>
+        <select id="year" disabled>
+          <option value="">—</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="flex:1;min-width:240px;">
+        <label for="q">Recherche (nom / team)</label>
+        <input id="q" type="text" placeholder="Ex : Martin, Team Maures..." />
+      </div>
+      <div style="min-width:240px;">
+        <label for="topN">Résultats retenus</label>
+        <select id="topN">
+          <option value="5" selected>Top 5 (recommandé)</option>
+          <option value="8">Top 8</option>
+          <option value="999">Tout (somme totale)</option>
+        </select>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:70px;">Rang</th>
+          <th>Cycliste</th>
+          <th>Team</th>
+          <th>Nationalité</th>
+          <th style="width:120px;">Points</th>
+          <th style="width:120px;">Épreuves</th>
+        </tr>
+      </thead>
+      <tbody id="rows">
+        <tr><td colspan="6" class="muted">Aucun classement calculé. Clique sur “Recalculer”.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="muted" style="margin-top:10px;">
+      Note : les points sont calculés à partir des résultats importés et de la valeur de difficulté des épreuves (analyse GPX).
+    </div>
+  </div>
+</div>
+
+<script src="js/storage.js"></script>
+<script src="js/ranking.js"></script>
+<script>
+  // UI only: enable/disable year based on period
+  const period = document.getElementById("period");
+  const year = document.getElementById("year");
+  const pillLabel = document.getElementById("periodLabel");
+  const pillDot = document.getElementById("periodDot");
+
+  function fillYears() {
+    const now = new Date();
+    const y = now.getFullYear();
+    year.innerHTML = "";
+    for (let i = y; i >= y - 6; i--) {
+      const opt = document.createElement("option");
+      opt.value = String(i);
+      opt.textContent = String(i);
+      year.appendChild(opt);
+    }
+  }
+  fillYears();
+  year.value = String(new Date().getFullYear());
+
+  function updatePeriodUI(){
+    const isYear = period.value === "YEAR";
+    year.disabled = !isYear;
+    if (isYear) {
+      pillLabel.textContent = `Année ${year.value || ""}`.trim();
+      pillDot.style.background = "#3b82f6";
+    } else {
+      pillLabel.textContent = "24 mois";
+      pillDot.style.background = "#22c55e";
+    }
+  }
+
+  period.addEventListener("change", updatePeriodUI);
+  year.addEventListener("change", updatePeriodUI);
+  updatePeriodUI();
+</script>
+
+</body>
+</html>

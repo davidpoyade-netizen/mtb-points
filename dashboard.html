@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard – VTT Points</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <h2>Dashboard</h2>
+    <a href="dashboard.html">Mes courses</a>
+    <a href="meetings.html">➕ Nouvel évènement</a>
+  </aside>
+
+  <main class="content">
+    <h1>Mes courses</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Date</th>
+          <th>Participants</th>
+          <th>Difficulté</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Raid du Ventoux</td>
+          <td>05/07/2025</td>
+          <td>120</td>
+          <td>🔴 1.32</td>
+          <td><a href="results.html">Voir</a></td>
+        </tr>
+        <tr>
+          <td>XC des Crêtes</td>
+          <td>21/06/2025</td>
+          <td>85</td>
+          <td>🔵 1.08</td>
+          <td><a href="results.html">Voir</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+  </main>
+</div>
+<script src="js/auth.js"></script>
+<script>
+  requireRole("organizer");
+</script>
+
+</body>
+</html>

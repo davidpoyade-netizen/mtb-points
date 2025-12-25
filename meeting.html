@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+  <a id="btnCreateRace"
+     href="#"
+     style="display:inline-block;padding:12px 16px;border-radius:10px;
+            background:#16a34a;color:#fff;text-decoration:none;font-weight:800;">
+    + Créer une épreuve
+  </a>
+
+  <a href="meetings.html"
+     style="display:inline-block;padding:12px 16px;border-radius:10px;
+            background:#f1f5f9;color:#0f172a;text-decoration:none;font-weight:800;">
+    Retour aux événements
+  </a>
+</div>
+
+  <title>Événement</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
+    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .muted{color:#667085}
+    .list{display:grid;gap:10px;margin-top:12px}
+    .item{padding:12px;border:1px solid #e5e7eb;border-radius:12px;text-decoration:none;color:inherit;background:#fff}
+    .title{font-weight:800}
+    .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
+    .kpi{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff}
+    .kpi .label{font-weight:700}
+    .kpi .value{font-size:22px;font-weight:900;margin-top:6px}
+    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:8px}
+    .bar>div{height:100%;background:#2563eb;width:0%}
+    .filters{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:12px}
+    label{font-weight:700;display:block;margin-bottom:6px}
+    select,input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px}
+    .chartRow{display:flex;align-items:center;gap:10px;margin-top:8px}
+    .chartName{min-width:200px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .chartBarWrap{flex:1;height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+    .chartBar{height:100%;background:#2563eb;width:0%}
+    @media(max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .filters{grid-template-columns:1fr 1fr}
+      .chartName{min-width:140px;max-width:140px}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="events.html">Épreuves</a>
+    <a href="meetings.html">Événements</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2 id="mName" style="margin:0;">—</h2>
+    <div class="muted" id="mMeta" style="margin-top:6px;">—</div>
+    <p class="muted" id="mComment"></p>
+
+    <h3 style="margin-top:14px;">Résumé global</h3>
+
+    <div class="grid">
+      <div class="kpi">
+        <div class="label">Nombre d’épreuves (filtrées)</div>
+        <div class="value" id="kpiCount">—</div>
+        <div class="muted" id="kpiRange">—</div>
+      </div>
+
+      <div class="kpi">
+        <div class="label">Difficulté moyenne (Global)</div>
+        <div class="value"><span id="kpiGlobal">—</span><span class="muted">/100</span></div>
+        <div class="muted">≈ <strong id="kpiGlobal5">—</strong> / 5</div>
+        <div class="bar"><div id="kpiGlobalBar"></div></div>
+      </div>
+
+      <div class="kpi">
+        <div class="label">Épreuve la plus difficile</div>
+        <div class="value" style="font-size:16px;line-height:1.2;">
+          <a id="kpiHardestLink" href="#" style="text-decoration:none;color:#2563eb;font-weight:900;">—</a>
+        </div>
+        <div class="muted" id="kpiHardestScore">—</div>
+      </div>
+
+      <div class="kpi">
+        <div class="label">Moyenne Physique</div>
+        <div class="value"><span id="kpiPhys">—</span><span class="muted">/100</span></div>
+      </div>
+
+      <div class="kpi">
+        <div class="label">Moyenne Technique</div>
+        <div class="value"><span id="kpiTech">—</span><span class="muted">/100</span></div>
+      </div>
+
+      <div class="kpi">
+        <div class="label">Participants (total)</div>
+        <div class="value" id="kpiParticipants">—</div>
+        <div class="muted">Somme des participants renseignés</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:16px;">Filtres & tri</h3>
+    <div class="filters">
+      <div>
+        <label>Recherche</label>
+        <input id="q" type="text" placeholder="Nom, lieu..." />
+      </div>
+
+      <div>
+        <label>Discipline</label>
+        <select id="fDisc">
+          <option value="">Toutes</option>
+          <option value="XC">XC</option>
+          <option value="Enduro">Enduro</option>
+          <option value="DH">DH</option>
+          <option value="Gravel">Gravel</option>
+          <option value="Marathon">Marathon</option>
+          <option value="Ultra">Ultra</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Type vélo</label>
+        <select id="fEbike">
+          <option value="">Tous</option>
+          <option value="0">Musculaire</option>
+          <option value="1">Assistance électrique</option>
+        </select>
+      </div>
+<div>
+  <label>Difficulté min (Global ≥ <span id="minGlobalVal">0</span>)</label>
+  <input id="minGlobal" type="range" min="0" max="100" value="0" />
+</div>
+
+      <div>
+        <label>Tri</label>
+        <select id="sortBy">
+          <option value="global_desc">Difficulté (Global) ↓</option>
+          <option value="global_asc">Difficulté (Global) ↑</option>
+          <option value="date_desc">Plus récentes</option>
+          <option value="date_asc">Plus anciennes</option>
+          <option value="distance_desc">Distance ↓</option>
+          <option value="name_asc">Nom A→Z</option>
+        </select>
+      </div>
+
+      <div>
+        <button id="clearBtn" style="width:100%;padding:10px;border:0;border-radius:10px;background:#2563eb;color:#fff;cursor:pointer;">
+          Réinitialiser
+        </button>
+      </div>
+
+      <div class="muted" style="grid-column:1/-1;">
+        Résultats : <strong id="countFiltered">0</strong>
+      </div>
+    </div>
+
+    <h3 style="margin-top:16px;">Graph rapide (Global)</h3>
+    <div id="miniChart" class="muted"></div>
+
+    <h3 style="margin-top:16px;">Épreuves disponibles</h3>
+    <div id="races" class="list"></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/meeting.js"></script>
+</body>
+</html>
+
+
+
