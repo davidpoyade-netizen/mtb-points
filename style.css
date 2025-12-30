@@ -113,3 +113,47 @@ th {
   border-radius: 8px;
   flex: 1;
 }
+.scoreBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:48px;
+  padding:8px 10px;
+  border-radius:12px;
+  font-weight:900;
+}
+/* ===== BADGES MTB POINTS ===== */
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  box-shadow:0 1px 6px rgba(0,0,0,.06);
+  font-size:12px;
+  font-weight:800;
+  line-height:1;
+  white-space:nowrap;
+}
+.badge .b-icon{width:16px;height:16px;display:inline-block}
+.badge .b-sub{font-weight:700;opacity:.85;font-size:11px}
+
+/* Niveaux */
+.badge.bronze{border-color:#f1d1b3}
+.badge.argent{border-color:#d7dde5}
+.badge.mtb1000{border-color:#c8e4ff}
+.badge.elite{border-color:#e7d9ff}
+.badge.legende{border-color:#ffe3a3}
+
+/* Variante compacte (classement) */
+.badge.sm{
+  padding:4px 8px;
+  font-size:11px;
+  gap:6px;
+}
+.badge.sm .b-icon{width:14px;height:14px}
+
+/* Alignement en tableau */
+.badge-row{display:flex;gap:8px;flex-wrap:wrap}
