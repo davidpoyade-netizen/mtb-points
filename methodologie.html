@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MTB Points — Méthodologie (Calcul)</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#64748b;--border:#e5e7eb;--blue:#2563eb;
+      --shadow:0 2px 10px rgba(0,0,0,.06);
+      --shadow2:0 2px 10px rgba(0,0,0,.08);
+    }
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;}
+    .header{background:var(--card);padding:14px 16px;box-shadow:var(--shadow);}
+    .header h1{margin:0;font-size:20px}
+    .header nav{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+    .header nav a{color:var(--text);text-decoration:none;font-size:14px}
+    .header nav a.active{color:var(--blue);font-weight:700}
+    .lang{margin-top:10px;display:flex;gap:8px}
+    .btn{padding:8px 10px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
+    .wrap{max-width:980px;margin:22px auto;padding:0 16px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:14px 0;box-shadow:var(--shadow2);}
+    .toc a{display:block;text-decoration:none;color:var(--blue);padding:6px 0}
+    h2{margin:0 0 10px 0;font-size:18px}
+    h3{margin:14px 0 6px 0;font-size:15px}
+    p,li{font-size:14px;line-height:1.6}
+    ul{padding-left:18px;margin:8px 0}
+    code{background:#f1f5f9;border:1px solid var(--border);border-radius:8px;padding:2px 6px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;font-size:13px}
+    .muted{color:var(--muted);font-size:13px}
+    .box{background:#f8fafc;border:1px solid var(--border);border-left:5px solid var(--blue);border-radius:12px;padding:12px;margin:12px 0}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:800px){.grid2{grid-template-columns:1fr}}
+    footer{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
+</head>
+
+<body>
+<header class="header">
+  <h1>MTB Points — Méthodologie (Calcul)</h1>
+
+  <nav>
+<a href="index.html">Acceuil</a>
+<a href="public-ranking.html">Classement</a>
+<a href="meetings.html">Événements</a>
+<a href="reglement.html">Règlement</a>
+<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
+<a href="about.html">À propos</a>
+<a href="login.html">Connexion</a>
+  </nav>
+
+  <div class="lang">
+    <button class="btn" id="btnFR" type="button">FR</button>
+    <button class="btn" id="btnEN" type="button">EN</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- TABLE DES MATIERES -->
+  <section class="card">
+    <h2>Sommaire</h2>
+    <div class="toc">
+      <a href="#mrs">1. Score Épreuve (MRS)</a>
+      <a href="#score-phys">2. Score physique (ScorePhys)</a>
+      <a href="#score-tech">3. Score technique (ScoreTech)</a>
+      <a href="#parametres">4. Paramètres &amp; calibration</a>
+    </div>
+    <p class="muted" style="margin-top:10px;">
+      Pour les règles d’éligibilité, statuts, import, litiges : voir <a href="reglement.html">Règlement</a>.
+    </p>
+  </section>
+
+  <!-- MRS -->
+  <section class="card" id="mrs">
+    <h2>1. Score Épreuve (MRS)</h2>
+    <p>
+      Le score global de difficulté d’une épreuve (<strong>MRS</strong>) combine le score physique et le score technique.
+    </p>
+
+    <div class="box">
+      <div><strong>Formule :</strong></div>
+      <p style="margin:8px 0;">
+        <code>MRS = round(0.55 × ScorePhys + 0.45 × ScoreTech)</code>
+      </p>
+      <div class="muted">MRS est borné sur 0–100.</div>
+    </div>
+  </section>
+
+  <!-- SCORE PHYSIQUE -->
+  <section class="card" id="score-phys">
+    <h2>2. Score physique (ScorePhys)</h2>
+
+    <h3>2.1 Objectif</h3>
+    <p>
+      Le score physique modélise l’effort physiologique global imposé par l’épreuve à partir du GPX.
+      Il doit refléter la distance, le dénivelé, et la sévérité du relief (pentes répétées/raides),
+      tout en restant stable et comparable entre épreuves.
+    </p>
+
+    <h3>2.2 Données d’entrée (GPX)</h3>
+    <ul>
+      <li><strong>D</strong> : distance totale (km)</li>
+      <li><strong>H⁺</strong> : dénivelé positif total (m)</li>
+      <li><strong>IPB</strong> : indice de pénibilité (distribution des pentes : segments raides + fréquence)</li>
+    </ul>
+
+    <h3>2.3 Calcul</h3>
+    <div class="grid2">
+      <div class="box">
+        <strong>Étape 1 — Effort de base</strong>
+        <p style="margin:8px 0;">
+          <code>EffortBase = sqrt(D) + (H⁺ / 1000)</code>
+        </p>
+        <div class="muted">√D limite l’effet “longueur pure”, H⁺/1000 valorise le relief.</div>
+      </div>
+
+      <div class="box">
+        <strong>Étape 2 — Normalisation</strong>
+        <p style="margin:8px 0;">
+          <code>EffortNorm = clamp(EffortBase / 10, 0, 1)</code><br/>
+          <code>IPB_norm   = clamp(IPB / 120, 0, 1)</code>
+        </p>
+        <div class="muted">10 et 120 sont des références calibrables (MVP).</div>
+      </div>
+    </div>
+
+    <div class="box">
+      <strong>Étape 3 — Combinaison</strong>
+      <p style="margin:8px 0;">
+        <code>ScorePhys = round(100 × clamp(0.70×EffortNorm + 0.30×IPB_norm, 0, 1))</code>
+      </p>
+      <div class="muted">70% effort global, 30% sévérité (IPB).</div>
+    </div>
+
+    <h3>2.4 Interprétation (indicative)</h3>
+    <ul>
+      <li>0 – 25 : Faible</li>
+      <li>25 – 45 : Modéré</li>
+      <li>45 – 65 : Soutenu</li>
+      <li>65 – 80 : Très exigeant</li>
+      <li>80 – 100 : Extrême / ultra</li>
+    </ul>
+  </section>
+
+  <!-- SCORE TECHNIQUE -->
+  <section class="card" id="score-tech">
+    <h2>3. Score technique (ScoreTech)</h2>
+    <p>
+      Le score technique modélise la difficulté de pilotage via une analyse segmentée du GPX (sinuosité + estimation terrain).
+    </p>
+
+    <h3>3.1 Segmentation</h3>
+    <p>La trace est découpée en segments (ex. fenêtres ~200–500 m). Pour chaque segment :</p>
+    <ul>
+      <li><strong>Sinuosité</strong> : ratio distance réelle / distance “vol d’oiseau”.</li>
+      <li><strong>TerrainSegScore</strong> : estimation terrain (0.0 à 1.0).</li>
+    </ul>
+
+    <div class="box">
+      <strong>Référentiel TerrainSegScore (MVP)</strong>
+      <ul style="margin:8px 0 0 18px;">
+        <li>Route / piste cyclable : <code>0.0</code></li>
+        <li>Piste large, roulante : <code>0.2</code></li>
+        <li>Chemin forestier : <code>0.4</code></li>
+        <li>Singletrack : <code>0.6</code></li>
+        <li>Singletrack technique : <code>0.8</code></li>
+        <li>Monotrace très rocailleuse / alpine : <code>1.0</code></li>
+      </ul>
+      <p class="muted" style="margin:8px 0 0 0;">
+        (Tu avais noté une refonte : route=0, piste large=0.2, single rocailleux=1 — ici on met l’échelle complète.)
+      </p>
+    </div>
+
+    <h3>3.2 Coefficient technique segment (hybride)</h3>
+    <div class="box">
+      <p style="margin:0 0 8px 0;"><strong>Forme générale :</strong></p>
+      <p style="margin:0;">
+        <code>TechCoeff_seg = clamp(0.80 + 0.004×IPB_seg + 0.20×TerrainSegScore + 0.10×SinuNorm, 0.80, 1.60)</code>
+      </p>
+      <div class="muted" style="margin-top:8px;">
+        <code>SinuNorm = clamp((Sinuosity − 1.0)/0.3, 0, 1)</code>
+      </div>
+    </div>
+
+    <h3>3.3 Agrégation (percentile 75)</h3>
+    <p>Pour refléter les secteurs techniques “déterminants”, on agrège par percentile :</p>
+    <div class="box">
+      <code>TechCoeff_P75 = percentile75(TechCoeff_seg)</code>
+      <div class="muted">Le P75 est plus sensible aux portions techniques que la moyenne.</div>
+    </div>
+
+    <h3>3.4 Score technique final (0–100)</h3>
+    <div class="box">
+      <code>ScoreTech = round(100 × clamp((TechCoeff_P75 − 0.80) / 0.80, 0, 1))</code>
+    </div>
+  </section>
+
+  <!-- PARAMETRES -->
+  <section class="card" id="parametres">
+    <h2>4. Paramètres &amp; calibration</h2>
+    <ul>
+      <li><strong>10</strong> (EffortBase/Eref) et <strong>120</strong> (IPB) sont des références <em>calibrables</em> (MVP).</li>
+      <li>Les poids <strong>0.70/0.30</strong> (physique) et <strong>0.55/0.45</strong> (MRS) peuvent être ajustés après retours terrain.</li>
+      <li>Les bornes <strong>0.80–1.60</strong> et coefficients (<code>0.004</code>, <code>0.20</code>, <code>0.10</code>) sont à calibrer sur un panel d’épreuves.</li>
+    </ul>
+
+    <div class="box">
+      <strong>Rappel</strong>
+      <p style="margin:8px 0 0 0;">
+        <code>MRS = 0.55×ScorePhys + 0.45×ScoreTech</code>
+      </p>
+      <p class="muted" style="margin:8px 0 0 0;">
+        ScorePhys = effort pur, ScoreTech = pilotage/terrain.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>MTB Points — Méthodologie (Calcul) (MVP). ©</footer>
+</body>
+</html>

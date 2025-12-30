@@ -3,60 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
-  <a id="btnCreateRace"
-     href="#"
-     style="display:inline-block;padding:12px 16px;border-radius:10px;
-            background:#16a34a;color:#fff;text-decoration:none;font-weight:800;">
-    + Créer une épreuve
-  </a>
-
-  <a href="meetings.html"
-     style="display:inline-block;padding:12px 16px;border-radius:10px;
-            background:#f1f5f9;color:#0f172a;text-decoration:none;font-weight:800;">
-    Retour aux événements
-  </a>
-</div>
-
-  <title>Événement</title>
+  <title>Login – MTB Points</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .muted{color:#667085}
-    .list{display:grid;gap:10px;margin-top:12px}
-    .item{padding:12px;border:1px solid #e5e7eb;border-radius:12px;text-decoration:none;color:inherit;background:#fff}
-    .title{font-weight:800}
-    .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
-    .kpi{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff}
-    .kpi .label{font-weight:700}
-    .kpi .value{font-size:22px;font-weight:900;margin-top:6px}
-    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:8px}
-    .bar>div{height:100%;background:#2563eb;width:0%}
-    .filters{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:12px}
-    label{font-weight:700;display:block;margin-bottom:6px}
-    select,input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px}
-    .chartRow{display:flex;align-items:center;gap:10px;margin-top:8px}
-    .chartName{min-width:200px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .chartBarWrap{flex:1;height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-    .chartBar{height:100%;background:#2563eb;width:0%}
-    @media(max-width:900px){
-      .grid{grid-template-columns:1fr}
-      .filters{grid-template-columns:1fr 1fr}
-      .chartName{min-width:140px;max-width:140px}
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#64748b;--border:#e5e7eb;--blue:#2563eb;
+      --ok:#22c55e;--warn:#ef4444;--dark:#111827;
     }
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;}
+    header{background:var(--card);padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+    header h1{margin:0;font-size:22px}
+    .wrap{max-width:980px;margin:22px auto;padding:0 16px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 18px;margin:14px 0;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+    .toc a{display:block;text-decoration:none;color:var(--blue);padding:6px 0}
+    h2{margin:0 0 10px 0;font-size:18px}
+    h3{margin:14px 0 6px 0;font-size:15px}
+    p,li{font-size:14px;line-height:1.6}
+    ul{padding-left:18px;margin:8px 0}
+    code{background:#f1f5f9;border:1px solid var(--border);border-radius:8px;padding:2px 6px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:13px}
+    .muted{color:var(--muted);font-size:13px}
+    .box{background:#f8fafc;border:1px solid var(--border);border-left:5px solid var(--blue);border-radius:12px;padding:12px;margin:12px 0}
+    .pill{display:inline-block;background:#f1f5f9;border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:800px){.grid2{grid-template-columns:1fr}}
+    footer{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+<header>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MTB Points - Evenements</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
+    .card { background:#fff; border-radius:12px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .btn2 { display:inline-block; padding:12px 16px; border-radius:10px; text-decoration:none; border:1px solid #cbd5e1; }
+    .primary { background:#2563eb; color:#fff; border:0; }
+    .muted { color:#667085; }
+    @media (max-width: 800px){ .grid{ grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
 
-<header>
+<header class="header">
+  <h1>MTB Points- Evenements</h1>
   <nav>
-    <a href="index.html">Accueil</a>
-    <a href="events.html">Épreuves</a>
-    <a href="meetings.html">Événements</a>
+<a href="public-ranking.html">Classement</a>
+<a href="meetings.html">Evenements</a>
+<a href="reglement.html">Règlement</a>
+<a href="about.html">A propos</a>
+<a href="login.html">Connexion</a>
   </nav>
+  <div class="lang">
+    <button class="btn" id="btnFR">FR</button>
+    <button class="btn" id="btnEN">EN</button>
+  </div>
 </header>
 
 <div class="wrap">

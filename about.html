@@ -3,31 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title data-i18n="about.title">À propos – VTT Points</title>
+  <title>MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-    header h1{font-size:18px;margin:0}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-    .wrap{max-width:900px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-    .muted{color:#667085}
-    .lang{margin-left:auto;display:flex;gap:8px}
-    .btn{padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
-    .btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
+    .card { background:#fff; border-radius:12px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .btn2 { display:inline-block; padding:12px 16px; border-radius:10px; text-decoration:none; border:1px solid #cbd5e1; }
+    .primary { background:#2563eb; color:#fff; border:0; }
+    .muted { color:#667085; }
+    @media (max-width: 800px){ .grid{ grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
-<header>
-  <h1 data-i18n="about.h1">À propos</h1>
-  <nav>
-    <a href="index.html" data-i18n="nav.home">Accueil</a>
-    <a href="meetings.html" data-i18n="nav.events">Épreuves</a>
-    <a href="public-ranking.html" data-i18n="nav.ranking">Classement</a>
-    <a href="about.html" data-i18n="nav.about">À propos</a>
-  </nav>
 
-  <div class="lang">
+<header class="header">
+  <h1>MTB Points - A propos</h1>
+  <nav>
+<a href="index.html">Acceuil</a>
+<a href="public-ranking.html">Classement</a>
+<a href="meetings.html">Événements</a>
+<a href="reglement.html">Règlement</a>
+<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
+<a href="about.html">À propos</a>
+<a href="login.html">Connexion</a>
+  </nav>
+   <div class="lang">
     <button class="btn" id="btnFR">FR</button>
     <button class="btn" id="btnEN">EN</button>
   </div>
@@ -35,7 +36,7 @@
 
 <div class="wrap">
   <div class="card">
-    <h2 data-i18n="about.what">C’est quoi VTT Points ?</h2>
+    <h2 data-i18n="about.what">C’est quoi MTB Points ?</h2>
     <p class="muted" data-i18n="about.p1">
       <section style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06);line-height:1.6;color:#334155;">
   
@@ -69,7 +70,7 @@
     d’établir un <strong>score physique</strong>, représentant l’exigence d’endurance et d’effort
     nécessaire pour terminer l’épreuve.
   </p>
-
+<p> LE score physique représente l’effort physiologique global imposé par l’épreuve, indépendamment de la technicité, à partir de la trace GPX.</p>
   <p>
     La difficulté technique est évaluée à partir de critères complémentaires tels que la nature
     du terrain, la proportion de sentiers étroits, la présence d’obstacles, ainsi que le niveau

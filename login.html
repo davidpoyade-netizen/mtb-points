@@ -3,87 +3,115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Connexion – VTT Points</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>Login – MTB Points</title>
   <style>
-    .wrap { max-width: 520px; margin: 40px auto; padding: 0 16px; }
-    .card { background:#fff; padding:24px; border-radius:10px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
-    label { display:block; margin-top:12px; font-weight:700; }
-    input, select { width:100%; padding:10px; margin-top:6px; }
-    .actions { display:flex; gap:10px; margin-top:16px; }
-    .btn { display:inline-block; padding:10px 14px; border-radius:8px; text-decoration:none; border:0; cursor:pointer; }
-    .primary { background:#2563eb; color:#fff; }
-    .muted { color:#667085; margin-top:8px; }
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#64748b;--border:#e5e7eb;--blue:#2563eb;
+      --ok:#22c55e;--warn:#ef4444;--dark:#111827;
+    }
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;}
+    header{background:var(--card);padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+    header h1{margin:0;font-size:22px}
+    .wrap{max-width:980px;margin:22px auto;padding:0 16px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 18px;margin:14px 0;box-shadow:0 2px 10px rgba(0,0,0,.05);}
+    .toc a{display:block;text-decoration:none;color:var(--blue);padding:6px 0}
+    h2{margin:0 0 10px 0;font-size:18px}
+    h3{margin:14px 0 6px 0;font-size:15px}
+    p,li{font-size:14px;line-height:1.6}
+    ul{padding-left:18px;margin:8px 0}
+    code{background:#f1f5f9;border:1px solid var(--border);border-radius:8px;padding:2px 6px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:13px}
+    .muted{color:var(--muted);font-size:13px}
+    .box{background:#f8fafc;border:1px solid var(--border);border-left:5px solid var(--blue);border-radius:12px;padding:12px;margin:12px 0}
+    .pill{display:inline-block;background:#f1f5f9;border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:800px){.grid2{grid-template-columns:1fr}}
+    footer{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
   </style>
 </head>
 <body>
-  <header class="header">
-    <h1>Connexion</h1>
-    <nav>
-      <a href="index.html">Accueil</a>
-      <a href="public-ranking.html">Classement</a>
-    </nav>
-  </header>
+<header>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
+    .card { background:#fff; border-radius:12px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .btn2 { display:inline-block; padding:12px 16px; border-radius:10px; text-decoration:none; border:1px solid #cbd5e1; }
+    .primary { background:#2563eb; color:#fff; border:0; }
+    .muted { color:#667085; }
+    @media (max-width: 800px){ .grid{ grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
 
-  <div class="wrap">
-    <div class="card">
-      <h2 style="margin-top:0;">Se connecter</h2>
-      <p class="muted">V1 simple : pas de mot de passe (on ajoutera plus tard).</p>
-
-      <label for="name">Nom / Prénom</label>
-      <input id="name" type="text" placeholder="Ex: Julien Dupont" />
-
-      <label for="role">Je suis</label>
-      <select id="role">
-        <option value="rider">Cycliste</option>
-        <option value="organizer">Organisateur</option>
-      </select>
-
-      <div class="actions">
-        <button class="btn primary" id="loginBtn">Connexion</button>
-        <button class="btn" id="logoutBtn" type="button">Déconnexion</button>
-      </div>
-
-      <p class="muted" id="status"></p>
-    </div>
+<header class="header">
+  <h1>MTB Points- Login</h1>
+  <nav>
+<a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="methodologie.html" class="active">Méthodologie (calcul)</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
+  </nav>
+  <div class="lang">
+    <button class="btn" id="btnFR">FR</button>
+    <button class="btn" id="btnEN">EN</button>
   </div>
+</header>
 
-  <script src="js/auth.js"></script>
-  <script>
-    const statusEl = document.getElementById("status");
-    const nameEl = document.getElementById("name");
-    const roleEl = document.getElementById("role");
+<div class="wrap">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Connexion – MTB Points</title>
+</head>
+<body style="font-family:Arial; padding:20px;">
+  <h1>Connexion</h1>
 
-    // pré-remplissage si déjà connecté
-    const cur = authGet();
-    if (cur) {
-      nameEl.value = cur.name;
-      roleEl.value = cur.role;
-      statusEl.textContent = `Connecté : ${cur.name} (${cur.role})`;
-    }
+  <div id="authState">—</div>
+  <p id="authMsg"></p>
 
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      const name = nameEl.value.trim();
-      const role = roleEl.value;
+  <h3>Créer un compte</h3>
+  <input id="suEmail" placeholder="Email" style="padding:8px; width:260px;" />
+  <input id="suPass" type="password" placeholder="Mot de passe" style="padding:8px; width:260px;" />
+  <button id="btnSignUp">S'inscrire</button>
 
-      if (!name) {
-        statusEl.textContent = "⚠️ Entre un nom.";
-        return;
-      }
-      authSet({ name, role });
-      statusEl.textContent = `✅ Connecté : ${name} (${role})`;
+  <h3>Se connecter</h3>
+  <input id="siEmail" placeholder="Email" style="padding:8px; width:260px;" />
+  <input id="siPass" type="password" placeholder="Mot de passe" style="padding:8px; width:260px;" />
+  <button id="btnSignIn">Se connecter</button>
 
-      // redirection selon rôle
-      if (role === "organizer") window.location.href = "dashboard.html";
-      else window.location.href = "public-ranking.html";
-    });
+  <h3>Déconnexion</h3>
+  <button id="btnSignOut">Se déconnecter</button>
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      authClear();
-      statusEl.textContent = "✅ Déconnecté.";
-      nameEl.value = "";
-      roleEl.value = "rider";
-    });
+  <script type="module">
+    import { signUp, signIn, signOut, renderAuthState } from "./js/auth.js";
+
+    const $ = (id) => document.getElementById(id);
+    const msg = (t) => document.getElementById("authMsg").textContent = t || "";
+
+    $("btnSignUp").onclick = async () => {
+      try { await signUp($("suEmail").value, $("suPass").value); }
+      catch(e){ msg(e.message); }
+    };
+
+    $("btnSignIn").onclick = async () => {
+      try { await signIn($("siEmail").value, $("siPass").value); }
+      catch(e){ msg(e.message); }
+    };
+
+    $("btnSignOut").onclick = async () => {
+      try { await signOut(); }
+      catch(e){ msg(e.message); }
+    };
+
+    renderAuthState();
   </script>
 </body>
 </html>

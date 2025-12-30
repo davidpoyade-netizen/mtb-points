@@ -20,12 +20,17 @@
 <header class="header">
   <h1>MTB Points</h1>
   <nav>
-<a href="meeting-create.html">Créer un événement</a>
-</a>    <a href="public-ranking.html">Classement</a>
-    <a href="login.html">Connexion</a>
+<a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
     <a href="reglement.html">Règlement</a>
-    <a href="about.html">A propos</a>
+    <a href="methodologie.html" class="active">Méthodologie (calcul)</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
   </nav>
+   <div class="lang">
+    <button class="btn" id="btnFR">FR</button>
+    <button class="btn" id="btnEN">EN</button>
+  </div>
 </header>
 
 <div class="wrap">
@@ -68,7 +73,8 @@
     Les organisateurs peuvent analyser leur épreuve à partir de la <strong>trace GPX</strong> du parcours afin d’obtenir :
     la distance et le dénivelé calculés automatiquement, le <strong>profil altimétrique</strong>, une <strong>carte du tracé</strong>,
     ainsi qu’un <strong>score de difficulté</strong> physique et technique. Une fois l’épreuve créée, ils peuvent ensuite
-    <strong>importer les résultats</strong> des participants pour attribuer automatiquement les points MTB.
+    <strong>importer les résultats</strong> des participants pour attribuer automatiquement les points MTB. Ils peuvent obtenir une fiche PDF de chaque épreuve.
+  
   </p>
 </section>
 
@@ -88,6 +94,11 @@
     </div>
   </div>
 </div>
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
+  const { data, error } = await supabase.from("races").select("id,name").limit(3);
+  console.log("TEST races:", data, error);
+</script>
 
 </body>
 </html>

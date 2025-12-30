@@ -3,40 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Classement – MTB Points</title>
+  <title>MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0;color:#0f172a}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-    .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    h1{margin:0;font-size:22px}
-    .muted{color:#667085;font-size:13px}
-    .filters{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
-    label{display:block;font-size:12px;color:#667085;margin-bottom:6px}
-    select,input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-top:12px}
-    .btn{padding:10px 14px;border-radius:10px;border:0;background:#2563eb;color:#fff;cursor:pointer;font-weight:800}
-    .btn.secondary{background:#f1f5f9;color:#0f172a;border:1px solid #e5e7eb}
-    table{width:100%;border-collapse:collapse;margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
-    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:14px}
-    th{background:#f8fafc;font-size:12px;color:#334155;text-transform:uppercase;letter-spacing:.04em}
-    tr:hover td{background:#f8fafc}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e5e7eb;font-weight:800;font-size:12px}
-    .pillDot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
-    .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    @media(max-width:1100px){ .filters{grid-template-columns:repeat(3,1fr);} }
-    @media(max-width:650px){ .filters{grid-template-columns:repeat(2,1fr);} }
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
+    .card { background:#fff; border-radius:12px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .btn2 { display:inline-block; padding:12px 16px; border-radius:10px; text-decoration:none; border:1px solid #cbd5e1; }
+    .primary { background:#2563eb; color:#fff; border:0; }
+    .muted { color:#667085; }
+    @media (max-width: 800px){ .grid{ grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
 
-<header>
+<header class="header">
+  <h1>MTB Points- Classement</h1>
   <nav>
-    <a href="index.html">Accueil</a>
-    <a href="events.html">Épreuves</a>
-    <a href="meetings.html">Événements</a>
-    <a href="ranking.html">Classement</a>
+<a href="index.html">Acceuil</a>
+<a href="public-ranking.html">Classement</a>
+<a href="meetings.html">Événements</a>
+<a href="reglement.html">Règlement</a>
+<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
+<a href="about.html">À propos</a>
+<a href="login.html">Connexion</a>
+  </nav>
+  <div class="lang">
+    <button class="btn" id="btnFR">FR</button>
+    <button class="btn" id="btnEN">EN</button>
+  </div>
+</header>
   </nav>
   <div class="right">
     <span class="pill" id="periodPill"><span class="pillDot" id="periodDot"></span><span id="periodLabel">24 mois</span></span>
