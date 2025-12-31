@@ -3,120 +3,329 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MTB Points</title>
+  <title>À propos — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
+
   <style>
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
-    .card { background:#fff; border-radius:12px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-    .btn2 { display:inline-block; padding:12px 16px; border-radius:10px; text-decoration:none; border:1px solid #cbd5e1; }
-    .primary { background:#2563eb; color:#fff; border:0; }
-    .muted { color:#667085; }
-    @media (max-width: 800px){ .grid{ grid-template-columns:1fr; } }
+    :root{
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#667085;
+      --muted2:#64748b;
+      --border:#e5e7eb;
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+      --shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      color:var(--blue);
+      font-weight:800;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+    }
+
+    /* Layout */
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:26px;letter-spacing:-.35px}
+    .hero p{margin:10px 0 0 0;color:#334155;line-height:1.65}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:900;font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#93c5fd;display:inline-block}
+
+    /* Content */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      padding:16px;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+
+    h3{margin:0 0 8px 0;font-size:16px;letter-spacing:-.15px}
+    .muted{color:var(--muted2)}
+    .lead{font-size:14px;line-height:1.7;color:#334155;margin:0}
+    .sep{border-top:1px dashed var(--border);margin:14px 0}
+
+    .callout{
+      border:1px solid var(--border);
+      border-left:5px solid var(--blue);
+      border-radius:16px;
+      padding:12px;
+      background:#eff6ff;
+      color:#0f172a;
+    }
+    .callout p{margin:0;color:#0f172a;line-height:1.6}
+    .small{font-size:12px;color:var(--muted);line-height:1.6}
+
+    ul{
+      margin:10px 0 0 18px;
+      padding:0;
+      color:#334155;
+      line-height:1.65;
+      font-size:14px;
+    }
+    li{margin:6px 0}
+
+    .kpis{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .kpi{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+    }
+    .kpi .label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.02em;
+    }
+    .kpi .value{
+      margin-top:6px;
+      font-size:14px;
+      font-weight:1000;
+      color:#0f172a;
+      line-height:1.35;
+    }
+
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btnLink{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
+      text-decoration:none;
+      transition:transform .12s ease, box-shadow .12s ease;
+    }
+    .btnLink:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
+    .btnLink.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btnLink.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+
+    footer{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    /* Accessibility focus */
+    a:focus, button:focus{
+      outline:3px solid rgba(37,99,235,.25);
+      outline-offset:2px;
+    }
   </style>
 </head>
-<body>
 
+<body>
 <header class="header">
-  <h1>MTB Points - A propos</h1>
+  <h1>MTB Points — À propos</h1>
+
   <nav>
-<a href="index.html">Acceuil</a>
-<a href="public-ranking.html">Classement</a>
-<a href="meetings.html">Événements</a>
-<a href="reglement.html">Règlement</a>
-<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
-<a href="about.html">À propos</a>
-<a href="login.html">Connexion</a>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="methodologie.html">Méthodologie</a>
+    <a href="about.html" class="active">À propos</a>
+    <a href="login.html">Connexion</a>
   </nav>
-   <div class="lang">
-    <button class="btn" id="btnFR">FR</button>
-    <button class="btn" id="btnEN">EN</button>
+
+  <div class="lang">
+    <button class="btn" id="btnFR" type="button">FR</button>
+    <button class="btn" id="btnEN" type="button">EN</button>
   </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
   <div class="card">
-    <h2 data-i18n="about.what">C’est quoi MTB Points ?</h2>
-    <p class="muted" data-i18n="about.p1">
-      <section style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.06);line-height:1.6;color:#334155;">
-  
-  <h2 style="margin-top:0;">À propos des MTB Points</h2>
 
-  <p>
-    Je suis un <strong>vététiste licencié en club</strong>, passionné de VTT et de compétition.
-    En tant que pratiquant régulier d’épreuves de cross-country, d’enduro et de marathon,
-    j’ai constaté qu’il était difficile de comparer objectivement les performances des cyclistes
-    d’une course à l’autre, tant les parcours et leurs difficultés peuvent varier.
-  </p>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:260px;flex:1">
+          <h2 data-i18n="about.what">C’est quoi MTB Points ?</h2>
+          <p class="lead muted" data-i18n="about.p1">
+            Un système de points pour comparer les performances entre épreuves VTT, en tenant compte de la difficulté réelle des parcours.
+          </p>
+        </div>
 
-  <p>
-    C’est dans ce contexte qu’est né le système des <strong>MTB Points</strong>, un système de classement
-    inspiré des <strong>points ITRA</strong> utilisés dans le trail, et spécifiquement adapté aux
-    exigences et à la diversité des disciplines du VTT.
-  </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+          <span class="pill"><span class="dot"></span> Audit & transparence</span>
+          <span class="pill"><span class="dot"></span> GPX + OSM</span>
+          <span class="pill"><span class="dot"></span> 24 mois glissants</span>
+        </div>
+      </div>
+    </section>
 
-  <h3>Méthodologie</h3>
+    <div class="grid">
 
-  <p>
-    Les MTB Points reposent sur une <strong>analyse mathématique avancée</strong> de la difficulté réelle
-    des parcours. Cette analyse s’appuie principalement sur l’exploitation de la
-    <strong>trace GPX</strong> fournie par les organisateurs.
-  </p>
+      <!-- LEFT: Story + Method -->
+      <section class="panel">
+        <h3>Pourquoi ce projet ?</h3>
+        <p class="lead">
+          Je suis un <strong>vététiste licencié en club</strong>, passionné de VTT et de compétition.
+          En cross-country, enduro et marathon, j’ai souvent constaté qu’il est difficile de comparer
+          objectivement les performances d’une course à l’autre : les parcours et leurs difficultés varient énormément.
+        </p>
 
-  <p>
-    À partir de cette trace, le système calcule automatiquement la <strong>distance</strong>,
-    le <strong>dénivelé positif</strong>, le <strong>profil altimétrique</strong> et la
-    <strong>répartition des pentes</strong> tout au long du parcours. Ces éléments permettent
-    d’établir un <strong>score physique</strong>, représentant l’exigence d’endurance et d’effort
-    nécessaire pour terminer l’épreuve.
-  </p>
-<p> LE score physique représente l’effort physiologique global imposé par l’épreuve, indépendamment de la technicité, à partir de la trace GPX.</p>
-  <p>
-    La difficulté technique est évaluée à partir de critères complémentaires tels que la nature
-    du terrain, la proportion de sentiers étroits, la présence d’obstacles, ainsi que le niveau
-    de technicité globale du parcours. Ces informations, combinées à l’analyse automatique,
-    permettent de calculer un <strong>score technique</strong> cohérent et représentatif.
-  </p>
+        <div class="sep"></div>
 
-  <p>
-    Le <strong>score global</strong> d’une épreuve résulte de la combinaison du score physique et du
-    score technique. Il est ensuite pondéré selon le <strong>niveau de l’événement</strong>
-    (local, régional, national ou international), afin de refléter l’attractivité et l’envergure
-    de la compétition.
-  </p>
+        <h3>Une méthode simple à comprendre, robuste sur le terrain</h3>
+        <p class="lead">
+          MTB Points s’inspire du principe des points ITRA (trail) et l’adapte aux spécificités VTT :
+          effort, pente, virages, terrain, technicité. La base provient des données structurées
+          (GPX et cartographie), pour éviter les “ressentis”.
+        </p>
 
-  <p>
-    Les points sont attribués aux cyclistes en fonction de leur <strong>classement final</strong>
-    et cumulés sur une <strong>fenêtre glissante de 24 mois</strong>. Les classements sont établis
-    par discipline, catégorie d’âge, sexe et type de vélo, avec une séparation claire entre
-    pratique musculaire et assistance électrique.
-  </p>
-<p>Les classements MTB Points distinguent systématiquement la pratique musculaire et la pratique à assistance électrique.
-Les cyclistes utilisant un VTT à assistance électrique sont classés dans des catégories dédiées, séparées des classements musculaires, afin de garantir une comparaison équitable des performances.
-Les points sont calculés selon la même méthodologie, mais les classements et cumuls sont indépendants.</p>
-  <p>
-    L’objectif des MTB Points est de proposer un <strong>système fiable, transparent et équitable</strong>,
-    capable de représenter fidèlement la difficulté des parcours et le niveau de performance
-    des cyclistes, au service des pratiquants comme des organisateurs.
-  </p>
+        <div class="callout" style="margin-top:12px;">
+          <p>
+            <strong>Score Physique</strong> : représente l’effort physiologique global (distance, D+, pentes) depuis le GPX.<br/>
+            <strong>Score Technique</strong> : socle cartographique (OSM) + bonus GPX capé (virages/sinuosité/pentes), pour rester stable.
+          </p>
+        </div>
 
-</section>
+        <div class="sep"></div>
 
+        <h3>Comment sont attribués les points ?</h3>
+        <p class="lead">
+          Chaque épreuve reçoit un score de difficulté, puis les points coureurs dépendent de la performance (temps)
+          et sont cumulés sur une <strong>fenêtre glissante de 24 mois</strong>. Les classements sont séparés par discipline,
+          âge, sexe et <strong>type de vélo</strong> (musculaire vs assistance électrique).
+        </p>
 
-    <h2 data-i18n="about.features">Fonctionnalités</h2>
-    <ul>
-      <li data-i18n="about.f1">Épreuves + fiche complète (distance, D+, barrières horaires, ravitos, etc.)</li>
-      <li data-i18n="about.f2">Classements par sexe et catégories d’âge</li>
-      <li data-i18n="about.f3">Support des disciplines (XC, Enduro, DH, Gravel…)</li>
-      <li data-i18n="about.f4">Sous-catégorie Assistance électrique (E-Bike)</li>
-    </ul>
+        <p class="small" style="margin-top:10px;">
+          Pour tous les détails de calcul : <a href="methodologie.html" style="color:var(--blue);font-weight:900;text-decoration:none;">Méthodologie (calcul)</a>.
+          Pour l’éligibilité, l’import, la modération : <a href="reglement.html" style="color:var(--blue);font-weight:900;text-decoration:none;">Règlement</a>.
+        </p>
+
+        <div class="btnRow">
+          <a class="btnLink primary" href="public-ranking.html">Voir le classement</a>
+          <a class="btnLink" href="meetings.html">Voir les événements</a>
+          <a class="btnLink" href="challengemtbpoints.html">Voir le challenge</a>
+        </div>
+      </section>
+
+      <!-- RIGHT: Features -->
+      <aside class="panel">
+        <h3 data-i18n="about.features">Fonctionnalités</h3>
+        <ul>
+          <li data-i18n="about.f1">Épreuves + fiche complète (distance, D+, barrières horaires, ravitos…)</li>
+          <li data-i18n="about.f2">Classements par sexe et catégories d’âge</li>
+          <li data-i18n="about.f3">Support des disciplines (XC, Enduro, DH, Gravel…)</li>
+          <li data-i18n="about.f4">Sous-catégorie Assistance électrique (E-Bike)</li>
+        </ul>
+
+        <div class="sep"></div>
+
+        <h3>Repères</h3>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">Fenêtre</div>
+            <div class="value">24 mois glissants (Top N)</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Objectif</div>
+            <div class="value">Comparaison équitable entre courses</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Données</div>
+            <div class="value">GPX (effort) + OSM (terrain)</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Classements</div>
+            <div class="value">Disciplines • Âge • Sexe • Musculaire / E-Bike</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="callout">
+          <p>
+            <strong>Important :</strong> les classements distinguent systématiquement la pratique <strong>musculaire</strong> et
+            la pratique à <strong>assistance électrique</strong>, avec cumuls indépendants.
+          </p>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      MTB Points — projet en évolution : calibrage progressif des paramètres via retours terrain.
+    </footer>
   </div>
-</div>
+</main>
 
 <script src="js/i18n.js"></script>
 <script>
-  bindLangButtons();
-  applyI18n();
+  // Si ton i18n.js expose bien ces fonctions, on garde le comportement existant.
+  if (typeof bindLangButtons === "function") bindLangButtons();
+  if (typeof applyI18n === "function") applyI18n();
 </script>
 </body>
 </html>

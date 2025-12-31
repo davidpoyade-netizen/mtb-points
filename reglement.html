@@ -8,45 +8,190 @@
 
   <style>
     :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#64748b;--border:#e5e7eb;--blue:#2563eb;
-      --shadow:0 2px 10px rgba(0,0,0,.06);
-      --shadow2:0 2px 10px rgba(0,0,0,.08);
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#667085;
+      --muted2:#64748b;
+      --border:#e5e7eb;
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+      --ok:#16a34a;
+      --warn:#ea580c;
+      --shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:18px;
     }
+    *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;}
-    .header{background:var(--card);padding:14px 16px;box-shadow:var(--shadow);}
-    .header h1{margin:0;font-size:20px}
-    .header nav{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-    .header nav a{color:var(--text);text-decoration:none;font-size:14px}
-    .header nav a.active{color:var(--blue);font-weight:700}
-    .lang{margin-top:10px;display:flex;gap:8px}
-    .btn{padding:8px 10px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
-    .wrap{max-width:980px;margin:22px auto;padding:0 16px;}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:14px 0;box-shadow:var(--shadow2);}
-    .toc a{display:block;text-decoration:none;color:var(--blue);padding:6px 0}
-    h2{margin:0 0 10px 0;font-size:18px}
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      color:var(--blue);
+      font-weight:800;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+    }
+
+    /* Layout */
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin:14px 0;
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .hero .muted{margin-top:8px;line-height:1.55;color:#334155}
+
+    /* Content */
+    h2.section{margin:0 0 10px 0;font-size:18px;letter-spacing:-.15px}
     h3{margin:14px 0 6px 0;font-size:15px}
-    p,li{font-size:14px;line-height:1.6}
+    p,li{font-size:14px;line-height:1.65}
     ul{padding-left:18px;margin:8px 0}
-    code{background:#f1f5f9;border:1px solid var(--border);border-radius:8px;padding:2px 6px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;font-size:13px}
     .muted{color:var(--muted);font-size:13px}
-    .box{background:#f8fafc;border:1px solid var(--border);border-left:5px solid var(--blue);border-radius:12px;padding:12px;margin:12px 0}
-    .pill{display:inline-block;background:#f1f5f9;border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800}
-    footer{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
+    code{
+      background:#f1f5f9;border:1px solid var(--border);border-radius:10px;
+      padding:2px 8px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    /* Pills / boxes */
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:900;font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+
+    .box{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .callout{
+      border-left:6px solid var(--blue);
+      background:#f8fafc;
+    }
+
+    /* TOC */
+    .tocGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    @media(max-width:900px){.tocGrid{grid-template-columns:1fr}}
+    .tocLink{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:12px 12px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      text-decoration:none;
+      background:#fff;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .tocLink:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 22px rgba(2,6,23,.10);
+      border-color:#dbeafe;
+    }
+    .tocTitle{font-weight:900}
+    .tocHint{color:var(--muted);font-size:12px}
+
+    /* Small sticky side nav (optional) */
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:14px;
+      align-items:start;
+    }
+    @media(max-width:980px){.twoCol{grid-template-columns:1fr}}
+    .side{
+      position:sticky;top:86px;
+    }
+    @media(max-width:980px){.side{position:relative;top:auto}}
+
+    .sideCard{
+      background:#fff;border:1px solid var(--border);border-radius:22px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .sideCard h3{margin:0 0 8px 0}
+    .sideCard a{
+      display:block;
+      text-decoration:none;
+      color:var(--blue);
+      font-weight:800;
+      padding:8px 10px;
+      border-radius:12px;
+    }
+    .sideCard a:hover{background:#eff6ff}
+    .badgePill{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px;
+    }
+
+    footer{
+      padding:26px 16px;text-align:center;color:var(--muted);font-size:13px
+    }
   </style>
 </head>
 
 <body>
 <header class="header">
-  <h1>MTB Points — Règlement</h1>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Règlement</h1>
+    <span class="pill"><span class="dot ok"></span> Version publique</span>
+  </div>
 
   <nav>
-<a href="index.html">Acceuil</a>
-<a href="public-ranking.html">Classement</a>
-<a href="meetings.html">Événements</a>
-<a href="reglement.html">Règlement</a>
-<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
-<a href="about.html">À propos</a>
-<a href="login.html">Connexion</a>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="reglement.html" class="active">Règlement</a>
+    <a href="methodologie.html">Méthodologie</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
   </nav>
 
   <div class="lang">
@@ -56,268 +201,348 @@
 </header>
 
 <main class="wrap">
-
-  <!-- TABLE DES MATIERES -->
-  <section class="card">
-    <h2>Sommaire</h2>
-    <div class="toc">
-      <a href="#objet">1. Objet</a>
-      <a href="#definitions">2. Définitions</a>
-      <a href="#eligibilite">3. Éligibilité</a>
-      <a href="#mrs">4. Score Épreuve (MRS)</a>
-      <a href="#points-coureur">5. Points Coureur</a>
-      <a href="#classements">6. Classements</a>
-      <a href="#challenge-1000">10. Challenge “MTB 1000”</a>
-      <a href="#import">7. Résultats &amp; Import</a>
-      <a href="#controle">8. Contrôle &amp; Modération</a>
-      <a href="#litiges">9. Litiges</a>
-    </div>
-    <p class="muted" style="margin-top:10px;">
-      Les détails de calcul (ScorePhys / ScoreTech / paramètres) sont dans :
-      <a href="methodologie.html">Méthodologie (calcul)</a>.
-    </p>
-  </section>
-
-  <!-- OBJET -->
-  <section class="card" id="objet">
-    <h2>1. Objet</h2>
-    <p>
-      MTB Points est un système de points destiné à évaluer la difficulté d’une épreuve VTT et à classer les cyclistes
-      en fonction de leurs performances. Il s’inspire du principe des points ITRA (trail), tout en intégrant les spécificités
-      du VTT (pente, terrain, sinuosité, effort).
-    </p>
-    <div class="box">
-      <strong>Principe :</strong> une épreuve reçoit un score de difficulté (<strong>MRS</strong>). Chaque participant reçoit des points
-      selon sa performance (temps) et son statut (finisher, abandon, hors délai, etc.).
+  <section class="card hero">
+    <h2>Règlement officiel MTB Points</h2>
+    <div class="muted">
+      Objectif : définir les règles d’éligibilité, de calcul des points coureurs, des classements, du challenge et de la modération.
+      Les détails techniques (ScorePhys / ScoreTech, paramètres, formules détaillées) sont décrits dans
+      <a href="methodologie.html" style="color:var(--blue);font-weight:900;text-decoration:none">Méthodologie (calcul)</a>.
     </div>
   </section>
 
-  <!-- DEFINITIONS -->
-  <section class="card" id="definitions">
-    <h2>2. Définitions</h2>
-    <ul>
-      <li><strong>Épreuve (Race)</strong> : course individuelle (distance/format) associée ou non à un événement (meeting).</li>
-      <li><strong>Événement (Meeting)</strong> : rassemblement pouvant contenir plusieurs épreuves (20 km, 30 km, 40 km…).</li>
-      <li><strong>Trace GPX</strong> : fichier de parcours servant aux calculs automatiques (distance, D+, profils, scores).</li>
-      <li><strong>MRS</strong> : <em>MTB Race Score</em>, score global de difficulté de l’épreuve, sur 100.</li>
-      <li><strong>ScorePhys</strong> : score physique (0–100) basé sur distance, D+ et sévérité des pentes (IPB).</li>
-      <li><strong>ScoreTech</strong> : score technique (0–100) basé sur sinuosité et estimation de terrain via GPX.</li>
-      <li><strong>Statuts</strong> :
+  <div class="twoCol">
+
+    <!-- Main column -->
+    <div>
+
+      <!-- SOMMAIRE -->
+      <section class="card" id="sommaire">
+        <h2 class="section">Sommaire</h2>
+        <div class="tocGrid">
+          <a class="tocLink" href="#objet"><span class="tocTitle">1. Objet</span><span class="tocHint">But & principe</span></a>
+          <a class="tocLink" href="#definitions"><span class="tocTitle">2. Définitions</span><span class="tocHint">Termes clés</span></a>
+          <a class="tocLink" href="#eligibilite"><span class="tocTitle">3. Éligibilité</span><span class="tocHint">Conditions</span></a>
+          <a class="tocLink" href="#mrs"><span class="tocTitle">4. Score Épreuve (MRS)</span><span class="tocHint">Difficulté</span></a>
+          <a class="tocLink" href="#points-coureur"><span class="tocTitle">5. Points Coureur</span><span class="tocHint">Attribution</span></a>
+          <a class="tocLink" href="#classements"><span class="tocTitle">6. Classements</span><span class="tocHint">24 mois / Année</span></a>
+          <a class="tocLink" href="#import"><span class="tocTitle">7. Résultats & Import</span><span class="tocHint">Format</span></a>
+          <a class="tocLink" href="#controle"><span class="tocTitle">8. Contrôle & Modération</span><span class="tocHint">Anti-abus</span></a>
+          <a class="tocLink" href="#litiges"><span class="tocTitle">9. Litiges</span><span class="tocHint">Procédure</span></a>
+          <a class="tocLink" href="#challenge-1000"><span class="tocTitle">10. Challenge</span><span class="tocHint">Badges</span></a>
+        </div>
+
+        <div class="box callout" style="margin-top:14px;">
+          <div style="font-weight:900;">À retenir</div>
+          <ul style="margin:8px 0 0 18px;">
+            <li>Une <b>épreuve</b> doit avoir une <b>date</b> et une <b>trace GPX</b> analysable.</li>
+            <li>Les classements sont <b>séparés</b> par discipline / sexe / âge / type de vélo.</li>
+            <li>Les non-finishers (DNF/DNS/OT/DSQ) reçoivent <b>0 point</b>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- OBJET -->
+      <section class="card" id="objet">
+        <h2 class="section">1. Objet</h2>
+        <p>
+          MTB Points est un système de points destiné à évaluer la difficulté d’une épreuve VTT et à classer les cyclistes
+          en fonction de leurs performances. Il s’inspire du principe des points ITRA (trail), en intégrant les spécificités
+          du VTT (pente, terrain, sinuosité, effort).
+        </p>
+        <div class="box callout">
+          <div style="font-weight:900;">Principe</div>
+          <p style="margin:8px 0 0 0;">
+            Une épreuve reçoit un score de difficulté (<b>MRS</b>).
+            Chaque participant reçoit des points selon sa performance (temps) et son statut.
+          </p>
+        </div>
+      </section>
+
+      <!-- DEFINITIONS -->
+      <section class="card" id="definitions">
+        <h2 class="section">2. Définitions</h2>
         <ul>
-          <li><code>FIN</code> : finisher (temps valide et dans la barrière horaire)</li>
-          <li><code>DNF</code> : abandon (Did Not Finish)</li>
-          <li><code>DNS</code> : non-partant (Did Not Start)</li>
-          <li><code>OT</code> : hors barrière horaire (Out of Time)</li>
-          <li><code>DSQ</code> : disqualifié</li>
+          <li><b>Épreuve (Race)</b> : course individuelle (distance/format) associée ou non à un événement (meeting).</li>
+          <li><b>Événement (Meeting)</b> : rassemblement pouvant contenir plusieurs épreuves (20 km, 30 km, 40 km…).</li>
+          <li><b>Trace GPX</b> : fichier de parcours servant aux calculs automatiques (distance, D+, profils, scores).</li>
+          <li><b>MRS</b> : <i>MTB Race Score</i>, score global de difficulté de l’épreuve, sur 100.</li>
+          <li><b>ScorePhys</b> : score physique (0–100) basé sur distance, D+ et sévérité des pentes (IPB).</li>
+          <li><b>ScoreTech</b> : score technique (0–100) basé sur sinuosité + terrain (voir méthodologie).</li>
+          <li><b>Statuts</b> :
+            <ul>
+              <li><code>FIN</code> : finisher (temps valide et dans la barrière horaire)</li>
+              <li><code>DNF</code> : abandon</li>
+              <li><code>DNS</code> : non-partant</li>
+              <li><code>OT</code> : hors barrière horaire</li>
+              <li><code>DSQ</code> : disqualifié</li>
+            </ul>
+          </li>
         </ul>
-      </li>
-    </ul>
-  </section>
+      </section>
 
-  <!-- ELIGIBILITE -->
-  <section class="card" id="eligibilite">
-    <h2>3. Éligibilité</h2>
-    <ul>
-      <li>Les points ne sont attribués que pour des épreuves disposant d’une date et d’une trace GPX analysable.</li>
-      <li>Les résultats doivent être importés par un organisateur (ou validés par modération).</li>
-      <li>Le classement est séparé par :
+      <!-- ELIGIBILITE -->
+      <section class="card" id="eligibilite">
+        <h2 class="section">3. Éligibilité</h2>
         <ul>
-          <li>Discipline (XC, Enduro, DH, Gravel, etc.)</li>
-          <li>Sexe (Hommes / Femmes)</li>
-          <li>Catégorie d’âge (UCI)</li>
-          <li>Type de vélo : <strong>Musculaire</strong> vs <strong>Assistance électrique</strong> (classements distincts)</li>
+          <li>Les points ne sont attribués que pour des épreuves disposant d’une <b>date</b> et d’une <b>trace GPX analysable</b>.</li>
+          <li>Les résultats doivent être importés par un organisateur (ou validés après modération).</li>
+          <li>Le classement est séparé par :
+            <ul>
+              <li>Discipline (XC, Enduro, DH, Gravel, etc.)</li>
+              <li>Sexe (Hommes / Femmes)</li>
+              <li>Catégorie d’âge (UCI)</li>
+              <li>Type de vélo : <b>Musculaire</b> vs <b>Assistance électrique</b></li>
+            </ul>
+          </li>
         </ul>
-      </li>
-    </ul>
-  </section>
+        <div class="box">
+          <span class="badgePill"><span class="dot warn"></span> Important</span>
+          <div class="muted" style="margin-top:8px;">
+            Si l’altitude du GPX est non exploitable, certains indicateurs peuvent être dégradés (voir méthodologie).
+          </div>
+        </div>
+      </section>
 
-  <!-- MRS (sans méthodologie détaillée) -->
-  <section class="card" id="mrs">
-    <h2>4. Score Épreuve (MRS)</h2>
-    <p>
-      Le score global de difficulté d’une épreuve (<strong>MRS</strong>) est calculé à partir d’un score physique et d’un score technique.
-      Les détails de calcul sont décrits dans la page <a href="methodologie.html">Méthodologie (calcul)</a>.
-    </p>
+      <!-- MRS -->
+      <section class="card" id="mrs">
+        <h2 class="section">4. Score Épreuve (MRS)</h2>
+        <p>
+          Le score global de difficulté d’une épreuve (<b>MRS</b>) est calculé à partir d’un score physique et d’un score technique.
+          Les détails de calcul et paramètres sont dans <a href="methodologie.html" style="color:var(--blue);font-weight:900;text-decoration:none">Méthodologie (calcul)</a>.
+        </p>
 
-    <div class="box">
-      <strong>Niveau de l’épreuve</strong>
-      <p style="margin:8px 0 0 0;">
-        L’organisateur peut déclarer un niveau :
-        <span class="pill">Locale</span>
-        <span class="pill">Régionale</span>
-        <span class="pill">Nationale</span>
-        <span class="pill">Internationale</span>
-      </p>
-      <p class="muted" style="margin:8px 0 0 0;">
-        Ce niveau peut influencer la valeur de points maximale distribuée (voir section suivante).
-      </p>
+        <div class="box callout">
+          <div style="font-weight:900;">Niveau de l’épreuve</div>
+          <p style="margin:8px 0 0 0;">
+            L’organisateur déclare un niveau :
+            <span class="pill">Locale</span>
+            <span class="pill">Régionale</span>
+            <span class="pill">Nationale</span>
+            <span class="pill">Internationale</span>
+          </p>
+          <p class="muted" style="margin:8px 0 0 0;">
+            Ce niveau peut influencer la valeur maximale de points distribuée (section 5).
+          </p>
+        </div>
+      </section>
+
+      <!-- POINTS COUREUR -->
+      <section class="card" id="points-coureur">
+        <h2 class="section">5. Points Coureur</h2>
+        <p>
+          Chaque épreuve distribue une quantité maximale de points <b>P<sub>e</sub></b> (vainqueur) dérivée du MRS,
+          bornée entre 0 et 200.
+        </p>
+
+        <div class="box callout">
+          <div style="font-weight:900;">Valeur maximale (vainqueur)</div>
+          <p style="margin:10px 0 0 0;">
+            <code>P_e = clamp(round(200 × (MRS/100)^1.20) × M_level, 0, 200)</code>
+          </p>
+          <div class="muted" style="margin-top:10px;">
+            <b>M_level</b> (niveau) : Locale=0.8, Régionale=1.0, Nationale=1.2, Internationale=1.5.
+          </div>
+        </div>
+
+        <h3>5.1 Règle finishers / abandons</h3>
+        <div class="box">
+          <p style="margin:0;">
+            <b>FIN :</b> minimum <b>5 points</b> par finisher.<br/>
+            <b>DNF / OT / DNS / DSQ :</b> <b>0 point</b>.
+          </p>
+        </div>
+
+        <h3>5.2 Attribution par performance au temps</h3>
+        <p>
+          Pour un finisher <i>i</i> dans une catégorie donnée (discipline/sexe/âge/type vélo), on définit :
+          <code>t_i</code> = temps du coureur, et <code>t*</code> = meilleur temps (référence).
+        </p>
+
+        <div class="box callout">
+          <p style="margin:0 0 8px 0;">
+            <code>r = t_i / t*</code>
+          </p>
+          <p style="margin:0;">
+            <code>Points(i,e) = max(5, round(P_e' × r^(−k)))</code>
+          </p>
+          <div class="muted" style="margin-top:10px;">
+            <b>k = 3.0</b> (par défaut). <b>P_e'</b> peut intégrer un correctif de faible participation si activé.
+          </div>
+        </div>
+      </section>
+
+      <!-- CLASSEMENTS -->
+      <section class="card" id="classements">
+        <h2 class="section">6. Classements</h2>
+        <p>Deux modes de classement sont proposés :</p>
+        <ul>
+          <li><b>Classement glissant 24 mois</b> (par défaut)</li>
+          <li><b>Classement par année civile</b> (ex. 2025, 2026…)</li>
+        </ul>
+
+        <h3>6.1 Fenêtre 24 mois (Top N)</h3>
+        <div class="box callout">
+          <code>MTB_Points(i,C) = somme des Top N résultats de i dans C sur 24 mois</code>
+          <div class="muted" style="margin-top:8px;">N=5 par défaut (paramétrable).</div>
+        </div>
+
+        <h3>6.2 Classement par année</h3>
+        <div class="box">
+          <code>MTB_Points_Year(i,C,Y) = somme des Top N résultats de i dans C sur l’année Y</code>
+        </div>
+
+        <p class="muted">
+          Les classements sont distincts pour <b>musculaire</b> et <b>assistance électrique</b>.
+        </p>
+      </section>
+
+      <!-- IMPORT -->
+      <section class="card" id="import">
+        <h2 class="section">7. Résultats &amp; Import</h2>
+        <p>
+          Les résultats sont importés par l’organisateur via un fichier (CSV, et à terme XLSX).
+          Colonnes recommandées :
+        </p>
+        <ul>
+          <li>Nom / Prénom (ou Nom complet)</li>
+          <li>Sexe</li>
+          <li>Catégorie âge</li>
+          <li>Nationalité</li>
+          <li>Team</li>
+          <li>Type vélo (musculaire / e-bike)</li>
+          <li>Temps (<code>HH:MM:SS</code>)</li>
+          <li>Statut (<code>FIN/DNF/DNS/OT/DSQ</code>)</li>
+        </ul>
+        <div class="box callout">
+          <b>Règle :</b> un temps valide implique <code>FIN</code> sauf indication contraire.
+          Tout statut non-finisher entraîne 0 point.
+        </div>
+      </section>
+
+      <!-- CONTROLE -->
+      <section class="card" id="controle">
+        <h2 class="section">8. Contrôle &amp; Modération</h2>
+        <ul>
+          <li>Un compte administrateur peut supprimer ou dépublier une épreuve en cas d’abus (fausse trace, faux résultats).</li>
+          <li>Les modifications majeures (GPX, distance, D+) peuvent être journalisées et nécessiter un recalcul.</li>
+          <li>Les épreuves “National/International” peuvent être soumises à validation (option).</li>
+          <li>Les classements musculaire et e-bike sont séparés ; toute incohérence peut entraîner une correction/modération.</li>
+        </ul>
+        <div class="box">
+          <div style="font-weight:900;">Traçabilité (recommandé)</div>
+          <div class="muted" style="margin-top:6px;">
+            Conserver l’empreinte du GPX (hash) + date d’import résultats + identité de l’organisateur.
+          </div>
+        </div>
+      </section>
+
+      <!-- LITIGES -->
+      <section class="card" id="litiges">
+        <h2 class="section">9. Litiges</h2>
+        <p>
+          Un litige peut être ouvert en cas d’erreur de résultat, de catégorie, de statut ou d’épreuve (GPX).
+        </p>
+        <div class="box callout">
+          <div style="font-weight:900;">Procédure</div>
+          <ul style="margin:8px 0 0 18px;">
+            <li>Demande motivée (preuve : lien officiel, capture, document organisateur).</li>
+            <li>Analyse par l’organisateur, puis par modération si nécessaire.</li>
+            <li>Décision : correction / maintien / suppression des points.</li>
+          </ul>
+        </div>
+        <p class="muted">En cas de fraude avérée : suppression des résultats concernés + éventuel bannissement.</p>
+      </section>
+
+      <!-- CHALLENGE -->
+      <section class="card" id="challenge-1000">
+        <h2 class="section">10. Challenge “MTB 1000”</h2>
+        <p>
+          Le challenge <b>MTB 1000</b> récompense la régularité et la performance sur une période glissante.
+        </p>
+
+        <div class="box callout">
+          <div style="font-weight:900;">Définition</div>
+          <p style="margin:8px 0 0 0;">
+            Un coureur valide <b>MTB 1000</b> lorsqu’il atteint <b>1000 points</b> sur une fenêtre de <b>24 mois</b>,
+            dans une <b>discipline</b> et un <b>type de vélo</b> donnés.
+          </p>
+        </div>
+
+        <h3>10.1 Périmètre</h3>
+        <ul>
+          <li>Challenge distinct par discipline (XC / Enduro / DH / Gravel…).</li>
+          <li>Challenge distinct par type de vélo : Musculaire / Assistance électrique.</li>
+          <li>Option : séparé par sexe et catégorie d’âge (comme les classements).</li>
+        </ul>
+
+        <h3>10.2 Calcul (fenêtre 24 mois — Top N)</h3>
+        <div class="box">
+          <code>ChallengePoints(i,C) = somme des Top N résultats de i dans C sur 24 mois</code><br/>
+          <span class="muted">N = 5 par défaut (paramétrable). C = catégorie (discipline / sexe / âge / type vélo).</span>
+        </div>
+
+        <h3>10.3 Condition anti-biais (minimum d’épreuves)</h3>
+        <div class="box">
+          Pour valider un statut, le coureur doit avoir participé à au moins <b>5 épreuves distinctes</b> sur la période (paramétrable).
+        </div>
+
+        <h3>10.4 Niveaux &amp; badges</h3>
+        <div class="box callout">
+          <ul style="margin:0 0 0 18px;">
+            <li><b>Bronze</b> : ≥ 300 points</li>
+            <li><b>Argent</b> : ≥ 600 points</li>
+            <li><b>MTB 1000</b> : ≥ 1000 points</li>
+            <li><b>Élite</b> : ≥ 1500 points</li>
+            <li><b>Légende</b> : ≥ 2000 points</li>
+          </ul>
+          <p class="muted" style="margin:10px 0 0 0;">
+            Les seuils peuvent évoluer après calibration (option : sans rétroactivité).
+          </p>
+        </div>
+
+        <h3>10.5 Affichage</h3>
+        <ul>
+          <li>Badge affiché sur le profil coureur et dans les classements.</li>
+          <li>Page “Hall of Fame” listant les coureurs ayant validé MTB 1000.</li>
+        </ul>
+      </section>
+
     </div>
-  </section>
 
-  <!-- POINTS COUREUR -->
-  <section class="card" id="points-coureur">
-    <h2>5. Points Coureur</h2>
-    <p>
-      Chaque épreuve distribue une quantité maximale de points <strong>P<sub>e</sub></strong> (vainqueur) dérivée du MRS,
-      bornée entre 0 et 200.
-    </p>
-
-    <div class="box">
-      <strong>Valeur maximale (vainqueur)</strong>
-      <p style="margin:8px 0;">
-        <code>P_e = clamp(round(200 × (MRS/100)^1.20) × M_level, 0, 200)</code>
-      </p>
-      <div class="muted">
-        M_level (niveau) : Locale=0.8, Régionale=1.0, Nationale=1.2, Internationale=1.5.
+    <!-- Side column -->
+    <aside class="side">
+      <div class="sideCard">
+        <h3>Accès rapide</h3>
+        <a href="#sommaire">Sommaire</a>
+        <a href="#points-coureur">Points coureur</a>
+        <a href="#classements">Classements</a>
+        <a href="#challenge-1000">Challenge</a>
+        <a href="methodologie.html">Méthodologie</a>
       </div>
-    </div>
 
-    <h3>5.1 Règle finishers / abandons</h3>
-    <div class="box">
-      <p style="margin:0;">
-        <strong>FIN :</strong> minimum <strong>5 points</strong> par finisher.<br/>
-        <strong>DNF / OT / DNS / DSQ :</strong> <strong>0 point</strong>.
-      </p>
-    </div>
-
-    <h3>5.2 Attribution par performance au temps</h3>
-    <p>
-      Pour un finisher <em>i</em> dans une catégorie donnée (discipline/sexe/âge/type vélo), on définit :
-      <code>t_i</code> = temps du coureur, et <code>t*</code> = meilleur temps (référence).
-    </p>
-
-    <div class="box">
-      <code>r = t_i / t*</code><br/>
-      <code>Points(i,e) = max(5, round(P_e' × r^(−k)))</code>
-      <div class="muted">
-        k = 3.0 (par défaut). P_e' peut intégrer un correctif de faible participation si activé.
+      <div class="sideCard" style="margin-top:12px;">
+        <h3>Raccourcis</h3>
+        <div class="muted" style="margin-top:8px;line-height:1.6">
+          • Besoin de modifier les formules ? Va dans <b>Méthodologie</b>.<br/>
+          • Besoin d’afficher les badges ? Va sur <b>Challenge</b>.
+        </div>
       </div>
-    </div>
-  </section>
+    </aside>
 
-  <!-- CLASSEMENTS -->
-  <section class="card" id="classements">
-    <h2>6. Classements</h2>
-    <p>Deux modes de classement sont proposés :</p>
-    <ul>
-      <li><strong>Classement glissant 24 mois</strong> (par défaut)</li>
-      <li><strong>Classement par année civile</strong> (ex. 2025, 2026…)</li>
-    </ul>
-
-    <h3>6.1 Fenêtre 24 mois (Top N)</h3>
-    <div class="box">
-      <code>MTB_Points(i,C) = somme des Top N résultats de i dans C sur 24 mois</code>
-      <div class="muted">N=5 par défaut (paramétrable).</div>
-    </div>
-
-    <h3>6.2 Classement par année</h3>
-    <div class="box">
-      <code>MTB_Points_Year(i,C,Y) = somme des Top N résultats de i dans C sur l’année Y</code>
-    </div>
-
-    <p class="muted">
-      Les classements sont distincts pour <strong>musculaire</strong> et <strong>assistance électrique</strong>.
-    </p>
-  </section>
-
-<!-- CHALLENGE MTB 1000 -->
-<section class="card" id="challenge-1000">
-  <h2>10. Challenge “MTB 1000”</h2>
-
-  <p>
-    Le challenge <strong>MTB 1000</strong> vise à récompenser la régularité et la performance sur une période donnée.
-    Il est calculé sur le même principe que les classements (fenêtre glissante).
-  </p>
-
-  <div class="box">
-    <strong>Définition</strong>
-    <p style="margin:8px 0 0 0;">
-      Un coureur valide le statut <strong>MTB 1000</strong> lorsqu’il atteint <strong>1000 points</strong> sur une fenêtre glissante
-      de <strong>24 mois</strong>, dans une <strong>discipline</strong> et un <strong>type de vélo</strong> donnés.
-    </p>
   </div>
+</main>
 
-  <h3>10.1 Périmètre</h3>
-  <ul>
-    <li>Le challenge est <strong>distinct</strong> par discipline (ex. XC / Enduro / DH / Gravel…).</li>
-    <li>Le challenge est <strong>distinct</strong> par type de vélo : <strong>Musculaire</strong> et <strong>Assistance électrique</strong>.</li>
-    <li>Option (recommandée) : séparé par sexe et catégorie d’âge, comme le classement principal.</li>
-  </ul>
+<footer>
+  MTB Points — Règlement • Dernière mise à jour : <span id="lastUpdate">—</span>
+</footer>
 
-  <h3>10.2 Calcul (fenêtre 24 mois — Top N)</h3>
-  <div class="box">
-    <p style="margin:0 0 8px 0;">
-      Le score “challenge” est la somme des <strong>Top N</strong> meilleurs résultats du coureur sur les <strong>24 derniers mois</strong>.
-    </p>
-    <p style="margin:0;">
-      <code>ChallengePoints(i,C) = somme des Top N résultats de i dans C sur 24 mois</code><br/>
-      <span class="muted">N = 5 par défaut (paramétrable). C = catégorie (discipline / sexe / âge / type vélo).</span>
-    </p>
-  </div>
+<script>
+  // Petit confort : date "dernière mise à jour" côté client (optionnel)
+  document.getElementById("lastUpdate").textContent = new Date().toLocaleDateString("fr-FR");
 
-  <h3>10.3 Condition anti-biais (minimum d’épreuves)</h3>
-  <div class="box">
-    <p style="margin:0;">
-      Pour valider un statut, le coureur doit avoir participé à au moins
-      <strong>5 épreuves distinctes</strong> dans la catégorie considérée sur la période.
-      <span class="muted">(paramétrable)</span>
-    </p>
-  </div>
+  // (Optionnel) boutons FR/EN : laisse tes handlers actuels si tu en as déjà.
+  // Ici on ne force rien pour ne pas casser ton existant.
+</script>
 
-  <h3>10.4 Niveaux &amp; badges</h3>
-  <p>
-    MTB Points peut attribuer des niveaux (badges) visibles sur le profil et le classement :
-  </p>
-
-  <div class="box">
-    <ul style="margin:0 0 0 18px;">
-      <li><strong>Bronze</strong> : ≥ 300 points</li>
-      <li><strong>Argent</strong> : ≥ 600 points</li>
-      <li><strong>MTB 1000</strong> : ≥ 1000 points</li>
-      <li><strong>Élite</strong> : ≥ 1500 points</li>
-      <li><strong>Légende</strong> : ≥ 2000 points</li>
-    </ul>
-    <p class="muted" style="margin:10px 0 0 0;">
-      Les seuils peuvent évoluer après calibration, sans effet rétroactif si souhaité.
-    </p>
-  </div>
-
-  <h3>10.5 Affichage</h3>
-  <ul>
-    <li>Le badge est affiché sur le <strong>profil coureur</strong> et dans le <strong>classement</strong>.</li>
-    <li>Une page “Hall of Fame” peut lister les coureurs ayant validé <strong>MTB 1000</strong>.</li>
-  </ul>
-</section>
-
-
-  <!-- RESULTATS & IMPORT -->
-  <section class="card" id="import">
-    <h2>7. Résultats &amp; Import</h2>
-    <p>
-      Les résultats sont importés par l’organisateur via un fichier (CSV, et à terme XLSX).
-      Les colonnes recommandées sont :
-    </p>
-    <ul>
-      <li>Nom / Prénom (ou Nom complet)</li>
-      <li>Sexe</li>
-      <li>Catégorie âge</li>
-      <li>Nationalité</li>
-      <li>Team</li>
-      <li>Type vélo (musculaire / e-bike)</li>
-      <li>Temps (<code>HH:MM:SS</code>)</li>
-      <li>Statut (<code>FIN/DNF/DNS/OT/DSQ</code>)</li>
-    </ul>
-    <div class="box">
-      <strong>Règle :</strong> un temps valide implique <code>FIN</code> sauf indication contraire.
-      Tout statut non-finisher entraîne 0 point.
-    </div>
-  </section>
-
-  <!-- CONTROLE & MODERATION -->
-  <section class="card" id="controle">
-    <h2>8. Contrôle &amp; Modération</h2>
-    <ul>
-      <li>Un compte administrateur peut supprimer ou dépublier une épreuve en cas d’abus (fausse trace, faux résultats).</li>
-      <li>Les modifications majeures (GPX, distance, D+) peuvent être journalisées et nécessiter re-calcul des scores.</li>
-      <li>Les épreuves “National/International” peuvent être soumises à validation (option).</li>
-      <li>Les classements musculaire et e-bike sont séparés ; toute inco
+</body>
+</html>

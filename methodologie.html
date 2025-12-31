@@ -4,105 +4,327 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MTB Points — Méthodologie (Calcul)</title>
+
   <style>
     :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#64748b;
-      --border:#e5e7eb;--blue:#2563eb;
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#667085;
+      --muted2:#64748b;
+      --border:#e5e7eb;
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+      --ok:#16a34a;
+      --warn:#ea580c;
+      --err:#dc2626;
+      --shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:18px;
     }
-    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;}
-    header{background:#0b1220;color:#fff;padding:16px 18px;}
-    header h1{margin:0;font-size:18px;}
-    nav{margin-top:10px;font-size:14px;opacity:.95}
-    nav a{color:#cbd5e1;text-decoration:none;margin-right:12px}
-    nav a:hover{color:#fff;text-decoration:underline}
-    .wrap{max-width:980px;margin:18px auto;padding:0 14px;}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:14px 0;box-shadow:0 1px 2px rgba(0,0,0,.04);}
-    h2{margin:0 0 10px 0;font-size:18px}
-    h3{margin:18px 0 8px 0;font-size:15px}
-    p,li{line-height:1.55;color:var(--text)}
-    .muted{color:var(--muted)}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+    }
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      color:var(--blue);
+      font-weight:800;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+    }
+
+    /* Layout */
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin:14px 0;
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .hero .muted{margin-top:8px;line-height:1.55;color:#334155}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:900;font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
+
+    /* Typography */
+    h2.section{margin:0 0 10px 0;font-size:18px;letter-spacing:-.15px}
+    h3{margin:16px 0 8px 0;font-size:15px}
+    p,li{font-size:14px;line-height:1.65}
+    ul{padding-left:18px;margin:8px 0}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* Code blocks */
     code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
-    pre{background:#0b1220;color:#e5e7eb;padding:12px;border-radius:12px;overflow:auto;border:1px solid #111827}
-    .toc a{color:var(--blue);text-decoration:none}
-    .toc a:hover{text-decoration:underline}
-    .tag{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:var(--muted);margin-right:6px}
-    .note{border-left:4px solid var(--blue);padding:10px 12px;background:#eff6ff;border-radius:10px}
-    .warn{border-left:4px solid #ef4444;padding:10px 12px;background:#fff1f2;border-radius:10px}
+    pre{
+      margin:10px 0 0 0;
+      background:#0b1220;
+      color:#e5e7eb;
+      padding:14px;
+      border-radius:16px;
+      overflow:auto;
+      border:1px solid #111827;
+      box-shadow:0 8px 18px rgba(2,6,23,.20);
+    }
+    code.inline{
+      background:#f1f5f9;border:1px solid var(--border);
+      border-radius:10px;padding:2px 8px;font-size:13px;color:#0f172a;
+      white-space:nowrap;
+    }
+
+    /* Boxes */
+    .box{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .callout{background:#f8fafc;border-left:6px solid var(--blue)}
+    .warnBox{background:#fff7ed;border-left:6px solid var(--warn)}
+    .errBox{background:#fff1f2;border-left:6px solid var(--err)}
+    .boxTitle{font-weight:900}
+    .box .muted{margin-top:6px}
+
+    /* TOC */
+    .tocGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    @media(max-width:900px){.tocGrid{grid-template-columns:1fr}}
+    .tocLink{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:12px 12px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      text-decoration:none;
+      background:#fff;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .tocLink:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 22px rgba(2,6,23,.10);
+      border-color:#dbeafe;
+    }
+    .tocTitle{font-weight:900}
+    .tocHint{color:var(--muted);font-size:12px}
+
+    /* 2 columns */
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:14px;
+      align-items:start;
+    }
+    @media(max-width:980px){.twoCol{grid-template-columns:1fr}}
+    .side{position:sticky;top:86px}
+    @media(max-width:980px){.side{position:relative;top:auto}}
+
+    .sideCard{
+      background:#fff;border:1px solid var(--border);
+      border-radius:22px;padding:14px;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .sideCard h3{margin:0 0 10px 0}
+    .sideCard a{
+      display:block;
+      text-decoration:none;
+      color:var(--blue);
+      font-weight:800;
+      padding:8px 10px;
+      border-radius:12px;
+    }
+    .sideCard a:hover{background:#eff6ff}
+    .smallList{margin:6px 0 0 0;padding-left:18px}
+    .badgePill{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px;
+    }
+
+    footer{
+      padding:26px 16px;text-align:center;color:var(--muted);font-size:13px
+    }
   </style>
 </head>
+
 <body>
-<header>
-  <h1>MTB Points — Méthodologie (Calcul)</h1>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Méthodologie</h1>
+    <span class="pill"><span class="dot ok"></span> OFFICIEL</span>
+    <span class="pill"><span class="dot warn"></span> Hybrid</span>
+    <span class="pill"><span class="dot"></span> OSM + GPX</span>
+  </div>
+
   <nav>
     <a href="index.html">Accueil</a>
-    <a href="classement.html">Classement</a>
-    <a href="evenements.html">Événements</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
     <a href="reglement.html">Règlement</a>
-    <a href="methodologie.html"><strong>Méthodologie</strong></a>
-    <a href="apropos.html">À propos</a>
+    <a href="methodologie.html" class="active">Méthodologie</a>
+    <a href="about.html">À propos</a>
     <a href="login.html">Connexion</a>
   </nav>
+
+  <div class="lang">
+    <button class="btn" id="btnFR" type="button">FR</button>
+    <button class="btn" id="btnEN" type="button">EN</button>
+  </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
+  <section class="card hero">
+    <div class="heroTop">
+      <div style="min-width:260px;flex:1">
+        <h2>Calculs & formules — version publique</h2>
+        <div class="muted">
+          Cette page décrit les formules de calcul (MRS, ScorePhys, ScoreTech V2 Hybrid).
+          Pour l’éligibilité, import, contrôle et litiges : voir
+          <a href="reglement.html" style="color:var(--blue);font-weight:900;text-decoration:none">Règlement</a>.
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+        <span class="badgePill"><span class="dot ok"></span> ScoreTech V2</span>
+        <span class="badgePill"><span class="dot"></span> P75 robuste</span>
+      </div>
+    </div>
 
-  <div class="card">
-    <div class="tag">OFFICIEL</div>
-    <div class="tag">Hybrid</div>
-    <div class="tag">OSM + GPX</div>
-    <p class="muted">Cette page décrit les formules de calcul. Pour l’éligibilité, import, contrôle, litiges : voir <a href="reglement.html">Règlement</a>.</p>
+    <div class="box callout" style="margin-top:14px;">
+      <div class="boxTitle">Mode officiel (unique)</div>
+      <div class="muted" style="margin-top:6px;">
+        <b>Hybrid obligatoire</b> : <b>OSM = socle audit-able</b> + <b>bonus GPX capé</b> (pente/virages/sinuosité, filtrage anti-bruit).
+      </div>
+    </div>
+  </section>
 
-    <h2>Sommaire</h2>
-    <ul class="toc">
-      <li><a href="#mrs">1. Score Épreuve (MRS)</a></li>
-      <li><a href="#phys">2. Score physique (ScorePhys)</a></li>
-      <li><a href="#tech">3. Score technique OFFICIEL (ScoreTech V2 — Hybrid obligatoire)</a></li>
-      <li><a href="#quality">4. Qualité des données & cas non calculables</a></li>
-      <li><a href="#params">5. Paramètres & calibration</a></li>
-    </ul>
-  </div>
+  <div class="twoCol">
 
-  <div class="card" id="mrs">
-    <h2>1. Score Épreuve (MRS)</h2>
-    <p>Le score global de difficulté d’une épreuve (MRS) combine le score physique et le score technique.</p>
-    <pre><code>MRS = round(0.55 × ScorePhys + 0.45 × ScoreTech)</code></pre>
-    <p class="muted">MRS est borné sur 0–100.</p>
-  </div>
+    <!-- Main -->
+    <div>
 
-  <div class="card" id="phys">
-    <h2>2. Score physique (ScorePhys)</h2>
+      <!-- Sommaire -->
+      <section class="card">
+        <h2 class="section">Sommaire</h2>
+        <div class="tocGrid">
+          <a class="tocLink" href="#mrs"><span class="tocTitle">1. Score Épreuve (MRS)</span><span class="tocHint">55/45</span></a>
+          <a class="tocLink" href="#phys"><span class="tocTitle">2. Score physique</span><span class="tocHint">GPX</span></a>
+          <a class="tocLink" href="#tech"><span class="tocTitle">3. ScoreTech V2 — Hybrid</span><span class="tocHint">OSM + bonus</span></a>
+          <a class="tocLink" href="#quality"><span class="tocTitle">4. Qualité des données</span><span class="tocHint">coverage</span></a>
+          <a class="tocLink" href="#params"><span class="tocTitle">5. Paramètres</span><span class="tocHint">calibration</span></a>
+        </div>
+      </section>
 
-    <h3>2.1 Données d’entrée (GPX)</h3>
-    <ul>
-      <li><strong>D</strong> : distance totale (km)</li>
-      <li><strong>H⁺</strong> : dénivelé positif total (m)</li>
-      <li><strong>IPB</strong> : indice de pénibilité (distribution des pentes)</li>
-    </ul>
+      <!-- MRS -->
+      <section class="card" id="mrs">
+        <h2 class="section">1. Score Épreuve (MRS)</h2>
+        <p>Le score global de difficulté d’une épreuve (MRS) combine le score physique et le score technique.</p>
+        <pre><code>MRS = round(0.55 × ScorePhys + 0.45 × ScoreTech)</code></pre>
+        <p class="muted">MRS est borné sur 0–100.</p>
+      </section>
 
-    <h3>2.2 Calcul</h3>
-    <pre><code>EffortBase = sqrt(D) + (H⁺ / 1000)
+      <!-- Phys -->
+      <section class="card" id="phys">
+        <h2 class="section">2. Score physique (ScorePhys)</h2>
+
+        <h3>2.1 Données d’entrée (GPX)</h3>
+        <ul>
+          <li><b>D</b> : distance totale (km)</li>
+          <li><b>H⁺</b> : dénivelé positif total (m)</li>
+          <li><b>IPB</b> : indice de pénibilité (distribution des pentes)</li>
+        </ul>
+
+        <h3>2.2 Calcul</h3>
+        <pre><code>EffortBase = sqrt(D) + (H⁺ / 1000)
 
 EffortNorm = clamp(EffortBase / 10, 0, 1)
 IPB_norm   = clamp(IPB / 120, 0, 1)
 
-ScorePhys = round(100 × clamp(0.70×EffortNorm + 0.30×IPB_norm, 0, 1))</code></pre>
-    <p class="muted">Les constantes (10, 120) sont calibrables.</p>
-  </div>
+ScorePhys  = round(100 × clamp(0.70×EffortNorm + 0.30×IPB_norm, 0, 1))</code></pre>
+        <div class="box callout">
+          <div class="boxTitle">Pourquoi ces termes ?</div>
+          <div class="muted">
+            <b>sqrt(D)</b> évite que la distance domine trop fort à haut kilométrage, et <b>H⁺</b> ajoute l’effort de montée.
+            IPB capte la “sévérité” des pentes (longues/raides).
+          </div>
+        </div>
+      </section>
 
-  <div class="card" id="tech">
-    <h2>3. Score technique OFFICIEL (ScoreTech V2 — Hybrid obligatoire)</h2>
+      <!-- Tech -->
+      <section class="card" id="tech">
+        <h2 class="section">3. Score technique OFFICIEL (ScoreTech V2 — Hybrid obligatoire)</h2>
 
-    <div class="note">
-      <strong>Mode officiel unique :</strong> ScoreTech V2 est <strong>hybride obligatoire</strong> :<br>
-      <strong>OSM = socle</strong> (terrain/surface/difficulté déclarée) + <strong>bonus GPX capé</strong> (pente + virages + sinuosité).<br>
-      Objectif : un score à la fois <strong>audit-able</strong> (OSM) et <strong>réaliste VTT</strong> (bonus GPX), sans être sensible au bruit.
-    </div>
+        <div class="box callout">
+          <div class="boxTitle">Règle</div>
+          <div class="muted" style="margin-top:6px;">
+            ScoreTech V2 = <b>socle OSM</b> (terrain/surface/difficulté déclarée) +
+            <b>bonus GPX capé</b> (pente + virages + sinuosité), avec filtrage anti-bruit.
+          </div>
+        </div>
 
-    <h3>3.1 Socle OSM : TerrainScore (0..1)</h3>
-    <p>On échantillonne la trace tous les <code>~120 m</code>. Pour chaque point, on récupère les tags OpenStreetMap (<code>mtb:scale</code>, <code>smoothness</code>, <code>highway</code>, <code>surface</code>, <code>tracktype</code>, <code>sac_scale</code>).</p>
+        <h3>3.1 Socle OSM : TerrainScore (0..1)</h3>
+        <p>
+          On échantillonne la trace tous les <span class="pill"><span class="dot"></span> ~120 m</span>.
+          Pour chaque point, on récupère les tags OSM :
+          <span class="pill"><span class="dot"></span> mtb:scale</span>
+          <span class="pill"><span class="dot"></span> smoothness</span>
+          <span class="pill"><span class="dot"></span> highway</span>
+          <span class="pill"><span class="dot"></span> surface</span>
+          <span class="pill"><span class="dot"></span> tracktype</span>
+          <span class="pill"><span class="dot"></span> sac_scale</span>.
+        </p>
 
-    <p><strong>Conversion tags → TerrainScore (0..1)</strong></p>
-    <pre><code>Priorité
+        <p><b>Conversion tags → TerrainScore (0..1)</b></p>
+        <pre><code>Priorité
 1) mtb:scale : TerrainScore = clamp(scale/5, 0, 1)
 2) smoothness (excellent/good/intermediate/bad/very_bad..)
 3) highway + tracktype + surface (règles)
@@ -113,85 +335,143 @@ ScorePhys = round(100 × clamp(0.70×EffortNorm + 0.30×IPB_norm, 0, 1))</code><
    path          -> 0.6
    rock/stone..  -> +0.2 (cap 1.0)</code></pre>
 
-    <p><strong>Agrégation</strong> : percentile 75 pondéré par la distance représentée par chaque échantillon.</p>
-    <pre><code>TerrainScore_OSM = weightedPercentile(TerrainScore_samples, weights=sample_distance, p=0.75)</code></pre>
+        <p><b>Agrégation</b> : percentile 75 pondéré par la distance représentée par chaque échantillon.</p>
+        <pre><code>TerrainScore_OSM = weightedPercentile(TerrainScore_samples,
+                                      weights=sample_distance,
+                                      p=0.75)</code></pre>
 
-    <h3>3.2 Bonus GPX (capé) : GPXTech (0..1)</h3>
-    <p>On découpe la trace en segments d’environ <code>200 m</code>. Sur chaque segment, on calcule :</p>
-    <ul>
-      <li><strong>SinuNorm</strong> : sinuosité normalisée</li>
-      <li><strong>TurnNorm</strong> : pilotage (somme des changements de cap / km)</li>
-      <li><strong>SlopeTech</strong> : pente technique (proportion de pentes fortes + percentile 90)</li>
-    </ul>
+        <h3>3.2 Bonus GPX (capé) : GPXTech (0..1)</h3>
+        <p>
+          On découpe la trace en segments d’environ <span class="pill"><span class="dot"></span> 200 m</span>.
+          Sur chaque segment, on calcule :
+        </p>
+        <ul>
+          <li><b>SinuNorm</b> : sinuosité normalisée</li>
+          <li><b>TurnNorm</b> : pilotage (somme des changements de cap / km)</li>
+          <li><b>SlopeTech</b> : pente technique (proportion de pentes fortes + percentile 90)</li>
+        </ul>
 
-    <p><strong>Anti-bruit (obligatoire)</strong> : on ignore les pas GPS trop courts/longs et les spikes altimétriques.</p>
-    <pre><code>Filtrage GPX
-- ignorer si d &lt; 3 m (jitter) ou d &gt; 80 m (trous)
-- ignorer si |Δele| &gt; 25 m sur un pas
-- ignorer si |grade| &gt; 45%</code></pre>
+        <div class="box warnBox">
+          <div class="boxTitle">Anti-bruit (obligatoire)</div>
+          <div class="muted">On ignore les pas GPS trop courts/longs et les spikes altimétriques.</div>
+          <pre><code>Filtrage GPX
+- ignorer si d < 3 m   (jitter)
+- ignorer si d > 80 m  (trous)
+- ignorer si |Δele| > 25 m sur un pas
+- ignorer si |grade| > 45%</code></pre>
+        </div>
 
-    <p><strong>SlopeTech (0..1)</strong></p>
-    <pre><code>p10  = proportion(|grade| ≥ 0.10)
+        <p><b>SlopeTech (0..1)</b></p>
+        <pre><code>p10  = proportion(|grade| ≥ 0.10)
 p16  = proportion(|grade| ≥ 0.16)
 gP90 = percentile90(|grade|)
 
-SlopeTech = clamp(0.55*p10 + 0.45*p16 + 0.55*clamp((gP90-0.08)/0.22,0,1), 0, 1)</code></pre>
+SlopeTech = clamp(0.55*p10 + 0.45*p16
+                  + 0.55*clamp((gP90-0.08)/0.22,0,1), 0, 1)</code></pre>
 
-    <p><strong>TurnNorm (0..1)</strong></p>
-    <pre><code>turnPerKm = sum(|Δbearing|) / km
+        <p><b>TurnNorm (0..1)</b></p>
+        <pre><code>turnPerKm = sum(|Δbearing|) / km
 TurnNorm  = clamp((turnPerKm - 120) / 500, 0, 1)</code></pre>
 
-    <p><strong>SinuNorm (0..1)</strong></p>
-    <pre><code>Sinuosity = dist_reelle / dist_oiseau
+        <p><b>SinuNorm (0..1)</b></p>
+        <pre><code>Sinuosity = dist_reelle / dist_oiseau
 SinuNorm  = clamp((Sinuosity - 1.0) / 0.30, 0, 1)</code></pre>
 
-    <p><strong>GPXTech par segment (0..1)</strong></p>
-    <pre><code>GPXTech_seg = clamp(0.45*SlopeTech + 0.35*TurnNorm + 0.20*SinuNorm, 0, 1)</code></pre>
+        <p><b>GPXTech par segment (0..1)</b></p>
+        <pre><code>GPXTech_seg = clamp(0.45*SlopeTech + 0.35*TurnNorm + 0.20*SinuNorm, 0, 1)</code></pre>
 
-    <p><strong>Agrégation</strong> : percentile 75 pondéré par la longueur de segment.</p>
-    <pre><code>GPXTech = weightedPercentile(GPXTech_seg, weights=seg_length, p=0.75)</code></pre>
+        <p><b>Agrégation</b> : percentile 75 pondéré par la longueur de segment.</p>
+        <pre><code>GPXTech = weightedPercentile(GPXTech_seg,
+                             weights=seg_length,
+                             p=0.75)</code></pre>
 
-    <h3>3.3 Fusion officielle : OSM socle + bonus GPX capé</h3>
-    <p>Le bonus GPX est <strong>capé</strong> pour éviter qu’un GPX bruité sur-gonfle le score.</p>
-    <pre><code>Base     = 0.80 * TerrainScore_OSM
-Bonus    = min(0.20 * GPXTech, BONUS_CAP)
+        <h3>3.3 Fusion officielle : OSM socle + bonus GPX capé</h3>
+        <p>Le bonus GPX est <b>capé</b> pour éviter qu’un GPX bruité sur-gonfle le score.</p>
+        <pre><code>Base      = 0.80 * TerrainScore_OSM
+Bonus     = min(0.20 * GPXTech, BONUS_CAP)
 
-Tech01   = clamp(Base + Bonus, 0, 1)
+Tech01    = clamp(Base + Bonus, 0, 1)
 ScoreTech = round(100 * Tech01)
 
-où BONUS_CAP = 0.15 (soit +15 points max sur 100)</code></pre>
-  </div>
+BONUS_CAP = 0.15   (soit +15 points max sur 100)</code></pre>
+      </section>
 
-  <div class="card" id="quality">
-    <h2>4. Qualité des données & cas non calculables</h2>
+      <!-- Quality -->
+      <section class="card" id="quality">
+        <h2 class="section">4. Qualité des données & cas non calculables</h2>
 
-    <div class="warn">
-      <strong>OSM est obligatoire :</strong> si la couverture OSM est insuffisante, ScoreTech n’est pas calculable automatiquement.
-    </div>
+        <div class="box errBox">
+          <div class="boxTitle">OSM est obligatoire</div>
+          <div class="muted">
+            Si la couverture OSM est insuffisante, ScoreTech n’est pas calculable automatiquement.
+          </div>
+        </div>
 
-    <pre><code>coverage = matched_samples / total_samples
+        <pre><code>coverage = matched_samples / total_samples
 
-Si coverage &lt; 0.30
+Si coverage < 0.30
 => ScoreTech = non calculable (à valider / compléter)</code></pre>
 
-    <p class="muted">Ce comportement évite d’attribuer un ScoreTech arbitraire lorsque les tags OSM sont absents ou incohérents.</p>
-  </div>
+        <p class="muted">
+          Ce comportement évite d’attribuer un ScoreTech arbitraire lorsque les tags OSM sont absents ou incohérents.
+        </p>
+      </section>
 
-  <div class="card" id="params">
-    <h2>5. Paramètres & calibration</h2>
-    <ul>
-      <li><strong>OSM sampling</strong> : 120 m (plus fin si besoin, mais attention au coût Overpass).</li>
-      <li><strong>Segment GPX</strong> : 200 m (tech-sensitive).</li>
-      <li><strong>Percentile</strong> : P75 (robuste : valorise les sections déterminantes sans être dominé par les portions faciles).</li>
-      <li><strong>Cap bonus</strong> : 0.15 (= +15/100 max). Ajustable après calibration terrain.</li>
-      <li><strong>Pondération</strong> : OSM 80% / GPX 20% (équilibre “audit” + “réalité VTT”).</li>
-    </ul>
+      <!-- Params -->
+      <section class="card" id="params">
+        <h2 class="section">5. Paramètres & calibration</h2>
+        <ul>
+          <li><b>OSM sampling</b> : 120 m (plus fin si besoin, mais attention au coût Overpass).</li>
+          <li><b>Segment GPX</b> : 200 m (tech-sensitive).</li>
+          <li><b>Percentile</b> : P75 (robuste : valorise les sections déterminantes sans être dominé par les portions faciles).</li>
+          <li><b>Cap bonus</b> : 0.15 (= +15/100 max). Ajustable après calibration terrain.</li>
+          <li><b>Pondération</b> : OSM 80% / GPX 20% (équilibre “audit” + “réalité VTT”).</li>
+        </ul>
 
-    <pre><code>Rappel
+        <pre><code>Rappel
 MRS = round(0.55 × ScorePhys + 0.45 × ScoreTech)</code></pre>
-  </div>
 
-</div>
+        <div class="box callout">
+          <div class="boxTitle">Conseil pratique</div>
+          <div class="muted">
+            Quand tu modifies un paramètre (sampling, segments, seuils), fais-le <b>une seule fois</b> et recalibre sur un set
+            de courses connues (XC vs Enduro vs DH) pour vérifier la cohérence des distributions.
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Side -->
+    <aside class="side">
+      <div class="sideCard">
+        <h3>Accès rapide</h3>
+        <a href="#mrs">MRS</a>
+        <a href="#phys">ScorePhys</a>
+        <a href="#tech">ScoreTech V2 Hybrid</a>
+        <a href="#quality">Qualité / Coverage</a>
+        <a href="#params">Paramètres</a>
+      </div>
+
+      <div class="sideCard" style="margin-top:12px;">
+        <h3>Raccourcis</h3>
+        <ul class="smallList">
+          <li><a href="reglement.html" style="color:var(--blue);font-weight:900;text-decoration:none">Règlement</a> : éligibilité, import, litiges</li>
+          <li><a href="challengemtbpoints.html" style="color:var(--blue);font-weight:900;text-decoration:none">Challenge</a> : badges & Hall of Fame</li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+</main>
+
+<footer>
+  MTB Points — Méthodologie • Dernière mise à jour : <span id="lastUpdate">—</span>
+</footer>
+
+<script>
+  document.getElementById("lastUpdate").textContent = new Date().toLocaleDateString("fr-FR");
+</script>
 </body>
 </html>
 

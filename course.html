@@ -3,41 +3,238 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Créer une épreuve</title>
-  <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
-    label{display:block;margin-top:10px;font-weight:700}
-    input,select,textarea{width:100%;padding:10px;margin-top:6px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box}
-    textarea{resize:vertical}
-    .muted{color:#667085}
-    .box{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff;margin-top:12px}
-    .btn{margin-top:14px;padding:12px 16px;border-radius:10px;border:0;background:#2563eb;color:#fff;cursor:pointer;font-weight:800}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .row > div{flex:1;min-width:160px}
-    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#f1f5f9;color:#0f172a;font-weight:700;font-size:12px}
-    .warn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;padding:10px;border-radius:10px;margin-top:10px}
+  <title>Créer une épreuve — MTB Points</title>
 
-    /* Age rows with laps inputs */
-    .age-group .age-row{display:grid;grid-template-columns: 1fr 120px 120px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed #e5e7eb}
+  <style>
+    :root{
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#667085;
+      --muted2:#64748b;
+      --border:#e5e7eb;
+
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+
+      --ok:#16a34a;
+      --warn:#ea580c;
+      --err:#dc2626;
+
+      --shadow:0 10px 30px rgba(2,6,23,.10);
+      --shadow2:0 2px 10px rgba(0,0,0,.06);
+      --r:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .subtitle{color:var(--muted2);font-size:12px;font-weight:700}
+
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      color:var(--blue);
+      font-weight:900;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+
+    /* Layout */
+    .wrap{max-width:1180px;margin:24px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:20px;
+      padding:16px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.25px}
+    .hero .muted{margin-top:6px;line-height:1.55;color:#334155}
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media(max-width:980px){ .grid{grid-template-columns:1fr} }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      padding:16px;
+      box-shadow:var(--shadow2);
+    }
+
+    /* Form */
+    label{display:block;margin-top:12px;font-weight:900;font-size:12px;color:#0f172a}
+    input,select,textarea{
+      width:100%;
+      padding:10px 12px;
+      margin-top:6px;
+      border:1px solid #cbd5e1;
+      border-radius:12px;
+      background:#fff;
+      box-sizing:border-box;
+      font-size:14px;
+    }
+    input::placeholder, textarea::placeholder{color:#94a3b8}
+    textarea{resize:vertical}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row > div{flex:1;min-width:180px}
+
+    .muted{color:var(--muted);font-size:13px;line-height:1.5}
+    .hint{color:var(--muted2);font-size:12px;margin-top:6px}
+
+    /* Pills / chips */
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#f1f5f9;
+      color:#0f172a;
+      font-weight:1000;font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:#86efac}
+    .dot.err{background:#fecaca}
+    .dot.wait{background:#93c5fd}
+
+    /* Boxes */
+    .box{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+      margin-top:12px;
+    }
+    .boxTitle{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;
+      font-weight:1000;
+    }
+
+    .kpiGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media(max-width:520px){ .kpiGrid{grid-template-columns:1fr} }
+
+    .kpi{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+    }
+    .kpi .kLabel{font-size:12px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.03em}
+    .kpi .kValue{margin-top:6px;font-size:18px;font-weight:1000}
+    .kpi .kInfo{margin-top:6px;font-size:12px;color:var(--muted2);line-height:1.45}
+
+    /* Buttons */
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ghost{background:#fff}
+
+    .warn{
+      background:#fff7ed;
+      color:#9a3412;
+      border:1px solid #fed7aa;
+      padding:10px;
+      border-radius:12px;
+      margin-top:10px;
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    /* Age group table */
+    .age-group .head{
+      display:grid;
+      grid-template-columns: 1fr 120px 120px;
+      gap:10px;
+      font-weight:1000;
+      color:#0f172a;
+      margin:10px 0 6px 0;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+      color:var(--muted);
+    }
+    .age-group .age-row{
+      display:grid;
+      grid-template-columns: 1fr 120px 120px;
+      gap:10px;
+      align-items:center;
+      padding:8px 0;
+      border-bottom:1px dashed var(--border);
+    }
     .age-group .age-row:last-child{border-bottom:0}
-    .age-group .head{display:grid;grid-template-columns: 1fr 120px 120px;gap:10px;font-weight:800;color:#0f172a;margin-bottom:6px}
-    .age-group label{display:flex;align-items:flex-start;gap:10px;font-weight:400;margin:0;cursor:pointer}
-    .age-group input[type="checkbox"]{margin-top:3px;width:auto}
-    .age-group input[type="number"]{width:100%;padding:8px;margin:0;border-radius:10px}
-    .age-group .small{font-size:12px;color:#667085;margin-top:-2px}
+    .age-group label{
+      display:flex;align-items:flex-start;gap:10px;
+      font-weight:700;margin:0;cursor:pointer;font-size:13px;color:#0f172a;
+    }
+    .age-group input[type="checkbox"]{margin-top:2px;width:auto}
+    .age-group input[type="number"]{width:100%;padding:8px 10px;margin:0;border-radius:12px}
+    .age-group .small{font-size:12px;color:var(--muted2);margin-top:-2px}
+
+    @media(max-width:980px){
+      .age-group .age-row,.age-group .head{grid-template-columns:1fr 1fr}
+      .age-group .head div:nth-child(3),
+      .age-group .age-row input[data-sex="F"]{display:none} /* compacte en mobile */
+    }
 
     /* ---- MTB Points: Status (GPX/OSM) ---- */
     .mtb-status{
       display:flex;align-items:center;gap:10px;
-      padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;
+      padding:10px 12px;border:1px solid var(--border);border-radius:16px;background:#fff;
+      margin-top:10px;
     }
-    .mtb-status-msg{font-size:14px;color:#0f172a;font-weight:800}
-    .mtb-status-sub{font-size:12px;color:#667085;margin-top:2px}
+    .mtb-status-msg{font-size:14px;color:#0f172a;font-weight:1000}
+    .mtb-status-sub{font-size:12px;color:var(--muted2);margin-top:2px}
     .mtb-spinner{
       width:18px;height:18px;border-radius:999px;
       border:2px solid rgba(100,116,139,.35);
@@ -48,97 +245,127 @@
     .mtb-progress{height:6px;border-radius:999px;background:#e5e7eb;overflow:hidden}
     .mtb-progress > div{height:100%;width:0%;background:rgba(37,99,235,.95);transition:width .2s ease}
     .mtb-badge{
-      font-size:12px;padding:2px 8px;border-radius:999px;
-      border:1px solid #e5e7eb;color:#667085;font-weight:800;
-      white-space:nowrap;
+      font-size:12px;padding:4px 10px;border-radius:999px;
+      border:1px solid var(--border);color:var(--muted2);font-weight:1000;
+      white-space:nowrap;background:#f1f5f9;
     }
     .mtb-badge.ok{color:#166534;border-color:#86efac;background:#dcfce7}
     .mtb-badge.err{color:#991b1b;border-color:#fecaca;background:#fee2e2}
-    .mtb-badge.phase{color:#0f172a;background:#f1f5f9}
 
-    @media(max-width:900px){
-      .grid{grid-template-columns:1fr}
-      .age-group .age-row,.age-group .head{grid-template-columns:1fr 1fr}
+    footer{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    a:focus, button:focus, input:focus, select:focus, textarea:focus{
+      outline:3px solid rgba(37,99,235,.25);
+      outline-offset:2px;
     }
   </style>
 </head>
-<body>
 
-<header>
-  <h1>MTB Points — Épreuves</h1>
+<body>
+<header class="header">
+  <div class="brand">
+    <h1>MTB Points — Créer une épreuve</h1>
+    <div class="subtitle">GPX obligatoire • Scores auto (Phys + Tech V2 Hybrid)</div>
+  </div>
+
   <nav>
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
     <a href="reglement.html">Règlement</a>
-    <a href="methodologie.html" class="active">Méthodologie (calcul)</a>
+    <a href="methodologie.html">Méthodologie</a>
     <a href="about.html">À propos</a>
     <a href="login.html">Connexion</a>
   </nav>
-  <div class="muted">Création d’une nouvelle épreuve (GPX obligatoire)</div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
   <div class="card">
-    <h2 style="margin:0;">Créer une épreuve</h2>
-    <p class="muted" style="margin-top:6px;">
-      Distance, D+, score physique (local) et ScoreTech V2 Hybrid officiel (serveur OSM) sont calculés automatiquement.
-    </p>
+
+    <section class="hero">
+      <h2>Nouvelle épreuve</h2>
+      <div class="muted">
+        Renseigne les infos de base puis charge la trace GPX : distance, D+, ScorePhys (local) et ScoreTech V2 (serveur OSM) se calculent automatiquement.
+      </div>
+      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <span class="pill" id="gpxPill"><span class="dot" id="gpxDot"></span><span id="gpxPillText">En attente</span></span>
+        <span class="muted" id="gpxStatus">Aucun fichier chargé.</span>
+      </div>
+    </section>
 
     <div class="grid">
+
       <!-- LEFT -->
-      <div>
-        <label>Nom *</label>
+      <section class="panel">
+        <h3 style="margin:0 0 8px 0;">Informations</h3>
+
+        <label for="name">Nom *</label>
         <input id="name" type="text" placeholder="Ex : Les 6 collines — 40 km" />
 
-        <label>Date *</label>
+        <label for="date">Date *</label>
         <input id="date" type="date" />
 
-        <label>Discipline (optionnel)</label>
-        <select id="disc">
-          <option value="">— (auto-détection)</option>
-          <option value="XC">XC</option>
-          <option value="Enduro">Enduro</option>
-          <option value="DH">DH</option>
-          <option value="Gravel">Gravel</option>
-          <option value="Marathon">Marathon</option>
-          <option value="Ultra">Ultra</option>
-        </select>
-        <div class="muted" id="discHint" style="margin-top:6px;"></div>
+        <div class="row">
+          <div>
+            <label for="disc">Discipline (optionnel)</label>
+            <select id="disc">
+              <option value="">— (auto-détection)</option>
+              <option value="XC">XC</option>
+              <option value="Enduro">Enduro</option>
+              <option value="DH">DH</option>
+              <option value="Gravel">Gravel</option>
+              <option value="Marathon">Marathon</option>
+              <option value="Ultra">Ultra</option>
+            </select>
+            <div class="hint" id="discHint"></div>
+          </div>
 
-        <label>Niveau *</label>
-        <select id="level">
-          <option value="Local">Locale</option>
-          <option value="Régional">Régionale</option>
-          <option value="National">Nationale</option>
-          <option value="International">Internationale</option>
-        </select>
+          <div>
+            <label for="level">Niveau *</label>
+            <select id="level">
+              <option value="Local">Locale</option>
+              <option value="Régional">Régionale</option>
+              <option value="National">Nationale</option>
+              <option value="International">Internationale</option>
+            </select>
+          </div>
+        </div>
 
-        <label>Événement (optionnel)</label>
-        <select id="meetingId">
-          <option value="">Aucun (épreuve seule)</option>
-        </select>
-        <div class="muted" id="meetingHint" style="margin-top:6px;"></div>
+        <div class="row">
+          <div>
+            <label for="meetingId">Événement (optionnel)</label>
+            <select id="meetingId">
+              <option value="">Aucun (épreuve seule)</option>
+            </select>
+            <div class="hint" id="meetingHint"></div>
+          </div>
 
-        <label>Type vélo</label>
-        <select id="ebike">
-          <option value="0">Musculaire</option>
-          <option value="1">Assistance électrique</option>
-        </select>
+          <div>
+            <label for="ebike">Type vélo</label>
+            <select id="ebike">
+              <option value="0">Musculaire</option>
+              <option value="1">Assistance électrique</option>
+            </select>
+          </div>
+        </div>
 
-        <label>Trace GPX *</label>
+        <label for="gpxFile">Trace GPX *</label>
         <input id="gpxFile" type="file" accept=".gpx" />
 
         <div class="box">
-          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;">
-            <div style="font-weight:900;">Analyse GPX / OSM</div>
-            <span class="pill" id="gpxPill">En attente</span>
+          <div class="boxTitle">
+            <span>Analyse GPX / OSM</span>
+            <span class="pill"><span class="dot wait" id="anaDot"></span><span id="anaText">Prêt</span></span>
           </div>
 
-          <div class="muted" id="gpxStatus" style="margin-top:6px;">Aucun fichier chargé.</div>
-
           <!-- Statut animé (piloté par js/gpx.js via l'event mtb:status) -->
-          <div id="mtbStatus" class="mtb-status" style="display:none;margin-top:10px;">
+          <div id="mtbStatus" class="mtb-status" style="display:none;">
             <div class="mtb-spinner" id="mtbSpinner"></div>
             <div style="flex:1;min-width:180px">
               <div class="mtb-status-msg" id="mtbStatusMsg">Analyse…</div>
@@ -147,43 +374,41 @@
                 <div id="mtbProgBar"></div>
               </div>
             </div>
-            <span class="mtb-badge phase" id="mtbBadge">…</span>
+            <span class="mtb-badge" id="mtbBadge">…</span>
           </div>
 
-          <div class="row" style="margin-top:10px;">
-            <div class="box" style="margin:0;">
-              <div class="muted">Distance (auto)</div>
-              <div style="font-weight:900;font-size:18px;" id="autoDistance">—</div>
+          <div class="kpiGrid">
+            <div class="kpi">
+              <div class="kLabel">Distance</div>
+              <div class="kValue" id="autoDistance">—</div>
+              <div class="kInfo">Calculée depuis le GPX</div>
             </div>
-            <div class="box" style="margin:0;">
-              <div class="muted">D+ (auto)</div>
-              <div style="font-weight:900;font-size:18px;" id="autoDplus">—</div>
+            <div class="kpi">
+              <div class="kLabel">D+ total</div>
+              <div class="kValue" id="autoDplus">—</div>
+              <div class="kInfo">Altitude filtrée anti-spikes</div>
             </div>
-          </div>
 
-          <div class="row" style="margin-top:10px;">
-            <div class="box" style="margin:0;">
-              <div class="muted">Score physique (local)</div>
-              <div style="font-weight:900;font-size:18px;" id="autoPhys">—</div>
-              <div class="muted" id="autoPhysInfo"></div>
+            <div class="kpi">
+              <div class="kLabel">Score physique</div>
+              <div class="kValue" id="autoPhys">—</div>
+              <div class="kInfo" id="autoPhysInfo"></div>
             </div>
-            <div class="box" style="margin:0;">
-              <div class="muted">Score technique V2 (officiel)</div>
-              <div style="font-weight:900;font-size:18px;" id="autoTech">—</div>
-              <div class="muted" id="autoTechInfo"></div>
+            <div class="kpi">
+              <div class="kLabel">Score technique V2</div>
+              <div class="kValue" id="autoTech">—</div>
+              <div class="kInfo" id="autoTechInfo"></div>
             </div>
-          </div>
 
-          <div class="row" style="margin-top:10px;">
-            <div class="box" style="margin:0;">
-              <div class="muted">Discipline détectée</div>
-              <div style="font-weight:900;font-size:18px;" id="autoDisc">—</div>
-              <div class="muted" id="autoDiscInfo"></div>
+            <div class="kpi">
+              <div class="kLabel">Discipline détectée</div>
+              <div class="kValue" id="autoDisc">—</div>
+              <div class="kInfo" id="autoDiscInfo"></div>
             </div>
-            <div class="box" style="margin:0;">
-              <div class="muted">Terrain OSM (P75)</div>
-              <div style="font-weight:900;font-size:18px;" id="autoTerrain">—</div>
-              <div class="muted" id="autoTerrainInfo"></div>
+            <div class="kpi">
+              <div class="kLabel">Terrain OSM (P75)</div>
+              <div class="kValue" id="autoTerrain">—</div>
+              <div class="kInfo" id="autoTerrainInfo"></div>
             </div>
           </div>
 
@@ -195,44 +420,44 @@
 
         <div class="row">
           <div>
-            <label>Lieu de départ</label>
+            <label for="startPlace">Lieu de départ</label>
             <input id="startPlace" type="text" placeholder="Ex : Base nature de Fréjus" />
           </div>
           <div>
-            <label>Lieu d’arrivée</label>
+            <label for="finishPlace">Lieu d’arrivée</label>
             <input id="finishPlace" type="text" placeholder="Ex : Base nature de Fréjus" />
           </div>
         </div>
 
         <div class="row">
           <div>
-            <label>Heure de départ</label>
+            <label for="startTime">Heure de départ</label>
             <input id="startTime" type="time" />
           </div>
           <div>
-            <label>Barrière horaire</label>
+            <label for="cutoffTime">Barrière horaire</label>
             <input id="cutoffTime" type="text" placeholder="Ex : 05:30" />
           </div>
         </div>
 
         <div class="row">
           <div>
-            <label>Ravitaillements</label>
+            <label for="aidStations">Ravitaillements</label>
             <input id="aidStations" type="number" min="0" step="1" value="0" />
           </div>
           <div>
-            <label>Stands assistance mécanique</label>
+            <label for="mechStations">Assistance mécanique</label>
             <input id="mechStations" type="number" min="0" step="1" value="0" />
           </div>
         </div>
 
         <div class="row">
           <div>
-            <label>Nombre de participants</label>
+            <label for="participantsCount">Participants</label>
             <input id="participantsCount" type="number" min="0" step="1" value="0" />
           </div>
           <div>
-            <label>Lavage des vélos</label>
+            <label for="bikeWash">Lavage vélos</label>
             <select id="bikeWash">
               <option value="0">Non</option>
               <option value="1">Oui</option>
@@ -240,98 +465,105 @@
           </div>
         </div>
 
-        <label>Commentaire libre (portage/obstacles…)</label>
-        <textarea id="comment" rows="4" placeholder="Ex : portage court ~150 m, 2 passages trialisants, zones glissantes selon météo..."></textarea>
-      </div>
+        <label for="comment">Commentaire libre (portage/obstacles…)</label>
+        <textarea id="comment" rows="4" placeholder="Ex : portage court ~150 m, passages trialisants, zones glissantes selon météo..."></textarea>
+      </section>
 
       <!-- RIGHT -->
-      <div>
-        <div class="box age-group">
-          <h3 style="margin:0 0 8px 0;">Catégories d’âge (UCI) + nombre de tours</h3>
-          <div class="muted" style="margin-top:0;">
-            Coche les catégories présentes. Définis les tours Hommes/Femmes (par défaut 1).
-          </div>
-
-          <div class="head">
-            <div>Catégorie</div>
-            <div class="small">Tours H</div>
-            <div class="small">Tours F</div>
-          </div>
-
-          <!-- U7 -->
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="U7"> U7 (5–6 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U7" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U7" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="U9"> U9 (7–8 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U9" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U9" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="U11"> U11 (9–10 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U11" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U11" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="U13"> U13 (11–12 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U13" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U13" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="U15"> U15 (13–14 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U15" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U15" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="U17"> U17 (15–16 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U17" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U17" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="U19"> U19 (17–18 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U19" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U19" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="U23"> U23 (19–22 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U23" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U23" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="U23PLUS"> U23 ans et plus</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U23PLUS" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="U23PLUS" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="SENIOR"> Seniors (&gt; 22 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="SENIOR" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="SENIOR" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="M1"> Masters 1 (30–34 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="M1" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="M1" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="M2"> Masters 2 (35–39 ans)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="M2" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="M2" data-sex="F" />
-          </div>
-          <div class="age-row">
-            <label><input type="checkbox" class="ageCat" value="M3"> Masters 3 (40 ans et +)</label>
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="M3" data-sex="M" />
-            <input class="laps" type="number" min="1" step="1" value="1" data-age="M3" data-sex="F" />
-          </div>
+      <aside class="panel age-group">
+        <h3 style="margin:0 0 8px 0;">Catégories d’âge (UCI) & tours</h3>
+        <div class="muted" style="margin-top:-2px;">
+          Coche les catégories présentes. Définis les tours Hommes/Femmes (par défaut 1).
         </div>
 
-        <button id="saveBtn" class="btn" type="button">Enregistrer l’épreuve</button>
-        <div class="muted" id="saveInfo" style="margin-top:10px;"></div>
-      </div>
+        <div class="head">
+          <div>Catégorie</div>
+          <div class="small">Tours H</div>
+          <div class="small">Tours F</div>
+        </div>
+
+        <!-- U7..M3 -->
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="U7"> U7 (5–6 ans)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U7" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U7" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="U9"> U9 (7–8 ans)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U9" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U9" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="U11"> U11 (9–10 ans)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U11" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U11" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="U13"> U13 (11–12 ans)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U13" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U13" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="U15"> U15 (13–14 ans)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U15" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U15" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="U17"> U17 (15–16 ans)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U17" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U17" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="U19"> U19 (17–18 ans)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U19" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U19" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="U23"> U23 (19–22 ans)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U23" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U23" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="U23PLUS"> U23 ans et +</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U23PLUS" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="U23PLUS" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="SENIOR"> Seniors (&gt; 22 ans)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="SENIOR" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="SENIOR" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="M1"> Masters 1 (30–34)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="M1" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="M1" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="M2"> Masters 2 (35–39)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="M2" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="M2" data-sex="F" />
+        </div>
+        <div class="age-row">
+          <label><input type="checkbox" class="ageCat" value="M3"> Masters 3 (40+)</label>
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="M3" data-sex="M" />
+          <input class="laps" type="number" min="1" step="1" value="1" data-age="M3" data-sex="F" />
+        </div>
+
+        <div class="btnRow">
+          <button id="saveBtn" class="btn primary" type="button">Enregistrer l’épreuve</button>
+          <a class="btn ghost" href="meetings.html">Retour</a>
+        </div>
+
+        <div class="hint" id="saveInfo" style="margin-top:10px;"></div>
+
+        <footer>
+          Conseil : choisis la discipline manuellement seulement si l’auto-détection se trompe.
+        </footer>
+      </aside>
+
     </div>
   </div>
-</div>
+</main>
 
 <script src="js/data.js"></script>
 <script src="js/storage.js"></script>
@@ -342,23 +574,30 @@
   function val(id){ const el = $(id); return el ? el.value.trim() : ""; }
   function num(id, d=0){ const v = Number(val(id)); return Number.isFinite(v) ? v : d; }
   function setText(id, t){ const el = $(id); if(el) el.textContent = t; }
-  function setPill(state){
-    const pill = $("gpxPill");
-    if(!pill) return;
 
-    if (state === "ok") {
-      pill.textContent = "OK";
-      pill.style.background = "#dcfce7";
-      pill.style.color = "#166534";
-    } else if (state === "err") {
-      pill.textContent = "Erreur";
-      pill.style.background = "#fee2e2";
-      pill.style.color = "#991b1b";
-    } else {
-      pill.textContent = "En attente";
-      pill.style.background = "#f1f5f9";
-      pill.style.color = "#0f172a";
-    }
+  function setPill(state, text){
+    const dot = $("gpxDot");
+    const pillText = $("gpxPillText");
+    if (!dot || !pillText) return;
+
+    pillText.textContent = text || (state === "ok" ? "OK" : state === "err" ? "Erreur" : "En attente");
+
+    dot.classList.remove("ok","err","wait");
+    if (state === "ok") dot.classList.add("ok");
+    else if (state === "err") dot.classList.add("err");
+    else dot.classList.add("wait");
+  }
+
+  function setAna(state, text){
+    const dot = $("anaDot");
+    const t = $("anaText");
+    if (!dot || !t) return;
+
+    t.textContent = text || "Prêt";
+    dot.classList.remove("ok","err","wait");
+    if (state === "ok") dot.classList.add("ok");
+    else if (state === "err") dot.classList.add("err");
+    else dot.classList.add("wait");
   }
 
   // meetings select + preselect from URL
@@ -418,7 +657,7 @@
       }
 
       if (badge) {
-        badge.className = "mtb-badge phase";
+        badge.className = "mtb-badge";
         if (d.phase === "done") { badge.textContent = "OK"; badge.classList.add("ok"); }
         else if (d.phase === "error") { badge.textContent = "ERREUR"; badge.classList.add("err"); }
         else if (d.phase === "osm") { badge.textContent = "OSM"; }
@@ -448,7 +687,8 @@
     if (!file) return;
 
     setText("gpxStatus", "Lecture et analyse…");
-    setPill("wait");
+    setPill("wait","Analyse…");
+    setAna("wait","Analyse…");
     setDashEmpty();
     if ($("elevWarn")) $("elevWarn").style.display = "none";
     setText("discHint", "");
@@ -457,8 +697,9 @@
       if (typeof analyzeGPX !== "function") throw new Error("analyzeGPX introuvable (vérifie js/gpx.js)");
       currentGpx = await analyzeGPX(file, { keepPoints: true });
 
-      setPill("ok");
-      setText("gpxStatus", `OK: ${currentGpx.fileName || file.name}`);
+      setPill("ok","OK");
+      setAna("ok","Terminé");
+      setText("gpxStatus", `OK : ${currentGpx.fileName || file.name}`);
 
       // Distance / D+
       setText("autoDistance", (currentGpx.distanceKm != null) ? (String(currentGpx.distanceKm).replace(".",",") + " km") : "—");
@@ -499,7 +740,6 @@
         setText("autoDisc", d.hint);
         setText("autoDiscInfo", `Confiance ${conf}%`);
 
-        // Si l'utilisateur n'a pas choisi de discipline, on propose l'auto
         if (!val("disc")) {
           setText("discHint", `Suggestion auto : ${d.hint} (confiance ${conf}%)`);
         }
@@ -511,7 +751,8 @@
     } catch (e) {
       console.error(e);
       currentGpx = null;
-      setPill("err");
+      setPill("err","Erreur");
+      setAna("err","Erreur");
       setText("gpxStatus", "Erreur : " + (e.message || e));
       setDashEmpty();
     }
@@ -541,8 +782,6 @@
     const name = val("name");
     const date = val("date");
     const level = val("level");
-
-    // Discipline: optionnelle (auto possible)
     const disc = val("disc") || (currentGpx?.discipline?.hint ?? "");
 
     if (!name || !date || !level) {
@@ -567,12 +806,10 @@
       ebike: (val("ebike") === "1"),
       meetingId: val("meetingId") || null,
 
-      // auto from analysis
       distanceKm: currentGpx.distanceKm ?? null,
       dplusM: currentGpx.dplusM ?? null,
-      gpx: currentGpx, // contient phys + techV2 + discipline
+      gpx: currentGpx,
 
-      // info
       startPlace: val("startPlace") || null,
       finishPlace: val("finishPlace") || null,
       startTime: val("startTime") || null,

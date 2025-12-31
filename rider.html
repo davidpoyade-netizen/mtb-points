@@ -3,76 +3,417 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profil cycliste – VTT Points</title>
+  <title>Profil cycliste — MTB Points</title>
+
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-    header h1{font-size:18px;margin:0}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-    .wrap{max-width:950px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-    .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-    .avatar{width:96px;height:96px;border-radius:999px;object-fit:cover;background:#f1f5f9}
-    .muted{color:#667085}
-    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#f1f5f9;margin-right:8px;margin-top:6px}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left}
-    th{background:#f8fafc}
+    :root{
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#667085;
+      --muted2:#64748b;
+      --border:#e5e7eb;
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+      --shadow:0 10px 30px rgba(2,6,23,.10);
+      --shadow2:0 2px 10px rgba(0,0,0,.06);
+      --r:22px;
+
+      --ok:#16a34a;
+      --warn:#ea580c;
+      --err:#dc2626;
+
+      --chip:#f1f5f9;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      color:var(--blue);
+      font-weight:800;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+    }
+
+    /* Layout */
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:20px;
+      padding:16px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .heroRow{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    .avatar{
+      width:104px;height:104px;border-radius:999px;
+      object-fit:cover;background:#e2e8f0;
+      border:3px solid #fff;
+      box-shadow:0 10px 18px rgba(2,6,23,.12);
+    }
+    .nameLine{
+      display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+    }
+    h2{margin:0;font-size:26px;letter-spacing:-.35px}
+    .sub{color:#334155;line-height:1.55;margin-top:6px}
+    .muted{color:var(--muted)}
+    .meta{color:var(--muted2);font-size:13px;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
+
+    /* Chips */
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--chip);
+      font-weight:900;font-size:12px;
+      white-space:nowrap;
+    }
+    .chip strong{font-weight:1000}
+    .dot{width:10px;height:10px;border-radius:999px;background:#93c5fd;display:inline-block}
+    .dot.ok{background:#86efac}
+    .dot.warn{background:#fdba74}
+
+    /* Content grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media(max-width:980px){ .grid{grid-template-columns:1fr} }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      padding:16px;
+      box-shadow:var(--shadow2);
+    }
+    .panel h3{
+      margin:0 0 10px 0;
+      font-size:16px;
+      letter-spacing:-.15px;
+    }
+
+    /* KPI cards */
+    .kpis{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    @media(max-width:520px){ .kpis{grid-template-columns:1fr} }
+
+    .kpi{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+    }
+    .kpi .label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.02em;
+    }
+    .kpi .value{
+      margin-top:6px;
+      font-size:22px;
+      font-weight:1000;
+      letter-spacing:-.2px;
+      color:#0f172a;
+      line-height:1;
+    }
+    .kpi .hint{margin-top:8px;font-size:12px;color:var(--muted2);line-height:1.45}
+
+    /* Table */
+    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:10px}
+    thead th{
+      text-align:left;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      color:var(--muted);
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      background:#f8fafc;
+    }
+    thead th:first-child{border-top-left-radius:12px}
+    thead th:last-child{border-top-right-radius:12px}
+    tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      font-size:14px;
+      color:#0f172a;
+    }
+    tbody tr:hover td{background:#f8fafc}
+    .tdMuted{color:var(--muted2)}
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:900;font-size:12px;
+    }
+
+    .empty{
+      border:1px dashed var(--border);
+      border-radius:16px;
+      padding:12px;
+      color:var(--muted2);
+      background:#fff;
+    }
+
+    /* Buttons */
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btnLink{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
+      text-decoration:none;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btnLink:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btnLink.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btnLink.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+
+    footer{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    /* Focus */
+    a:focus, button:focus{
+      outline:3px solid rgba(37,99,235,.25);
+      outline-offset:2px;
+    }
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>Profil cycliste</h1>
-    <nav>
-<a href="index.html">Acceuil</a>
-<a href="public-ranking.html">Classement</a>
-<a href="meetings.html">Événements</a>
-<a href="reglement.html">Règlement</a>
-<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
-<a href="about.html">À propos</a>
-<a href="login.html">Connexion</a>
-    </nav>
-  </header>
+<header class="header">
+  <h1>MTB Points — Profil cycliste</h1>
 
-  <div class="wrap">
-    <div class="card">
-      <div class="row">
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="methodologie.html">Méthodologie</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
+  </nav>
+
+  <!-- (optionnel) garde la zone langue si tu en as besoin dans ton projet -->
+  <div class="lang">
+    <button class="btn" id="btnFR" type="button">FR</button>
+    <button class="btn" id="btnEN" type="button">EN</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="heroRow">
         <img id="photo" class="avatar" alt="Photo cycliste" />
-        <div style="flex:1;">
-          <h2 id="name" style="margin:0;">—</h2>
-          <div class="muted">
-            <span id="nat">—</span> • <span id="team">—</span>
-          </div>
-          <div class="muted" style="margin-top:6px;">
-            <span id="sex">—</span> • <span id="birthYear">—</span> • <span id="ageCat">—</span>
+
+        <div style="flex:1;min-width:240px">
+          <div class="nameLine">
+            <h2 id="name">—</h2>
+            <span class="badge" id="badgeLevel" title="Badge / niveau (si activé)">🏅 —</span>
           </div>
 
-          <div style="margin-top:6px;">
-            <span class="pill">Score : <strong id="score">—</strong></span>
-            <span class="pill">Courses valides : <strong id="races">—</strong></span>
+          <div class="sub">
+            <span id="nat">—</span>
+            <span class="muted"> • </span>
+            <span id="team">—</span>
+          </div>
+
+          <div class="meta">
+            <span>👤 <span id="sex">—</span></span>
+            <span>🎂 <span id="birthYear">—</span></span>
+            <span>🏷️ <span id="ageCat">—</span></span>
+          </div>
+
+          <div class="chips">
+            <span class="chip"><span class="dot ok"></span> Score : <strong id="score">—</strong></span>
+            <span class="chip"><span class="dot"></span> Courses valides : <strong id="races">—</strong></span>
+          </div>
+
+          <div class="btnRow">
+            <a class="btnLink primary" href="public-ranking.html">Voir le classement</a>
+            <a class="btnLink" href="challengemtbpoints.html">Voir le challenge</a>
           </div>
         </div>
       </div>
+    </section>
 
-      <h3 style="margin-top:18px;">Historique (démo)</h3>
-      <div class="muted">On branchera ici les vraies épreuves + résultats.</div>
+    <div class="grid">
 
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Épreuve</th>
-            <th>Score</th>
-            <th>Place</th>
-          </tr>
-        </thead>
-        <tbody id="history"></tbody>
-      </table>
+      <!-- LEFT: History -->
+      <section class="panel">
+        <h3>Historique</h3>
+        <div class="muted" style="margin-top:-4px;">
+          Cette page affiche l’historique des épreuves du coureur (démo si aucune donnée n’est disponible).
+        </div>
+
+        <div id="historyEmpty" class="empty" style="display:none;margin-top:12px;">
+          Aucun résultat disponible pour ce coureur.
+        </div>
+
+        <table aria-label="Historique des épreuves">
+          <thead>
+            <tr>
+              <th style="width:140px;">Date</th>
+              <th>Épreuve</th>
+              <th style="width:120px;">Points</th>
+              <th style="width:90px;">Place</th>
+            </tr>
+          </thead>
+          <tbody id="history">
+            <!-- Rempli par rider.js -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- RIGHT: Summary -->
+      <aside class="panel">
+        <h3>Résumé</h3>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">Total points</div>
+            <div class="value" id="kpiTotal">—</div>
+            <div class="hint">Somme (selon la période/filtre appliqué par ton rider.js)</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Meilleure course</div>
+            <div class="value" id="kpiBest">—</div>
+            <div class="hint">Max points sur une épreuve</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Nb d’épreuves</div>
+            <div class="value" id="kpiCount">—</div>
+            <div class="hint">Nombre de résultats affichés</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Régularité</div>
+            <div class="value" id="kpiConsistency">—</div>
+            <div class="hint">Indice simple (optionnel) basé sur la dispersion</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="callout" aria-hidden="true"></div>
+
+        <div class="sep" style="border-top:1px dashed var(--border);margin:14px 0;"></div>
+
+        <div class="muted2" style="font-size:13px;line-height:1.55;color:var(--muted2);">
+          Astuce : si tu veux afficher un badge “Bronze/Argent/Or/Legend”, tu peux le calculer
+          depuis le total et l’afficher dans <code>badgeLevel</code>.
+        </div>
+      </aside>
+
     </div>
-  </div>
 
-  <script src="js/data.js"></script>
-  <script src="js/uci.js"></script>
-  <script src="js/rider.js"></script>
+    <footer>
+      MTB Points — Profil cycliste
+    </footer>
+
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/uci.js"></script>
+<script src="js/rider.js"></script>
+
+<script>
+  // Optionnel : si rider.js ne gère pas encore ces KPIs, on tente un fallback non-bloquant.
+  (function(){
+    const $ = (id) => document.getElementById(id);
+
+    function toNum(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
+
+    // Essaie de déduire depuis le tableau #history (si rider.js a déjà rendu)
+    function computeFromTable(){
+      const rows = Array.from(document.querySelectorAll("#history tr"));
+      const points = [];
+
+      for (const tr of rows) {
+        const tds = tr.querySelectorAll("td");
+        if (!tds || tds.length < 3) continue;
+        const p = toNum((tds[2].textContent || "").replace(",", "."));
+        if (p != null) points.push(p);
+      }
+
+      const count = points.length;
+      if (!count) {
+        const empty = $("historyEmpty");
+        if (empty) empty.style.display = "block";
+        return;
+      }
+
+      if ($("historyEmpty")) $("historyEmpty").style.display = "none";
+
+      const total = points.reduce((s,x)=>s+x,0);
+      const best = Math.max(...points);
+
+      // “Régularité” simple : 100 - (std/mean)*100 capé, juste pour donner une info visuelle
+      const mean = total / count;
+      const varr = points.reduce((s,x)=>s + (x-mean)*(x-mean),0) / count;
+      const sd = Math.sqrt(varr);
+      const consistency = mean > 0 ? Math.max(0, Math.min(100, Math.round(100 - (sd/mean)*100))) : 0;
+
+      if ($("kpiTotal")) $("kpiTotal").textContent = Math.round(total);
+      if ($("kpiBest")) $("kpiBest").textContent = Math.round(best);
+      if ($("kpiCount")) $("kpiCount").textContent = String(count);
+      if ($("kpiConsistency")) $("kpiConsistency").textContent = consistency + "%";
+    }
+
+    // Attends un tick pour laisser rider.js remplir
+    setTimeout(computeFromTable, 0);
+  })();
+</script>
 </body>
 </html>
