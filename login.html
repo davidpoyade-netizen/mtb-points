@@ -3,115 +3,306 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login – MTB Points</title>
-  <style>
-    :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#64748b;--border:#e5e7eb;--blue:#2563eb;
-      --ok:#22c55e;--warn:#ef4444;--dark:#111827;
-    }
-    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;}
-    header{background:var(--card);padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
-    header h1{margin:0;font-size:22px}
-    .wrap{max-width:980px;margin:22px auto;padding:0 16px;}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 18px;margin:14px 0;box-shadow:0 2px 10px rgba(0,0,0,.05);}
-    .toc a{display:block;text-decoration:none;color:var(--blue);padding:6px 0}
-    h2{margin:0 0 10px 0;font-size:18px}
-    h3{margin:14px 0 6px 0;font-size:15px}
-    p,li{font-size:14px;line-height:1.6}
-    ul{padding-left:18px;margin:8px 0}
-    code{background:#f1f5f9;border:1px solid var(--border);border-radius:8px;padding:2px 6px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:13px}
-    .muted{color:var(--muted);font-size:13px}
-    .box{background:#f8fafc;border:1px solid var(--border);border-left:5px solid var(--blue);border-radius:12px;padding:12px;margin:12px 0}
-    .pill{display:inline-block;background:#f1f5f9;border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:800px){.grid2{grid-template-columns:1fr}}
-    footer{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
-  </style>
-</head>
-<body>
-<header>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MTB Points</title>
+  <title>Connexion — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
-    .card { background:#fff; border-radius:12px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-    .btn2 { display:inline-block; padding:12px 16px; border-radius:10px; text-decoration:none; border:1px solid #cbd5e1; }
-    .primary { background:#2563eb; color:#fff; border:0; }
-    .muted { color:#667085; }
-    @media (max-width: 800px){ .grid{ grid-template-columns:1fr; } }
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 12px 34px rgba(2,6,23,.12);
+      --r:18px;
+      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      color:var(--blue);font-weight:800;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+    }
+
+    /* Layout */
+    .wrap{max-width:980px;margin:24px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .hero .muted{margin-top:8px;line-height:1.55;color:#334155}
+
+    /* Panels */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:14px;
+      background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .panel h3{margin:0 0 10px 0;font-size:16px;letter-spacing:-.1px}
+    .panel p{margin:0 0 10px 0;color:#334155;line-height:1.55}
+
+    /* Inputs */
+    label{display:block;font-weight:900;font-size:12px;color:#0f172a}
+    input{
+      width:100%;
+      padding:11px 12px;
+      margin-top:6px;
+      border:1px solid #cbd5e1;
+      border-radius:14px;
+      background:#fff;
+      outline:none;
+    }
+    input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+    input::placeholder{color:#94a3b8}
+    .field{margin-top:10px}
+
+    /* Buttons */
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:14px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
+      text-decoration:none;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(2,6,23,.10)}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.good{background:var(--ok);border-color:var(--ok);color:#fff}
+    .btn.good:hover{background:#15803d;border-color:#15803d}
+    .btn.danger{border-color:#fecaca;color:var(--err);background:#fff}
+
+    /* Status */
+    .statusBar{
+      margin-top:14px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      padding:12px;
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:900;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.err{background:var(--err)}
+    .msg{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+      flex:1;
+      min-width:220px;
+    }
+
+    footer{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
   </style>
 </head>
 <body>
 
 <header class="header">
-  <h1>MTB Points- Login</h1>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Connexion</h1>
+  </div>
+
   <nav>
-<a href="public-ranking.html">Classement</a>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
     <a href="reglement.html">Règlement</a>
-    <a href="methodologie.html" class="active">Méthodologie (calcul)</a>
+    <a href="methodologie.html">Méthodologie</a>
     <a href="about.html">À propos</a>
-    <a href="login.html">Connexion</a>
+    <a class="active" href="login.html">Connexion</a>
   </nav>
+
   <div class="lang">
-    <button class="btn" id="btnFR">FR</button>
-    <button class="btn" id="btnEN">EN</button>
+    <button class="btn" id="btnFR" type="button">FR</button>
+    <button class="btn" id="btnEN" type="button">EN</button>
   </div>
 </header>
 
 <div class="wrap">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Connexion – MTB Points</title>
-</head>
-<body style="font-family:Arial; padding:20px;">
-  <h1>Connexion</h1>
+  <div class="card">
 
-  <div id="authState">—</div>
-  <p id="authMsg"></p>
+    <section class="hero">
+      <h2>Accès Organisateur</h2>
+      <div class="muted">
+        Crée un compte, connecte-toi, puis accède aux outils de création d’épreuves et d’import des résultats.
+      </div>
 
-  <h3>Créer un compte</h3>
-  <input id="suEmail" placeholder="Email" style="padding:8px; width:260px;" />
-  <input id="suPass" type="password" placeholder="Mot de passe" style="padding:8px; width:260px;" />
-  <button id="btnSignUp">S'inscrire</button>
+      <div class="statusBar">
+        <span class="pill">
+          <span class="dot" id="authDot"></span>
+          <span id="authState">—</span>
+        </span>
+        <div class="msg" id="authMsg">—</div>
+        <button class="btn danger" id="btnSignOut" type="button">Se déconnecter</button>
+      </div>
+    </section>
 
-  <h3>Se connecter</h3>
-  <input id="siEmail" placeholder="Email" style="padding:8px; width:260px;" />
-  <input id="siPass" type="password" placeholder="Mot de passe" style="padding:8px; width:260px;" />
-  <button id="btnSignIn">Se connecter</button>
+    <div class="grid">
 
-  <h3>Déconnexion</h3>
-  <button id="btnSignOut">Se déconnecter</button>
+      <!-- Sign up -->
+      <div class="panel">
+        <h3>Créer un compte</h3>
+        <p class="muted">Utilise une adresse email valide. Un mot de passe robuste est recommandé.</p>
 
-  <script type="module">
-    import { signUp, signIn, signOut, renderAuthState } from "./js/auth.js";
+        <div class="field">
+          <label for="suEmail">Email</label>
+          <input id="suEmail" autocomplete="email" placeholder="ex: david@email.com" />
+        </div>
+        <div class="field">
+          <label for="suPass">Mot de passe</label>
+          <input id="suPass" type="password" autocomplete="new-password" placeholder="••••••••" />
+        </div>
 
-    const $ = (id) => document.getElementById(id);
-    const msg = (t) => document.getElementById("authMsg").textContent = t || "";
+        <div class="row">
+          <button class="btn good" id="btnSignUp" type="button">S'inscrire</button>
+        </div>
+      </div>
 
-    $("btnSignUp").onclick = async () => {
-      try { await signUp($("suEmail").value, $("suPass").value); }
-      catch(e){ msg(e.message); }
-    };
+      <!-- Sign in -->
+      <div class="panel">
+        <h3>Se connecter</h3>
+        <p class="muted">Déjà un compte ? Connecte-toi pour accéder à ton espace organisateur.</p>
 
-    $("btnSignIn").onclick = async () => {
-      try { await signIn($("siEmail").value, $("siPass").value); }
-      catch(e){ msg(e.message); }
-    };
+        <div class="field">
+          <label for="siEmail">Email</label>
+          <input id="siEmail" autocomplete="email" placeholder="ex: david@email.com" />
+        </div>
+        <div class="field">
+          <label for="siPass">Mot de passe</label>
+          <input id="siPass" type="password" autocomplete="current-password" placeholder="••••••••" />
+        </div>
 
-    $("btnSignOut").onclick = async () => {
-      try { await signOut(); }
-      catch(e){ msg(e.message); }
-    };
+        <div class="row">
+          <button class="btn primary" id="btnSignIn" type="button">Se connecter</button>
+        </div>
+      </div>
 
-    renderAuthState();
-  </script>
+    </div>
+
+    <footer>
+      Astuce : si tu utilises Supabase, vérifie que <code style="background:#f1f5f9;border:1px solid #e5e7eb;border-radius:8px;padding:2px 6px;">js/supabaseClient.js</code> est bien configuré.
+    </footer>
+  </div>
+</div>
+
+<script type="module">
+  import { signUp, signIn, signOut, renderAuthState } from "./js/auth.js";
+
+  const $ = (id) => document.getElementById(id);
+
+  function setMsg(t){
+    $("authMsg").textContent = t || "—";
+  }
+
+  // Patch léger: si ton renderAuthState() écrit déjà dans #authState,
+  // on ajoute juste un petit feedback visuel via #authDot.
+  function setDot(state){
+    const dot = $("authDot");
+    dot.className = "dot";
+    if (!state) return;
+    const s = String(state).toLowerCase();
+    if (s.includes("connect")) dot.classList.add("ok");
+    if (s.includes("erreur") || s.includes("error")) dot.classList.add("err");
+  }
+
+  $("btnSignUp").onclick = async () => {
+    setMsg("");
+    try {
+      await signUp($("suEmail").value, $("suPass").value);
+      setMsg("✅ Compte créé. Vérifie tes emails si une confirmation est requise.");
+      // renderAuthState met à jour #authState
+      await renderAuthState();
+      setDot($("authState").textContent);
+    } catch(e){
+      setMsg("❌ " + (e.message || e));
+      setDot("erreur");
+    }
+  };
+
+  $("btnSignIn").onclick = async () => {
+    setMsg("");
+    try {
+      await signIn($("siEmail").value, $("siPass").value);
+      setMsg("✅ Connecté.");
+      await renderAuthState();
+      setDot($("authState").textContent);
+    } catch(e){
+      setMsg("❌ " + (e.message || e));
+      setDot("erreur");
+    }
+  };
+
+  $("btnSignOut").onclick = async () => {
+    setMsg("");
+    try {
+      await signOut();
+      setMsg("✅ Déconnecté.");
+      await renderAuthState();
+      setDot($("authState").textContent);
+    } catch(e){
+      setMsg("❌ " + (e.message || e));
+      setDot("erreur");
+    }
+  };
+
+  // Init
+  await renderAuthState();
+  setDot($("authState").textContent);
+</script>
+
 </body>
 </html>
