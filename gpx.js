@@ -1,7 +1,45 @@
 // js/gpx.js
-// Expose: window.analyzeGPX(file) -> Promise<GPXAnalysis>
+// MTB Points — Frontend GPX analyzer
+// Expose: window.analyzeGPX(file, opts?) -> Promise<GPXAnalysis>
+//
+// Meilleure solution (OFFICIEL):
+// - Front: parse GPX + calcule ScorePhys local + stats + (optionnel) points pour profil altimétrique
+// - Serveur: calcule ScoreTech V2 Hybrid officiel (OSM socle + bonus GPX capé) + Discipline hint
+//
+// UI Indicateurs:
+// - Dispatch d'événements: "mtb:status" avec { phase, message, progress, spinning }
+//   => ton UI peut écouter et afficher "Analyse GPX..." puis "Analyse OSM..."
+// - Animation CSS simple conseillée (classe .spinner)
+//
+// Usage:
+//   window.addEventListener("mtb:status", (e)=> console.log(e.detail));
+//   const res = await window.analyzeGPX(file);
+//
+// Important:
+// - L'endpoint serveur attendu: POST /api/analyze-gpx (voir index.js adapté)
 
 (function () {
+  // -------------------------
+  // Status helpers (UI)
+  // -------------------------
+  function emitStatus(detail) {
+    try {
+      window.dispatchEvent(new CustomEvent("mtb:status", { detail }));
+    } catch (_) { /* noop */ }
+  }
+
+  function setPhase(phase, message, opts = {}) {
+    emitStatus({
+      phase, // "idle" | "gpx" | "osm" | "done" | "error"
+      message,
+      progress: typeof opts.progress === "number" ? opts.progress : null, // 0..1 or null
+      spinning: opts.spinning !== false,
+      ts: Date.now()
+    });
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
   // -------------------------
   // Utils
   // -------------------------
@@ -21,49 +59,22 @@
     return R * c;
   }
 
-  function bearing(a, b) {
-    const y = Math.sin(toRad(b.lon - a.lon)) * Math.cos(toRad(b.lat));
-    const x =
-      Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat)) -
-      Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(toRad(b.lon - a.lon));
-    let br = Math.atan2(y, x) * 180 / Math.PI;
-    if (br < 0) br += 360;
-    return br;
-  }
-
   function readFileAsText(file) {
     return new Promise((resolve, reject) => {
       const fr = new FileReader();
-      fr.onerror = () => reject(new Error("Impossible de lire le fichier."));
+      fr.onerror = () => reject(new Error("Impossible de lire le fichier GPX."));
       fr.onload = () => resolve(String(fr.result || ""));
       fr.readAsText(file);
     });
   }
 
-  function stddev(arr) {
-    if (!arr.length) return 0;
-    const m = arr.reduce((s, x) => s + x, 0) / arr.length;
-    const v = arr.reduce((s, x) => s + (x - m) * (x - m), 0) / arr.length;
-    return Math.sqrt(v);
-  }
-
-  function percentile(arr, p) {
-    if (!arr.length) return 0;
-    const a = arr.slice().sort((x, y) => x - y);
-    const idx = (a.length - 1) * p;
-    const lo = Math.floor(idx), hi = Math.ceil(idx);
-    if (lo === hi) return a[lo];
-    const w = idx - lo;
-    return a[lo] * (1 - w) + a[hi] * w;
-  }
-
   // -------------------------
-  // GPX parsing
+  // GPX parsing (browser)
   // -------------------------
   function parseGPXText(xmlText) {
     const parser = new DOMParser();
     const xml = parser.parseFromString(xmlText, "application/xml");
-    if (xml.querySelector("parsererror")) throw new Error("GPX invalide (parsererror).");
+    if (xml.querySelector("parsererror")) throw new Error("GPX invalide (erreur XML).");
 
     const trkpts = Array.from(xml.querySelectorAll("trkpt"));
     if (!trkpts.length) throw new Error("Aucun point <trkpt> trouvé dans le GPX.");
@@ -72,12 +83,23 @@
     for (const p of trkpts) {
       const lat = Number(p.getAttribute("lat"));
       const lon = Number(p.getAttribute("lon"));
+
       const eleNode = p.querySelector("ele");
       const ele = eleNode ? Number(eleNode.textContent) : null;
 
+      // time (optionnel)
+      const timeNode = p.querySelector("time");
+      const time = timeNode ? String(timeNode.textContent || "").trim() : null;
+
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
-      points.push({ lat, lon, ele: Number.isFinite(ele) ? ele : null });
+      points.push({
+        lat,
+        lon,
+        ele: Number.isFinite(ele) ? ele : null,
+        time: time && !Number.isNaN(Date.parse(time)) ? time : null
+      });
     }
+
     if (points.length < 2) throw new Error("GPX: pas assez de points valides.");
     return points;
   }
@@ -127,7 +149,7 @@
     const dplusM = Math.round(dplus);
 
     const steep = {
-      p10: distM > 0 ? Math.round((distSlope10 / distM) * 1000) / 1000 : 0, // 0..1
+      p10: distM > 0 ? Math.round((distSlope10 / distM) * 1000) / 1000 : 0,
       p15: distM > 0 ? Math.round((distSlope15 / distM) * 1000) / 1000 : 0
     };
 
@@ -135,298 +157,176 @@
   }
 
   // -------------------------
-  // Technique: segment analysis + P75 aggregation
-  // TechCoeff_seg = clamp(0.80 + 0.004*IPB_seg + 0.20*terrain + 0.10*sinu_norm, 0.80, 1.60)
-  // with IPB proxy per segment (if elevation).
+  // Server call (ScoreTech V2 Hybrid officiel + Discipline)
   // -------------------------
-  function computeTechCoeffFromGPX(points, opts = {}) {
-    const segmentLenM = Number(opts.segmentLenM ?? 300);
-    const minDirectM = 1;
+  async function fetchServerAnalysis(gpxText) {
+    // Petit délai pour laisser l'UI afficher le spinner
+    await sleep(30);
 
-    // build segments by length
-    const segRanges = [];
-    let segStartIdx = 0;
-    let acc = 0;
+    const res = await fetch("/api/analyze-gpx", {
+      method: "POST",
+      headers: { "Content-Type": "application/gpx+xml" },
+      body: gpxText
+    });
 
-    for (let i = 1; i < points.length; i++) {
-      const d = haversine(points[i - 1].lat, points[i - 1].lon, points[i].lat, points[i].lon);
-      if (!Number.isFinite(d) || d <= 0) continue;
-      acc += d;
-      if (acc >= segmentLenM) {
-        segRanges.push([segStartIdx, i]);
-        segStartIdx = i;
-        acc = 0;
-      }
+    let data = null;
+    try { data = await res.json(); } catch (_) { data = null; }
+
+    if (!res.ok || !data?.ok) {
+      const msg = data?.error || `Erreur serveur (${res.status}).`;
+      throw new Error(msg);
     }
-    if (segStartIdx < points.length - 1) segRanges.push([segStartIdx, points.length - 1]);
-
-    const segments = [];
-    const techValues = [];
-    let sumW = 0;
-    let sumTech = 0;
-
-    for (const [aIdx, bIdx] of segRanges) {
-      const pts = points.slice(aIdx, bIdx + 1);
-      if (pts.length < 2) continue;
-
-      // real distance, gain, slopes
-      let distReal = 0;
-      let gain = 0;
-      let distSlope10 = 0;
-      let distSlope15 = 0;
-
-      const dEle = [];
-      for (let i = 1; i < pts.length; i++) {
-        const segD = haversine(pts[i - 1].lat, pts[i - 1].lon, pts[i].lat, pts[i].lon);
-        if (!Number.isFinite(segD) || segD <= 0) continue;
-        distReal += segD;
-
-        const e1 = pts[i - 1].ele;
-        const e2 = pts[i].ele;
-        if (e1 != null && e2 != null) {
-          const de = e2 - e1;
-          dEle.push(de);
-          if (de > 0) gain += de;
-
-          const slope = (de / segD) * 100;
-          if (slope > 10) distSlope10 += segD;
-          if (slope > 15) distSlope15 += segD;
-        }
-      }
-      if (distReal <= 10) continue;
-
-      // sinuosité
-      const direct = haversine(pts[0].lat, pts[0].lon, pts[pts.length - 1].lat, pts[pts.length - 1].lon);
-      const sinu = distReal / Math.max(direct, minDirectM);
-      const sinuNorm = clamp((sinu - 1.0) / 0.3, 0, 1);
-
-      // terrain heuristic from vertical roughness
-      const hasEle = dEle.length > 0;
-      let terrain = 0;
-      let ipb = 0;
-
-      if (hasEle) {
-        const absDE = dEle.map(x => Math.abs(x));
-        const rough = stddev(absDE);
-        const micro = absDE.reduce((s, x) => s + x, 0) / absDE.length;
-
-        const roughN = clamp((rough - 0.2) / 1.8, 0, 1);
-        const microN = clamp((micro - 0.15) / 1.2, 0, 1);
-        terrain = clamp(0.6 * roughN + 0.4 * microN, 0, 1);
-
-        const lenKm = distReal / 1000;
-        const vm = gain / Math.max(lenKm, 0.01); // m/km
-        const p10 = distSlope10 / distReal;
-        const p15 = distSlope15 / distReal;
-
-        // IPB proxy (0..120)
-        ipb = clamp(0.06 * vm + 30 * p10 + 45 * p15, 0, 120);
-      } else {
-        terrain = 0;
-        ipb = 0;
-      }
-
-      const ipbCoef = 0.004 * ipb;
-      const techCoeff = clamp(0.80 + ipbCoef + 0.20 * terrain + 0.10 * sinuNorm, 0.80, 1.60);
-
-// ---------- SCORES PAR SEGMENT (0–100)
-
-// Technique : conversion du coeff (0.80 → 1.60) vers 0 → 100
-const techSegScore = Math.round(
-  100 * clamp((techCoeff - 0.80) / 0.80, 0, 1)
-);
-
-// Physique : effort + IPB segment
-const segKm = distReal / 1000;
-const effortSeg = Math.sqrt(Math.max(0, segKm)) + (gain / 1000);
-
-// normalisation (valeurs ajustables)
-const effortN = clamp(effortSeg / 3.0, 0, 1);
-const ipbN = clamp(ipb / 120, 0, 1);
-
-const physSegScore = Math.round(
-  100 * clamp(0.70 * effortN + 0.30 * ipbN, 0, 1)
-);
-
-// Score global segment (pondération finale)
-const globalSegScore = Math.round(
-  0.55 * physSegScore + 0.45 * techSegScore
-);
-
-
-      // weighted mean (still computed, even if you use P75 later)
-      sumW += distReal;
-      sumTech += techCoeff * distReal;
-      techValues.push(techCoeff);
-
-      segments.push({
-        from: aIdx,
-        to: bIdx,
-        lenM: Math.round(distReal),
-        sinuosity: Math.round(sinu * 1000) / 1000,
-        sinuNorm: Math.round(sinuNorm * 1000) / 1000,
-        terrain: Math.round(terrain * 1000) / 1000,
-        ipb: Math.round(ipb * 10) / 10,
-        techCoeff: Math.round(techCoeff * 1000) / 1000
-      });
-    }
-
-    const techCoeffTotal = sumW ? (sumTech / sumW) : 0.80;
-    const techCoeffP75 = techValues.length ? percentile(techValues, 0.75) : techCoeffTotal;
-
-    return {
-      segmentLenM,
-      techCoeffTotal: Math.round(techCoeffTotal * 1000) / 1000,
-      techCoeffP75: Math.round(techCoeffP75 * 1000) / 1000,
-      segments
-    };
+    return data; // { ok:true, tech, discipline, meta }
   }
 
   // -------------------------
-  // Surface estimate: road/track/single from geometry (+ elevation roughness if available)
+  // Friendly error mapper
   // -------------------------
-  function estimateSurfaceFromGPX(points, hasElevation) {
-    const winM = 300;
-    let start = 0;
-    let acc = 0;
-
-    let wRoad = 0, wTrack = 0, wSingle = 0;
-
-    for (let i = 2; i < points.length; i++) {
-      const d = haversine(points[i - 1].lat, points[i - 1].lon, points[i].lat, points[i].lon);
-      if (!Number.isFinite(d) || d <= 0) continue;
-      acc += d;
-
-      if (acc >= winM || i === points.length - 1) {
-        const a = points[start];
-        const b = points[i];
-
-        // real distance in window
-        let distReal = 0;
-        for (let k = start + 1; k <= i; k++) {
-          const dd = haversine(points[k - 1].lat, points[k - 1].lon, points[k].lat, points[k].lon);
-          if (dd > 0) distReal += dd;
-        }
-        if (distReal <= 10) { start = i; acc = 0; continue; }
-
-        // sinuosity
-        const direct = haversine(a.lat, a.lon, b.lat, b.lon);
-        const sinu = distReal / Math.max(direct, 1);
-        const sinuN = clamp((sinu - 1.0) / 0.3, 0, 1);
-
-        // curvature proxy: sum of heading changes per km
-        let turn = 0;
-        for (let k = start + 2; k <= i; k++) {
-          const br1 = bearing(points[k - 2], points[k - 1]);
-          const br2 = bearing(points[k - 1], points[k]);
-          let diff = Math.abs(br2 - br1);
-          if (diff > 180) diff = 360 - diff;
-          turn += diff;
-        }
-        const turnPerKm = turn / (distReal / 1000);
-        const turnN = clamp((turnPerKm - 150) / 450, 0, 1);
-
-        // vertical micro-roughness (if available)
-        let roughN = 0;
-        if (hasElevation) {
-          let sumAbs = 0;
-          let c = 0;
-          for (let k = start + 1; k <= i; k++) {
-            const e1 = points[k - 1].ele, e2 = points[k].ele;
-            if (e1 != null && e2 != null) { sumAbs += Math.abs(e2 - e1); c++; }
-          }
-          const micro = c ? (sumAbs / c) : 0;
-          roughN = clamp((micro - 0.15) / 1.2, 0, 1);
-        }
-
-        // scores
-        const singleScore = clamp(0.45 * sinuN + 0.35 * turnN + 0.20 * roughN, 0, 1);
-        const roadScore = clamp(1 - (0.60 * sinuN + 0.30 * turnN + 0.10 * roughN), 0, 1);
-        const trackScore = clamp(1 - Math.abs(singleScore - 0.5) * 2, 0, 1);
-
-        const sum = (singleScore + roadScore + trackScore) || 1;
-        wRoad += distReal * (roadScore / sum);
-        wTrack += distReal * (trackScore / sum);
-        wSingle += distReal * (singleScore / sum);
-
-        start = i;
-        acc = 0;
-      }
-    }
-
-    const total = (wRoad + wTrack + wSingle) || 1;
-    let r = Math.round(100 * (wRoad / total));
-    let t = Math.round(100 * (wTrack / total));
-    let s = Math.round(100 * (wSingle / total));
-    const diff = 100 - (r + t + s);
-
-    if (diff !== 0) {
-      if (r >= t && r >= s) r += diff;
-      else if (t >= r && t >= s) t += diff;
-      else s += diff;
-    }
-
-    return { roadPct: r, trackPct: t, singlePct: s };
+  function friendlyErrorMessage(err) {
+    const msg = (err && err.message) ? String(err.message) : String(err || "Erreur inconnue.");
+    // messages fréquents
+    if (/Aucun point <trkpt>/i.test(msg)) return "Ce fichier GPX ne contient pas de trace exploitable (trkpt absent).";
+    if (/GPX invalide/i.test(msg) || /erreur XML/i.test(msg)) return "GPX invalide : le fichier est corrompu ou mal formé.";
+    if (/trop volumineux/i.test(msg)) return "GPX trop volumineux : essaye une trace plus légère.";
+    if (/OSM coverage too low/i.test(msg)) return "Score technique non calculable automatiquement (données OSM insuffisantes).";
+    if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) return "Impossible de contacter le serveur (réseau/CORS).";
+    return msg;
   }
 
   // -------------------------
   // Main API
   // -------------------------
-  async function analyzeGPX(file) {
-    if (!file) throw new Error("Aucun fichier GPX.");
-    const text = await readFileAsText(file);
-    const points = parseGPXText(text);
-    const stats = computeStats(points);
-
-    // ---- Physical score (0..100): effort + IPB proxy global
-    const D = Number(stats.distanceKm || 0);
-    const H = Number(stats.dplusM || 0);
-    const effort = Math.sqrt(Math.max(0, D)) + (H / 1000);
-
-    let ipbOverall = 0;
-    if (stats.hasElevation && D > 0) {
-      const vm = H / Math.max(D, 0.01); // m/km
-      const p10 = Number(stats.steep?.p10 || 0); // 0..1
-      const p15 = Number(stats.steep?.p15 || 0); // 0..1
-      ipbOverall = clamp(0.06 * vm + 30 * p10 + 45 * p15, 0, 120);
-    }
-
-    const effortN = clamp(effort / 12, 0, 1);
-    const ipbN = clamp(ipbOverall / 120, 0, 1);
-    const physScore = Math.round(100 * clamp(0.70 * effortN + 0.30 * ipbN, 0, 1));
-
-    // ---- Technique (segments) + p75 score
-    const techRaw = computeTechCoeffFromGPX(points, { segmentLenM: 300 });
-    const techCoeffP75 = techRaw.techCoeffP75; // 0.80..1.60
-    const techScore = Math.round(100 * clamp((techCoeffP75 - 0.80) / 0.80, 0, 1));
-
-    // ---- Surface estimate (heuristic)
-    const surfaceEstimate = estimateSurfaceFromGPX(points, stats.hasElevation);
-
-    return {
-      fileName: file.name,
-      distanceKm: stats.distanceKm,
-      dplusM: stats.dplusM,
-      hasElevation: stats.hasElevation,
-      points,
-      steep: stats.steep,
-
-      phys: {
-        effort: Math.round(effort * 1000) / 1000,
-        ipbOverall: Math.round(ipbOverall * 10) / 10,
-        score: physScore
-      },
-
-      tech: {
-        ...techRaw,
-        techCoeffP75,
-        techScore
-      },
-
-      surfaceEstimate
+  async function analyzeGPX(file, opts = {}) {
+    const options = {
+      keepPoints: true,     // true => renvoie points pour profil altimétrique
+      ...opts
     };
+
+    try {
+      setPhase("gpx", "Analyse GPX en cours…", { spinning: true });
+
+      if (!file) throw new Error("Aucun fichier GPX.");
+      if (!/\.gpx$/i.test(file.name || "") && file.type && !/xml|gpx/i.test(file.type)) {
+        // soft warning only
+      }
+
+      // 1) Lire le fichier GPX
+      const gpxText = await readFileAsText(file);
+
+      // 2) Parser localement (stats + score physique)
+      // Simule un petit "progress" pour l'UI (sans vrai streaming)
+      setPhase("gpx", "Lecture et parsing du GPX…", { progress: 0.35, spinning: true });
+      await sleep(20);
+
+      const points = parseGPXText(gpxText);
+
+      setPhase("gpx", "Calcul des statistiques…", { progress: 0.65, spinning: true });
+      await sleep(20);
+
+      const stats = computeStats(points);
+
+      // ---- ScorePhys local (0..100)
+      const D = Number(stats.distanceKm || 0);
+      const H = Number(stats.dplusM || 0);
+      const effort = Math.sqrt(Math.max(0, D)) + (H / 1000);
+
+      let ipbOverall = 0;
+      if (stats.hasElevation && D > 0) {
+        const vm = H / Math.max(D, 0.01); // m/km
+        const p10 = Number(stats.steep?.p10 || 0); // 0..1
+        const p15 = Number(stats.steep?.p15 || 0); // 0..1
+        ipbOverall = clamp(0.06 * vm + 30 * p10 + 45 * p15, 0, 120);
+      }
+
+      const effortN = clamp(effort / 12, 0, 1);
+      const ipbN = clamp(ipbOverall / 120, 0, 1);
+      const physScore = Math.round(100 * clamp(0.70 * effortN + 0.30 * ipbN, 0, 1));
+
+      setPhase("gpx", "Analyse GPX terminée ✅", { progress: 1, spinning: false });
+      await sleep(60);
+
+      // 3) Appel serveur (OSM + TechScore officiel)
+      setPhase("osm", "Analyse OSM en cours… (calcul ScoreTech officiel)", { spinning: true });
+
+      const server = await fetchServerAnalysis(gpxText);
+
+      // 4) Résultats
+      const tech = server.tech || null;
+      const discipline = server.discipline || null;
+
+      const mrs = (tech?.techScoreV2 == null)
+        ? null
+        : Math.round(0.55 * physScore + 0.45 * tech.techScoreV2);
+
+      setPhase("done", "Analyse terminée ✅", { spinning: false });
+
+      return {
+        fileName: file.name,
+
+        // stats GPX locales
+        distanceKm: stats.distanceKm,
+        dplusM: stats.dplusM,
+        hasElevation: stats.hasElevation,
+        steep: stats.steep,
+
+        // points seulement si besoin (profil altimétrique)
+        points: options.keepPoints ? points : undefined,
+
+        // score physique local
+        phys: {
+          effort: Math.round(effort * 1000) / 1000,
+          ipbOverall: Math.round(ipbOverall * 10) / 10,
+          score: physScore
+        },
+
+        // ScoreTech V2 Hybrid officiel (serveur) + Discipline
+        techV2: tech,
+        discipline,
+
+        // Score global
+        mrs,
+
+        // Infos serveur optionnelles
+        serverMeta: server.meta || null
+      };
+    } catch (err) {
+      const msg = friendlyErrorMessage(err);
+      setPhase("error", msg, { spinning: false });
+
+      // On relance une erreur "propre" pour ton UI si tu veux afficher un toast
+      throw new Error(msg);
+    }
+  }
+
+  // -------------------------
+  // Inject minimal spinner CSS (optional helper)
+  // -------------------------
+  // Tu peux appeler window.ensureMTBSpinnerCSS() une fois dans ta page.
+  function ensureMTBSpinnerCSS() {
+    const id = "mtb-spinner-css";
+    if (document.getElementById(id)) return;
+
+    const css = `
+/* MTB Points — status spinner (minimal) */
+.mtb-status{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
+.mtb-status .label{font-size:14px;color:#0f172a}
+.mtb-status .sub{font-size:12px;color:#64748b;margin-top:2px}
+.mtb-spinner{width:18px;height:18px;border-radius:999px;border:2px solid rgba(100,116,139,.35);border-top-color:rgba(37,99,235,.95);animation:mtbSpin .9s linear infinite}
+@keyframes mtbSpin{to{transform:rotate(360deg)}}
+.mtb-progress{height:6px;border-radius:999px;background:#e5e7eb;overflow:hidden}
+.mtb-progress > div{height:100%;width:0%;background:rgba(37,99,235,.95);transition:width .2s ease}
+.mtb-badge{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid #e5e7eb;color:#64748b}
+.mtb-badge.ok{color:#16a34a;border-color:rgba(22,163,74,.35)}
+.mtb-badge.warn{color:#ea580c;border-color:rgba(234,88,12,.35)}
+.mtb-badge.err{color:#dc2626;border-color:rgba(220,38,38,.35)}
+    `.trim();
+
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = css;
+    document.head.appendChild(style);
   }
 
   window.analyzeGPX = analyzeGPX;
+  window.ensureMTBSpinnerCSS = ensureMTBSpinnerCSS;
 })();
-
