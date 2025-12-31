@@ -27,6 +27,7 @@
     .toc a:hover{text-decoration:underline}
     .tag{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:var(--muted);margin-right:6px}
     .note{border-left:4px solid var(--blue);padding:10px 12px;background:#eff6ff;border-radius:10px}
+    .warn{border-left:4px solid #ef4444;padding:10px 12px;background:#fff1f2;border-radius:10px}
   </style>
 </head>
 <body>
@@ -46,17 +47,18 @@
 <div class="wrap">
 
   <div class="card">
-    <div class="tag">MVP</div>
-    <div class="tag">GPX</div>
-    <div class="tag">OSM</div>
-    <p class="muted">Pour les règles d’éligibilité, statuts, import, litiges : voir <a href="reglement.html">Règlement</a>.</p>
+    <div class="tag">OFFICIEL</div>
+    <div class="tag">Hybrid</div>
+    <div class="tag">OSM + GPX</div>
+    <p class="muted">Cette page décrit les formules de calcul. Pour l’éligibilité, import, contrôle, litiges : voir <a href="reglement.html">Règlement</a>.</p>
 
     <h2>Sommaire</h2>
     <ul class="toc">
       <li><a href="#mrs">1. Score Épreuve (MRS)</a></li>
       <li><a href="#phys">2. Score physique (ScorePhys)</a></li>
-      <li><a href="#tech">3. Score technique (ScoreTech — OSM + pente)</a></li>
-      <li><a href="#calib">4. Paramètres & calibration</a></li>
+      <li><a href="#tech">3. Score technique OFFICIEL (ScoreTech V2 — Hybrid obligatoire)</a></li>
+      <li><a href="#quality">4. Qualité des données & cas non calculables</a></li>
+      <li><a href="#params">5. Paramètres & calibration</a></li>
     </ul>
   </div>
 
@@ -70,116 +72,126 @@
   <div class="card" id="phys">
     <h2>2. Score physique (ScorePhys)</h2>
 
-    <h3>2.1 Objectif</h3>
-    <p>Le score physique modélise l’effort physiologique global imposé par l’épreuve à partir du GPX. Il doit refléter la distance, le dénivelé, et la sévérité du relief (pentes répétées/raides), tout en restant stable et comparable entre épreuves.</p>
-
-    <h3>2.2 Données d’entrée (GPX)</h3>
+    <h3>2.1 Données d’entrée (GPX)</h3>
     <ul>
       <li><strong>D</strong> : distance totale (km)</li>
       <li><strong>H⁺</strong> : dénivelé positif total (m)</li>
-      <li><strong>IPB</strong> : indice de pénibilité (distribution des pentes : segments raides + fréquence)</li>
+      <li><strong>IPB</strong> : indice de pénibilité (distribution des pentes)</li>
     </ul>
 
-    <h3>2.3 Calcul</h3>
-    <p><strong>Étape 1 — Effort de base</strong></p>
-    <pre><code>EffortBase = sqrt(D) + (H⁺ / 1000)</code></pre>
-    <p class="muted">√D limite l’effet “longueur pure”, H⁺/1000 valorise le relief.</p>
+    <h3>2.2 Calcul</h3>
+    <pre><code>EffortBase = sqrt(D) + (H⁺ / 1000)
 
-    <p><strong>Étape 2 — Normalisation</strong></p>
-    <pre><code>EffortNorm = clamp(EffortBase / 10, 0, 1)
-IPB_norm   = clamp(IPB / 120, 0, 1)</code></pre>
-    <p class="muted">10 et 120 sont des références calibrables (MVP).</p>
+EffortNorm = clamp(EffortBase / 10, 0, 1)
+IPB_norm   = clamp(IPB / 120, 0, 1)
 
-    <p><strong>Étape 3 — Combinaison</strong></p>
-    <pre><code>ScorePhys = round(100 × clamp(0.70×EffortNorm + 0.30×IPB_norm, 0, 1))</code></pre>
-    <p class="muted">70% effort global, 30% sévérité (IPB).</p>
-
-    <h3>2.4 Interprétation (indicative)</h3>
-    <ul>
-      <li>0 – 25 : Faible</li>
-      <li>25 – 45 : Modéré</li>
-      <li>45 – 65 : Soutenu</li>
-      <li>65 – 80 : Très exigeant</li>
-      <li>80 – 100 : Extrême / ultra</li>
-    </ul>
+ScorePhys = round(100 × clamp(0.70×EffortNorm + 0.30×IPB_norm, 0, 1))</code></pre>
+    <p class="muted">Les constantes (10, 120) sont calibrables.</p>
   </div>
 
   <div class="card" id="tech">
-    <h2>3. Score technique (ScoreTech — OSM + pente)</h2>
+    <h2>3. Score technique OFFICIEL (ScoreTech V2 — Hybrid obligatoire)</h2>
 
     <div class="note">
-      <strong>Principe clé :</strong> un GPX seul ne décrit pas la “nature du terrain” (rocaille, racines, surface).  
-      MTB Points calcule donc ScoreTech en combinant <strong>(1) OSM</strong> (tags surface/chemin/mtb:scale…) + <strong>(2) la pente locale</strong> (issue du GPX) + <strong>(3) la sinuosité</strong>.
+      <strong>Mode officiel unique :</strong> ScoreTech V2 est <strong>hybride obligatoire</strong> :<br>
+      <strong>OSM = socle</strong> (terrain/surface/difficulté déclarée) + <strong>bonus GPX capé</strong> (pente + virages + sinuosité).<br>
+      Objectif : un score à la fois <strong>audit-able</strong> (OSM) et <strong>réaliste VTT</strong> (bonus GPX), sans être sensible au bruit.
     </div>
 
-    <h3>3.1 Données d’entrée</h3>
+    <h3>3.1 Socle OSM : TerrainScore (0..1)</h3>
+    <p>On échantillonne la trace tous les <code>~120 m</code>. Pour chaque point, on récupère les tags OpenStreetMap (<code>mtb:scale</code>, <code>smoothness</code>, <code>highway</code>, <code>surface</code>, <code>tracktype</code>, <code>sac_scale</code>).</p>
+
+    <p><strong>Conversion tags → TerrainScore (0..1)</strong></p>
+    <pre><code>Priorité
+1) mtb:scale : TerrainScore = clamp(scale/5, 0, 1)
+2) smoothness (excellent/good/intermediate/bad/very_bad..)
+3) highway + tracktype + surface (règles)
+   route/asphalt -> 0.0
+   track grade1  -> 0.2
+   track grade2  -> 0.35
+   track grade3  -> 0.5
+   path          -> 0.6
+   rock/stone..  -> +0.2 (cap 1.0)</code></pre>
+
+    <p><strong>Agrégation</strong> : percentile 75 pondéré par la distance représentée par chaque échantillon.</p>
+    <pre><code>TerrainScore_OSM = weightedPercentile(TerrainScore_samples, weights=sample_distance, p=0.75)</code></pre>
+
+    <h3>3.2 Bonus GPX (capé) : GPXTech (0..1)</h3>
+    <p>On découpe la trace en segments d’environ <code>200 m</code>. Sur chaque segment, on calcule :</p>
     <ul>
-      <li><strong>GPX</strong> : points (lat/lon/ele) → segmentation, sinuosité, pentes</li>
-      <li><strong>OSM</strong> : tags le long du tracé (échantillonnage ~200 m) : <code>highway</code>, <code>surface</code>, <code>smoothness</code>, <code>tracktype</code>, <code>mtb:scale</code>, <code>sac_scale</code></li>
+      <li><strong>SinuNorm</strong> : sinuosité normalisée</li>
+      <li><strong>TurnNorm</strong> : pilotage (somme des changements de cap / km)</li>
+      <li><strong>SlopeTech</strong> : pente technique (proportion de pentes fortes + percentile 90)</li>
     </ul>
 
-    <h3>3.2 Segmentation</h3>
-    <p>La trace est découpée en segments par distance (fenêtres typiques 300 m, bornées 200–500 m).</p>
+    <p><strong>Anti-bruit (obligatoire)</strong> : on ignore les pas GPS trop courts/longs et les spikes altimétriques.</p>
+    <pre><code>Filtrage GPX
+- ignorer si d &lt; 3 m (jitter) ou d &gt; 80 m (trous)
+- ignorer si |Δele| &gt; 25 m sur un pas
+- ignorer si |grade| &gt; 45%</code></pre>
 
-    <h3>3.3 Indicateurs par segment</h3>
+    <p><strong>SlopeTech (0..1)</strong></p>
+    <pre><code>p10  = proportion(|grade| ≥ 0.10)
+p16  = proportion(|grade| ≥ 0.16)
+gP90 = percentile90(|grade|)
 
-    <p><strong>A) Sinuosité</strong></p>
-    <pre><code>Sinuosity = dist_reelle / dist_vol_oiseau
+SlopeTech = clamp(0.55*p10 + 0.45*p16 + 0.55*clamp((gP90-0.08)/0.22,0,1), 0, 1)</code></pre>
+
+    <p><strong>TurnNorm (0..1)</strong></p>
+    <pre><code>turnPerKm = sum(|Δbearing|) / km
+TurnNorm  = clamp((turnPerKm - 120) / 500, 0, 1)</code></pre>
+
+    <p><strong>SinuNorm (0..1)</strong></p>
+    <pre><code>Sinuosity = dist_reelle / dist_oiseau
 SinuNorm  = clamp((Sinuosity - 1.0) / 0.30, 0, 1)</code></pre>
 
-    <p><strong>B) Pente “technique” (GPX)</strong></p>
-    <pre><code>grade   = Δele / Δdist   (ex: 0.15 = 15%)
-p_steep = proportion(|grade| ≥ 0.12)
-p_very  = proportion(|grade| ≥ 0.18)
-g_max   = percentile90(|grade|)
+    <p><strong>GPXTech par segment (0..1)</strong></p>
+    <pre><code>GPXTech_seg = clamp(0.45*SlopeTech + 0.35*TurnNorm + 0.20*SinuNorm, 0, 1)</code></pre>
 
-SlopeTech =
-  clamp(
-    0.60*p_steep
-  + 0.40*p_very
-  + 0.50*clamp((g_max - 0.10)/0.20, 0, 1),
-  0, 1
-)</code></pre>
+    <p><strong>Agrégation</strong> : percentile 75 pondéré par la longueur de segment.</p>
+    <pre><code>GPXTech = weightedPercentile(GPXTech_seg, weights=seg_length, p=0.75)</code></pre>
 
-    <p><strong>C) TerrainScore (OSM) — 0 à 1</strong></p>
-    <p class="muted">Priorité : mtb:scale → smoothness → highway/surface/tracktype. Fallback si OSM indisponible.</p>
-    <pre><code>TerrainScore (priorités)
-1) si mtb:scale présent : score = clamp(mtb_scale/5, 0, 1)
-2) sinon smoothness :
-   excellent/good -> 0.2–0.3
-   intermediate   -> 0.5
-   bad            -> 0.7
-   very_bad..     -> 0.85–1.0
-3) sinon highway/surface/tracktype :
-   asphalt/cycleway/road -> 0.0
-   track + grade1        -> 0.2
-   track + grade2        -> 0.35
-   track + grade3        -> 0.5
-   path                  -> 0.6
-   surface rock/stone... -> +0.2 (cap 1.0)
-Fallback si OSM vide : TerrainScore = 0.40</code></pre>
+    <h3>3.3 Fusion officielle : OSM socle + bonus GPX capé</h3>
+    <p>Le bonus GPX est <strong>capé</strong> pour éviter qu’un GPX bruité sur-gonfle le score.</p>
+    <pre><code>Base     = 0.80 * TerrainScore_OSM
+Bonus    = min(0.20 * GPXTech, BONUS_CAP)
 
-    <h3>3.4 Coefficient technique segment</h3>
-    <pre><code>TechCoeff_seg =
-  clamp(
-    0.80
-  + 0.18*TerrainScore
-  + 0.14*SinuNorm
-  + 0.18*SlopeTech,
-    0.80, 1.80
-  )</code></pre>
+Tech01   = clamp(Base + Bonus, 0, 1)
+ScoreTech = round(100 * Tech01)
 
-    <h3>3.5 Agrégation (percentile 75 pondéré)</h3>
-    <p>On agrège via un percentile 75 pondéré par la longueur des segments, afin de refléter les secteurs “déterminants”.</p>
-    <pre><code>TechCoeff_P75 = weightedPercentile(TechCoeff_seg, weights=seg_length, p=0.75)</code></pre>
-
-    <h3>3.6 Score technique final (0–100)</h3>
-    <pre><code>ScoreTech = round(100 × clamp((TechCoeff_P75 − 0.80) / 1.00, 0, 1))</code></pre>
-
-    <p class="muted">Interprétation rapide : 0–30 roulants / 30–60 mixte / 60–85 technique / 85–100 très technique (alpin/rocailleux).</p>
+où BONUS_CAP = 0.15 (soit +15 points max sur 100)</code></pre>
   </div>
 
-  <div class="card" id="calib">
-    <h2>4. Paramètres & calibration</h2>
+  <div class="card" id="quality">
+    <h2>4. Qualité des données & cas non calculables</h2>
+
+    <div class="warn">
+      <strong>OSM est obligatoire :</strong> si la couverture OSM est insuffisante, ScoreTech n’est pas calculable automatiquement.
+    </div>
+
+    <pre><code>coverage = matched_samples / total_samples
+
+Si coverage &lt; 0.30
+=> ScoreTech = non calculable (à valider / compléter)</code></pre>
+
+    <p class="muted">Ce comportement évite d’attribuer un ScoreTech arbitraire lorsque les tags OSM sont absents ou incohérents.</p>
+  </div>
+
+  <div class="card" id="params">
+    <h2>5. Paramètres & calibration</h2>
     <ul>
-      <
+      <li><strong>OSM sampling</strong> : 120 m (plus fin si besoin, mais attention au coût Overpass).</li>
+      <li><strong>Segment GPX</strong> : 200 m (tech-sensitive).</li>
+      <li><strong>Percentile</strong> : P75 (robuste : valorise les sections déterminantes sans être dominé par les portions faciles).</li>
+      <li><strong>Cap bonus</strong> : 0.15 (= +15/100 max). Ajustable après calibration terrain.</li>
+      <li><strong>Pondération</strong> : OSM 80% / GPX 20% (équilibre “audit” + “réalité VTT”).</li>
+    </ul>
+
+    <pre><code>Rappel
+MRS = round(0.55 × ScorePhys + 0.45 × ScoreTech)</code></pre>
+  </div>
+
+</div>
+</body>
+</html>
+
