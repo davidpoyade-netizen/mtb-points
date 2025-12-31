@@ -3,54 +3,189 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Créer un événement</title>
+  <title>Créer un événement — MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-    .wrap{max-width:900px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    label{display:block;margin-top:10px;font-weight:700}
-    input,textarea{width:100%;padding:10px;margin-top:6px;border:1px solid #cbd5e1;border-radius:10px}
-    .muted{color:#667085}
-    .btn{margin-top:14px;padding:12px 16px;border-radius:10px;border:0;background:#2563eb;color:#fff;cursor:pointer}
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 12px 34px rgba(2,6,23,.12);
+      --r:18px;
+      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      color:var(--blue);font-weight:800;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+
+    /* Layout */
+    .wrap{max-width:980px;margin:24px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .hero .muted{margin-top:8px;line-height:1.55;color:#334155}
+
+    /* Form */
+    .formGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+    @media(max-width:900px){ .formGrid{grid-template-columns:1fr} }
+
+    label{display:block;font-weight:900;font-size:12px;color:#0f172a}
+    input,textarea{
+      width:100%;
+      padding:11px 12px;
+      margin-top:6px;
+      border:1px solid #cbd5e1;
+      border-radius:14px;
+      background:#fff;
+      outline:none;
+    }
+    input:focus,textarea:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+    textarea{resize:vertical;min-height:120px}
+    input::placeholder,textarea::placeholder{color:#94a3b8}
+
+    .full{grid-column:1 / -1}
+
+    /* Buttons */
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:11px 14px;border-radius:14px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
+      text-decoration:none;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(2,6,23,.10)}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ghost{background:#f8fafc}
+    .hint{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+    .note{
+      margin-top:14px;
+      border:1px solid #dbeafe;
+      background:#eff6ff;
+      color:#1e3a8a;
+      border-radius:16px;
+      padding:12px;
+      line-height:1.55;
+      font-size:13px;
+    }
+    footer{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
   </style>
 </head>
 <body>
 
-<header>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Créer un événement</h1>
+  </div>
   <nav>
-<a href="index.html">Acceuil</a>
-<a href="public-ranking.html">Classement</a>
-<a href="meetings.html">Événements</a>
-<a href="reglement.html">Règlement</a>
-<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
-<a href="about.html">À propos</a>
-<a href="login.html">Connexion</a>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html" class="active">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="methodologie.html">Méthodologie</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
   </nav>
-  <div class="muted">Créer un événement (regroupe plusieurs distances)</div>
 </header>
 
 <div class="wrap">
   <div class="card">
-    <h2 style="margin-top:0;">Créer un événement</h2>
-    <p class="muted" style="margin-top:6px;">
-      Exemple : “Roc d’Azur 2026” qui contient plusieurs épreuves (20/30/40/50 km…).
-    </p>
 
-    <label>Nom de l’événement *</label>
-    <input id="mName" type="text" placeholder="Ex : Roc d’Azur 2026" />
+    <section class="hero">
+      <h2>Créer un événement</h2>
+      <div class="muted">
+        Un événement regroupe plusieurs épreuves (distances / catégories). Exemple : <b>“Roc d’Azur 2026”</b>
+        qui contient plusieurs courses (20/30/40/50 km…).
+      </div>
+      <div class="note">
+        💡 Conseil : mets un nom clair + l’année, et utilise le commentaire pour le site web, parking,
+        organisateur, infos logistiques, etc.
+      </div>
+    </section>
 
-    <label>Date</label>
-    <input id="mDate" type="date" />
+    <div class="formGrid">
 
-    <label>Lieu</label>
-    <input id="mLocation" type="text" placeholder="Ex : Fréjus, Base Nature" />
+      <div class="full">
+        <label for="mName">Nom de l’événement *</label>
+        <input id="mName" type="text" placeholder="Ex : Roc d’Azur 2026" />
+        <div class="hint">Champ obligatoire — utilisé pour l’affichage et la recherche.</div>
+      </div>
 
-    <label>Commentaire</label>
-    <textarea id="mComment" rows="5" placeholder="Infos générales, organisateur, site web, parking, etc."></textarea>
+      <div>
+        <label for="mDate">Date</label>
+        <input id="mDate" type="date" />
+      </div>
 
-    <button id="saveMeetingBtn" class="btn" type="button">Enregistrer l’événement</button>
+      <div>
+        <label for="mLocation">Lieu</label>
+        <input id="mLocation" type="text" placeholder="Ex : Fréjus, Base Nature" />
+      </div>
+
+      <div class="full">
+        <label for="mComment">Commentaire</label>
+        <textarea id="mComment" rows="6" placeholder="Infos générales, organisateur, site web, parking, etc."></textarea>
+      </div>
+
+    </div>
+
+    <div class="row">
+      <a class="btn ghost" href="meetings.html">← Retour liste</a>
+      <button id="saveMeetingBtn" class="btn primary" type="button">Enregistrer l’événement</button>
+    </div>
+
+    <footer>
+      Les événements sont stockés via <code style="background:#f1f5f9;border:1px solid #e5e7eb;border-radius:8px;padding:2px 6px;">js/storage.js</code>.
+    </footer>
   </div>
 </div>
 
