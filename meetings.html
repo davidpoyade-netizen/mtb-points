@@ -3,53 +3,213 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Événements</title>
+  <title>Événements — MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:16px;
+      --ok:#16a34a;--ok2:#22c55e;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:10px;
+      color:var(--blue);
+      font-weight:800;
+      font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+    }
+
+    /* Layout */
     .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .muted{color:#667085}
-    .list{display:grid;gap:12px;margin-top:12px}
-    .item{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.05);text-decoration:none;color:inherit}
-    .title{font-weight:800;font-size:18px}
-    .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#f1f5f9;margin-left:8px}
-    input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:18px;
+      padding:16px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 240px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 220px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .hero .muted{margin-top:6px;line-height:1.55;color:#334155}
+
+    /* Controls */
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+    label{display:block;font-weight:900;font-size:12px;color:#0f172a}
+    input{
+      width:100%;padding:10px;margin-top:6px;
+      border:1px solid #cbd5e1;border-radius:12px;background:#fff;
+    }
+    input::placeholder{color:#94a3b8}
+    .kpi{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px;
+      white-space:nowrap;
+    }
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
+      text-decoration:none;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
+    .btn.primary{background:var(--ok);border-color:var(--ok);color:#fff}
+    .btn.primary:hover{background:#15803d;border-color:#15803d}
+
+    /* List */
+    .list{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+    @media(max-width:900px){ .list{grid-template-columns:1fr} }
+
+    .item{
+      display:block;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:14px;
+      background:#fff;
+      text-decoration:none;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .item:hover{
+      transform:translateY(-2px);
+      box-shadow:0 16px 28px rgba(2,6,23,.10);
+      border-color:#dbeafe;
+    }
+    .topline{
+      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;
+    }
+    .title{
+      font-weight:900;
+      font-size:16px;
+      letter-spacing:-.1px;
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      background:#f1f5f9;border:1px solid var(--border);
+      font-weight:900;font-size:12px;color:#0f172a;
+      white-space:nowrap;
+    }
+    .meta{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5}
+    .comment{
+      margin-top:8px;
+      color:#334155;
+      font-size:13px;
+      line-height:1.55;
+      border-top:1px dashed var(--border);
+      padding-top:10px;
+    }
+    .empty{
+      margin-top:14px;
+      border:1px dashed var(--border);
+      border-radius:18px;
+      padding:14px;
+      color:var(--muted);
+      background:#fff;
+    }
+
+    footer{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
   </style>
 </head>
 <body>
 
-<header>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Événements</h1>
+    <span class="kpi">Résultats : <span id="count">0</span></span>
+  </div>
+
   <nav>
     <a href="index.html">Accueil</a>
-    <a href="events.html">Épreuves</a>
-    <a href="meetings.html">Événements</a>
-    <a href="events.html">Épreuves</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html" class="active">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="methodologie.html">Méthodologie</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
   </nav>
-  <div class="muted">Regroupe plusieurs épreuves (20/30/40/50 km…)</div>
+
+  <div class="lang">
+    <button class="btn" id="btnFR" type="button">FR</button>
+    <button class="btn" id="btnEN" type="button">EN</button>
+  </div>
 </header>
 
 <div class="wrap">
   <div class="card">
-    <label style="font-weight:700;display:block;margin-bottom:6px;">Recherche</label>
-    <input id="q" type="text" placeholder="Nom, lieu, commentaire..." />
-    <div class="muted" style="margin-top:10px;">
-      Résultats : <strong id="count">0</strong>
-    </div>
-  </div>
-<div style="margin:14px 0;">
-  <a href="meeting-create.html"
-     style="display:inline-block;padding:12px 16px;
-            background:#16a34a;color:#fff;
-            border-radius:10px;
-            text-decoration:none;
-            font-weight:700;">
-    + Créer un événement
-  </a>
-</div>
 
-  <div id="meetingsList" class="list"></div>
+    <div class="hero">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div style="min-width:260px;flex:1">
+          <h2>Liste des événements</h2>
+          <div class="muted">
+            Recherche par nom, lieu, commentaire. Clique sur un événement pour voir ses épreuves.
+          </div>
+        </div>
+        <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
+      </div>
+
+      <div class="row" style="margin-top:12px;align-items:end">
+        <div style="flex:1;min-width:240px">
+          <label for="q">Recherche</label>
+          <input id="q" type="text" placeholder="Nom, lieu, commentaire..." />
+        </div>
+      </div>
+    </div>
+
+    <div id="meetingsList" class="list"></div>
+    <div id="emptyBox" class="empty" style="display:none;">Aucun événement enregistré.</div>
+
+    <footer>
+      Astuce : tu peux rattacher une épreuve à un événement au moment de la création de l’épreuve.
+    </footer>
+  </div>
 </div>
 
 <script src="js/storage.js"></script>
@@ -58,35 +218,41 @@
   const list = document.getElementById("meetingsList");
   const qEl = document.getElementById("q");
   const countEl = document.getElementById("count");
+  const emptyBox = document.getElementById("emptyBox");
 
   function normalize(s){
     return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
   }
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
   function valOrDash(x){ const s = String(x||"").trim(); return s ? s : "—"; }
 
-  // loadMeetings() vient de storage.js (ajouté précédemment)
   const meetings = (typeof loadMeetings === "function") ? loadMeetings() : [];
 
   function render(items){
     countEl.textContent = String(items.length);
 
     if (!items.length) {
-      list.innerHTML = `<div class="muted">Aucun événement enregistré.</div>`;
+      list.innerHTML = "";
+      emptyBox.style.display = "block";
       return;
     }
+    emptyBox.style.display = "none";
 
     list.innerHTML = items.map(m => {
       const nRaces = (m.raceIds && m.raceIds.length) ? m.raceIds.length : 0;
+      const date = valOrDash(m.date);
+      const loc = valOrDash(m.location);
+
       return `
         <a class="item" href="meeting.html?id=${encodeURIComponent(m.id)}">
-          <div class="title">
-            ${valOrDash(m.name)}
-            <span class="badge">${nRaces} épreuve${nRaces>1?"s":""}</span>
+          <div class="topline">
+            <div class="title">${esc(valOrDash(m.name))}</div>
+            <span class="badge">🏁 ${nRaces} épreuve${nRaces>1?"s":""}</span>
           </div>
-          <div class="muted" style="margin-top:6px;">
-            ${valOrDash(m.date)} • ${valOrDash(m.location)}
-          </div>
-          ${m.comment ? `<div class="muted" style="margin-top:6px;">${m.comment}</div>` : ``}
+          <div class="meta">📅 ${esc(date)} &nbsp;•&nbsp; 📍 ${esc(loc)}</div>
+          ${m.comment ? `<div class="comment">${esc(m.comment)}</div>` : ``}
         </a>
       `;
     }).join("");
