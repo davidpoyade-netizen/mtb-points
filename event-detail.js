@@ -94,33 +94,42 @@ function colorFromScore(score){
 }
 
 /* ---------------- Profile + Tooltip ---------------- */
-function renderElevationProfile(canvas, tooltipEl, infoEl, pts, hasElevation, segments){
+
+function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+function colorFromScore(score){
+  const s = Number(score);
+  if (!Number.isFinite(s)) return "#94a3b8"; // gris
+  if (s < 25) return "#22c55e"; // vert
+  if (s < 50) return "#3b82f6"; // bleu
+  if (s < 75) return "#ef4444"; // rouge
+  return "#111827";             // noir
+}
+
+function renderElevationProfile(canvas, infoEl, pts, hasElevation, segments){
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
-  // resize canvas width to container
+  // Responsive width
   const wrapWidth = canvas.parentElement ? canvas.parentElement.clientWidth : canvas.width;
-  canvas.width = Math.max(320, Math.floor(wrapWidth));
+  canvas.width = Math.max(320, Math.floor(wrapWidth - 24));
+  const W = canvas.width;
+  const H = canvas.height;
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.clearRect(0,0,W,H);
 
   if (!Array.isArray(pts) || pts.length < 2){
     if (infoEl) infoEl.textContent = "Pas assez de points GPX pour le profil.";
-    if (tooltipEl) tooltipEl.style.display = "none";
     return;
   }
   if (!hasElevation){
     if (infoEl) infoEl.textContent = "Altitude indisponible → profil non calculable.";
-    if (tooltipEl) tooltipEl.style.display = "none";
     ctx.strokeStyle = "#94a3b8";
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height - 20);
-    ctx.lineTo(canvas.width, canvas.height - 20);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, H-20); ctx.lineTo(W, H-20); ctx.stroke();
     return;
   }
 
-  // distance cumulated
+  // --- distance cumulative (haversine) ---
   const R = 6371000;
   const toRad = d => (d * Math.PI) / 180;
   const hav = (a, b) => {
@@ -134,132 +143,162 @@ function renderElevationProfile(canvas, tooltipEl, infoEl, pts, hasElevation, se
 
   const dist = [0];
   for (let i=1;i<pts.length;i++) dist[i] = dist[i-1] + hav(pts[i-1], pts[i]);
-  const total = dist[dist.length-1] || 1;
+  const totalM = dist[dist.length-1] || 1;
+  const totalKm = totalM / 1000;
 
+  // --- min/max elevation ---
   const elev = pts.map(p => p.ele);
   let minE = Math.min(...elev);
   let maxE = Math.max(...elev);
-  if (!isFinite(minE) || !isFinite(maxE) || (maxE - minE) < 1){
+  if (!isFinite(minE) || !isFinite(maxE) || (maxE-minE) < 1){
     if (infoEl) infoEl.textContent = "Altitude non exploitable → profil non calculable.";
-    if (tooltipEl) tooltipEl.style.display = "none";
     return;
   }
 
-  // layout
-  const padL=34,padR=10,padT=10,padB=24;
-  const W=canvas.width, H=canvas.height;
+  // --- layout ---
+  const padL=34, padR=10, padT=10, padB=28;
   const innerW=W-padL-padR, innerH=H-padT-padB;
-
-  ctx.fillStyle = "#111";
-  ctx.font = "12px Arial";
-  ctx.fillText(`${Math.round(maxE)} m`, 6, padT+12);
-  ctx.fillText(`${Math.round(minE)} m`, 6, H-padB);
-
-  // baseline
-  ctx.strokeStyle = "#111";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(padL, H-padB);
-  ctx.lineTo(W-padR, H-padB);
-  ctx.stroke();
+  const baseY = H - padB;
 
   function xy(i){
-    const x = padL + (dist[i]/total) * innerW;
-    const y = padT + (1 - (pts[i].ele - minE)/(maxE-minE)) * innerH;
+    const x = padL + (dist[i]/totalM)*innerW;
+    const y = padT + (1 - (pts[i].ele - minE)/(maxE-minE))*innerH;
     return {x,y};
   }
 
-  // build pixel ranges for hover
-  const segPix = [];
+  // --- axes labels (alt) ---
+  ctx.fillStyle = "#111";
+  ctx.font = "12px Arial";
+  ctx.fillText(`${Math.round(maxE)} m`, 6, padT+12);
+  ctx.fillText(`${Math.round(minE)} m`, 6, baseY);
 
-  const segs = Array.isArray(segments) ? segments : [];
-  if (segs.length){
-    ctx.lineWidth = 2.8;
+  // --- bottom axis baseline ---
+  ctx.strokeStyle = "#111";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, baseY);
+  ctx.lineTo(W-padR, baseY);
+  ctx.stroke();
 
-    for (const seg of segs){
-      const a = clamp(Number(seg.from), 0, pts.length-1);
-      const b = clamp(Number(seg.to), 0, pts.length-1);
-      if (!Number.isFinite(a) || !Number.isFinite(b) || b <= a) continue;
+  // --- X ticks every 5 km ---
+  const stepKm = 5;
+  const maxTick = Math.floor(totalKm / stepKm) * stepKm;
 
-      const x1 = xy(a).x;
-      const x2 = xy(b).x;
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.fillStyle = "#334155";
+  ctx.font = "11px Arial";
 
-      // score priority: globalSegScore -> phys/tech -> techCoeff -> default
-      let segScore = Number(seg.globalSegScore);
-      if (!Number.isFinite(segScore)) segScore = Number(seg.techSegScore);
-      if (!Number.isFinite(segScore)) {
-        const tc = Number(seg.techCoeff);
-        if (Number.isFinite(tc)) segScore = 100 * clamp((tc - 0.80) / 0.80, 0, 1);
-      }
-      if (!Number.isFinite(segScore)) segScore = 0;
-
-      segPix.push({ x1: Math.min(x1,x2), x2: Math.max(x1,x2), seg, segScore });
-
-      ctx.strokeStyle = colorFromScore(segScore);
-      ctx.beginPath();
-      const p0 = xy(a);
-      ctx.moveTo(p0.x, p0.y);
-      for (let i=a+1;i<=b;i++){
-        const p = xy(i);
-        ctx.lineTo(p.x, p.y);
-      }
-      ctx.stroke();
-    }
-
-    if (infoEl) {
-      infoEl.textContent =
-        `Profil coloré par difficulté (segments) • ${(total/1000).toFixed(1).replace(".", ",")} km • Alt ${Math.round(minE)}–${Math.round(maxE)} m`;
-    }
-  } else {
-    // fallback mono-couleur
-    ctx.strokeStyle = "#2563eb";
-    ctx.lineWidth = 2.4;
+  for (let k=0; k<=maxTick; k+=stepKm){
+    const x = padL + (k/totalKm)*innerW;
+    // tick
     ctx.beginPath();
-    for (let i=0;i<pts.length;i++){
+    ctx.moveTo(x, baseY);
+    ctx.lineTo(x, baseY+5);
+    ctx.stroke();
+    // label
+    const label = `${k} km`;
+    ctx.fillText(label, x-12, baseY+18);
+  }
+
+  // --- segments coloring (fill under curve + draw line) ---
+  const segs = Array.isArray(segments) ? segments : [];
+
+  // fallback if no segments: draw one filled area (blue)
+  if (!segs.length){
+    // fill area
+    ctx.fillStyle = "rgba(37,99,235,0.15)";
+    ctx.beginPath();
+    let p0 = xy(0);
+    ctx.moveTo(p0.x, baseY);
+    ctx.lineTo(p0.x, p0.y);
+    for (let i=1;i<pts.length;i++){
       const p = xy(i);
-      if (i===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+      ctx.lineTo(p.x, p.y);
+    }
+    const pn = xy(pts.length-1);
+    ctx.lineTo(pn.x, baseY);
+    ctx.closePath();
+    ctx.fill();
+
+    // line
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(p0.x, p0.y);
+    for (let i=1;i<pts.length;i++){
+      const p = xy(i);
+      ctx.lineTo(p.x, p.y);
     }
     ctx.stroke();
 
-    if (infoEl) {
-      infoEl.textContent =
-        `Distance profilée : ${(total/1000).toFixed(1).replace(".", ",")} km • Altitude min/max : ${Math.round(minE)}–${Math.round(maxE)} m`;
-    }
+    if (infoEl) infoEl.textContent = `Profil • ${totalKm.toFixed(1).replace(".", ",")} km • Alt ${Math.round(minE)}–${Math.round(maxE)} m`;
+    return;
   }
 
-  // tooltip
-  if (!tooltipEl) return;
+  // draw each segment: first fill polygon to baseline, then line on top
+  for (const seg of segs){
+    const a = clamp(seg.from ?? 0, 0, pts.length-1);
+    const b = clamp(seg.to ?? 0, 0, pts.length-1);
+    if (b <= a) continue;
 
-  function hideTip(){ tooltipEl.style.display = "none"; }
-  canvas.onmouseleave = hideTip;
+    const col = colorFromScore(seg.globalSegScore);
+    // fill with alpha
+    ctx.fillStyle = col + "22"; // add transparency (works for hex like #RRGGBB)
+    // some browsers don't like hex+alpha. safer:
+    // ctx.fillStyle = hexToRgba(col, 0.18);
 
-  canvas.onmousemove = (e) => {
-    if (!segPix.length) { hideTip(); return; }
+    ctx.beginPath();
+    const pA = xy(a);
+    ctx.moveTo(pA.x, baseY);
+    ctx.lineTo(pA.x, pA.y);
+    for (let i=a+1;i<=b;i++){
+      const p = xy(i);
+      ctx.lineTo(p.x, p.y);
+    }
+    const pB = xy(b);
+    ctx.lineTo(pB.x, baseY);
+    ctx.closePath();
+    // if your browser ignores #RRGGBB22, comment the fillStyle above and use this helper (see note)
+    ctx.fill();
+  }
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+  // line on top per segment (for crispness)
+  ctx.lineWidth = 2.5;
+  for (const seg of segs){
+    const a = clamp(seg.from ?? 0, 0, pts.length-1);
+    const b = clamp(seg.to ?? 0, 0, pts.length-1);
+    if (b <= a) continue;
 
-    const hit = segPix.find(s => x >= s.x1 && x <= s.x2);
-    if (!hit) { hideTip(); return; }
+    ctx.strokeStyle = colorFromScore(seg.globalSegScore);
+    ctx.beginPath();
+    const pA = xy(a);
+    ctx.moveTo(pA.x, pA.y);
+    for (let i=a+1;i<=b;i++){
+      const p = xy(i);
+      ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+  }
 
-    const seg = hit.seg || {};
-    const gs = Number(seg.globalSegScore);
-    const ps = Number(seg.physSegScore);
-    const ts = Number(seg.techSegScore);
-    const scoreShow = Number.isFinite(gs) ? gs : Math.round(hit.segScore);
-
-    tooltipEl.style.display = "block";
-    tooltipEl.style.left = `${clamp(x + 12, 0, canvas.width - 190)}px`;
-    tooltipEl.style.top  = `${clamp(y + 12, 0, canvas.height - 100)}px`;
-
-    tooltipEl.innerHTML = `
-      <div style="font-weight:900;margin-bottom:4px;">Segment</div>
-      <div>Score : <strong>${scoreShow}/100</strong></div>
-      <div>Phys : <strong>${Number.isFinite(ps) ? ps : "—"}</strong> • Tech : <strong>${Number.isFinite(ts) ? ts : "—"}</strong></div>
-    `;
-  };
+  if (infoEl) {
+    infoEl.textContent =
+      `Profil coloré (aire remplie) • ${totalKm.toFixed(1).replace(".", ",")} km • Alt ${Math.round(minE)}–${Math.round(maxE)} m • repères tous les 5 km`;
+  }
 }
+
+/* NOTE : Si le fillStyle "#RRGGBB22" ne marche pas chez toi,
+   remplace la ligne ctx.fillStyle = col + "22" par :
+
+function hexToRgba(hex, a){
+  const h = hex.replace("#","").trim();
+  const r = parseInt(h.slice(0,2),16);
+  const g = parseInt(h.slice(2,4),16);
+  const b = parseInt(h.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+...
+ctx.fillStyle = hexToRgba(col, 0.18);
+*/
 
 /* ---------------- Map colored segments (Leaflet) ---------------- */
 function renderColoredMap(mapDiv, pts, segments){
@@ -391,6 +430,31 @@ function renderColoredMap(mapDiv, pts, segments){
   if (dot) dot.style.background = diff.color;
 
   setText("autoSummary", buildAutoSummary(gpx, global, diff.label));
+
+function applyScoreColor(el, score){
+  if (!el) return;
+  const s = Number(score);
+  const bg = colorFromScore(s);
+  el.style.background = bg;
+  el.style.color = (s >= 75) ? "#ffffff" : "#ffffff"; // tout en blanc (lisible)
+  el.style.border = "1px solid rgba(0,0,0,0.08)";
+}
+const phys = current.gpx?.phys?.score;          // 0..100
+const tech = current.gpx?.tech?.techScore;      // 0..100
+const glob = current.gpx?.global?.score;        // 0..100 (ou calcule 0.55/0.45)
+
+const physEl = document.getElementById("scorePhys");
+const techEl = document.getElementById("scoreTech");
+const globEl = document.getElementById("scoreGlobal");
+
+if (physEl) physEl.textContent = phys ?? "—";
+if (techEl) techEl.textContent = tech ?? "—";
+if (globEl) globEl.textContent = glob ?? "—";
+
+applyScoreColor(physEl, phys);
+applyScoreColor(techEl, tech);
+applyScoreColor(globEl, glob);
+
 
   // Surface estimate
   const se = gpx?.surfaceEstimate;

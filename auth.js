@@ -1,27 +1,49 @@
-const AUTH_KEY = "vtt_auth_v1";
+// js/auth.js
+import { supabase, getSession, getUser } from "./supabaseClient.js";
 
-function authSet({ name, role }) {
-  localStorage.setItem(AUTH_KEY, JSON.stringify({ name, role }));
+function $(id){ return document.getElementById(id); }
+function msg(t){ const el = $("authMsg"); if (el) el.textContent = t || ""; }
+
+export async function signUp(email, password) {
+  msg("Inscription...");
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) throw error;
+
+  // Optionnel: tu peux créer/mettre à jour le profile ici si tes policies l’autorisent.
+  // Recommandé plutôt: trigger SQL côté DB (je te le donne juste après).
+  msg("Compte créé. Vérifie tes emails si confirmation activée.");
+  return data;
 }
 
-function authGet() {
-  const raw = localStorage.getItem(AUTH_KEY);
-  if (!raw) return null;
-  try { return JSON.parse(raw); } catch { return null; }
+export async function signIn(email, password) {
+  msg("Connexion...");
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  msg("Connecté ✅");
+  return data;
 }
 
-function authClear() {
-  localStorage.removeItem(AUTH_KEY);
+export async function signOut() {
+  msg("Déconnexion...");
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+  msg("Déconnecté.");
 }
 
-// Protection simple d’une page
-function requireRole(requiredRole) {
-  const user = authGet();
-  if (!user) {
-    window.location.href = "login.html";
+export async function renderAuthState() {
+  const session = await getSession();
+  const el = $("authState");
+  if (!el) return;
+
+  if (!session) {
+    el.textContent = "Non connecté";
     return;
   }
-  if (requiredRole && user.role !== requiredRole) {
-    window.location.href = "public-ranking.html";
-  }
+  const user = await getUser();
+  el.textContent = `Connecté : ${user?.email || "utilisateur"}`;
 }
+
+// Auto-refresh UI on auth state changes
+supabase.auth.onAuthStateChange(async () => {
+  await renderAuthState();
+});
