@@ -3,53 +3,214 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MTB Points</title>
+  <title>Classement — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
-    .card { background:#fff; border-radius:12px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-    .btn2 { display:inline-block; padding:12px 16px; border-radius:10px; text-decoration:none; border:1px solid #cbd5e1; }
-    .primary { background:#2563eb; color:#fff; border:0; }
-    .muted { color:#667085; }
-    @media (max-width: 800px){ .grid{ grid-template-columns:1fr; } }
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:16px;
+      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:10px;
+      color:var(--blue);
+      font-weight:800;
+      font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+    }
+    .right{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      margin-left:auto;
+    }
+
+    /* Pills */
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;color:var(--text);
+      white-space:nowrap;
+    }
+    .pillDot{width:10px;height:10px;border-radius:999px;background:var(--ok);display:inline-block}
+
+    /* Layout */
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    /* Title block */
+    .hero{
+      border-radius:18px;
+      padding:16px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 240px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 220px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .hero .muted{margin-top:6px;line-height:1.55;color:#334155}
+
+    /* Buttons */
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.secondary{background:#f8fafc}
+    .btn.danger{border-color:#fecaca;color:var(--err);background:#fff}
+
+    /* Filters */
+    .filters{
+      display:grid;
+      grid-template-columns: repeat(6, minmax(160px, 1fr));
+      gap:10px;
+      margin-top:14px;
+    }
+    @media(max-width:1100px){
+      .filters{grid-template-columns: repeat(3, minmax(160px, 1fr));}
+    }
+    @media(max-width:720px){
+      .filters{grid-template-columns: 1fr;}
+    }
+
+    label{display:block;margin-top:0;font-weight:900;font-size:12px;color:#0f172a}
+    select,input{
+      width:100%;
+      padding:10px;margin-top:6px;
+      border:1px solid #cbd5e1;border-radius:12px;
+      background:#fff;
+    }
+    input::placeholder{color:#94a3b8}
+
+    /* Table */
+    .tableWrap{
+      margin-top:14px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+    }
+    table{width:100%;border-collapse:collapse}
+    thead th{
+      font-size:12px;text-transform:uppercase;letter-spacing:.04em;
+      color:var(--muted);
+      text-align:left;
+      padding:12px;
+      background:#f8fafc;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+    }
+    tbody td{
+      padding:12px;
+      border-bottom:1px solid var(--border);
+      font-size:14px;
+      vertical-align:middle;
+    }
+    tbody tr:hover{background:#f8fafc}
+    .rank{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:34px;height:34px;border-radius:12px;
+      border:1px solid var(--border);background:#fff;font-weight:900;
+    }
+    .points{
+      font-weight:900;
+      padding:6px 10px;border-radius:999px;
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--border);background:#fff;
+      white-space:nowrap;
+    }
+
+    /* Footer note */
+    .note{
+      margin-top:12px;
+      border:1px solid #fed7aa;
+      background:#fff7ed;
+      color:#9a3412;
+      border-radius:14px;
+      padding:12px;
+      line-height:1.55;
+      font-size:13px;
+    }
   </style>
 </head>
 <body>
 
 <header class="header">
-  <h1>MTB Points- Classement</h1>
-  <nav>
-<a href="index.html">Acceuil</a>
-<a href="public-ranking.html">Classement</a>
-<a href="meetings.html">Événements</a>
-<a href="reglement.html">Règlement</a>
-<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
-<a href="about.html">À propos</a>
-<a href="login.html">Connexion</a>
-  </nav>
-  <div class="lang">
-    <button class="btn" id="btnFR">FR</button>
-    <button class="btn" id="btnEN">EN</button>
-  </div>
-</header>
-  </nav>
-  <div class="right">
-    <span class="pill" id="periodPill"><span class="pillDot" id="periodDot"></span><span id="periodLabel">24 mois</span></span>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Classement</h1>
+    <span class="pill" id="periodPill">
+      <span class="pillDot" id="periodDot"></span>
+      <span id="periodLabel">24 mois</span>
+    </span>
     <span class="muted" id="lastUpdate">—</span>
+  </div>
+
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html" class="active">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="methodologie.html">Méthodologie</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
+  </nav>
+
+  <div class="lang">
+    <button class="btn" id="btnFR" type="button">FR</button>
+    <button class="btn" id="btnEN" type="button">EN</button>
   </div>
 </header>
 
 <div class="wrap">
   <div class="card">
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
-      <div>
-        <h1>Classement MTB Points</h1>
-        <div class="muted">Filtre par discipline, sexe, âge, type vélo et période (24 mois ou année).</div>
-      </div>
-      <div class="row" style="margin-top:0;">
-        <button class="btn secondary" id="resetBtn" type="button">Réinitialiser</button>
-        <button class="btn" id="refreshBtn" type="button">Recalculer</button>
+
+    <div class="hero">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+        <div style="min-width:260px;flex:1">
+          <h2>Classement MTB Points</h2>
+          <div class="muted">
+            Filtre par discipline, sexe, âge, type vélo et période (24 mois glissants ou année).
+          </div>
+        </div>
+        <div class="row" style="margin-top:4px;">
+          <button class="btn danger" id="resetBtn" type="button">Réinitialiser</button>
+          <button class="btn primary" id="refreshBtn" type="button">Recalculer</button>
+        </div>
       </div>
     </div>
 
@@ -121,7 +282,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" style="margin-top:12px;">
       <div style="flex:1;min-width:240px;">
         <label for="q">Recherche (nom / team)</label>
         <input id="q" type="text" placeholder="Ex : Martin, Team Maures..." />
@@ -136,25 +297,32 @@
       </div>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th style="width:70px;">Rang</th>
-          <th>Cycliste</th>
-          <th>Team</th>
-          <th>Nationalité</th>
-          <th style="width:120px;">Points</th>
-          <th style="width:120px;">Épreuves</th>
-        </tr>
-      </thead>
-      <tbody id="rows">
-        <tr><td colspan="6" class="muted">Aucun classement calculé. Clique sur “Recalculer”.</td></tr>
-      </tbody>
-    </table>
-
-    <div class="muted" style="margin-top:10px;">
-      Note : les points sont calculés à partir des résultats importés et de la valeur de difficulté des épreuves (analyse GPX).
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:84px;">Rang</th>
+            <th>Cycliste</th>
+            <th>Team</th>
+            <th>Nationalité</th>
+            <th style="width:140px;">Points</th>
+            <th style="width:140px;">Épreuves</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr>
+            <td colspan="6" class="muted" style="padding:14px;">
+              Aucun classement calculé. Clique sur “Recalculer”.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+
+    <div class="note">
+      Note : les points sont calculés à partir des résultats importés et de la valeur de difficulté des épreuves (analyse GPX / OSM).
+    </div>
+
   </div>
 </div>
 
@@ -200,3 +368,4 @@
 
 </body>
 </html>
+
