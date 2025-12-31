@@ -31,6 +31,31 @@
     .age-group input[type="number"]{width:100%;padding:8px;margin:0;border-radius:10px}
     .age-group .small{font-size:12px;color:#667085;margin-top:-2px}
 
+    /* ---- MTB Points: Status (GPX/OSM) ---- */
+    .mtb-status{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;
+    }
+    .mtb-status-msg{font-size:14px;color:#0f172a;font-weight:800}
+    .mtb-status-sub{font-size:12px;color:#667085;margin-top:2px}
+    .mtb-spinner{
+      width:18px;height:18px;border-radius:999px;
+      border:2px solid rgba(100,116,139,.35);
+      border-top-color:rgba(37,99,235,.95);
+      animation:mtbSpin .9s linear infinite;
+    }
+    @keyframes mtbSpin{to{transform:rotate(360deg)}}
+    .mtb-progress{height:6px;border-radius:999px;background:#e5e7eb;overflow:hidden}
+    .mtb-progress > div{height:100%;width:0%;background:rgba(37,99,235,.95);transition:width .2s ease}
+    .mtb-badge{
+      font-size:12px;padding:2px 8px;border-radius:999px;
+      border:1px solid #e5e7eb;color:#667085;font-weight:800;
+      white-space:nowrap;
+    }
+    .mtb-badge.ok{color:#166534;border-color:#86efac;background:#dcfce7}
+    .mtb-badge.err{color:#991b1b;border-color:#fecaca;background:#fee2e2}
+    .mtb-badge.phase{color:#0f172a;background:#f1f5f9}
+
     @media(max-width:900px){
       .grid{grid-template-columns:1fr}
       .age-group .age-row,.age-group .head{grid-template-columns:1fr 1fr}
@@ -40,25 +65,24 @@
 <body>
 
 <header>
-  <header class="header">
-  <h1>MTB Points- Epreuves</h1>
+  <h1>MTB Points — Épreuves</h1>
   <nav>
-<a href="index.html">Acceuil</a>
-<a href="public-ranking.html">Classement</a>
-<a href="meetings.html">Événements</a>
-<a href="reglement.html">Règlement</a>
-<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
-<a href="about.html">À propos</a>
-<a href="login.html">Connexion</a>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="methodologie.html" class="active">Méthodologie (calcul)</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
   </nav>
-</header>
   <div class="muted">Création d’une nouvelle épreuve (GPX obligatoire)</div>
+</header>
 
 <div class="wrap">
   <div class="card">
     <h2 style="margin:0;">Créer une épreuve</h2>
     <p class="muted" style="margin-top:6px;">
-      Distance, D+, scores physique/technique et descriptif route/piste/single sont calculés automatiquement à partir de la trace GPX.
+      Distance, D+, score physique (local) et ScoreTech V2 Hybrid officiel (serveur OSM) sont calculés automatiquement.
     </p>
 
     <div class="grid">
@@ -70,9 +94,9 @@
         <label>Date *</label>
         <input id="date" type="date" />
 
-        <label>Discipline *</label>
+        <label>Discipline (optionnel)</label>
         <select id="disc">
-          <option value="">—</option>
+          <option value="">— (auto-détection)</option>
           <option value="XC">XC</option>
           <option value="Enduro">Enduro</option>
           <option value="DH">DH</option>
@@ -80,6 +104,7 @@
           <option value="Marathon">Marathon</option>
           <option value="Ultra">Ultra</option>
         </select>
+        <div class="muted" id="discHint" style="margin-top:6px;"></div>
 
         <label>Niveau *</label>
         <select id="level">
@@ -106,11 +131,24 @@
 
         <div class="box">
           <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;">
-            <div style="font-weight:900;">Analyse GPX</div>
+            <div style="font-weight:900;">Analyse GPX / OSM</div>
             <span class="pill" id="gpxPill">En attente</span>
           </div>
 
           <div class="muted" id="gpxStatus" style="margin-top:6px;">Aucun fichier chargé.</div>
+
+          <!-- Statut animé (piloté par js/gpx.js via l'event mtb:status) -->
+          <div id="mtbStatus" class="mtb-status" style="display:none;margin-top:10px;">
+            <div class="mtb-spinner" id="mtbSpinner"></div>
+            <div style="flex:1;min-width:180px">
+              <div class="mtb-status-msg" id="mtbStatusMsg">Analyse…</div>
+              <div class="mtb-status-sub" id="mtbStatusPhase">—</div>
+              <div class="mtb-progress" id="mtbProgWrap" style="display:none;margin-top:8px;">
+                <div id="mtbProgBar"></div>
+              </div>
+            </div>
+            <span class="mtb-badge phase" id="mtbBadge">…</span>
+          </div>
 
           <div class="row" style="margin-top:10px;">
             <div class="box" style="margin:0;">
@@ -125,22 +163,27 @@
 
           <div class="row" style="margin-top:10px;">
             <div class="box" style="margin:0;">
-              <div class="muted">Score physique</div>
+              <div class="muted">Score physique (local)</div>
               <div style="font-weight:900;font-size:18px;" id="autoPhys">—</div>
               <div class="muted" id="autoPhysInfo"></div>
             </div>
             <div class="box" style="margin:0;">
-              <div class="muted">Score technique (P75)</div>
+              <div class="muted">Score technique V2 (officiel)</div>
               <div style="font-weight:900;font-size:18px;" id="autoTech">—</div>
               <div class="muted" id="autoTechInfo"></div>
             </div>
           </div>
 
-          <div class="box" style="margin-top:10px;">
-            <div class="muted">Type de terrain estimé (depuis GPX)</div>
-            <div style="font-weight:900;" id="autoSurface">—</div>
-            <div class="muted" style="margin-top:6px;">
-              Estimation heuristique (sans cartographie) : basée sur sinuosité et “rugosité” altimétrique.
+          <div class="row" style="margin-top:10px;">
+            <div class="box" style="margin:0;">
+              <div class="muted">Discipline détectée</div>
+              <div style="font-weight:900;font-size:18px;" id="autoDisc">—</div>
+              <div class="muted" id="autoDiscInfo"></div>
+            </div>
+            <div class="box" style="margin:0;">
+              <div class="muted">Terrain OSM (P75)</div>
+              <div style="font-weight:900;font-size:18px;" id="autoTerrain">—</div>
+              <div class="muted" id="autoTerrainInfo"></div>
             </div>
           </div>
 
@@ -215,7 +258,7 @@
             <div class="small">Tours F</div>
           </div>
 
-          <!-- helper row generator style -->
+          <!-- U7 -->
           <div class="age-row">
             <label><input type="checkbox" class="ageCat" value="U7"> U7 (5–6 ans)</label>
             <input class="laps" type="number" min="1" step="1" value="1" data-age="U7" data-sex="M" />
@@ -246,7 +289,6 @@
             <input class="laps" type="number" min="1" step="1" value="1" data-age="U17" data-sex="M" />
             <input class="laps" type="number" min="1" step="1" value="1" data-age="U17" data-sex="F" />
           </div>
-
           <div class="age-row">
             <label><input type="checkbox" class="ageCat" value="U19"> U19 (17–18 ans)</label>
             <input class="laps" type="number" min="1" step="1" value="1" data-age="U19" data-sex="M" />
@@ -262,7 +304,6 @@
             <input class="laps" type="number" min="1" step="1" value="1" data-age="U23PLUS" data-sex="M" />
             <input class="laps" type="number" min="1" step="1" value="1" data-age="U23PLUS" data-sex="F" />
           </div>
-
           <div class="age-row">
             <label><input type="checkbox" class="ageCat" value="SENIOR"> Seniors (&gt; 22 ans)</label>
             <input class="laps" type="number" min="1" step="1" value="1" data-age="SENIOR" data-sex="M" />
@@ -301,12 +342,23 @@
   function val(id){ const el = $(id); return el ? el.value.trim() : ""; }
   function num(id, d=0){ const v = Number(val(id)); return Number.isFinite(v) ? v : d; }
   function setText(id, t){ const el = $(id); if(el) el.textContent = t; }
-  function setPill(ok){
+  function setPill(state){
     const pill = $("gpxPill");
     if(!pill) return;
-    pill.textContent = ok ? "OK" : "En attente";
-    pill.style.background = ok ? "#dcfce7" : "#f1f5f9";
-    pill.style.color = ok ? "#166534" : "#0f172a";
+
+    if (state === "ok") {
+      pill.textContent = "OK";
+      pill.style.background = "#dcfce7";
+      pill.style.color = "#166534";
+    } else if (state === "err") {
+      pill.textContent = "Erreur";
+      pill.style.background = "#fee2e2";
+      pill.style.color = "#991b1b";
+    } else {
+      pill.textContent = "En attente";
+      pill.style.background = "#f1f5f9";
+      pill.style.color = "#0f172a";
+    }
   }
 
   // meetings select + preselect from URL
@@ -330,83 +382,150 @@
       if (m) setText("meetingHint", `Épreuve rattachée à l’événement : ${m.name}`);
     }
 
-    sel.addEventListener("change", ()=>{
+    sel.addEventListener("change", ()=> {
       const m = (typeof findMeeting === "function") ? findMeeting(sel.value) : null;
       setText("meetingHint", m ? `Épreuve rattachée à l’événement : ${m.name}` : "");
+    });
+  })();
+
+  // ---- Status UI (écoute les events de js/gpx.js)
+  (function initStatusUI(){
+    const box = $("mtbStatus");
+    const msg = $("mtbStatusMsg");
+    const phase = $("mtbStatusPhase");
+    const spinner = $("mtbSpinner");
+    const progWrap = $("mtbProgWrap");
+    const progBar = $("mtbProgBar");
+    const badge = $("mtbBadge");
+
+    if (!box) return;
+
+    window.addEventListener("mtb:status", (e) => {
+      const d = e.detail || {};
+      box.style.display = "flex";
+
+      if (msg) msg.textContent = d.message || "";
+      if (phase) phase.textContent = d.phase ? `Phase : ${d.phase}` : "";
+
+      if (spinner) spinner.style.display = (d.spinning === false) ? "none" : "block";
+
+      if (progWrap && progBar && typeof d.progress === "number") {
+        progWrap.style.display = "block";
+        progBar.style.width = (Math.max(0, Math.min(1, d.progress)) * 100) + "%";
+      } else if (progWrap && progBar) {
+        progWrap.style.display = "none";
+        progBar.style.width = "0%";
+      }
+
+      if (badge) {
+        badge.className = "mtb-badge phase";
+        if (d.phase === "done") { badge.textContent = "OK"; badge.classList.add("ok"); }
+        else if (d.phase === "error") { badge.textContent = "ERREUR"; badge.classList.add("err"); }
+        else if (d.phase === "osm") { badge.textContent = "OSM"; }
+        else if (d.phase === "gpx") { badge.textContent = "GPX"; }
+        else { badge.textContent = "…"; }
+      }
     });
   })();
 
   // GPX analysis
   let currentGpx = null;
 
-  function formatSurface(s) {
-    if (!s) return "—";
-    const road = Math.round(s.roadPct);
-    const track = Math.round(s.trackPct);
-    const single = Math.round(s.singlePct);
-    return `Route ≈ ${road}% • Piste large ≈ ${track}% • Single ≈ ${single}%`;
+  function setDashEmpty(){
+    setText("autoDistance", "—");
+    setText("autoDplus", "—");
+    setText("autoPhys", "—");
+    setText("autoPhysInfo", "");
+    setText("autoTech", "—");
+    setText("autoTechInfo", "");
+    setText("autoDisc", "—");
+    setText("autoDiscInfo", "");
+    setText("autoTerrain", "—");
+    setText("autoTerrainInfo", "");
   }
 
   async function handleGpxFile(file){
     if (!file) return;
-    setText("gpxStatus", "Lecture et analyse de la trace...");
-    setPill(false);
-    $("elevWarn").style.display = "none";
+
+    setText("gpxStatus", "Lecture et analyse…");
+    setPill("wait");
+    setDashEmpty();
+    if ($("elevWarn")) $("elevWarn").style.display = "none";
+    setText("discHint", "");
 
     try {
       if (typeof analyzeGPX !== "function") throw new Error("analyzeGPX introuvable (vérifie js/gpx.js)");
-      currentGpx = await analyzeGPX(file);
+      currentGpx = await analyzeGPX(file, { keepPoints: true });
 
-      setPill(true);
+      setPill("ok");
       setText("gpxStatus", `OK: ${currentGpx.fileName || file.name}`);
+
+      // Distance / D+
       setText("autoDistance", (currentGpx.distanceKm != null) ? (String(currentGpx.distanceKm).replace(".",",") + " km") : "—");
       setText("autoDplus", (currentGpx.dplusM != null) ? (currentGpx.dplusM + " m") : "—");
 
+      // Phys
       if (currentGpx.phys && typeof currentGpx.phys.score === "number") {
         setText("autoPhys", `${currentGpx.phys.score}/100`);
         setText("autoPhysInfo", `IPB≈${currentGpx.phys.ipbOverall} • Effort=${currentGpx.phys.effort}`);
-      } else {
-        setText("autoPhys", "—");
-        setText("autoPhysInfo", "");
       }
 
-      if (currentGpx.tech && typeof currentGpx.tech.techScore === "number") {
-        setText("autoTech", `${currentGpx.tech.techScore}/100`);
-        setText("autoTechInfo", `P75=${currentGpx.tech.techCoeffP75} • segments=${(currentGpx.tech.segments||[]).length}`);
+      // Tech V2 (serveur)
+      const t = currentGpx.techV2;
+      if (t && typeof t.techScoreV2 === "number") {
+        setText("autoTech", `${t.techScoreV2}/100`);
+
+        const cov = (typeof t.coverage === "number") ? Math.round(t.coverage * 100) : null;
+        const bonusPts = (typeof t.bonusApplied === "number") ? Math.round(t.bonusApplied * 100) : null;
+
+        setText("autoTechInfo", `Couverture OSM ${cov ?? "—"}% • Bonus GPX +${bonusPts ?? "—"} pts`);
       } else {
-        setText("autoTech", "—");
-        setText("autoTechInfo", "");
+        setText("autoTech", "À valider");
+        const cov = (t && typeof t.coverage === "number") ? Math.round(t.coverage * 100) : null;
+        setText("autoTechInfo", (t && t.reason) ? `Raison : ${t.reason} • Couverture ${cov ?? "—"}%` : "ScoreTech non calculable automatiquement.");
       }
 
-      setText("autoSurface", formatSurface(currentGpx.surfaceEstimate));
+      // Terrain OSM
+      if (t && typeof t.terrainScoreP75 === "number") {
+        const terrainPts = Math.round(t.terrainScoreP75 * 100);
+        setText("autoTerrain", `${terrainPts}/100`);
+        setText("autoTerrainInfo", "Estimé depuis OSM (P75 segments).");
+      }
 
-      if (!currentGpx.hasElevation) {
+      // Discipline hint
+      const d = currentGpx.discipline;
+      if (d && d.hint) {
+        const conf = Math.round((d.confidence || 0) * 100);
+        setText("autoDisc", d.hint);
+        setText("autoDiscInfo", `Confiance ${conf}%`);
+
+        // Si l'utilisateur n'a pas choisi de discipline, on propose l'auto
+        if (!val("disc")) {
+          setText("discHint", `Suggestion auto : ${d.hint} (confiance ${conf}%)`);
+        }
+      }
+
+      if (!currentGpx.hasElevation && $("elevWarn")) {
         $("elevWarn").style.display = "block";
       }
     } catch (e) {
       console.error(e);
       currentGpx = null;
-      setPill(false);
-      setText("gpxStatus", "Erreur GPX : " + (e.message || e));
-      setText("autoDistance", "—");
-      setText("autoDplus", "—");
-      setText("autoPhys", "—");
-      setText("autoPhysInfo", "");
-      setText("autoTech", "—");
-      setText("autoTechInfo", "");
-      setText("autoSurface", "—");
+      setPill("err");
+      setText("gpxStatus", "Erreur : " + (e.message || e));
+      setDashEmpty();
     }
   }
 
-  $("gpxFile").addEventListener("change", (e)=>{
+  $("gpxFile").addEventListener("change", (e) => {
     const file = e.target.files && e.target.files[0];
     handleGpxFile(file);
   });
 
   function collectAgeCategories(){
     return Array.from(document.querySelectorAll(".ageCat"))
-      .filter(x=>x.checked)
-      .map(x=>x.value);
+      .filter(x => x.checked)
+      .map(x => x.value);
   }
 
   function collectLapsRules(){
@@ -418,14 +537,16 @@
       }));
   }
 
-  $("saveBtn").addEventListener("click", ()=>{
+  $("saveBtn").addEventListener("click", () => {
     const name = val("name");
     const date = val("date");
-    const disc = val("disc");
     const level = val("level");
 
-    if (!name || !date || !disc || !level) {
-      alert("⚠️ Champs obligatoires : Nom, Date, Discipline, Niveau");
+    // Discipline: optionnelle (auto possible)
+    const disc = val("disc") || (currentGpx?.discipline?.hint ?? "");
+
+    if (!name || !date || !level) {
+      alert("⚠️ Champs obligatoires : Nom, Date, Niveau");
       return;
     }
     if (!currentGpx) {
@@ -441,15 +562,15 @@
       id: makeIdFromName(name),
       name,
       date,
-      disc,
+      disc: disc || "—",
       level,
       ebike: (val("ebike") === "1"),
       meetingId: val("meetingId") || null,
 
-      // auto from GPX
+      // auto from analysis
       distanceKm: currentGpx.distanceKm ?? null,
       dplusM: currentGpx.dplusM ?? null,
-      gpx: currentGpx,
+      gpx: currentGpx, // contient phys + techV2 + discipline
 
       // info
       startPlace: val("startPlace") || null,
