@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact — MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+      background:#f4f4f4;
+      color:#0f172a;
+    }
+
+    header{
+      background:#fff;
+      padding:14px 16px;
+      box-shadow:0 1px 8px rgba(0,0,0,.06);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    nav a{
+      margin-right:10px;
+      text-decoration:none;
+      color:#2563eb;
+      font-weight:800;
+    }
+
+    .wrap{
+      max-width:800px;
+      margin:32px auto;
+      padding:0 16px;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:18px;
+      padding:22px;
+      box-shadow:0 10px 30px rgba(2,6,23,.08);
+    }
+
+    h1{
+      margin:0 0 10px 0;
+      font-size:26px;
+      letter-spacing:-.3px;
+    }
+
+    .muted{
+      color:#64748b;
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    label{
+      display:block;
+      margin-top:14px;
+      font-weight:900;
+      font-size:13px;
+    }
+
+    input, select, textarea{
+      width:100%;
+      margin-top:6px;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid #cbd5e1;
+      font-size:14px;
+      font-family:inherit;
+    }
+
+    textarea{min-height:120px;resize:vertical}
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    @media(max-width:720px){.row{grid-template-columns:1fr}}
+
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      align-items:center;
+    }
+
+    button{
+      padding:12px 16px;
+      border-radius:12px;
+      border:0;
+      background:#2563eb;
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+    }
+    button:hover{background:#1d4ed8}
+
+    .msg{
+      margin-top:12px;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    footer{
+      margin-top:24px;
+      text-align:center;
+      font-size:12px;
+      color:#64748b;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="about.html">À propos</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="card">
+    <h1>Contact</h1>
+    <p class="muted">
+      Une question sur le scoring, un problème technique, une suggestion d’amélioration ou une demande partenaire ?
+      Écris-nous, nous te répondrons rapidement.
+    </p>
+
+    <form id="contactForm">
+      <div class="row">
+        <div>
+          <label for="name">Nom</label>
+          <input id="name" required placeholder="Ton nom" />
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" required placeholder="ton@email.fr" />
+        </div>
+      </div>
+
+      <label for="subject">Sujet</label>
+      <select id="subject" required>
+        <option value="">— Choisir —</option>
+        <option>Question générale</option>
+        <option>Problème technique</option>
+        <option>Erreur de classement</option>
+        <option>Organisateur / partenariat</option>
+        <option>Autre</option>
+      </select>
+
+      <label for="message">Message</label>
+      <textarea id="message" required placeholder="Décris ta demande…"></textarea>
+
+      <div class="actions">
+        <button type="submit">Envoyer le message</button>
+        <span class="msg" id="formMsg"></span>
+      </div>
+    </form>
+  </div>
+
+  <footer>
+    MTB Points — Contact
+  </footer>
+</main>
+
+<script>
+  const form = document.getElementById("contactForm");
+  const msg = document.getElementById("formMsg");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    msg.textContent = "✅ Message envoyé (démo).";
+    msg.style.color = "#16a34a";
+    form.reset();
+  });
+</script>
+
+</body>
+</html>
+

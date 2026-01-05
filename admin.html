@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administration — MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    :root{
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#667085;
+      --muted2:#64748b;
+      --border:#e5e7eb;
+
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+
+      --ok:#16a34a;
+      --warn:#ea580c;
+      --err:#dc2626;
+
+      --shadow:0 10px 30px rgba(2,6,23,.10);
+      --shadow2:0 2px 10px rgba(0,0,0,.06);
+      --r:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .subtitle{color:var(--muted2);font-size:12px;font-weight:700}
+
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      color:var(--blue);
+      font-weight:900;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+
+    .wrap{max-width:1180px;margin:24px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      border-radius:20px;
+      padding:16px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.25px}
+    .hero .muted{margin-top:6px;line-height:1.55;color:#334155}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media(max-width:980px){ .grid{grid-template-columns:1fr} }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      padding:16px;
+      box-shadow:var(--shadow2);
+    }
+
+    .kpis{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    @media(max-width:720px){ .kpis{grid-template-columns:1fr} }
+    .kpi{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+    }
+    .kpi .kLabel{font-size:12px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.03em}
+    .kpi .kValue{margin-top:6px;font-size:18px;font-weight:1000}
+    .kpi .kInfo{margin-top:6px;font-size:12px;color:var(--muted2);line-height:1.45}
+
+    label{display:block;margin-top:12px;font-weight:900;font-size:12px;color:#0f172a}
+    input,select{
+      width:100%;
+      padding:10px 12px;
+      margin-top:6px;
+      border:1px solid #cbd5e1;
+      border-radius:12px;
+      background:#fff;
+      font-size:14px;
+    }
+    input::placeholder{color:#94a3b8}
+
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+    .row > div{flex:1;min-width:210px}
+
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+    .btn.danger:hover{border-color:#fca5a5}
+    .btn.ghost{background:#fff}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#f1f5f9;
+      color:#0f172a;
+      font-weight:1000;font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.err{background:var(--err)}
+    .dot.warn{background:var(--warn)}
+
+    .callout{
+      margin-top:12px;border:1px solid #dbeafe;background:#eff6ff;color:#1e3a8a;
+      border-radius:16px;padding:12px;line-height:1.55;font-size:13px
+    }
+    .warnBox{
+      margin-top:12px;border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;
+      border-radius:16px;padding:12px;line-height:1.55;font-size:13px
+    }
+
+    table{width:100%;border-collapse:collapse;margin-top:10px;background:#fff}
+    th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;font-size:13px}
+    th{background:#f8fafc;color:#334155;font-weight:1000}
+    .muted{color:var(--muted);font-size:13px;line-height:1.5}
+    footer{margin-top:14px;text-align:center;color:var(--muted);font-size:12px}
+  </style>
+</head>
+
+<body>
+<header class="header">
+  <div class="brand">
+    <h1>MTB Points — Administration</h1>
+    <div class="subtitle">Modération • Rôles • Validation</div>
+  </div>
+
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a class="active" href="admin.html">Admin</a>
+    <a href="login.html">Connexion</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="card">
+
+    <section class="hero">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start">
+        <div style="min-width:280px;flex:1">
+          <h2>Console d’administration</h2>
+          <div class="muted">
+            Gestion des rôles, contrôle des contenus, et actions de modération (suppression / dépublication).
+          </div>
+          <div class="callout">
+            🔒 Cette page est réservée au rôle <b>admin</b>. Si tu n’es pas admin, tu seras redirigé.
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+          <span class="pill"><span class="dot" id="authDot"></span><span id="authPill">—</span></span>
+          <button class="btn danger" id="btnSignOut" type="button">Se déconnecter</button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kLabel">Session</div>
+          <div class="kValue" id="kpiUser">—</div>
+          <div class="kInfo" id="kpiRole">Rôle —</div>
+        </div>
+        <div class="kpi">
+          <div class="kLabel">Comptes</div>
+          <div class="kValue" id="kpiUsers">—</div>
+          <div class="kInfo">Nombre de profils (table profiles)</div>
+        </div>
+        <div class="kpi">
+          <div class="kLabel">Contenus</div>
+          <div class="kValue" id="kpiNotes">—</div>
+          <div class="kInfo">Placeholders (événements/épreuves)</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+
+      <!-- LEFT: Role management -->
+      <section class="panel">
+        <h3 style="margin:0 0 6px 0;">Rôles & comptes</h3>
+        <div class="muted">
+          Promouvoir un organisateur en admin, ou rétrograder (selon tes policies RLS côté Supabase).
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <div>
+            <label for="email">Email du compte</label>
+            <input id="email" placeholder="ex: admin@mtbpoints.com" autocomplete="email" />
+          </div>
+          <div>
+            <label for="role">Nouveau rôle</label>
+            <select id="role">
+              <option value="athlete">athlete</option>
+              <option value="organizer">organizer</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
+          <div style="min-width:180px">
+            <button class="btn primary" id="btnSetRole" type="button">Appliquer</button>
+          </div>
+        </div>
+
+        <div class="warnBox" id="roleMsg" style="display:none;"></div>
+
+        <h4 style="margin:16px 0 6px 0;">Recherche rapide</h4>
+        <div class="muted">Liste les 30 derniers profils (email + rôle).</div>
+
+        <div class="btnRow">
+          <button class="btn" id="btnRefreshUsers" type="button">Rafraîchir</button>
+        </div>
+
+        <div style="overflow:auto">
+          <table aria-label="Liste des profils">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Créé</th>
+              </tr>
+            </thead>
+            <tbody id="usersTbody">
+              <tr><td colspan="3" class="muted">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- RIGHT: Moderation shortcuts -->
+      <aside class="panel">
+        <h3 style="margin:0 0 6px 0;">Modération</h3>
+        <div class="muted">
+          Raccourcis admin. On peut brancher ici la suppression/dépublication des épreuves et événements.
+        </div>
+
+        <div class="btnRow">
+          <a class="btn" href="meetings.html">Voir événements</a>
+          <a class="btn" href="events.html">Voir épreuves</a>
+          <a class="btn" href="public-ranking.html">Voir classement</a>
+        </div>
+
+        <div class="callout">
+          ✅ Recommandation : ajouter une table <b>audit_log</b> (qui, quoi, quand) pour tracer suppressions / impo_
+

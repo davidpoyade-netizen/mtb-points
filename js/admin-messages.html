@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Messages — MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    :root{
+      --bg:#f4f4f4;--card:#fff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+      --shadow:0 10px 30px rgba(2,6,23,.10);--r:22px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+
+    header.header{
+      position:sticky;top:0;z-index:20;background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{text-decoration:none;padding:8px 10px;border-radius:10px;color:var(--blue);font-weight:900;font-size:13px}
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .wrap{max-width:1180px;margin:24px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+    .hero{
+      border-radius:20px;padding:16px;border:1px solid var(--border);
+      background:radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+                 radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%), #fff;
+    }
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.25px}
+    .muted{color:var(--muted);font-size:13px;line-height:1.55}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-top:12px}
+    .row > div{flex:1;min-width:220px}
+    label{display:block;font-weight:900;font-size:12px;color:#0f172a}
+    input,select{
+      width:100%;padding:10px 12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:14px
+    }
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);text-decoration:none;white-space:nowrap;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);background:#f1f5f9;font-weight:1000;font-size:12px
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.err{background:var(--err)}
+    table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;font-size:13px;vertical-align:top}
+    th{background:#f8fafc;color:#334155;font-weight:1000}
+    .msgbox{margin-top:10px;border:1px solid #dbeafe;background:#eff6ff;color:#1e3a8a;border-radius:14px;padding:10px;display:none}
+    .small{font-size:12px}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+  </style>
+</head>
+
+<body>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1 style="margin:0;font-size:18px">MTB Points — Admin messages</h1>
+    <span class="pill"><span class="dot" id="authDot"></span><span id="authPill">—</span></span>
+  </div>
+
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="admin.html">Admin</a>
+    <a href="admin-messages.html" class="active">Messages</a>
+    <a href="login.html">Connexion</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="card">
+    <section class="hero">
+      <h2>Messages de contact</h2>
+      <div class="muted">Lister, marquer comme “lu”, supprimer. (Réservé admin)</div>
+
+      <div class="row">
+        <div>
+          <label for="q">Recherche</label>
+          <input id="q" placeholder="email, nom, sujet, mot-clé…" />
+        </div>
+        <div>
+          <label for="filter">Filtre</label>
+          <select id="filter">
+            <option value="unread">Non lus</option>
+            <option value="all">Tous</option>
+            <option value="read">Lus</option>
+          </select>
+        </div>
+        <div style="min-width:220px">
+          <label>&nbsp;</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn primary" id="btnRefresh" type="button">Rafraîchir</button>
+            <button class="btn" id="btnMarkAllRead" type="button">Tout marquer lu</button>
+            <button class="btn danger" id="btnSignOut" type="button">Déconnexion</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="msgbox" id="infoBox"></div>
+    </section>
+
+    <div style="overflow:auto;margin-top:12px">
+      <table aria-label="Messages">
+        <thead>
+          <tr>
+            <th style="width:160px">Statut</th>
+            <th>Message</th>
+            <th style="width:220px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="3" class="muted">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer style="margin-top:14px;text-align:center;color:#667085;font-size:12px">
+      MTB Points — Admin messages
+    </footer>
+  </div>
+</main>
+
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
+
+  const $ = (id) => document.getElementById(id);
+  const tbody = $("tbody");
+  const infoBox = $("infoBox");
+
+  function showInfo(text){
+    infoBox.textContent = text || "";
+    infoBox.style.display = text ? "" : "none";
+  }
+  function setPill(state, text){
+    const dot = $("authDot");
+    const pill = $("authPill");
+    dot.className = "dot";
+    if (state === "ok") dot.classList.add("ok");
+    if (state === "err") dot.classList.add("err");
+    pill.textContent = text || "—";
+  }
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  async function guardAdmin(){
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { location.href = "login.html"; return null; }
+
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("role, email")
+      .eq("id", user.id)
+      .single();
+
+    if (error || !profile) { alert("Erreur profil (RLS?)"); location.href = "index.html"; return null; }
+    if (profile.role !== "admin") { alert("⛔ Accès refusé"); location.href = "index.html"; return null; }
+    return { user, profile };
+  }
+
+  async function loadMessages(){
+    showInfo("");
+    tbody.innerHTML = `<tr><td colspan="3" class="muted">Chargement…</td></tr>`;
+
+    const q = $("q").value.trim().toLowerCase();
+    const filter = $("filter").value;
+
+    let query = supabase
+      .from("contact_messages")
+      .select("id,name,email,subject,message,is_read,created_at")
+      .order("created_at", { ascending:false })
+      .limit(200);
+
+    if (filter === "unread") query = query.eq("is_read", false);
+    if (filter === "read") query = query.eq("is_read", true);
+
+    // Recherche simple (client-side, sur les 200 derniers)
+    const { data, error } = await query;
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="3" class="muted">❌ ${esc(error.message)}</td></tr>`;
+      return;
+    }
+
+    let rows = data || [];
+    if (q) {
+      rows = rows.filter(m =>
+        (m.email||"").toLowerCase().includes(q) ||
+        (m.name||"").toLowerCase().includes(q) ||
+        (m.subject||"").toLowerCase().includes(q) ||
+        (m.message||"").toLowerCase().includes(q)
+      );
+    }
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="3" class="muted">Aucun message.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(m => {
+      const status = m.is_read
+        ? `<span class="pill"><span class="dot ok"></span>Lu</span>`
+        : `<span class="pill"><span class="dot"></span>Non lu</span>`;
+      const when = m.created_at ? new Date(m.created_at).toLocaleString("fr-FR") : "—";
+      const subj = m.subject ? `<div class="small"><b>Sujet:</b> ${esc(m.subject)}</div>` : "";
+      const header = `
+        <div class="small muted">
+          <b>${esc(m.name)}</b> • <span class="mono">${esc(m.email)}</span> • ${esc(when)}
+        </div>
+      `;
+      const body = `<div style="margin-top:6px;white-space:pre-wrap">${esc(m.message)}</div>`;
+      return `
+        <tr>
+          <td>${status}</td>
+          <td>${header}${subj}${body}</td>
+          <td>
+            <div class="actions">
+              <button class="btn" data-act="toggleRead" data-id="${esc(m.id)}">${m.is_read ? "Marquer non lu" : "Marquer lu"}</button>
+              <a class="btn" href="mailto:${encodeURIComponent(m.email)}?subject=${encodeURIComponent("Re: " + (m.subject||"MTB Points"))}">Répondre</a>
+              <button class="btn danger" data-act="delete" data-id="${esc(m.id)}">Supprimer</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  async function toggleRead(id){
+    const { data: cur, error: e1 } = await supabase
+      .from("contact_messages")
+      .select("is_read")
+      .eq("id", id)
+      .single();
+    if (e1) throw e1;
+
+    const { error: e2 } = await supabase
+      .from("contact_messages")
+      .update({ is_read: !cur.is_read })
+      .eq("id", id);
+    if (e2) throw e2;
+  }
+
+  async function deleteMsg(id){
+    const { error } = await supabase
+      .from("contact_messages")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+  }
+
+  async function markAllRead(){
+    const { error } = await supabase
+      .from("contact_messages")
+      .update({ is_read: true })
+      .eq("is_read", false);
+    if (error) throw error;
+  }
+
+  // Init
+  setPill("warn", "Vérification…");
+  const session = await guardAdmin();
+  if (!session) return;
+
+  setPill("ok", "Admin");
+  $("btnSignOut").onclick = async () => { await supabase.auth.signOut(); location.href="login.html"; };
+  $("btnRefresh").onclick = loadMessages;
+  $("btnMarkAllRead").onclick = async () => {
+    try { await markAllRead(); showInfo("✅ Tous les messages ont été marqués comme lus."); await loadMessages(); }
+    catch(e){ showInfo("❌ " + (e.message || e)); }
+  };
+
+  $("q").addEventListener("input", () => {
+    // légère debounce
+    clearTimeout(window.__t); window.__t = setTimeout(loadMessages, 250);
+  });
+  $("filter").addEventListener("change", loadMessages);
+
+  tbody.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-act]");
+    if (!btn) return;
+
+    const act = btn.dataset.act;
+    const id = btn.dataset.id;
+
+    try{
+      if (act === "toggleRead") await toggleRead(id);
+      if (act === "delete") {
+        if (!confirm("Supprimer ce message ?")) return;
+        await deleteMsg(id);
+      }
+      await loadMessages();
+    }catch(err){
+      showInfo("❌ " + (err.message || err));
+    }
+  });
+
+  await loadMessages();
+</script>
+
+</body>
+</html>
