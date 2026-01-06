@@ -7,41 +7,108 @@ function setMsg(t){
   if (el) el.textContent = t || "";
 }
 
-export async function signUp(email, password) {
-  setMsg("Inscription...");
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      // IMPORTANT: doit être autorisé dans Auth > URL Configuration
-      emailRedirectTo: `${location.origin}/login.html`
-    }
-  });
-  if (error) throw error;
-
-  // Si confirm email est ON : session=null et il faut confirmer par email
-  if (!data?.session) {
-    setMsg("Compte créé ✅ Vérifie ton email (spam) pour confirmer.");
-  } else {
-    setMsg("Compte créé ✅ (confirmation désactivée)");
-  }
-
-  return data;
+// ✅ Base URL compatible GitHub Pages (inclut /mtb-points)
+// Ex: https://davidpoyade-netizen.github.io/mtb-points
+function getAppBaseUrl(){
+  // pathname ex: /mtb-points/login.html -> base /mtb-points
+  const parts = location.pathname.split("/").filter(Boolean);
+  const base = parts.length ? `/${parts[0]}` : "";
+  return `${location.origin}${base}`;
 }
 
+function humanizeAuthError(error){
+  const msg = (error?.message || "").toLowerCase();
+
+  if (msg.includes("invalid login credentials")) {
+    return "Email ou mot de passe incorrect.";
+  }
+  if (msg.includes("email not confirmed")) {
+    return "Email non confirmé. Vérifie ta boîte mail (et spam) puis réessaie.";
+  }
+  if (msg.includes("user already registered")) {
+    return "Cet email est déjà inscrit. Essaie de te connecter.";
+  }
+  return error?.message || "Erreur inconnue.";
+}
+
+/** INSCRIPTION (email + password) */
+export async function signUp(email, password) {
+  setMsg("Inscription…");
+
+  try{
+    const redirectTo = `${getAppBaseUrl()}/login.html`;
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        // IMPORTANT: doit être autorisé dans Supabase > Auth > URL Configuration
+        emailRedirectTo: redirectTo
+      }
+    });
+
+    if (error) throw error;
+
+    // Si confirmation ON => session null
+    if (!data?.session) {
+      setMsg("Compte créé ✅ Vérifie ton email pour confirmer (spam inclus).");
+    } else {
+      setMsg("Compte créé ✅ (confirmation email désactivée)");
+    }
+
+    return data;
+  } catch(e){
+    setMsg("❌ " + humanizeAuthError(e));
+    throw e;
+  }
+}
+
+/** CONNEXION (email + password) */
 export async function signIn(email, password) {
-  setMsg("Connexion...");
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  setMsg("Connecté ✅");
-  return data;
+  setMsg("Connexion…");
+
+  try{
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+
+    setMsg("Connecté ✅");
+    return data;
+  } catch(e){
+    setMsg("❌ " + humanizeAuthError(e));
+    throw e;
+  }
+}
+
+/** ✅ CONNEXION PAR EMAIL (MAGIC LINK) -> envoie un email */
+export async function signInWithEmailLink(email){
+  setMsg("Envoi du lien…");
+
+  try{
+    const redirectTo = `${getAppBaseUrl()}/dashboard.html`; // ou login.html si tu préfères
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo }
+    });
+    if (error) throw error;
+
+    setMsg("Email envoyé ✅ Vérifie ta boîte mail (spam inclus).");
+    return data;
+  } catch(e){
+    setMsg("❌ " + humanizeAuthError(e));
+    throw e;
+  }
 }
 
 export async function signOut() {
-  setMsg("Déconnexion...");
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
-  setMsg("Déconnecté.");
+  setMsg("Déconnexion…");
+  try{
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    setMsg("Déconnecté.");
+  } catch(e){
+    setMsg("❌ " + humanizeAuthError(e));
+    throw e;
+  }
 }
 
 export async function renderAuthState() {
@@ -62,3 +129,6 @@ export async function renderAuthState() {
 supabase.auth.onAuthStateChange(async () => {
   await renderAuthState();
 });
+
+// Init
+renderAuthState();
