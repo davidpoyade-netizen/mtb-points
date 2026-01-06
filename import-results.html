@@ -3,100 +3,311 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Import résultats – VTT Points</title>
+  <title>Import résultats — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .wrap { max-width: 1000px; margin: 30px auto; padding: 0 16px; }
-    .card { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
-    .row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
-    .grow { flex:1; }
-    .muted { color:#667085; }
-    .pill { display:inline-block; padding: 4px 10px; border-radius: 999px; background:#f1f5f9; }
-    .ok { color:#067647; }
-    .bad { color:#b42318; }
-    table { width:100%; border-collapse: collapse; margin-top: 12px; background:#fff; }
-    th, td { border-bottom: 1px solid #e5e7eb; padding: 10px; text-align:left; }
-    th { background:#f8fafc; }
-    .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
-    button { cursor:pointer; }
-    .btn2 { padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; background:#fff; }
-    .btn-primary { padding: 10px 14px; border-radius: 8px; border: 0; background:#2563eb; color:#fff; }
-    .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
-    .msg { margin-top:10px; }
-    code { background:#f1f5f9; padding:2px 6px; border-radius:6px; }
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--muted2:#64748b;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:22px;
+      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+    code{background:#f1f5f9;padding:2px 6px;border-radius:6px}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;padding:8px 10px;border-radius:10px;
+      color:var(--blue);font-weight:900;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .kpi{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
+    }
+
+    /* Layout */
+    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .hero .desc{margin-top:6px;line-height:1.55;color:#334155}
+
+    /* Controls */
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap:12px;
+      align-items:start;
+    }
+    @media(max-width:980px){ .grid{grid-template-columns:1fr} }
+    .panel{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      padding:14px;
+    }
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
+    input,select{
+      width:100%;
+      padding:10px;
+      margin-top:6px;
+      border:1px solid #cbd5e1;
+      border-radius:12px;
+      background:#fff;
+      font-size:14px;
+    }
+    input::placeholder{color:#94a3b8}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+    .btn.ok:hover{background:#15803d;border-color:#15803d}
+    .btn.ghost{background:#f8fafc}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.err{background:var(--err)}
+    .dot.warn{background:var(--warn)}
+
+    /* Messages */
+    .notice{
+      margin-top:12px;
+      border:1px solid #dbeafe;
+      background:#eff6ff;
+      color:#1e3a8a;
+      border-radius:18px;
+      padding:12px 14px;
+      line-height:1.5;
+      font-size:13px;
+    }
+    .notice.ok{border-color:#bbf7d0;background:#f0fdf4;color:#14532d}
+    .notice.err{border-color:#fecaca;background:#fff1f2;color:#991b1b}
+    .notice.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+
+    /* Table */
+    .tableWrap{
+      margin-top:14px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+    }
+    table{width:100%;border-collapse:collapse}
+    thead th{
+      text-align:left;
+      font-size:12px;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      color:#334155;
+      background:#f8fafc;
+      border-bottom:1px solid var(--border);
+      padding:10px 12px;
+      white-space:nowrap;
+    }
+    tbody td{padding:12px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+    tbody tr:hover{background:#fcfdff}
+    .right{text-align:right}
+    .small{font-size:12px;color:var(--muted2)}
+    .statusOk{color:var(--ok);font-weight:900}
+    .statusBad{color:var(--err);font-weight:900}
+
+    footer{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+      line-height:1.5;
+    }
+
+    a:focus, button:focus, input:focus, select:focus{
+      outline:3px solid rgba(37,99,235,.25);
+      outline-offset:2px;
+    }
   </style>
 </head>
-<body>
 
+<body>
 <header class="header">
-  <h1>Import des résultats</h1>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Import des résultats</h1>
+    <span class="kpi" id="authState">—</span>
+  </div>
+
   <nav>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="course.html">Créer une course</a>
+    <a href="index.html">Accueil</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
+    <a href="course-create.html">Créer épreuve</a>
+    <a href="meetings.html">Événements</a>
+    <a href="public-ranking.html">Classement</a>
   </nav>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <button class="btn ghost" id="refreshBtn" type="button">↻ Actualiser</button>
+    <a class="btn" href="dashboard.html">← Retour</a>
+  </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
   <div class="card">
-    <div class="row">
-      <div class="grow">
-        <div><strong>Épreuve :</strong> <span id="eventName">Marathon VTT (démo)</span></div>
-        <div class="muted"><strong>Score de l’épreuve :</strong> <span id="eventScore">133</span> pts</div>
+
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:260px;flex:1">
+          <h2>Importer un CSV</h2>
+          <div class="desc">
+            V1 : CSV simple. Colonnes attendues : <code>nom</code>, <code>prenom</code>, <code>temps</code> (HH:MM:SS). Optionnel :
+            <code>categorie</code>, <code>club</code>.
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+            <span class="pill"><span class="dot" id="dotMode"></span><span id="modeLabel">Mode : —</span></span>
+            <span class="pill">📅 Fenêtre : classement public 24 mois</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="btn" id="downloadTemplateBtn" type="button">⬇ Télécharger modèle</button>
+        </div>
       </div>
-      <div class="pill">Organisateur</div>
-    </div>
 
-    <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+      <div class="grid">
+        <!-- Left: Select race -->
+        <div class="panel">
+          <div style="font-weight:1000;margin-bottom:8px">1) Choisir l’épreuve</div>
 
-    <div class="row">
-      <div class="grow">
-        <div><strong>1) Télécharger le modèle</strong></div>
-        <div class="muted">Colonnes attendues : <code>nom</code>, <code>prenom</code>, <code>temps</code> (HH:MM:SS), optionnel : <code>categorie</code>, <code>club</code></div>
+          <div class="row">
+            <div style="flex:1;min-width:220px">
+              <label for="raceSelect">Épreuve</label>
+              <select id="raceSelect">
+                <option value="">Chargement…</option>
+              </select>
+              <div class="small" style="margin-top:8px">
+                Astuce : crée d’abord une épreuve dans <a href="course-create.html">Créer épreuve</a>.
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <span class="pill">🏁 <span id="eventName">—</span></span>
+            <span class="pill">⭐ Score : <span id="eventScore">—</span></span>
+            <span class="pill">📅 Date : <span id="eventDate">—</span></span>
+          </div>
+
+          <div id="raceMsg" class="notice warn" style="display:none;margin-top:12px"></div>
+        </div>
+
+        <!-- Right: Upload file -->
+        <div class="panel">
+          <div style="font-weight:1000;margin-bottom:8px">2) Importer le fichier</div>
+
+          <div class="row">
+            <div style="flex:1;min-width:220px">
+              <label for="fileInput">Fichier CSV</label>
+              <input type="file" id="fileInput" accept=".csv,text/csv" />
+              <div class="small" style="margin-top:8px">
+                CSV séparé par virgule (,) — version simple (pas de guillemets complexes).
+              </div>
+            </div>
+          </div>
+
+          <div id="statusMsg" class="notice" style="display:none;"></div>
+        </div>
       </div>
-      <button class="btn2" id="downloadTemplateBtn">Télécharger modèle CSV</button>
-    </div>
+    </section>
 
-    <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
-
-    <div class="row">
-      <div class="grow">
-        <div><strong>2) Importer un fichier</strong></div>
-        <div class="muted">V1 : CSV (Excel pourra être ajouté ensuite)</div>
+    <section id="previewBlock" style="display:none; margin-top:14px;">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div>
+          <h3 style="margin:0">Aperçu</h3>
+          <div class="small" id="summaryLine"></div>
+        </div>
+        <div class="row">
+          <button class="btn ghost" id="resetBtn" type="button">Réinitialiser</button>
+          <button class="btn ok" id="validateBtn" type="button" disabled>Valider & enregistrer</button>
+        </div>
       </div>
-      <input type="file" id="fileInput" accept=".csv,text/csv">
-    </div>
 
-    <div class="msg" id="statusMsg"></div>
-
-    <div id="previewBlock" style="display:none; margin-top:16px;">
-      <h3 style="margin:0 0 8px 0;">Aperçu des résultats importés</h3>
-      <div class="muted" id="summaryLine"></div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Temps</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody id="previewBody"></tbody>
-      </table>
-
-      <div class="actions">
-        <button class="btn2" id="resetBtn">Réinitialiser</button>
-        <button class="btn-primary" id="validateBtn" disabled>Valider & calculer les scores</button>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Temps</th>
+              <th>Cat.</th>
+              <th>Club</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
+        </table>
       </div>
-    </div>
+
+      <footer>
+        À la validation : calcul des points (V1) + insertion dans Supabase <code>results</code> (si connecté).
+      </footer>
+    </section>
+
   </div>
-</div>
+</main>
 
-<script>
-  // ---- Helpers temps ----
-  function parseHMS(hms) {
-    // "HH:MM:SS" -> seconds, return null if invalid
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
+  import { renderAuthState } from "./js/auth.js";
+  import { loadStoredEventsHybrid } from "./js/storage-supabase.js";
+
+  /* --------------------------------------------------------------- */
+  /* Helpers temps                                                   */
+  /* --------------------------------------------------------------- */
+  function parseHMS(hms){
     if (!hms || typeof hms !== "string") return null;
     const m = hms.trim().match(/^(\d{1,2}):([0-5]\d):([0-5]\d)$/);
     if (!m) return null;
@@ -104,16 +315,16 @@
     return hh * 3600 + mm * 60 + ss;
   }
 
-  function formatHMS(totalSec) {
+  function formatHMS(totalSec){
     const hh = Math.floor(totalSec / 3600);
     const mm = Math.floor((totalSec % 3600) / 60);
     const ss = totalSec % 60;
-    const pad = (n) => String(n).padStart(2, "0");
+    const pad = (n) => String(n).padStart(2,"0");
     return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
   }
 
-  // ---- CSV parser simple (sans guillemets complexes) ----
-  function parseCSV(text) {
+  /* CSV parser simple (sans guillemets complexes) */
+  function parseCSV(text){
     const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
     if (lines.length < 2) return { headers: [], rows: [] };
 
@@ -128,153 +339,347 @@
     return { headers, rows };
   }
 
-  function hasRequiredHeaders(headers) {
-    const required = ["nom", "prenom", "temps"];
-    return required.every(r => headers.includes(r));
+  function hasRequiredHeaders(headers){
+    return ["nom","prenom","temps"].every(r => headers.includes(r));
   }
 
-  // ---- Coeff de place (V1) ----
-  function coeffForPlace(place) {
+  /* Coeff de place (V1) */
+  function coeffForPlace(place){
     if (place === 1) return 1.00;
     if (place === 2) return 0.80;
     if (place === 3) return 0.65;
     if (place === 4) return 0.55;
     if (place === 5) return 0.45;
-    if (place >= 6 && place <= 10) {
-      // dégressif 0.40 -> 0.15 sur places 6..10
+    if (place >= 6 && place <= 10){
       const start = 0.40, end = 0.15;
       const t = (place - 6) / (10 - 6);
       return start + (end - start) * t;
     }
-    // finishers au-delà
-    return 0; // on gérera le fixe (5-15) ensuite
+    return 0;
   }
 
-  // ---- UI ----
+  function escapeHTML(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  function show(el, yes){ el.style.display = yes ? "" : "none"; }
+
+  /* --------------------------------------------------------------- */
+  /* UI refs                                                         */
+  /* --------------------------------------------------------------- */
+  const dotMode = document.getElementById("dotMode");
+  const modeLabel = document.getElementById("modeLabel");
+  const refreshBtn = document.getElementById("refreshBtn");
+
+  const raceSelect = document.getElementById("raceSelect");
+  const raceMsg = document.getElementById("raceMsg");
+
+  const eventNameEl = document.getElementById("eventName");
+  const eventScoreEl = document.getElementById("eventScore");
+  const eventDateEl = document.getElementById("eventDate");
+
+  const downloadTemplateBtn = document.getElementById("downloadTemplateBtn");
   const fileInput = document.getElementById("fileInput");
   const statusMsg = document.getElementById("statusMsg");
+
   const previewBlock = document.getElementById("previewBlock");
   const previewBody = document.getElementById("previewBody");
   const summaryLine = document.getElementById("summaryLine");
+
   const validateBtn = document.getElementById("validateBtn");
   const resetBtn = document.getElementById("resetBtn");
-  const downloadTemplateBtn = document.getElementById("downloadTemplateBtn");
 
-  const eventScore = Number(document.getElementById("eventScore").textContent) || 100;
+  /* --------------------------------------------------------------- */
+  /* State                                                           */
+  /* --------------------------------------------------------------- */
+  let RACES = [];
+  let selectedRace = null;
 
-  let imported = []; // {nom, prenom, tempsStr, timeSec, ok, err}
+  // imported rows: {nom, prenom, tempsStr, timeSec, category, club, ok, err}
+  let imported = [];
 
+  function setRaceHeader(r){
+    if (!r){
+      eventNameEl.textContent = "—";
+      eventScoreEl.textContent = "—";
+      eventDateEl.textContent = "—";
+      return;
+    }
+    eventNameEl.textContent = r.name || "—";
+    // score global si dispo, sinon 100 par défaut (à adapter)
+    const s = Number(r.scoreGlobal ?? r.score_global ?? 100);
+    eventScoreEl.textContent = Number.isFinite(s) ? `${Math.round(s)} pts` : "—";
+    eventDateEl.textContent = r.date || "—";
+  }
+
+  function setNotice(type, text){
+    statusMsg.className = `notice ${type || ""}`.trim();
+    statusMsg.textContent = text;
+    show(statusMsg, true);
+  }
+
+  function clearNotice(){
+    show(statusMsg, false);
+    statusMsg.textContent = "";
+  }
+
+  /* --------------------------------------------------------------- */
+  /* Load races                                                      */
+  /* --------------------------------------------------------------- */
+  async function loadRaces(){
+    show(raceMsg, false);
+    raceSelect.innerHTML = `<option value="">Chargement…</option>`;
+    setRaceHeader(null);
+
+    const { data: sess } = await supabase.auth.getSession();
+    const authed = !!sess?.session;
+
+    dotMode.className = "dot " + (authed ? "ok" : "warn");
+    modeLabel.textContent = authed ? "Mode : Supabase" : "Mode : Local (démo)";
+
+    try{
+      RACES = await loadStoredEventsHybrid();
+      RACES = Array.isArray(RACES) ? RACES : [];
+      if (!RACES.length){
+        raceSelect.innerHTML = `<option value="">Aucune épreuve</option>`;
+        raceMsg.textContent = "Aucune épreuve trouvée. Crée une épreuve avant d’importer des résultats.";
+        show(raceMsg, true);
+        return;
+      }
+
+      raceSelect.innerHTML =
+        `<option value="">— Sélectionner —</option>` +
+        RACES
+          .slice()
+          .sort((a,b) => String(b.date||"").localeCompare(String(a.date||"")))
+          .map(r => `<option value="${escapeHTML(r.id)}">${escapeHTML(r.date || "—")} — ${escapeHTML(r.name || r.id)}</option>`)
+          .join("");
+
+      // auto-sélection si query ?race_id=
+      const params = new URLSearchParams(location.search);
+      const rid = params.get("race_id");
+      if (rid){
+        raceSelect.value = rid;
+        onRaceChange();
+      }
+    } catch(e){
+      console.error(e);
+      raceSelect.innerHTML = `<option value="">Erreur</option>`;
+      raceMsg.textContent = "Erreur au chargement des épreuves.";
+      show(raceMsg, true);
+    }
+  }
+
+  function onRaceChange(){
+    const id = raceSelect.value;
+    selectedRace = RACES.find(r => String(r.id) === String(id)) || null;
+    setRaceHeader(selectedRace);
+    // reset import state when race changes
+    resetImportUI(false);
+  }
+
+  raceSelect.addEventListener("change", onRaceChange);
+
+  /* --------------------------------------------------------------- */
+  /* Template download                                               */
+  /* --------------------------------------------------------------- */
   downloadTemplateBtn.addEventListener("click", () => {
-    const template = "nom,prenom,temps,categorie,club\nDUPONT,Julien,03:42:18,M40,VTT Limoges\nMARTIN,Paul,03:45:02,M30,Club X\n";
+    const template =
+`nom,prenom,temps,categorie,club
+DUPONT,Julien,03:42:18,M40,VTT Limoges
+MARTIN,Paul,03:45:02,M30,Club X
+`;
     const blob = new Blob([template], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "modele_resultats_vtt_points.csv";
+    a.download = "modele_resultats_mtb_points.csv";
     document.body.appendChild(a);
     a.click();
     a.remove();
   });
 
-  resetBtn.addEventListener("click", () => {
+  /* --------------------------------------------------------------- */
+  /* Import flow                                                     */
+  /* --------------------------------------------------------------- */
+  function resetImportUI(clearFile = true){
     imported = [];
-    fileInput.value = "";
-    previewBlock.style.display = "none";
-    statusMsg.textContent = "";
-    statusMsg.className = "msg";
-  });
+    if (clearFile) fileInput.value = "";
+    previewBody.innerHTML = "";
+    show(previewBlock, false);
+    clearNotice();
+    validateBtn.disabled = true;
+  }
+
+  resetBtn.addEventListener("click", () => resetImportUI(true));
 
   fileInput.addEventListener("change", async () => {
-    const file = fileInput.files[0];
+    resetImportUI(false);
+
+    if (!selectedRace){
+      setNotice("warn", "⚠️ Sélectionne d’abord une épreuve.");
+      fileInput.value = "";
+      return;
+    }
+
+    const file = fileInput.files && fileInput.files[0];
     if (!file) return;
 
     const text = await file.text();
     const { headers, rows } = parseCSV(text);
 
-    if (!hasRequiredHeaders(headers)) {
-      statusMsg.className = "msg bad";
-      statusMsg.textContent = "❌ Colonnes manquantes. Il faut : nom, prenom, temps (HH:MM:SS).";
-      previewBlock.style.display = "none";
+    if (!hasRequiredHeaders(headers)){
+      setNotice("err", "❌ Colonnes manquantes : il faut nom, prenom, temps (HH:MM:SS).");
       return;
     }
 
     imported = rows.map((r, idx) => {
-      const nom = (r.nom || "").trim();
-      const prenom = (r.prenom || "").trim();
-      const tempsStr = (r.temps || "").trim();
+      const nom = String(r.nom || "").trim();
+      const prenom = String(r.prenom || "").trim();
+      const tempsStr = String(r.temps || "").trim();
       const timeSec = parseHMS(tempsStr);
 
-      if (!nom || !prenom) {
-        return { nom, prenom, tempsStr, timeSec, ok: false, err: `Ligne ${idx+2}: nom/prénom manquant` };
+      const category = String(r.categorie || r.category || "").trim();
+      const club = String(r.club || "").trim();
+
+      if (!nom || !prenom){
+        return { nom, prenom, tempsStr, timeSec, category, club, ok:false, err:`Ligne ${idx+2}: nom/prénom manquant` };
       }
-      if (timeSec === null) {
-        return { nom, prenom, tempsStr, timeSec, ok: false, err: `Ligne ${idx+2}: temps invalide` };
+      if (timeSec === null){
+        return { nom, prenom, tempsStr, timeSec, category, club, ok:false, err:`Ligne ${idx+2}: temps invalide` };
       }
-      return { nom, prenom, tempsStr, timeSec, ok: true, err: "" };
+      return { nom, prenom, tempsStr, timeSec, category, club, ok:true, err:"" };
     });
 
     renderPreview();
   });
 
-  function renderPreview() {
+  function renderPreview(){
     previewBody.innerHTML = "";
 
     const errors = imported.filter(x => !x.ok);
-    const okCount = imported.length - errors.length;
-
-    // Aperçu: trier les OK par temps
     const okRows = imported.filter(x => x.ok).slice().sort((a,b) => a.timeSec - b.timeSec);
 
-    // Status
-    if (errors.length === 0) {
-      statusMsg.className = "msg ok";
-      statusMsg.textContent = `✅ Import OK (${okCount} lignes valides).`;
-    } else {
-      statusMsg.className = "msg bad";
-      statusMsg.textContent = `❌ ${errors.length} erreur(s) détectée(s). Corrige avant validation.`;
+    const okCount = okRows.length;
+    const errCount = errors.length;
+
+    summaryLine.textContent = `Lignes valides : ${okCount} • Erreurs : ${errCount}`;
+
+    if (errCount === 0 && okCount > 0){
+      setNotice("ok", `✅ Import OK (${okCount} lignes valides).`);
+    } else if (errCount > 0){
+      setNotice("err", `❌ ${errCount} erreur(s) détectée(s). Corrige avant validation.`);
       console.warn("Erreurs import:", errors.map(e => e.err));
+    } else {
+      setNotice("warn", "⚠️ Aucun résultat valide.");
     }
 
-    summaryLine.textContent = `Lignes valides : ${okCount} • Erreurs : ${errors.length}`;
+    // Aperçu : 25 ok + 5 erreurs max
+    const toShow = okRows.slice(0, 25).concat(errors.slice(0, 5));
 
-    // Remplir tableau : on montre les 30 premiers (OK + erreurs en fin)
-    const toShow = okRows.slice(0, 25).concat(errors.slice(0, 5)); // aperçu
     toShow.forEach((r, i) => {
       const tr = document.createElement("tr");
-      const status = r.ok ? "✔ OK" : "❌ Erreur";
       tr.innerHTML = `
         <td>${i+1}</td>
         <td>${escapeHTML(r.nom)}</td>
         <td>${escapeHTML(r.prenom)}</td>
         <td>${escapeHTML(r.tempsStr)}</td>
-        <td class="${r.ok ? "ok" : "bad"}">${status}${r.ok ? "" : ` — ${escapeHTML(r.err)}`}</td>
+        <td>${escapeHTML(r.category || "—")}</td>
+        <td>${escapeHTML(r.club || "—")}</td>
+        <td class="${r.ok ? "statusOk" : "statusBad"}">
+          ${r.ok ? "✔ OK" : "❌ Erreur"}${r.ok ? "" : ` <span class="small">— ${escapeHTML(r.err)}</span>`}
+        </td>
       `;
       previewBody.appendChild(tr);
     });
 
-    previewBlock.style.display = "block";
-    validateBtn.disabled = errors.length > 0 || okCount === 0;
+    show(previewBlock, true);
+    validateBtn.disabled = errCount > 0 || okCount === 0;
   }
 
-  validateBtn.addEventListener("click", () => {
-    // Calcul classement + scores (démo côté client)
-    const okRows = imported.filter(x => x.ok).slice().sort((a,b) => a.timeSec - b.timeSec);
+  /* --------------------------------------------------------------- */
+  /* Validation: calc points + insert Supabase                        */
+  /* --------------------------------------------------------------- */
+  async function insertResultsSupabase(rowsWithPoints){
+    const { data: u } = await supabase.auth.getUser();
+    const user = u?.user;
+    if (!user) throw new Error("Non connecté.");
 
+    // points de l'épreuve : score_global si dispo sinon 100
+    const eventScore = Number(selectedRace.scoreGlobal ?? selectedRace.score_global ?? 100) || 100;
+
+    const payload = rowsWithPoints.map(r => ({
+      race_id: selectedRace.id,
+      organizer_id: user.id,
+      last_name: r.nom,
+      first_name: r.prenom,
+      club: r.club || null,
+      category: r.category || null,
+      rank: r.place,
+      time_seconds: r.timeSec,
+      time_display: r.tempsStr || formatHMS(r.timeSec),
+      points: r.points
+    }));
+
+    const { error } = await supabase.from("results").insert(payload);
+    if (error) throw error;
+
+    return { inserted: payload.length, eventScore };
+  }
+
+  validateBtn.addEventListener("click", async () => {
+    if (!selectedRace) return;
+
+    const okRows = imported.filter(x => x.ok).slice().sort((a,b) => a.timeSec - b.timeSec);
+    const eventScore = Number(selectedRace.scoreGlobal ?? selectedRace.score_global ?? 100) || 100;
+
+    // enrich + points V1
     const enriched = okRows.map((r, idx) => {
       const place = idx + 1;
       const coeff = coeffForPlace(place);
-      const score = coeff > 0 ? Math.round(eventScore * coeff) : 10; // TODO: finishers hors top10
-      return { ...r, place, coeff, score };
+      const points = coeff > 0 ? Math.round(eventScore * coeff) : 10; // TODO: finishers hors top10
+      return { ...r, place, coeff, points };
     });
 
-    console.table(enriched.map(x => ({ place: x.place, nom: x.nom, prenom: x.prenom, temps: x.tempsStr, score: x.score })));
-    alert("✅ Résultats validés (démo). Ouvre la console (F12) pour voir le classement + scores.");
+    // si connecté -> insert supabase, sinon démo console
+    const { data: sess } = await supabase.auth.getSession();
+    const authed = !!sess?.session;
+
+    validateBtn.disabled = true;
+    setNotice("warn", "Validation en cours…");
+
+    try{
+      if (!authed){
+        console.table(enriched.map(x => ({
+          place: x.place,
+          nom: x.nom,
+          prenom: x.prenom,
+          temps: x.tempsStr,
+          points: x.points
+        })));
+        setNotice("ok", "✅ Validé (mode local / démo). Ouvre la console (F12) pour voir les points.");
+        return;
+      }
+
+      const res = await insertResultsSupabase(enriched);
+      setNotice("ok", `✅ ${res.inserted} résultat(s) inséré(s) dans Supabase pour “${selectedRace.name}”.`);
+    } catch(e){
+      console.error(e);
+      setNotice("err", `❌ Erreur : ${e?.message || e}`);
+    } finally{
+      validateBtn.disabled = false;
+    }
   });
 
-  function escapeHTML(s) {
-    return String(s).replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[m]));
-  }
+  /* --------------------------------------------------------------- */
+  /* Boot                                                            */
+  /* --------------------------------------------------------------- */
+  refreshBtn.addEventListener("click", loadRaces);
+
+  await renderAuthState();
+  await loadRaces();
 </script>
+
 </body>
 </html>
