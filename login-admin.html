@@ -3,54 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Connexion Organisateur — MTB Points</title>
-
-  <!-- IMPORTANT: chemin relatif => pas de Mixed Content -->
+  <title>Connexion Admin — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
-
   <style>
-    :root{
-      --bg:#f4f4f4;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e5e7eb;
+    :root{--bg:#f4f4f4;--card:#fff;--text:#0f172a;--muted:#64748b;--border:#e5e7eb;
       --blue:#2563eb;--blue2:#1d4ed8;--ok:#16a34a;--err:#dc2626;--warn:#ea580c;
-      --shadow:0 12px 34px rgba(2,6,23,.12);--r:18px;
-    }
+      --shadow:0 12px 34px rgba(2,6,23,.12);--r:18px;}
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
-    a{color:inherit}
-    header.header{
-      position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
-      padding:14px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
-    }
-    header.header h1{margin:0;font-size:18px}
+    header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);padding:14px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
     nav{display:flex;gap:10px;flex-wrap:wrap}
     nav a{padding:8px 10px;border-radius:10px;text-decoration:none;color:var(--blue);font-weight:900;font-size:13px}
     nav a:hover{background:#eff6ff}
     nav a.active{background:#eff6ff;color:var(--blue2)}
-    .wrap{max-width:980px;margin:22px auto;padding:0 16px}
+    .wrap{max-width:860px;margin:22px auto;padding:0 16px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
-    .hero{
-      border-radius:18px;border:1px solid var(--border);
-      padding:16px;background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(234,88,12,.10), transparent 60%),
-        #fff;
-    }
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .hero{border-radius:18px;border:1px solid var(--border);padding:16px;background:
+      radial-gradient(900px 260px at 12% 0%, rgba(220,38,38,.12), transparent 60%),
+      radial-gradient(700px 240px at 95% 10%, rgba(37,99,235,.10), transparent 60%),
+      #fff;}
     .kpi{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px}
     .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
     .dot.ok{background:var(--ok)}
+    .dot.err{background:var(--err)}
     .panel{margin-top:14px;border:1px solid var(--border);border-radius:16px;padding:14px;background:#fff}
     label{display:block;font-weight:900;font-size:12px}
     input{width:100%;margin-top:6px;padding:10px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:14px}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;text-decoration:none;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;text-decoration:none;transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease}
     .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
     .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
     .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
@@ -59,72 +41,51 @@
     .msg.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
     .msg.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}
     .msg.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
-    footer{margin-top:14px;color:var(--muted);font-size:12px;text-align:center;line-height:1.5}
   </style>
 </head>
-
 <body>
-<header class="header">
-  <div class="row" style="gap:10px">
-    <h1>MTB Points — Connexion Organisateur</h1>
-    <span class="kpi"><span class="dot ok"></span> organizer</span>
+<header>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <h1 style="margin:0;font-size:18px">MTB Points — Connexion Admin</h1>
+    <span class="kpi"><span class="dot err"></span> admin</span>
     <span class="kpi" id="authState">Non connecté</span>
   </div>
-
   <nav>
     <a href="index.html">Accueil</a>
-    <a href="meetings.html">Événements</a>
-    <a href="events.html">Épreuves</a>
-    <a class="active" href="login.html">Login Orga</a>
-    <a href="login-admin.html">Login Admin</a>
+    <a href="login.html">Login Orga</a>
+    <a class="active" href="login-admin.html">Login Admin</a>
     <a href="login-rider.html">Login Rider</a>
   </nav>
-
-  <div class="row" style="gap:10px">
-    <button class="btn ghost" id="btnSignOut" type="button">Déconnexion</button>
-  </div>
+  <button class="btn ghost" id="btnSignOut" type="button">Déconnexion</button>
 </header>
 
 <main class="wrap">
   <div class="card">
     <section class="hero">
-      <div class="row">
-        <div style="min-width:260px;flex:1">
-          <h2 style="margin:0;font-size:22px">Accès Organisateurs</h2>
-          <p style="margin:8px 0 0 0;color:#334155;line-height:1.55">
-            Connexion réservée aux comptes avec <code>profiles.role = 'organizer'</code> ou <code>'admin'</code>.
-          </p>
-        </div>
-      </div>
+      <h2 style="margin:0;font-size:22px">Accès Administration</h2>
+      <p style="margin:8px 0 0 0;color:#334155;line-height:1.55">
+        Connexion réservée aux comptes avec <code>profiles.role = 'admin'</code>.
+      </p>
       <div id="msg" class="msg"></div>
     </section>
 
     <section class="panel">
       <label for="email">Email</label>
-      <input id="email" type="email" autocomplete="email" placeholder="orga@email.com" />
-
+      <input id="email" type="email" autocomplete="email" placeholder="admin@email.com" />
       <label for="pass" style="margin-top:10px">Mot de passe</label>
       <input id="pass" type="password" autocomplete="current-password" placeholder="••••••••" />
-
       <div class="actions">
         <button class="btn primary" id="btnSignIn" type="button">Se connecter</button>
-        <button class="btn" id="btnSignUp" type="button">Créer compte organisateur</button>
       </div>
-
       <div style="margin-top:10px;color:#64748b;font-size:12px;line-height:1.5">
-        Si la confirmation email est activée dans Supabase, tu dois valider le lien reçu avant de pouvoir te connecter.
+        (Option) Tu peux désactiver l’inscription admin côté UI : ici, pas de “sign up”.
       </div>
     </section>
-
-    <footer>
-      Redirection après login : <code>organizer-dashboard.html</code>
-    </footer>
   </div>
 </main>
 
 <script type="module">
   import { supabase } from "./js/supabaseClient.js";
-
   const $ = (id) => document.getElementById(id);
 
   function showMsg(text, kind="warn"){
@@ -137,13 +98,12 @@
 
   async function renderAuthState(){
     const el = $("authState");
-    if (!el) return;
     const { data } = await supabase.auth.getSession();
     const s = data?.session;
     el.textContent = s?.user?.email ? `Connecté : ${s.user.email}` : "Non connecté";
   }
 
-  async function requireOrganizerOrAdmin(){
+  async function requireAdmin(){
     const { data: u } = await supabase.auth.getUser();
     const user = u?.user;
     if (!user) throw new Error("Session introuvable.");
@@ -157,15 +117,14 @@
     if (error) throw error;
 
     const role = p?.role || "rider";
-    if (!(role === "organizer" || role === "admin")) {
+    if (role !== "admin") {
       await supabase.auth.signOut();
       await renderAuthState();
-      throw new Error("Ce compte n’est pas organisateur. Utilise le login Rider ou demande une promotion.");
+      throw new Error("Ce compte n’est pas admin.");
     }
-    return role;
   }
 
-  async function signInOrganizer(){
+  async function signInAdmin(){
     showMsg("Connexion…", "warn");
     const email = $("email").value.trim();
     const password = $("pass").value;
@@ -173,43 +132,15 @@
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
 
-    await requireOrganizerOrAdmin();
+    await requireAdmin();
     await renderAuthState();
 
     showMsg("Connecté ✅ Redirection…", "ok");
-    location.href = "organizer-dashboard.html";
-  }
-
-  async function signUpOrganizer(){
-    showMsg("Création compte organisateur…", "warn");
-    const email = $("email").value.trim();
-    const password = $("pass").value;
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { role: "organizer" },
-        emailRedirectTo: `${location.origin}/mtb-points/login.html`
-      }
-    });
-    if (error) throw error;
-
-    showMsg(data?.session
-      ? "Compte créé ✅ (confirmation email désactivée)"
-      : "Compte créé ✅ Vérifie ton email (spam) pour confirmer.",
-      "ok"
-    );
-    await renderAuthState();
+    location.href = "dashboard.html";
   }
 
   $("btnSignIn").addEventListener("click", async () => {
-    try { await signInOrganizer(); }
-    catch(e){ showMsg(`Erreur: ${e?.message || e}`, "err"); }
-  });
-
-  $("btnSignUp").addEventListener("click", async () => {
-    try { await signUpOrganizer(); }
+    try { await signInAdmin(); }
     catch(e){ showMsg(`Erreur: ${e?.message || e}`, "err"); }
   });
 
