@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Connexion — MTB Points</title>
-  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- IMPORTANT: relatif (pas de http:// externe) -> évite Mixed Content -->
+  <link rel="stylesheet" href="./css/style.css" />
+
   <style>
     :root{
       --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
@@ -17,7 +20,6 @@
     a{color:inherit}
     .muted{color:var(--muted)}
 
-    /* Header */
     header.header{
       position:sticky;top:0;z-index:20;
       background:rgba(255,255,255,.90);
@@ -44,7 +46,6 @@
       background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
     }
 
-    /* Layout */
     .wrap{max-width:1050px;margin:22px auto;padding:0 16px}
     .card{
       background:var(--card);
@@ -140,6 +141,8 @@
       outline:3px solid rgba(37,99,235,.25);
       outline-offset:2px;
     }
+
+    code{background:#f1f5f9;padding:2px 6px;border-radius:8px}
   </style>
 </head>
 <body>
@@ -169,13 +172,14 @@
 
 <main class="wrap">
   <div class="card">
+
     <section class="hero">
       <div class="heroTop">
         <div style="min-width:260px;flex:1">
           <h2>Riders & Organisateurs</h2>
           <p>
-            Deux accès : <b>cyclistes (riders)</b> et <b>organisateurs</b>.
-            Les comptes sont identiques côté Supabase : le rôle est géré dans la table <code>profiles</code>.
+            <b>Rider</b> : connexion par <b>email (lien)</b> ✅ (tu reçois un email).<br>
+            <b>Organisateur</b> : connexion par <b>mot de passe</b> (dashboard / création / import).
           </p>
         </div>
       </div>
@@ -185,36 +189,38 @@
 
     <div class="grid">
 
-      <!-- RIDER -->
+      <!-- RIDER (MAGIC LINK) -->
       <section class="panel" aria-label="Connexion cycliste">
         <div class="row">
           <h3>🚴 Connexion Rider</h3>
-          <span class="kpi">Rôle : rider</span>
+          <span class="kpi">Magic link</span>
         </div>
-        <p class="desc muted">Accès aux pages publiques + profil rider.</p>
+
+        <p class="desc muted">
+          Tu reçois un email de connexion (sans mot de passe).
+        </p>
 
         <label for="riderEmail">Email</label>
         <input id="riderEmail" type="email" autocomplete="email" placeholder="rider@email.com" />
 
-        <label for="riderPass" style="margin-top:10px">Mot de passe</label>
-        <input id="riderPass" type="password" autocomplete="current-password" placeholder="••••••••" />
-
         <div class="actions">
-          <button class="btn primary" id="btnRiderSignIn" type="button">Se connecter</button>
-          <button class="btn ok" id="btnRiderSignUp" type="button">Créer compte rider</button>
+          <button class="btn primary" id="btnRiderLink" type="button">Recevoir un lien de connexion</button>
+          <button class="btn ghost" id="btnRiderGoPublic" type="button">Continuer sans compte</button>
         </div>
 
         <div class="muted" style="margin-top:10px;font-size:12px;line-height:1.5">
-          Si la confirmation email est activée, tu dois valider le lien reçu avant de pouvoir te connecter.
+          Si tu ne reçois rien : vérifie spam, et confirme que les <code>Redirect URLs</code> Supabase autorisent bien
+          l’URL GitHub Pages.
         </div>
       </section>
 
-      <!-- ORGANIZER -->
+      <!-- ORGANIZER (PASSWORD) -->
       <section class="panel" aria-label="Connexion organisateur">
         <div class="row">
           <h3>🏁 Connexion Organisateur</h3>
-          <span class="kpi">Rôle : organizer</span>
+          <span class="kpi">Mot de passe</span>
         </div>
+
         <p class="desc muted">Accès dashboard + création d’événements/épreuves + import résultats.</p>
 
         <label for="orgEmail">Email</label>
@@ -230,15 +236,14 @@
 
         <div class="muted" style="margin-top:10px;font-size:12px;line-height:1.5">
           Un compte “organizer” doit avoir <code>profiles.role = 'organizer'</code> (ou <code>admin</code>).
-          Si tu crées un compte ici, le rôle sera demandé à l’inscription.
+          Si le rôle n’est pas encore posé côté DB, la connexion sera refusée.
         </div>
       </section>
 
     </div>
 
     <footer>
-      Astuce dev : tu peux promouvoir un compte en organisateur via SQL :
-      <code>update public.profiles set role='organizer' where email='...';</code>
+      Astuce admin : <code>update public.profiles set role='organizer' where email='...';</code>
     </footer>
 
   </div>
@@ -246,12 +251,10 @@
 
 <script type="module">
   import { supabase } from "./js/supabaseClient.js";
-  import { signUp, signIn, signOut, renderAuthState } from "./js/auth.js";
+  import { signIn, signOut, renderAuthState, signInWithEmailLink, signUp } from "./js/auth.js";
 
   const $ = (id) => document.getElementById(id);
-
   const msgEl = $("authMsg");
-  const btnSignOut = $("btnSignOut");
 
   function showMsg(text, kind="warn"){
     if (!msgEl) return;
@@ -260,51 +263,47 @@
     msgEl.style.display = text ? "block" : "none";
   }
 
-  // Riders
-  const riderEmail = $("riderEmail");
-  const riderPass  = $("riderPass");
-  $("btnRiderSignIn").addEventListener("click", async () => {
+  // Base URL GH Pages: https://.../mtb-points
+  function getAppBaseUrl(){
+    const parts = location.pathname.split("/").filter(Boolean);
+    const base = parts.length ? `/${parts[0]}` : "";
+    return `${location.origin}${base}`;
+  }
+
+  // RIDER: Magic link (envoie email)
+  $("btnRiderLink").addEventListener("click", async () => {
     try{
-      showMsg("Connexion rider…", "warn");
-      await signIn(riderEmail.value, riderPass.value);
-      await renderAuthState();
-      showMsg("Connecté ✅", "ok");
-      // redir vers pages publiques (ou rider.html)
-      location.href = "public-ranking.html";
+      const email = $("riderEmail").value.trim();
+      if (!email) { showMsg("⚠️ Entre un email.", "warn"); return; }
+
+      showMsg("Envoi du lien de connexion…", "warn");
+
+      // IMPORTANT: redirection vers une page autorisée dans Supabase Auth URL Configuration
+      // -> ajoute bien: https://davidpoyade-netizen.github.io/mtb-points/login.html
+      await signInWithEmailLink(email);
+
+      showMsg("✅ Email envoyé ! Ouvre le lien reçu (vérifie spam).", "ok");
     } catch(e){
-      showMsg(`Erreur: ${e?.message || e}`, "err");
+      showMsg(`❌ ${e?.message || e}`, "err");
     }
   });
 
-  $("btnRiderSignUp").addEventListener("click", async () => {
-    try{
-      showMsg("Création compte rider…", "warn");
-      const { data } = await supabase.auth.signUp({
-        email: riderEmail.value,
-        password: riderPass.value,
-        options: {
-          data: { role: "rider" },
-          emailRedirectTo: `${location.origin}/login.html`
-        }
-      });
-      // si confirm email ON => session null
-      showMsg(data?.session ? "Compte rider créé ✅" : "Compte rider créé ✅ Vérifie ton email (spam) pour confirmer.", "ok");
-      await renderAuthState();
-    } catch(e){
-      showMsg(`Erreur: ${e?.message || e}`, "err");
-    }
+  $("btnRiderGoPublic").addEventListener("click", () => {
+    location.href = "public-ranking.html";
   });
 
-  // Organizers
-  const orgEmail = $("orgEmail");
-  const orgPass  = $("orgPass");
-
+  // ORGANIZER: password sign-in + vérif role dans profiles
   $("btnOrgSignIn").addEventListener("click", async () => {
     try{
-      showMsg("Connexion organisateur…", "warn");
-      await signIn(orgEmail.value, orgPass.value);
+      const email = $("orgEmail").value.trim();
+      const pass  = $("orgPass").value;
 
-      // Vérifier rôle via profiles (si pas organizer/admin -> refuser)
+      if (!email || !pass) { showMsg("⚠️ Email + mot de passe requis.", "warn"); return; }
+
+      showMsg("Connexion organisateur…", "warn");
+      await signIn(email, pass);
+
+      // Vérifier role via profiles (si pas organizer/admin -> refuser)
       const { data: u } = await supabase.auth.getUser();
       const user = u?.user;
       if (!user) throw new Error("Session introuvable.");
@@ -321,57 +320,69 @@
       if (!(role === "organizer" || role === "admin")) {
         await supabase.auth.signOut();
         await renderAuthState();
-        throw new Error("Ce compte n’est pas organisateur. Utilise la connexion Rider ou demande une promotion.");
+        throw new Error("Ce compte n’est pas organisateur. Demande une promotion admin.");
       }
 
       await renderAuthState();
-      showMsg("Connecté organisateur ✅", "ok");
+      showMsg("✅ Connecté organisateur", "ok");
       location.href = "dashboard.html";
     } catch(e){
-      showMsg(`Erreur: ${e?.message || e}`, "err");
+      showMsg(`❌ ${e?.message || e}`, "err");
     }
   });
 
+  // ORGANIZER: signUp (email + password) + metadata role
   $("btnOrgSignUp").addEventListener("click", async () => {
     try{
+      const email = $("orgEmail").value.trim();
+      const pass  = $("orgPass").value;
+
+      if (!email || !pass) { showMsg("⚠️ Email + mot de passe requis.", "warn"); return; }
+
       showMsg("Création compte organisateur…", "warn");
+
+      // On passe par signUp() (auth.js) qui gère redirect GitHub Pages correctement,
+      // mais on ajoute la metadata role directement ici (utile si tu as un trigger).
+      const redirectTo = `${getAppBaseUrl()}/login.html`;
+
       const { data, error } = await supabase.auth.signUp({
-        email: orgEmail.value,
-        password: orgPass.value,
+        email,
+        password: pass,
         options: {
-          data: { role: "organizer" },
-          emailRedirectTo: `${location.origin}/login.html`
+          data: { role: "organizer" },      // metadata (auth.users raw_user_meta_data)
+          emailRedirectTo: redirectTo
         }
       });
       if (error) throw error;
 
-      showMsg(data?.session ? "Compte organisateur créé ✅" : "Compte organisateur créé ✅ Vérifie ton email (spam) pour confirmer.", "ok");
-      await renderAuthState();
+      // Si confirm email ON => session null
+      showMsg(
+        data?.session
+          ? "✅ Compte organisateur créé."
+          : "✅ Compte créé. Confirme via l’email reçu (spam inclus) avant connexion.",
+        "ok"
+      );
 
-      // Note: le role organizer sera écrit dans profiles via trigger handle_new_user()
-      // Si tes policies empêchent update/insert, fais la promotion en SQL (admin) comme indiqué en bas.
+      await renderAuthState();
     } catch(e){
-      showMsg(`Erreur: ${e?.message || e}`, "err");
+      showMsg(`❌ ${e?.message || e}`, "err");
     }
   });
 
   // Sign out
-  btnSignOut.addEventListener("click", async () => {
+  $("btnSignOut").addEventListener("click", async () => {
     try{
       showMsg("Déconnexion…", "warn");
       await signOut();
       await renderAuthState();
       showMsg("Déconnecté.", "ok");
     } catch(e){
-      showMsg(`Erreur: ${e?.message || e}`, "err");
+      showMsg(`❌ ${e?.message || e}`, "err");
     }
   });
 
   // Init
   await renderAuthState();
-
-  // Si l’utilisateur arrive depuis un email magic/confirm, Supabase peut avoir une session dans l’URL
-  // On force un refresh de l’état
   supabase.auth.onAuthStateChange(async () => {
     await renderAuthState();
   });
