@@ -3,276 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fiche épreuve – MTB Points</title>
-
-  <!-- Leaflet (carte) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0;color:#0f172a}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .blockTitle{font-weight:900;margin:0 0 10px 0}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .item{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
-    .label{color:#667085;font-size:12px;margin-bottom:6px}
-    .value{font-weight:900;font-size:18px;color:#0f172a}
-    .muted{color:#667085;font-size:12px;margin-top:6px}
-
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid #e5e7eb;background:#f8fafc;color:#0f172a}
-    .pillDot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
-
-    .barWrap{margin-top:8px;background:#f1f5f9;border-radius:999px;overflow:hidden;border:1px solid #e5e7eb;height:16px}
-    .barSeg{height:16px;display:block;float:left}
-    .segRoad{background:#64748b}
-    .segTrack{background:#22c55e}
-    .segSingle{background:#ef4444}
-
-    #map{height:380px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
-    #profileWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
-    #profileCanvas{width:100%;display:block}
-
-    .legendRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 10px 0}
-    .legendItem{display:inline-flex;align-items:center;gap:6px}
-    .legendSwatch{width:10px;height:10px;border-radius:3px;display:inline-block}
-
-    .linkBtn{display:inline-block;padding:10px 14px;border-radius:10px;background:#2563eb;color:#fff;text-decoration:none;font-weight:900}
-    .linkBtn.secondary{background:#f1f5f9;color:#0f172a;border:1px solid #e5e7eb}
-
-    @media(max-width:900px){
-      .grid,.grid3,.twoCol{grid-template-columns:1fr}
-      #map{height:320px}
-    }
-  </style>
+  <title>Épreuve — MTB Points</title>
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 
 <body>
-<header>
-  <nav>
-<a href="index.html">Acceuil</a>
-<a href="public-ranking.html">Classement</a>
-<a href="meetings.html">Événements</a>
-<a href="reglement.html">Règlement</a>
-<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
-<a href="about.html">À propos</a>
-<a href="login.html">Connexion</a>
-  </nav>
-  <div class="muted">Fiche épreuve</div>
-</header>
-
-<div class="wrap">
-
-  <!-- 1) Identité -->
-  <section class="card">
-    <h2 class="blockTitle" id="name">—</h2>
-
-    <div class="grid3">
-      <div class="item">
-        <div class="label">Date</div>
-        <div class="value" id="date">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Discipline</div>
-        <div class="value" id="disc">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Niveau</div>
-        <div class="value" id="level">—</div>
-      </div>
-    </div>
-
-    <div class="grid" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Distance</div>
-        <div class="value" id="distance">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Dénivelé</div>
-        <div class="value"><span id="dplus">—</span> <span class="muted">(+)</span> • <span id="dminus">—</span> <span class="muted">(-)</span></div>
-        <div class="muted" id="elevInfo">—</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 2) Scores -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Scores & difficulté</h3>
-<span id="scorePhys" class="scoreBadge">—</span>
-<span id="scoreTech" class="scoreBadge">—</span>
-<span id="scoreGlobal" class="scoreBadge">—</span>
-
-    <div class="grid3">
-      <div class="item">
-        <div class="label">Score technique</div>
-        <div class="value" id="scoreTech">—</div>
-        <div class="muted">Basé GPX (segments)</div>
-      </div>
-      <div class="item">
-        <div class="label">TechCoeff P75</div>
-        <div class="value" id="techP75">—</div>
-        <div class="muted" id="techInfo">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Score physique</div>
-        <div class="value" id="scorePhys">—</div>
-        <div class="muted" id="physInfo">—</div>
-      </div>
-    </div>
-
-    <div class="grid" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Score global</div>
-        <div class="value" id="scoreGlobal">—</div>
-        <div class="muted">Synthèse technique + physique</div>
-      </div>
-      <div class="item">
-        <div class="label">Niveau de difficulté</div>
-        <div class="pill" id="diffPill">
-          <span class="pillDot" id="diffDot"></span>
-          <span id="diffLabel">—</span>
-        </div>
-        <div class="muted" id="diffHint">—</div>
-      </div>
-    </div>
-
-    <div class="item" style="margin-top:12px;">
-      <div class="label">Résumé</div>
-      <div class="value" id="autoSummary" style="font-size:14px;font-weight:800;">—</div>
-      <div class="muted">Synthèse automatique depuis la trace GPX</div>
-    </div>
-
-    <div class="item" style="margin-top:12px;">
-      <div class="label">Type de voie empruntée (estimé GPX)</div>
-      <div class="value" id="surfaceText">—</div>
-
-      <div class="barWrap" aria-label="Route / Piste large / Single">
-        <span class="barSeg segRoad" id="barRoad" style="width:0%"></span>
-        <span class="barSeg segTrack" id="barTrack" style="width:0%"></span>
-        <span class="barSeg segSingle" id="barSingle" style="width:0%"></span>
-      </div>
-
-      <div class="muted">Route (gris) • Piste large (vert) • Single (rouge)</div>
-    </div>
-  </section>
-
-  <!-- 3) Profil + carte (colorés) -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Profil & carte</h3>
-
-    <div class="twoCol">
-      <div id="profileWrap">
-        <div class="label">Profil altimétrique (coloré par segments)</div>
-
-        <div class="legendRow muted">
-          <span class="legendItem"><span class="legendSwatch" style="background:#22c55e;"></span> Facile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#3b82f6;"></span> Modéré</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#ef4444;"></span> Difficile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#111827;"></span> Très difficile</span>
-          <span class="muted" style="margin-left:auto;">Survole</span>
-        </div>
-
-        <div style="position:relative;">
-          <canvas id="profileCanvas" height="220"></canvas>
-          <div id="profileTooltip"
-               style="position:absolute;display:none;pointer-events:none;
-                      background:#0f172a;color:#fff;padding:8px 10px;border-radius:10px;
-                      font-size:12px;line-height:1.35;box-shadow:0 10px 30px rgba(0,0,0,.25);">
-          </div>
-        </div>
-
-        <div class="muted" id="profileInfo">—</div>
-      </div>
-
-      <div>
-        <div class="label">Carte du tracé (colorée par segments)</div>
-
-        <div class="legendRow muted">
-          <span class="legendItem"><span class="legendSwatch" style="background:#22c55e;"></span> Facile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#3b82f6;"></span> Modéré</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#ef4444;"></span> Difficile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#111827;"></span> Très difficile</span>
-        </div>
-
-        <div id="map"></div>
-
-        <div class="muted">Départ / Arrivée affichés automatiquement</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4) Infos pratiques -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Informations pratiques</h3>
-
-    <div class="grid">
-      <div class="item">
-        <div class="label">Départ</div>
-        <div class="value" id="startPlace">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Arrivée</div>
-        <div class="value" id="finishPlace">—</div>
-      </div>
-    </div>
-
-    <div class="grid3" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Heure de départ</div>
-        <div class="value" id="startTime">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Ravitaillements</div>
-        <div class="value" id="aidStations">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Assistance mécanique</div>
-        <div class="value" id="mechStations">—</div>
-      </div>
-    </div>
-
-    <div class="grid3" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Lavage des vélos</div>
-        <div class="value" id="bikeWash">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Barrière horaire</div>
-        <div class="value" id="cutoffTime">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Catégories d’âge</div>
-        <div class="value" id="ageCategories">—</div>
-        <div class="muted" id="ageHint">—</div>
-      </div>
-    </div>
-
-    <div class="item" style="margin-top:12px;">
-      <div class="label">Commentaire</div>
-      <div class="value" style="font-size:14px;font-weight:700;" id="comment">—</div>
-    </div>
-  </section>
-
-  <!-- 5) Lien événement -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Événement</h3>
-    <div id="meetingBlock">
-      <div class="muted">Cette épreuve n’est rattachée à aucun événement.</div>
-    </div>
-  </section>
-
-  <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-    <a class="linkBtn secondary" href="events.html">← Retour aux épreuves</a>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Fiche épreuve</h1>
+    <span class="pill" id="pillMeeting">
+      <span class="dot"></span>
+      <span id="pillMeetingTxt">—</span>
+    </span>
   </div>
 
-</div>
+  <nav class="nav">
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="events.html" class="active">Épreuves</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="login.html">Connexion</a>
+  </nav>
 
-<script src="js/storage.js"></script>
-<script src="js/event-detail.js"></script>
-</body>
-</html>
+  <div class="headerRight" style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="btn ghost" id="btnBack" href="events.html">← Retour</a>
+    <a class="btn" id="btnOpenMeeting" href="#" style="display:none;">Voir l’événement</a>
+    <a class="btn primary" id="btnCreateSibling" href="#" style="display:none;">Créer une autre épreuve</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2 id="raceName">—</h2>
+          <div class="heroMeta" id="raceMeta">—</div>
+          <div class="heroDesc" id="raceComment" style="display:none;"></div>
+        </div>
+
+        <div class="heroActions">
+          <span class="pill"><span class="dot ok"></span> Épreuve</span>
+          <span class="pill"><span class="dot"></span> Scores</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ALERT -->
+    <div id="alertBox" class="empty" style="display:none; margin-top:14px;"></div>
+
+    <!-- KPIs -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Résumé</h3>
+    <div class="kpiGrid">
+      <div class="kpi">
+        <div class="kpiLabel">Distance</div>
+        <div class="kpiValue"><span id="kpiDistance">—</span><span class="muted"> km</span></div>
+        <div class="kpiSub" id="kpiDplus">—</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpiLabel">ScorePhys</div>
+        <div class="kpiValue"><span id="kpiPhys">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub" id="kpiPhysSub">—</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpiLabel">ScoreTech</div>
+        <div class="kpiValue"><span id="kpiTech">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub" id="kpiTechSub">—</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpiLabel">Score Global</div>
+        <div class="kpiValue"><span id="kpiGlobal">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub" id="kpiGlobalSub">—</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpiLabel">Discipline</div>
+        <div class="kpiValue" id="kpiDisc">—</div>
+        <div class="kpiSub" id="kpiEbike">—</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpiLabel">Participants</div>
+        <div class="kpiValue" id="kpiParticipants">—</div>
+        <div class="kpiSub" id="kpiCreated">—</div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Actions</h3>
+    <div class="filters" style="grid-template-columns: 1fr 1fr 1fr; align-items:end;">
+      <div>
+        <a class="btn" id="btnEdit" href="#">Modifier (optionnel)</a>
+      </div>
+      <div>
+        <a class="btn" id="btnGoMeeting2" href="#" style="display:none;">Voir l’événement</a>
+      </div>
+      <div>
