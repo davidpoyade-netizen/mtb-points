@@ -1,6 +1,7 @@
 // js/gpx.js
-// MTB Points — Frontend GPX analyzer
+// MTB Points — Frontend GPX analyzer (safe for static hosting)
 // Expose: window.analyzeGPX(file, opts?) -> Promise<GPXAnalysis>
+// Also: window.ensureMTBSpinnerCSS()
 
 (function () {
   // -------------------------
@@ -9,20 +10,20 @@
   function emitStatus(detail) {
     try {
       window.dispatchEvent(new CustomEvent("mtb:status", { detail }));
-    } catch (_) {}
+    } catch (_) { /* noop */ }
   }
 
   function setPhase(phase, message, opts = {}) {
     emitStatus({
       phase, // "idle" | "gpx" | "osm" | "done" | "error"
       message,
-      progress: typeof opts.progress === "number" ? opts.progress : null,
+      progress: typeof opts.progress === "number" ? opts.progress : null, // 0..1 or null
       spinning: opts.spinning !== false,
-      ts: Date.now(),
+      ts: Date.now()
     });
   }
 
-  function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   // -------------------------
   // Utils
@@ -30,15 +31,16 @@
   function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
   function toRad(deg) { return (deg * Math.PI) / 180; }
 
+  // Haversine distance (meters)
   function haversine(lat1, lon1, lat2, lon2) {
     const R = 6371000;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    const aa =
-      Math.sin(dLat / 2) ** 2 +
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
 
@@ -52,7 +54,7 @@
   }
 
   // -------------------------
-  // GPX parsing
+  // GPX parsing (browser)
   // -------------------------
   function parseGPXText(xmlText) {
     const parser = new DOMParser();
@@ -70,16 +72,16 @@
       const eleNode = p.querySelector("ele");
       const ele = eleNode ? Number(eleNode.textContent) : null;
 
+      // time (optionnel)
       const timeNode = p.querySelector("time");
       const time = timeNode ? String(timeNode.textContent || "").trim() : null;
 
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
-
       points.push({
         lat,
         lon,
         ele: Number.isFinite(ele) ? ele : null,
-        time: time && !Number.isNaN(Date.parse(time)) ? time : null,
+        time: time && !Number.isNaN(Date.parse(time)) ? time : null
       });
     }
 
@@ -133,7 +135,7 @@
 
     const steep = {
       p10: distM > 0 ? Math.round((distSlope10 / distM) * 1000) / 1000 : 0,
-      p15: distM > 0 ? Math.round((distSlope15 / distM) * 1000) / 1000 : 0,
+      p15: distM > 0 ? Math.round((distSlope15 / distM) * 1000) / 1000 : 0
     };
 
     return { distanceKm, dplusM, hasElevation, steep };
@@ -143,7 +145,7 @@
   // Server call (ScoreTech V2 Hybrid officiel + Discipline)
   // -------------------------
   async function fetchServerAnalysis(gpxText) {
-    // GitHub Pages = statique => pas de /api
+    // Sur GitHub Pages (statique), il n’y a pas de backend /api
     const isStaticHost =
       location.hostname.endsWith("github.io") ||
       location.hostname.includes("netlify.app") ||
@@ -154,21 +156,22 @@
         ok: true,
         tech: null,
         discipline: null,
-        meta: { mode: "LOCAL_ONLY", reason: "Static host: no /api/analyze-gpx" },
+        meta: { mode: "LOCAL_ONLY", reason: "Static host: no /api/analyze-gpx" }
       };
     }
 
     const res = await fetch("/api/analyze-gpx", {
       method: "POST",
       headers: { "Content-Type": "application/gpx+xml" },
-      body: gpxText,
+      body: gpxText
     });
 
     let data = null;
     try { data = await res.json(); } catch (_) { data = null; }
 
     if (!res.ok || !data?.ok) {
-      throw new Error(data?.error || `Erreur serveur (${res.status}).`);
+      const msg = data?.error || `Erreur serveur (${res.status}).`;
+      throw new Error(msg);
     }
     return data; // { ok:true, tech, discipline, meta }
   }
@@ -190,33 +193,38 @@
   // Main API
   // -------------------------
   async function analyzeGPX(file, opts = {}) {
-    const options = { keepPoints: true, ...opts };
+    const options = {
+      keepPoints: true,
+      ...opts
+    };
 
     try {
       setPhase("gpx", "Analyse GPX en cours…", { spinning: true });
 
       if (!file) throw new Error("Aucun fichier GPX.");
 
+      // 1) Lire le fichier GPX
       const gpxText = await readFileAsText(file);
 
+      // 2) Parser localement (stats + score physique)
       setPhase("gpx", "Lecture et parsing du GPX…", { progress: 0.35, spinning: true });
-      await sleep(20);
+      await sleep(10);
 
       const points = parseGPXText(gpxText);
 
       setPhase("gpx", "Calcul des statistiques…", { progress: 0.65, spinning: true });
-      await sleep(20);
+      await sleep(10);
 
       const stats = computeStats(points);
 
-      // ---- ScorePhys local
+      // ScorePhys local (0..100)
       const D = Number(stats.distanceKm || 0);
       const H = Number(stats.dplusM || 0);
       const effort = Math.sqrt(Math.max(0, D)) + (H / 1000);
 
       let ipbOverall = 0;
       if (stats.hasElevation && D > 0) {
-        const vm = H / Math.max(D, 0.01);
+        const vm = H / Math.max(D, 0.01); // m/km
         const p10 = Number(stats.steep?.p10 || 0);
         const p15 = Number(stats.steep?.p15 || 0);
         ipbOverall = clamp(0.06 * vm + 30 * p10 + 45 * p15, 0, 120);
@@ -227,12 +235,12 @@
       const physScore = Math.round(100 * clamp(0.70 * effortN + 0.30 * ipbN, 0, 1));
 
       setPhase("gpx", "Analyse GPX terminée ✅", { progress: 1, spinning: false });
-      await sleep(60);
+      await sleep(30);
 
-      // ---- Server OSM (optionnel)
-      setPhase("osm", "Analyse OSM en cours… (ScoreTech officiel)", { spinning: true });
-
+      // 3) Appel serveur (optionnel)
+      setPhase("osm", "Analyse OSM…", { spinning: true });
       const server = await fetchServerAnalysis(gpxText);
+
       const tech = server.tech || null;
       const discipline = server.discipline || null;
 
@@ -240,11 +248,7 @@
         ? null
         : Math.round(0.55 * physScore + 0.45 * tech.techScoreV2);
 
-      setPhase("done", server.meta?.mode === "LOCAL_ONLY"
-        ? "Analyse terminée ✅ (ScoreTech serveur indisponible)"
-        : "Analyse terminée ✅",
-        { spinning: false }
-      );
+      setPhase("done", "Analyse terminée ✅", { spinning: false });
 
       return {
         fileName: file.name,
@@ -259,13 +263,14 @@
         phys: {
           effort: Math.round(effort * 1000) / 1000,
           ipbOverall: Math.round(ipbOverall * 10) / 10,
-          score: physScore,
+          score: physScore
         },
 
         techV2: tech,
         discipline,
+
         mrs,
-        serverMeta: server.meta || null,
+        serverMeta: server.meta || null
       };
     } catch (err) {
       const msg = friendlyErrorMessage(err);
@@ -275,7 +280,7 @@
   }
 
   // -------------------------
-  // Optional helper: spinner CSS
+  // Optional minimal spinner CSS helper
   // -------------------------
   function ensureMTBSpinnerCSS() {
     const id = "mtb-spinner-css";
