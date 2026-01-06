@@ -39,6 +39,7 @@
             Les épreuves créées depuis l’événement seront automatiquement rattachées, avec une date par défaut dans la plage.
           </div>
           <div id="msg" class="heroDesc" style="display:none;"></div>
+          <div id="debug" class="muted" style="margin-top:10px;font-size:12px;"></div>
         </div>
 
         <div class="heroActions">
@@ -92,8 +93,16 @@
     </div>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
-      <button class="btn primary" id="btnCreate" type="button">Créer l’événement</button>
-      <button class="btn" id="btnCreateAndRace" type="button">Créer + ajouter une épreuve</button>
+      <button class="btn primary" id="btnCreate" type="button"
+        onclick="window.__fallbackCreateMeeting && window.__fallbackCreateMeeting(false)">
+        Créer l’événement
+      </button>
+
+      <button class="btn" id="btnCreateAndRace" type="button"
+        onclick="window.__fallbackCreateMeeting && window.__fallbackCreateMeeting(true)">
+        Créer + ajouter une épreuve
+      </button>
+
       <button class="btn ghost" id="btnReset" type="button">Réinitialiser</button>
     </div>
 
@@ -104,6 +113,17 @@
   </div>
 </main>
 
-<script src="js/meeting-create.js"></script>
+<!-- Fallback minimal : si le JS principal ne charge pas, on affiche au moins une alerte -->
+<script>
+  window.__fallbackCreateMeeting = function(goRace){
+    alert("Le JS principal (meeting-create.js) ne semble pas chargé. Vérifie la console (F12) / Network (404).");
+    console.log("Fallback click OK. goRace =", goRace);
+  };
+  document.getElementById("debug").textContent =
+    "Debug: page chargée — si cliquer ne fait rien, le script n’est probablement pas chargé.";
+</script>
+
+<script src="./js/meeting-create.js"></script>
 </body>
 </html>
+
