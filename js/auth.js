@@ -1,131 +1,64 @@
 // js/auth.js
 import { supabase } from "./supabaseClient.js";
 
-/* ------------------------------------------------------------------ */
-/* Helpers UI */
-/* ------------------------------------------------------------------ */
-function $(id) {
-  return document.getElementById(id);
-}
-
-function setMsg(text = "") {
+function $(id){ return document.getElementById(id); }
+function setMsg(t){
   const el = $("authMsg");
-  if (el) el.textContent = text;
+  if (el) el.textContent = t || "";
 }
 
-/* ------------------------------------------------------------------ */
-/* Auth actions */
-/* ------------------------------------------------------------------ */
-
-/**
- * Inscription par email / mot de passe
- */
 export async function signUp(email, password) {
-  setMsg("Inscription en cours…");
-
+  setMsg("Inscription...");
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      // IMPORTANT: doit être autorisé dans Auth > URL Configuration
+      emailRedirectTo: `${location.origin}/login.html`
+    }
   });
+  if (error) throw error;
 
-  if (error) {
-    setMsg(error.message);
-    throw error;
+  // Si confirm email est ON : session=null et il faut confirmer par email
+  if (!data?.session) {
+    setMsg("Compte créé ✅ Vérifie ton email (spam) pour confirmer.");
+  } else {
+    setMsg("Compte créé ✅ (confirmation désactivée)");
   }
 
-  setMsg("Compte créé. Vérifie ton email si la confirmation est activée.");
   return data;
 }
 
-/**
- * Connexion par email / mot de passe
- */
 export async function signIn(email, password) {
-  setMsg("Connexion…");
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    setMsg(error.message);
-    throw error;
-  }
-
+  setMsg("Connexion...");
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
   setMsg("Connecté ✅");
   return data;
 }
 
-/**
- * Déconnexion
- */
 export async function signOut() {
-  setMsg("Déconnexion…");
-
+  setMsg("Déconnexion...");
   const { error } = await supabase.auth.signOut();
-  if (error) {
-    setMsg(error.message);
-    throw error;
-  }
-
+  if (error) throw error;
   setMsg("Déconnecté.");
 }
 
-/* ------------------------------------------------------------------ */
-/* Session & état */
-/* ------------------------------------------------------------------ */
-
-/**
- * Retourne la session courante (ou null)
- */
-export async function getSession() {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) {
-    console.error("[auth] getSession error:", error);
-    return null;
-  }
-  return data.session;
-}
-
-/**
- * Retourne l'utilisateur courant (ou null)
- */
-export async function getUser() {
-  const { data, error } = await supabase.auth.getUser();
-  if (error) {
-    console.error("[auth] getUser error:", error);
-    return null;
-  }
-  return data.user;
-}
-
-/**
- * Met à jour un petit indicateur UI de connexion
- */
 export async function renderAuthState() {
   const el = $("authState");
   if (!el) return;
 
-  const session = await getSession();
+  const { data: s } = await supabase.auth.getSession();
+  const session = s?.session;
 
   if (!session) {
     el.textContent = "Non connecté";
     return;
   }
-
-  const user = session.user;
-  el.textContent = `Connecté : ${user.email}`;
+  el.textContent = `Connecté : ${session.user.email || "utilisateur"}`;
 }
 
-/* ------------------------------------------------------------------ */
-/* Listener global */
-/* ------------------------------------------------------------------ */
-
-// Rafraîchit automatiquement l’UI quand l’état change
-supabase.auth.onAuthStateChange(() => {
-  renderAuthState();
+// Auto refresh UI
+supabase.auth.onAuthStateChange(async () => {
+  await renderAuthState();
 });
-
-// Premier rendu au chargement
-renderAuthState();
