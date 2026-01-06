@@ -263,6 +263,11 @@
   </div>
 </main>
 
+<script type="module">
+  import { exposeHybridToWindow } from "./js/storage-supabase.js";
+  exposeHybridToWindow();
+</script>
+
 <script src="js/storage.js"></script>
 <script>
 (function(){
