@@ -9,12 +9,13 @@
     :root{
       --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
       --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 12px 34px rgba(2,6,23,.12);
-      --r:18px;
+      --r:22px;
       --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
     a{color:inherit}
+    .muted{color:var(--muted)}
 
     /* Header */
     header.header{
@@ -29,122 +30,115 @@
     nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     nav a{
       text-decoration:none;
-      padding:8px 10px;border-radius:10px;
-      color:var(--blue);font-weight:800;font-size:13px;
+      padding:8px 10px;
+      border-radius:10px;
+      color:var(--blue);
+      font-weight:900;
+      font-size:13px;
     }
     nav a:hover{background:#eff6ff}
     nav a.active{background:#eff6ff;color:var(--blue2)}
-    .lang{display:flex;gap:8px;align-items:center}
-    .lang .btn{
-      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+    .kpi{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
     }
 
     /* Layout */
-    .wrap{max-width:980px;margin:24px auto;padding:0 16px}
+    .wrap{max-width:1050px;margin:22px auto;padding:0 16px}
     .card{
       background:var(--card);
       border:1px solid var(--border);
-      border-radius:22px;
+      border-radius:var(--r);
       padding:18px;
       box-shadow:var(--shadow);
     }
 
-    /* Hero */
     .hero{
       border-radius:22px;
       padding:18px;
       border:1px solid var(--border);
       background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.10), transparent 60%),
         #fff;
     }
-    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
-    .hero .muted{margin-top:8px;line-height:1.55;color:#334155}
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .hero p{margin:6px 0 0 0;line-height:1.55;color:#334155}
 
-    /* Panels */
     .grid{
+      margin-top:14px;
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:12px;
-      margin-top:14px;
     }
-    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+    @media(max-width:920px){ .grid{grid-template-columns:1fr} }
 
     .panel{
       border:1px solid var(--border);
-      border-radius:20px;
+      border-radius:18px;
       padding:14px;
       background:#fff;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
     }
-    .panel h3{margin:0 0 10px 0;font-size:16px;letter-spacing:-.1px}
-    .panel p{margin:0 0 10px 0;color:#334155;line-height:1.55}
+    .panel h3{margin:0 0 6px 0;font-size:16px;letter-spacing:-.1px}
+    .panel .desc{margin:0 0 10px 0;color:#334155;line-height:1.5}
 
-    /* Inputs */
-    label{display:block;font-weight:900;font-size:12px;color:#0f172a}
+    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
     input{
       width:100%;
-      padding:11px 12px;
+      padding:10px;
       margin-top:6px;
       border:1px solid #cbd5e1;
-      border-radius:14px;
+      border-radius:12px;
       background:#fff;
-      outline:none;
+      font-size:14px;
     }
-    input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
     input::placeholder{color:#94a3b8}
-    .field{margin-top:10px}
 
-    /* Buttons */
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 12px;border-radius:14px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
-      text-decoration:none;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;white-space:nowrap;
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(2,6,23,.10)}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
     .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
     .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .btn.good{background:var(--ok);border-color:var(--ok);color:#fff}
-    .btn.good:hover{background:#15803d;border-color:#15803d}
-    .btn.danger{border-color:#fecaca;color:var(--err);background:#fff}
+    .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+    .btn.ok:hover{background:#15803d;border-color:#15803d}
+    .btn.ghost{background:#f8fafc}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
 
-    /* Status */
-    .statusBar{
-      margin-top:14px;
-      border:1px solid var(--border);
-      border-radius:18px;
-      background:#fff;
-      padding:12px;
-      display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;
-    }
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--border);
-      background:#fff;
-      font-weight:900;font-size:12px;white-space:nowrap;
-    }
-    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .dot.ok{background:var(--ok)}
-    .dot.err{background:var(--err)}
     .msg{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.5;
-      flex:1;
-      min-width:220px;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:900;
+      display:none;
+      line-height:1.45;
     }
+    .msg.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .msg.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+    .msg.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
 
     footer{
       margin-top:14px;
       color:var(--muted);
       font-size:12px;
       text-align:center;
+      line-height:1.5;
+    }
+
+    a:focus, button:focus, input:focus{
+      outline:3px solid rgba(37,99,235,.25);
+      outline-offset:2px;
     }
   </style>
 </head>
@@ -153,155 +147,234 @@
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points — Connexion</h1>
+    <span class="kpi" id="authState">Non connecté</span>
   </div>
 
   <nav>
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
+    <a href="events.html">Épreuves</a>
     <a href="challengemtbpoints.html">Challenge</a>
     <a href="reglement.html">Règlement</a>
     <a href="methodologie.html">Méthodologie</a>
     <a href="about.html">À propos</a>
-    <a class="active" href="login.html">Connexion</a>
+    <a href="login.html" class="active">Connexion</a>
   </nav>
 
-  <div class="lang">
-    <button class="btn" id="btnFR" type="button">FR</button>
-    <button class="btn" id="btnEN" type="button">EN</button>
+  <div class="row" style="gap:10px">
+    <button class="btn ghost" id="btnSignOut" type="button">Déconnexion</button>
   </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
   <div class="card">
-
     <section class="hero">
-      <h2>Accès Organisateur</h2>
-      <div class="muted">
-        Crée un compte, connecte-toi, puis accède aux outils de création d’épreuves et d’import des résultats.
+      <div class="heroTop">
+        <div style="min-width:260px;flex:1">
+          <h2>Riders & Organisateurs</h2>
+          <p>
+            Deux accès : <b>cyclistes (riders)</b> et <b>organisateurs</b>.
+            Les comptes sont identiques côté Supabase : le rôle est géré dans la table <code>profiles</code>.
+          </p>
+        </div>
       </div>
 
-      <div class="statusBar">
-        <span class="pill">
-          <span class="dot" id="authDot"></span>
-          <span id="authState">—</span>
-        </span>
-        <div class="msg" id="authMsg">—</div>
-        <button class="btn danger" id="btnSignOut" type="button">Se déconnecter</button>
-      </div>
+      <div id="authMsg" class="msg"></div>
     </section>
 
     <div class="grid">
 
-      <!-- Sign up -->
-      <div class="panel">
-        <h3>Créer un compte</h3>
-        <p class="muted">Utilise une adresse email valide. Un mot de passe robuste est recommandé.</p>
-
-        <div class="field">
-          <label for="suEmail">Email</label>
-          <input id="suEmail" autocomplete="email" placeholder="ex: david@email.com" />
-        </div>
-        <div class="field">
-          <label for="suPass">Mot de passe</label>
-          <input id="suPass" type="password" autocomplete="new-password" placeholder="••••••••" />
-        </div>
-
+      <!-- RIDER -->
+      <section class="panel" aria-label="Connexion cycliste">
         <div class="row">
-          <button class="btn good" id="btnSignUp" type="button">S'inscrire</button>
+          <h3>🚴 Connexion Rider</h3>
+          <span class="kpi">Rôle : rider</span>
         </div>
-      </div>
+        <p class="desc muted">Accès aux pages publiques + profil rider.</p>
 
-      <!-- Sign in -->
-      <div class="panel">
-        <h3>Se connecter</h3>
-        <p class="muted">Déjà un compte ? Connecte-toi pour accéder à ton espace organisateur.</p>
+        <label for="riderEmail">Email</label>
+        <input id="riderEmail" type="email" autocomplete="email" placeholder="rider@email.com" />
 
-        <div class="field">
-          <label for="siEmail">Email</label>
-          <input id="siEmail" autocomplete="email" placeholder="ex: david@email.com" />
-        </div>
-        <div class="field">
-          <label for="siPass">Mot de passe</label>
-          <input id="siPass" type="password" autocomplete="current-password" placeholder="••••••••" />
+        <label for="riderPass" style="margin-top:10px">Mot de passe</label>
+        <input id="riderPass" type="password" autocomplete="current-password" placeholder="••••••••" />
+
+        <div class="actions">
+          <button class="btn primary" id="btnRiderSignIn" type="button">Se connecter</button>
+          <button class="btn ok" id="btnRiderSignUp" type="button">Créer compte rider</button>
         </div>
 
+        <div class="muted" style="margin-top:10px;font-size:12px;line-height:1.5">
+          Si la confirmation email est activée, tu dois valider le lien reçu avant de pouvoir te connecter.
+        </div>
+      </section>
+
+      <!-- ORGANIZER -->
+      <section class="panel" aria-label="Connexion organisateur">
         <div class="row">
-          <button class="btn primary" id="btnSignIn" type="button">Se connecter</button>
+          <h3>🏁 Connexion Organisateur</h3>
+          <span class="kpi">Rôle : organizer</span>
         </div>
-      </div>
+        <p class="desc muted">Accès dashboard + création d’événements/épreuves + import résultats.</p>
+
+        <label for="orgEmail">Email</label>
+        <input id="orgEmail" type="email" autocomplete="email" placeholder="orga@email.com" />
+
+        <label for="orgPass" style="margin-top:10px">Mot de passe</label>
+        <input id="orgPass" type="password" autocomplete="current-password" placeholder="••••••••" />
+
+        <div class="actions">
+          <button class="btn primary" id="btnOrgSignIn" type="button">Se connecter</button>
+          <button class="btn ok" id="btnOrgSignUp" type="button">Créer compte organisateur</button>
+        </div>
+
+        <div class="muted" style="margin-top:10px;font-size:12px;line-height:1.5">
+          Un compte “organizer” doit avoir <code>profiles.role = 'organizer'</code> (ou <code>admin</code>).
+          Si tu crées un compte ici, le rôle sera demandé à l’inscription.
+        </div>
+      </section>
 
     </div>
 
     <footer>
-      Astuce : si tu utilises Supabase, vérifie que <code style="background:#f1f5f9;border:1px solid #e5e7eb;border-radius:8px;padding:2px 6px;">js/supabaseClient.js</code> est bien configuré.
+      Astuce dev : tu peux promouvoir un compte en organisateur via SQL :
+      <code>update public.profiles set role='organizer' where email='...';</code>
     </footer>
+
   </div>
-</div>
+</main>
 
 <script type="module">
+  import { supabase } from "./js/supabaseClient.js";
   import { signUp, signIn, signOut, renderAuthState } from "./js/auth.js";
 
   const $ = (id) => document.getElementById(id);
 
-  function setMsg(t){
-    $("authMsg").textContent = t || "—";
+  const msgEl = $("authMsg");
+  const btnSignOut = $("btnSignOut");
+
+  function showMsg(text, kind="warn"){
+    if (!msgEl) return;
+    msgEl.className = `msg ${kind}`;
+    msgEl.textContent = text || "";
+    msgEl.style.display = text ? "block" : "none";
   }
 
-  // Patch léger: si ton renderAuthState() écrit déjà dans #authState,
-  // on ajoute juste un petit feedback visuel via #authDot.
-  function setDot(state){
-    const dot = $("authDot");
-    dot.className = "dot";
-    if (!state) return;
-    const s = String(state).toLowerCase();
-    if (s.includes("connect")) dot.classList.add("ok");
-    if (s.includes("erreur") || s.includes("error")) dot.classList.add("err");
-  }
-
-  $("btnSignUp").onclick = async () => {
-    setMsg("");
-    try {
-      await signUp($("suEmail").value, $("suPass").value);
-      setMsg("✅ Compte créé. Vérifie tes emails si une confirmation est requise.");
-      // renderAuthState met à jour #authState
+  // Riders
+  const riderEmail = $("riderEmail");
+  const riderPass  = $("riderPass");
+  $("btnRiderSignIn").addEventListener("click", async () => {
+    try{
+      showMsg("Connexion rider…", "warn");
+      await signIn(riderEmail.value, riderPass.value);
       await renderAuthState();
-      setDot($("authState").textContent);
+      showMsg("Connecté ✅", "ok");
+      // redir vers pages publiques (ou rider.html)
+      location.href = "public-ranking.html";
     } catch(e){
-      setMsg("❌ " + (e.message || e));
-      setDot("erreur");
+      showMsg(`Erreur: ${e?.message || e}`, "err");
     }
-  };
+  });
 
-  $("btnSignIn").onclick = async () => {
-    setMsg("");
-    try {
-      await signIn($("siEmail").value, $("siPass").value);
-      setMsg("✅ Connecté.");
+  $("btnRiderSignUp").addEventListener("click", async () => {
+    try{
+      showMsg("Création compte rider…", "warn");
+      const { data } = await supabase.auth.signUp({
+        email: riderEmail.value,
+        password: riderPass.value,
+        options: {
+          data: { role: "rider" },
+          emailRedirectTo: `${location.origin}/login.html`
+        }
+      });
+      // si confirm email ON => session null
+      showMsg(data?.session ? "Compte rider créé ✅" : "Compte rider créé ✅ Vérifie ton email (spam) pour confirmer.", "ok");
       await renderAuthState();
-      setDot($("authState").textContent);
     } catch(e){
-      setMsg("❌ " + (e.message || e));
-      setDot("erreur");
+      showMsg(`Erreur: ${e?.message || e}`, "err");
     }
-  };
+  });
 
-  $("btnSignOut").onclick = async () => {
-    setMsg("");
-    try {
+  // Organizers
+  const orgEmail = $("orgEmail");
+  const orgPass  = $("orgPass");
+
+  $("btnOrgSignIn").addEventListener("click", async () => {
+    try{
+      showMsg("Connexion organisateur…", "warn");
+      await signIn(orgEmail.value, orgPass.value);
+
+      // Vérifier rôle via profiles (si pas organizer/admin -> refuser)
+      const { data: u } = await supabase.auth.getUser();
+      const user = u?.user;
+      if (!user) throw new Error("Session introuvable.");
+
+      const { data: p, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      const role = p?.role || "rider";
+      if (!(role === "organizer" || role === "admin")) {
+        await supabase.auth.signOut();
+        await renderAuthState();
+        throw new Error("Ce compte n’est pas organisateur. Utilise la connexion Rider ou demande une promotion.");
+      }
+
+      await renderAuthState();
+      showMsg("Connecté organisateur ✅", "ok");
+      location.href = "dashboard.html";
+    } catch(e){
+      showMsg(`Erreur: ${e?.message || e}`, "err");
+    }
+  });
+
+  $("btnOrgSignUp").addEventListener("click", async () => {
+    try{
+      showMsg("Création compte organisateur…", "warn");
+      const { data, error } = await supabase.auth.signUp({
+        email: orgEmail.value,
+        password: orgPass.value,
+        options: {
+          data: { role: "organizer" },
+          emailRedirectTo: `${location.origin}/login.html`
+        }
+      });
+      if (error) throw error;
+
+      showMsg(data?.session ? "Compte organisateur créé ✅" : "Compte organisateur créé ✅ Vérifie ton email (spam) pour confirmer.", "ok");
+      await renderAuthState();
+
+      // Note: le role organizer sera écrit dans profiles via trigger handle_new_user()
+      // Si tes policies empêchent update/insert, fais la promotion en SQL (admin) comme indiqué en bas.
+    } catch(e){
+      showMsg(`Erreur: ${e?.message || e}`, "err");
+    }
+  });
+
+  // Sign out
+  btnSignOut.addEventListener("click", async () => {
+    try{
+      showMsg("Déconnexion…", "warn");
       await signOut();
-      setMsg("✅ Déconnecté.");
       await renderAuthState();
-      setDot($("authState").textContent);
+      showMsg("Déconnecté.", "ok");
     } catch(e){
-      setMsg("❌ " + (e.message || e));
-      setDot("erreur");
+      showMsg(`Erreur: ${e?.message || e}`, "err");
     }
-  };
+  });
 
   // Init
   await renderAuthState();
-  setDot($("authState").textContent);
+
+  // Si l’utilisateur arrive depuis un email magic/confirm, Supabase peut avoir une session dans l’URL
+  // On force un refresh de l’état
+  supabase.auth.onAuthStateChange(async () => {
+    await renderAuthState();
+  });
 </script>
 
 </body>
