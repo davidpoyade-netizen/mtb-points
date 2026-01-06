@@ -159,25 +159,40 @@
   // -------------------------
   // Server call (ScoreTech V2 Hybrid officiel + Discipline)
   // -------------------------
-  async function fetchServerAnalysis(gpxText) {
-    // Petit délai pour laisser l'UI afficher le spinner
-    await sleep(30);
+  -------------------------
+// Server call (ScoreTech V2 Hybrid officiel + Discipline)
+// -------------------------
+async function fetchServerAnalysis(gpxText) {
+  // Si tu es sur GitHub Pages (statique), il n’y a pas de /api
+  // => on retourne "pas de score technique serveur" sans bloquer.
+  const isStaticHost =
+    location.hostname.endsWith("github.io") ||
+    location.hostname.includes("netlify.app") ||
+    location.hostname.includes("pages.dev");
 
-    const res = await fetch("/api/analyze-gpx", {
-      method: "POST",
-      headers: { "Content-Type": "application/gpx+xml" },
-      body: gpxText
-    });
-
-    let data = null;
-    try { data = await res.json(); } catch (_) { data = null; }
-
-    if (!res.ok || !data?.ok) {
-      const msg = data?.error || `Erreur serveur (${res.status}).`;
-      throw new Error(msg);
-    }
-    return data; // { ok:true, tech, discipline, meta }
+  if (isStaticHost) {
+    return {
+      ok: true,
+      tech: null,
+      discipline: null,
+      meta: { mode: "LOCAL_ONLY", reason: "Static host: no /api/analyze-gpx" }
+    };
   }
+
+  const res = await fetch("/api/analyze-gpx", {
+    method: "POST",
+    headers: { "Content-Type": "application/gpx+xml" },
+    body: gpxText
+  });
+
+  let data = null;
+  try { data = await res.json(); } catch (_) { data = null; }
+
+  if (!res.ok || !data?.ok) {
+    const msg = data?.error || `Erreur serveur (${res.status}).`;
+    throw new Error(msg);
+  }
+  return data; // { ok:true, tech, discipline, meta }
 
   // -------------------------
   // Friendly error mapper
