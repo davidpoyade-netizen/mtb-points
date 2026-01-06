@@ -7,14 +7,25 @@
   <link rel="stylesheet" href="css/style.css" />
   <style>
     :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--muted2:#64748b;--border:#e5e7eb;
       --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:16px;
-      --ok:#16a34a;--ok2:#22c55e;
+      --r:22px;
+      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
     a{color:inherit}
+    .muted{color:var(--muted)}
+    .muted2{color:var(--muted2)}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
 
     /* Header */
     header.header{
@@ -25,6 +36,7 @@
       padding:14px 16px;
       display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
+    .brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
     nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     nav a{
@@ -32,7 +44,7 @@
       padding:8px 10px;
       border-radius:10px;
       color:var(--blue);
-      font-weight:800;
+      font-weight:900;
       font-size:13px;
     }
     nav a:hover{background:#eff6ff}
@@ -48,48 +60,59 @@
     .card{
       background:var(--card);
       border:1px solid var(--border);
-      border-radius:22px;
+      border-radius:var(--r);
       padding:18px;
       box-shadow:var(--shadow);
     }
 
     /* Hero */
     .hero{
-      border-radius:18px;
-      padding:16px;
+      border-radius:22px;
+      padding:18px;
       border:1px solid var(--border);
       background:
-        radial-gradient(900px 240px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 220px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
         #fff;
     }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
     .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
-    .hero .muted{margin-top:6px;line-height:1.55;color:#334155}
+    .hero .desc{margin-top:6px;line-height:1.55;color:#334155}
+    .heroActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
     /* Controls */
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
-    label{display:block;font-weight:900;font-size:12px;color:#0f172a}
-    input{
-      width:100%;padding:10px;margin-top:6px;
-      border:1px solid #cbd5e1;border-radius:12px;background:#fff;
+    .filters{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: 1.2fr 0.9fr 180px;
+      gap:10px;
+      align-items:end;
+    }
+    @media(max-width:900px){ .filters{grid-template-columns:1fr} }
+    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
+    input,select{
+      width:100%;
+      padding:10px;
+      margin-top:6px;
+      border:1px solid #cbd5e1;
+      border-radius:12px;
+      background:#fff;
+      font-size:14px;
     }
     input::placeholder{color:#94a3b8}
-    .kpi{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px;
-      white-space:nowrap;
-    }
 
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
       text-decoration:none;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      white-space:nowrap;
     }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
     .btn.primary{background:var(--ok);border-color:var(--ok);color:#fff}
     .btn.primary:hover{background:#15803d;border-color:#15803d}
+    .btn.ghost{background:#f8fafc}
 
     /* List */
     .list{
@@ -115,30 +138,29 @@
       box-shadow:0 16px 28px rgba(2,6,23,.10);
       border-color:#dbeafe;
     }
+
     .topline{
       display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;
     }
-    .title{
-      font-weight:900;
-      font-size:16px;
-      letter-spacing:-.1px;
-    }
+    .title{font-weight:1000;font-size:16px;letter-spacing:-.15px}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .badge{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;
       background:#f1f5f9;border:1px solid var(--border);
-      font-weight:900;font-size:12px;color:#0f172a;
+      font-weight:1000;font-size:12px;color:#0f172a;
       white-space:nowrap;
     }
-    .meta{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5}
+    .meta{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.55}
     .comment{
-      margin-top:8px;
+      margin-top:10px;
       color:#334155;
       font-size:13px;
       line-height:1.55;
       border-top:1px dashed var(--border);
       padding-top:10px;
     }
+
     .empty{
       margin-top:14px;
       border:1px dashed var(--border);
@@ -153,15 +175,21 @@
       color:var(--muted);
       font-size:12px;
       text-align:center;
+      line-height:1.5;
+    }
+
+    a:focus, button:focus, input:focus, select:focus{
+      outline:3px solid rgba(37,99,235,.25);
+      outline-offset:2px;
     }
   </style>
 </head>
 <body>
 
 <header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+  <div class="brand">
     <h1>MTB Points — Événements</h1>
-    <span class="kpi">Résultats : <span id="count">0</span></span>
+    <span class="chip">Résultats : <span id="count">0</span></span>
   </div>
 
   <nav>
@@ -173,6 +201,7 @@
     <a href="methodologie.html">Méthodologie</a>
     <a href="about.html">À propos</a>
     <a href="login.html">Connexion</a>
+    <a href="contact.html">Contact</a>
   </nav>
 
   <div class="lang">
@@ -181,27 +210,49 @@
   </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
   <div class="card">
 
-    <div class="hero">
-      <div class="row" style="justify-content:space-between;align-items:flex-start">
+    <section class="hero">
+      <div class="heroTop">
         <div style="min-width:260px;flex:1">
           <h2>Liste des événements</h2>
-          <div class="muted">
+          <div class="desc">
             Recherche par nom, lieu, commentaire. Clique sur un événement pour voir ses épreuves.
           </div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip"><span class="dot ok"></span> Épreuves rattachées</span>
+            <span class="chip"><span class="dot"></span> Tri par date</span>
+          </div>
         </div>
-        <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
+
+        <div class="heroActions">
+          <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
+          <button class="btn ghost" id="clearBtn" type="button">Effacer filtres</button>
+        </div>
       </div>
 
-      <div class="row" style="margin-top:12px;align-items:end">
-        <div style="flex:1;min-width:240px">
+      <div class="filters">
+        <div>
           <label for="q">Recherche</label>
-          <input id="q" type="text" placeholder="Nom, lieu, commentaire..." />
+          <input id="q" type="text" placeholder="Nom, lieu, commentaire…" />
+        </div>
+
+        <div>
+          <label for="sortBy">Tri</label>
+          <select id="sortBy">
+            <option value="date_desc">Date (récent → ancien)</option>
+            <option value="date_asc">Date (ancien → récent)</option>
+            <option value="name_asc">Nom (A → Z)</option>
+            <option value="name_desc">Nom (Z → A)</option>
+          </select>
+        </div>
+
+        <div>
+          <button class="btn" id="refreshBtn" type="button" style="width:100%">↻ Actualiser</button>
         </div>
       </div>
-    </div>
+    </section>
 
     <div id="meetingsList" class="list"></div>
     <div id="emptyBox" class="empty" style="display:none;">Aucun événement enregistré.</div>
@@ -210,25 +261,44 @@
       Astuce : tu peux rattacher une épreuve à un événement au moment de la création de l’épreuve.
     </footer>
   </div>
-</div>
+</main>
 
 <script src="js/storage.js"></script>
 <script>
 (function(){
   const list = document.getElementById("meetingsList");
   const qEl = document.getElementById("q");
+  const sortEl = document.getElementById("sortBy");
   const countEl = document.getElementById("count");
   const emptyBox = document.getElementById("emptyBox");
+  const clearBtn = document.getElementById("clearBtn");
+  const refreshBtn = document.getElementById("refreshBtn");
 
   function normalize(s){
-    return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+    return String(s||"")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .trim();
   }
   function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[m]));
   }
-  function valOrDash(x){ const s = String(x||"").trim(); return s ? s : "—"; }
+  function valOrDash(x){ const s = String(x??"").trim(); return s ? s : "—"; }
 
-  const meetings = (typeof loadMeetings === "function") ? loadMeetings() : [];
+  function safeDateKey(d){
+    // YYYY-MM-DD -> yyyymmdd number ; fallback 0
+    const m = String(d||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return 0;
+    return Number(m[1] + m[2] + m[3]);
+  }
+
+  function loadAll(){
+    return (typeof loadMeetings === "function") ? loadMeetings() : [];
+  }
+
+  let MEETINGS = loadAll();
 
   function render(items){
     countEl.textContent = String(items.length);
@@ -243,13 +313,17 @@
     list.innerHTML = items.map(m => {
       const nRaces = (m.raceIds && m.raceIds.length) ? m.raceIds.length : 0;
       const date = valOrDash(m.date);
-      const loc = valOrDash(m.location);
+      const loc  = valOrDash(m.location);
+
+      const raceBadge = nRaces
+        ? `<span class="badge">🏁 ${nRaces} épreuve${nRaces>1?"s":""}</span>`
+        : `<span class="badge">— aucune épreuve</span>`;
 
       return `
         <a class="item" href="meeting.html?id=${encodeURIComponent(m.id)}">
           <div class="topline">
             <div class="title">${esc(valOrDash(m.name))}</div>
-            <span class="badge">🏁 ${nRaces} épreuve${nRaces>1?"s":""}</span>
+            <div class="badges">${raceBadge}</div>
           </div>
           <div class="meta">📅 ${esc(date)} &nbsp;•&nbsp; 📍 ${esc(loc)}</div>
           ${m.comment ? `<div class="comment">${esc(m.comment)}</div>` : ``}
@@ -260,7 +334,9 @@
 
   function apply(){
     const q = normalize(qEl.value);
-    let items = meetings.slice();
+    const sortBy = sortEl.value;
+
+    let items = MEETINGS.slice();
 
     if (q) {
       items = items.filter(m => {
@@ -269,17 +345,34 @@
       });
     }
 
-    // tri : plus récent d'abord si date au format YYYY-MM-DD
-    items.sort((a,b) => String(b.date||"").localeCompare(String(a.date||"")));
+    // Tri
+    if (sortBy === "date_desc") items.sort((a,b) => safeDateKey(b.date) - safeDateKey(a.date) || normalize(a.name).localeCompare(normalize(b.name)));
+    if (sortBy === "date_asc")  items.sort((a,b) => safeDateKey(a.date) - safeDateKey(b.date) || normalize(a.name).localeCompare(normalize(b.name)));
+    if (sortBy === "name_asc")  items.sort((a,b) => normalize(a.name).localeCompare(normalize(b.name)));
+    if (sortBy === "name_desc") items.sort((a,b) => normalize(b.name).localeCompare(normalize(a.name)));
 
     render(items);
   }
 
   qEl.addEventListener("input", apply);
+  sortEl.addEventListener("change", apply);
+
+  clearBtn.addEventListener("click", () => {
+    qEl.value = "";
+    sortEl.value = "date_desc";
+    apply();
+  });
+
+  refreshBtn.addEventListener("click", () => {
+    MEETINGS = loadAll();
+    apply();
+  });
+
+  // Initial
+  sortEl.value = "date_desc";
   apply();
 })();
 </script>
 
 </body>
 </html>
-
