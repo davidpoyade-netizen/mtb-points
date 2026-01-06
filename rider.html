@@ -3,76 +3,656 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Profil cycliste – VTT Points</title>
+  <title>Mon profil — MTB Points</title>
+  <link rel="stylesheet" href="./css/style.css" />
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-    header h1{font-size:18px;margin:0}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-    .wrap{max-width:950px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-    .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-    .avatar{width:96px;height:96px;border-radius:999px;object-fit:cover;background:#f1f5f9}
-    .muted{color:#667085}
-    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#f1f5f9;margin-right:8px;margin-top:6px}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left}
-    th{background:#f8fafc}
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:22px;
+      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);color:var(--text)
+    }
+    a{color:inherit}
+    .muted{color:var(--muted)}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;padding:8px 10px;border-radius:10px;
+      color:var(--blue);font-weight:900;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
+
+    .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+
+    .hero{
+      border-radius:22px;padding:18px;border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.10), transparent 60%),
+        #fff;
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .heroMeta{margin-top:6px;line-height:1.55;color:#334155}
+    .heroActions{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+
+    .kpiGrid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;margin-top:14px;
+    }
+    @media(max-width:1100px){.kpiGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.kpiGrid{grid-template-columns:1fr}}
+    .kpi{
+      border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .kpi .label{color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+    .kpi .value{margin-top:6px;font-size:26px;font-weight:1000;letter-spacing:-.4px}
+    .kpi .sub{margin-top:4px;color:var(--muted);font-size:12px}
+
+    .grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;margin-top:12px}
+    @media(max-width:980px){.grid2{grid-template-columns:1fr}}
+
+    .panel{
+      border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .panel h3{margin:0 0 8px 0;font-size:15px;letter-spacing:-.1px}
+    .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+
+    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
+    input{
+      width:100%;padding:10px;margin-top:6px;
+      border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:14px;
+    }
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ghost{background:#f8fafc}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+
+    .msg{
+      margin-top:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);
+      background:#fff;font-weight:900;display:none;line-height:1.45;
+    }
+    .msg.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .msg.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+    .msg.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+
+    .badgeGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:10px}
+    @media(max-width:1100px){.badgeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.badgeGrid{grid-template-columns:1fr}}
+    .badgeCard{
+      border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
+      display:flex;gap:12px;align-items:flex-start;
+    }
+    .badgeIcon{
+      width:44px;height:44px;border-radius:14px;
+      border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      font-size:18px;font-weight:1000;
+      background:#f8fafc;
+    }
+    .badgeCard.locked{opacity:.55}
+    .badgeCard .bTitle{font-weight:1000}
+    .badgeCard .bSub{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.45}
+    .badgeCard .bState{margin-top:8px;font-size:12px;font-weight:1000}
+
+    .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+    @media(max-width:900px){.list{grid-template-columns:1fr}}
+    .item{
+      border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .item .title{font-weight:1000;font-size:16px;letter-spacing:-.2px}
+    .item .meta{margin-top:6px;color:var(--muted);font-size:13px;line-height:1.5}
+    .item .chips{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;
+      font-weight:900;font-size:12px;
+    }
+
+    .empty{margin-top:10px;border:1px dashed var(--border);border-radius:18px;padding:14px;color:var(--muted);background:#fff}
+    a:focus, button:focus, input:focus{outline:3px solid rgba(37,99,235,.25);outline-offset:2px}
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>Profil cycliste</h1>
-    <nav>
-<a href="index.html">Acceuil</a>
-<a href="public-ranking.html">Classement</a>
-<a href="meetings.html">Événements</a>
-<a href="reglement.html">Règlement</a>
-<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
-<a href="about.html">À propos</a>
-<a href="login.html">Connexion</a>
-    </nav>
-  </header>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Rider</h1>
+    <span class="pill"><span class="dot ok"></span><span id="authPill">—</span></span>
+  </div>
 
-  <div class="wrap">
-    <div class="card">
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="events.html">Épreuves</a>
+    <a href="rider.html" class="active">Mon profil</a>
+    <a href="login-rider.html">Login Rider</a>
+    <a href="login.html">Admin</a>
+  </nav>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn ghost" id="btnSignOut" type="button">Déconnexion</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2 id="displayName">—</h2>
+          <div class="heroMeta" id="heroMeta">—</div>
+          <div id="msg" class="msg"></div>
+        </div>
+        <div class="heroActions">
+          <span class="pill"><span class="dot ok"></span> rider</span>
+          <span class="pill"><span class="dot"></span><span id="pillPoints">0</span> pts</span>
+          <span class="pill"><span class="dot"></span><span id="pillRaces">0</span> résultats</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid2">
+
+      <section class="panel">
+        <div class="row">
+          <h3>Mon profil</h3>
+          <span class="pill"><span class="dot"></span> Supabase</span>
+        </div>
+
+        <div class="muted" style="font-size:12px;line-height:1.5;margin-top:4px;">
+          Les infos viennent de <code>auth.users</code> + <code>profiles</code>.
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="muted" style="font-size:12px;font-weight:900;">Email</div>
+          <div style="font-weight:1000;margin-top:4px;" id="emailLine">—</div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label for="nameInput">Nom affiché</label>
+          <input id="nameInput" type="text" placeholder="Ex: David P." />
+          <div class="muted" style="font-size:12px;margin-top:6px;">
+            Modifie ton <code>profiles.display_name</code>.
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+            <button class="btn primary" id="btnSaveName" type="button">Enregistrer</button>
+            <button class="btn ghost" id="btnReload" type="button">Recharger</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="row">
+          <h3>Badges Challenge</h3>
+          <span class="pill"><span class="dot"></span> 500 / 750 / 1000 / 2000</span>
+        </div>
+
+        <div class="badgeGrid" id="badges"></div>
+        <div class="muted" style="font-size:12px;margin-top:10px;line-height:1.5;">
+          Les badges sont calculés à partir de tes <b>points</b> (somme des résultats).
+        </div>
+      </section>
+
+    </div>
+
+    <div class="kpiGrid">
+      <div class="kpi">
+        <div class="label">Points totaux</div>
+        <div class="value" id="kPoints">—</div>
+        <div class="sub">Somme des points</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Résultats</div>
+        <div class="value" id="kResults">—</div>
+        <div class="sub">Nombre de courses classées</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Meilleur score</div>
+        <div class="value" id="kBest">—</div>
+        <div class="sub" id="kBestSub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Moyenne</div>
+        <div class="value" id="kAvg">—</div>
+        <div class="sub">Points / course</div>
+      </div>
+    </div>
+
+    <section class="panel" style="margin-top:12px;">
       <div class="row">
-        <img id="photo" class="avatar" alt="Photo cycliste" />
-        <div style="flex:1;">
-          <h2 id="name" style="margin:0;">—</h2>
-          <div class="muted">
-            <span id="nat">—</span> • <span id="team">—</span>
-          </div>
-          <div class="muted" style="margin-top:6px;">
-            <span id="sex">—</span> • <span id="birthYear">—</span> • <span id="ageCat">—</span>
-          </div>
+        <h3>Mes résultats</h3>
+        <span class="pill"><span class="dot"></span> localStorage / storage.js</span>
+      </div>
 
-          <div style="margin-top:6px;">
-            <span class="pill">Score : <strong id="score">—</strong></span>
-            <span class="pill">Courses valides : <strong id="races">—</strong></span>
-          </div>
+      <div style="display:grid;grid-template-columns:1.3fr 220px 220px;gap:10px;align-items:end;margin-top:10px;">
+        <div>
+          <label for="q">Recherche</label>
+          <input id="q" type="text" placeholder="Nom épreuve, meeting, discipline…" />
+        </div>
+        <div>
+          <label for="sortBy">Tri</label>
+          <select id="sortBy" style="width:100%;padding:10px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;">
+            <option value="date_desc">Plus récents</option>
+            <option value="points_desc">Points ↓</option>
+            <option value="points_asc">Points ↑</option>
+            <option value="name_asc">Nom A→Z</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn primary" id="btnReset" type="button" style="width:100%;">Réinitialiser</button>
         </div>
       </div>
 
-      <h3 style="margin-top:18px;">Historique (démo)</h3>
-      <div class="muted">On branchera ici les vraies épreuves + résultats.</div>
+      <div id="resultsList" class="list"></div>
+      <div id="emptyBox" class="empty" style="display:none;">
+        Aucun résultat rider trouvé (ou import non fait).<br/>
+        Astuce admin : passe par <code>import-results.html</code> pour charger les résultats.
+      </div>
+    </section>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Épreuve</th>
-            <th>Score</th>
-            <th>Place</th>
-          </tr>
-        </thead>
-        <tbody id="history"></tbody>
-      </table>
-    </div>
   </div>
+</main>
 
-  <script src="js/data.js"></script>
-  <script src="js/uci.js"></script>
-  <script src="js/rider.js"></script>
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
+
+  const $ = (id)=>document.getElementById(id);
+  const msgEl = $("msg");
+
+  function showMsg(text, kind="warn"){
+    if (!msgEl) return;
+    msgEl.className = `msg ${kind}`;
+    msgEl.textContent = text || "";
+    msgEl.style.display = text ? "block" : "none";
+  }
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
+
+  // ---------- Supabase guards ----------
+  async function getProfile(userId){
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id,email,display_name,role")
+      .eq("id", userId)
+      .maybeSingle();
+    if (error) return null;
+    return data || null;
+  }
+
+  async function guardRider(){
+    const { data } = await supabase.auth.getSession();
+    const session = data?.session;
+    if (!session?.user){
+      location.href = "login-rider.html";
+      return null;
+    }
+
+    const profile = await getProfile(session.user.id);
+    const role = profile?.role || "rider";
+
+    if (role !== "rider"){
+      await supabase.auth.signOut();
+      location.href = "login-rider.html";
+      return null;
+    }
+
+    return { session, profile };
+  }
+
+  // ---------- Local data adapters ----------
+  function listMeetingsSafe(){
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    if (typeof window.getMeetings === "function") return window.getMeetings();
+    try {
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    try {
+      const raw = localStorage.getItem("mtb.races.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+
+  function listResultsSafe(){
+    if (typeof window.listResults === "function") return window.listResults();
+    if (typeof window.getResults === "function") return window.getResults();
+    try{
+      const raw = localStorage.getItem("mtb.results.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(_){ return []; }
+  }
+
+  function normalizeResult(r){
+    // On essaye de couvrir plusieurs structures possibles
+    return {
+      id: r?.id ?? r?.resultId ?? null,
+      riderId: r?.riderId ?? r?.profile_id ?? r?.user_id ?? null,
+      riderEmail: r?.riderEmail ?? r?.email ?? null,
+      riderName: r?.riderName ?? r?.name ?? null,
+      raceId: r?.raceId ?? r?.race_id ?? r?.eventId ?? null,
+      points: num(r?.points ?? r?.score ?? r?.mtbPoints),
+      rank: num(r?.rank ?? r?.place ?? r?.pos),
+      time: r?.time ?? r?.chrono ?? null,
+      createdAt: r?.createdAt ?? r?.created_at ?? null
+    };
+  }
+
+  function resolveRaceLabel(race, meeting){
+    const rn = race?.name || "Épreuve";
+    const md = meeting?.name ? ` • ${meeting.name}` : "";
+    const dt = race?.date ? ` • ${race.date}` : "";
+    return `${rn}${md}${dt}`;
+  }
+
+  // ---------- Badges ----------
+  const BADGES = [
+    { key:"bronze", label:"Bronze", icon:"🥉", min:500,  desc:"Atteins 500 points cumulés." },
+    { key:"argent", label:"Argent", icon:"🥈", min:750,  desc:"Atteins 750 points cumulés." },
+    { key:"or",     label:"Or",     icon:"🥇", min:1000, desc:"Challenge 1000 points." },
+    { key:"legend", label:"Legend", icon:"🏆", min:2000, desc:"MTB 2000 Legend." }
+  ];
+
+  function renderBadges(totalPoints){
+    const root = $("badges");
+    root.innerHTML = "";
+    for (const b of BADGES){
+      const unlocked = totalPoints >= b.min;
+      const el = document.createElement("div");
+      el.className = `badgeCard ${unlocked ? "" : "locked"}`;
+      el.innerHTML = `
+        <div class="badgeIcon">${esc(b.icon)}</div>
+        <div style="flex:1">
+          <div class="bTitle">${esc(b.label)} • ${b.min} pts</div>
+          <div class="bSub">${esc(b.desc)}</div>
+          <div class="bState" style="color:${unlocked ? "var(--ok)" : "var(--muted)"};">
+            ${unlocked ? "Débloqué ✅" : "Verrouillé 🔒"}
+          </div>
+        </div>
+      `;
+      root.appendChild(el);
+    }
+  }
+
+  // ---------- Results render ----------
+  let STATE = {
+    user: null,
+    profile: null,
+    meetings: [],
+    races: [],
+    results: [],
+    riderResults: [],
+    maps: { racesById: new Map(), meetingsById: new Map() }
+  };
+
+  function computeStats(){
+    const rr = STATE.riderResults;
+
+    const pointsSum = rr.reduce((s,x)=> s + (num(x.points) ?? 0), 0);
+    const resultsCount = rr.length;
+    const avg = resultsCount ? Math.round((pointsSum / resultsCount) * 10) / 10 : 0;
+
+    let best = null;
+    for (const r of rr){
+      const p = num(r.points);
+      if (p == null) continue;
+      if (!best || p > (num(best.points) ?? -1)) best = r;
+    }
+
+    return { pointsSum: Math.round(pointsSum), resultsCount, avg, best };
+  }
+
+  function renderKPIs(stats){
+    $("kPoints").textContent = String(stats.pointsSum);
+    $("kResults").textContent = String(stats.resultsCount);
+    $("kAvg").textContent = String(stats.avg);
+
+    $("pillPoints").textContent = String(stats.pointsSum);
+    $("pillRaces").textContent = String(stats.resultsCount);
+
+    if (!stats.best){
+      $("kBest").textContent = "—";
+      $("kBestSub").textContent = "—";
+      return;
+    }
+    const race = STATE.maps.racesById.get(stats.best.raceId) || null;
+    const meeting = race?.meetingId ? STATE.maps.meetingsById.get(race.meetingId) : null;
+
+    $("kBest").textContent = String(Math.round(num(stats.best.points) ?? 0));
+    $("kBestSub").textContent = resolveRaceLabel(race, meeting);
+  }
+
+  function applyFiltersAndRender(){
+    const q = ($("q").value || "").trim().toLowerCase();
+    const sortBy = $("sortBy").value || "date_desc";
+
+    let rr = STATE.riderResults.slice();
+
+    if (q){
+      rr = rr.filter(r=>{
+        const race = STATE.maps.racesById.get(r.raceId) || {};
+        const meeting = race?.meetingId ? STATE.maps.meetingsById.get(race.meetingId) : {};
+        const txt = `${race?.name||""} ${race?.disc||""} ${race?.date||""} ${meeting?.name||""} ${meeting?.location||""}`.toLowerCase();
+        return txt.includes(q);
+      });
+    }
+
+    rr.sort((a,b)=>{
+      const ap = num(a.points) ?? -1;
+      const bp = num(b.points) ?? -1;
+
+      const ar = STATE.maps.racesById.get(a.raceId) || {};
+      const br = STATE.maps.racesById.get(b.raceId) || {};
+      const ad = String(ar.date || "");
+      const bd = String(br.date || "");
+      const an = String(ar.name || "").toLowerCase();
+      const bn = String(br.name || "").toLowerCase();
+
+      if (sortBy === "date_desc") return bd.localeCompare(ad);
+      if (sortBy === "points_desc") return bp - ap;
+      if (sortBy === "points_asc") return ap - bp;
+      if (sortBy === "name_asc") return an.localeCompare(bn);
+      return 0;
+    });
+
+    renderResults(rr);
+    const stats = computeStats();
+    renderKPIs(stats);
+    renderBadges(stats.pointsSum);
+  }
+
+  function renderResults(rr){
+    const root = $("resultsList");
+    const empty = $("emptyBox");
+    root.innerHTML = "";
+
+    if (!rr.length){
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    for (const r of rr){
+      const race = STATE.maps.racesById.get(r.raceId) || null;
+      const meeting = race?.meetingId ? STATE.maps.meetingsById.get(race.meetingId) : null;
+
+      const title = resolveRaceLabel(race, meeting);
+      const pts = (num(r.points) == null) ? "—" : Math.round(num(r.points));
+      const rank = (num(r.rank) == null) ? "—" : `#${Math.round(num(r.rank))}`;
+
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div class="title">${esc(title)}</div>
+        <div class="meta">
+          ${race?.disc ? `🏷️ ${esc(race.disc)} • ` : ""}
+          ${race?.ebike != null ? `🚲 ${String(race.ebike)==="1" ? "E-Bike" : "Musculaire"} • ` : ""}
+          ${race?.distanceKm != null ? `📏 ${esc(race.distanceKm)} km • ` : ""}
+          ${race?.dplusM != null ? `⛰️ ${esc(race.dplusM)} m D+` : ""}
+        </div>
+        <div class="chips">
+          <span class="chip">🏁 ${esc(rank)}</span>
+          <span class="chip">⭐ ${esc(String(pts))} pts</span>
+          ${r.time ? `<span class="chip">⏱️ ${esc(String(r.time))}</span>` : ""}
+          ${race?.id ? `<a class="chip" href="event.html?id=${encodeURIComponent(race.id)}" style="text-decoration:none;">Voir l’épreuve</a>` : ""}
+        </div>
+      `;
+      root.appendChild(el);
+    }
+  }
+
+  // ---------- Save display name ----------
+  async function saveDisplayName(userId, name){
+    const n = String(name || "").trim();
+    if (!n) throw new Error("Nom vide.");
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: n })
+      .eq("id", userId);
+    if (error) throw error;
+  }
+
+  // ---------- Main ----------
+  const guarded = await guardRider();
+  if (!guarded) return;
+
+  STATE.user = guarded.session.user;
+  STATE.profile = guarded.profile;
+
+  $("authPill").textContent = `${STATE.user.email} (rider)`;
+  $("emailLine").textContent = STATE.user.email;
+
+  const name = (STATE.profile?.display_name || "").trim() || "Mon profil";
+  $("displayName").textContent = name;
+  $("nameInput").value = (STATE.profile?.display_name || "");
+
+  $("heroMeta").innerHTML = `
+    Connecté en tant que <b>${esc(STATE.user.email)}</b>.<br/>
+    Objectif : débloquer les badges (500 / 750 / 1000 / 2000 points).
+  `;
+
+  // Load local datasets
+  STATE.meetings = listMeetingsSafe();
+  STATE.races = listRacesSafe();
+  STATE.results = listResultsSafe().map(normalizeResult).filter(x => x && x.raceId);
+
+  STATE.maps.meetingsById = new Map(STATE.meetings.map(m => [m.id, m]));
+  STATE.maps.racesById = new Map(STATE.races.map(r => [r.id, r]));
+
+  // Filter results for this rider (by id or email)
+  const meId = STATE.user.id;
+  const meEmail = String(STATE.user.email || "").toLowerCase();
+
+  STATE.riderResults = STATE.results.filter(r => {
+    const rid = (r.riderId || "").toString();
+    const rem = (r.riderEmail || "").toString().toLowerCase();
+    return (rid && rid === meId) || (rem && rem === meEmail);
+  });
+
+  // UI events
+  $("btnSignOut").addEventListener("click", async ()=>{
+    try{
+      showMsg("Déconnexion…", "warn");
+      await supabase.auth.signOut();
+      location.href = "login-rider.html";
+    }catch(e){
+      showMsg(`Erreur: ${e?.message || e}`, "err");
+    }
+  });
+
+  $("btnSaveName").addEventListener("click", async ()=>{
+    try{
+      showMsg("Enregistrement…", "warn");
+      await saveDisplayName(STATE.user.id, $("nameInput").value);
+      const prof = await getProfile(STATE.user.id);
+      STATE.profile = prof;
+
+      const newName = (STATE.profile?.display_name || "").trim() || "Mon profil";
+      $("displayName").textContent = newName;
+
+      showMsg("Nom mis à jour ✅", "ok");
+    }catch(e){
+      showMsg(`Erreur: ${e?.message || e}`, "err");
+    }
+  });
+
+  $("btnReload").addEventListener("click", async ()=>{
+    try{
+      showMsg("Rechargement…", "warn");
+      const prof = await getProfile(STATE.user.id);
+      STATE.profile = prof;
+      $("nameInput").value = (STATE.profile?.display_name || "");
+      $("displayName").textContent = ((STATE.profile?.display_name || "").trim() || "Mon profil");
+      showMsg("", "warn");
+    }catch(e){
+      showMsg(`Erreur: ${e?.message || e}`, "err");
+    }
+  });
+
+  $("btnReset").addEventListener("click", ()=>{
+    $("q").value = "";
+    $("sortBy").value = "date_desc";
+    applyFiltersAndRender();
+  });
+
+  ["q","sortBy"].forEach(id => $(id).addEventListener("input", applyFiltersAndRender));
+
+  // First render
+  applyFiltersAndRender();
+})();
+</script>
 </body>
 </html>
