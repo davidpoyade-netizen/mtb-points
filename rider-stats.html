@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stats Rider — MTB Points</title>
+  <link rel="stylesheet" href="./css/style.css" />
+
+  <style>
+    :root{
+      --bg:#f4f4f4;--card:#fff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 12px 34px rgba(2,6,23,.10);
+      --r:22px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+    .muted{color:var(--muted)}
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .nav a{
+      text-decoration:none;padding:8px 10px;border-radius:10px;
+      color:var(--blue);font-weight:900;font-size:13px
+    }
+    .nav a:hover{background:#eff6ff}
+    .nav a.active{background:#eff6ff;color:var(--blue2)}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
+      text-decoration:none;white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ghost{background:#f8fafc}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
+
+    .hero{
+      border-radius:22px;padding:18px;border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.10), transparent 60%),
+        #fff;
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .identity{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    .avatar{
+      width:74px;height:74px;border-radius:999px;
+      border:1px solid var(--border);background:#fff;object-fit:cover;
+      box-shadow:0 8px 22px rgba(2,6,23,.10);
+    }
+    .name{font-weight:1000;font-size:18px;letter-spacing:-.2px}
+    .subline{display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:#334155;margin-top:6px}
+    .mtbPoints{
+      display:flex;flex-direction:column;gap:6px;align-items:flex-end;min-width:220px;
+    }
+    .mtbPoints .big{
+      font-size:34px;font-weight:1100;letter-spacing:-.6px;line-height:1;
+    }
+    .mtbPoints .label{
+      font-size:12px;font-weight:1000;color:var(--muted);text-transform:uppercase;letter-spacing:.02em
+    }
+    .mtbPoints .hint{font-size:12px;color:var(--muted);text-align:right;max-width:260px}
+
+    .sectionTitle{margin:16px 0 10px 0;font-size:15px;font-weight:1000;letter-spacing:-.15px}
+    .grid{
+      display:grid;gap:12px;
+    }
+    .grid.kpis{grid-template-columns: repeat(4, minmax(0,1fr));}
+    @media(max-width:980px){.grid.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.grid.kpis{grid-template-columns:1fr}}
+
+    .grid.two{grid-template-columns:1fr 1fr}
+    @media(max-width:980px){.grid.two{grid-template-columns:1fr}}
+
+    .box{
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:14px;
+      background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .kpiLabel{color:var(--muted);font-size:12px;font-weight:1000;text-transform:uppercase;letter-spacing:.02em}
+    .kpiValue{margin-top:6px;font-size:24px;font-weight:1100;letter-spacing:-.35px}
+    .kpiSub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.4}
+
+    table{
+      width:100%;
+      border-collapse:separate;border-spacing:0;
+      border:1px solid var(--border);
+      border-radius:18px;overflow:hidden;
+      background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    thead th{
+      text-align:left;font-size:12px;color:#334155;background:#f8fafc;
+      padding:12px;border-bottom:1px solid var(--border);font-weight:1000;white-space:nowrap;
+    }
+    tbody td{padding:12px;border-bottom:1px solid var(--border);vertical-align:top;font-size:13px}
+    tbody tr:last-child td{border-bottom:none}
+    .right{text-align:right}
+    .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px}
+    .tag.ok{border-color:rgba(22,163,74,.35);color:#166534;background:#f0fdf4}
+    .tag.warn{border-color:rgba(234,88,12,.35);color:#9a3412;background:#fff7ed}
+    .tag.err{border-color:rgba(220,38,38,.35);color:#991b1b;background:#fef2f2}
+  </style>
+</head>
+
+<body>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1 style="margin:0;font-size:18px;letter-spacing:.2px;">MTB Points — Stats Rider</h1>
+    <span class="pill"><span class="dot ok"></span> Rider</span>
+  </div>
+
+  <nav class="nav">
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="events.html">Épreuves</a>
+    <a href="rider.html" class="active">Rider</a>
+  </nav>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <a class="btn ghost" href="rider.html">← Retour</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="heroTop">
+        <div class="identity">
+          <img class="avatar" id="riderPhoto" src="./img/rider-placeholder.png" alt="Photo du rider" />
+          <div>
+            <div class="name" id="riderName">Nom Prénom</div>
+            <div class="subline">
+              <span class="pill"><span class="dot"></span> <span id="riderSex">Homme</span></span>
+              <span class="pill"><span class="dot"></span> <span id="riderAgeCat">M 35–39</span></span>
+              <span class="pill"><span class="dot"></span> <span id="riderCountry">France (FRA)</span></span>
+            </div>
+            <div class="muted" style="font-size:13px;line-height:1.55;margin-top:6px" id="riderHint">
+              Statistiques basées sur tes résultats enregistrés.
+            </div>
+          </div>
+        </div>
+
+        <div class="mtbPoints">
+          <div class="label">Points MTB</div>
+          <div class="big" id="mtbPoints">0</div>
+          <div class="hint">Somme des points MTB (à connecter à tes résultats / classement).</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1er bloc -->
+    <h3 class="sectionTitle">Statistiques générales</h3>
+    <div class="grid kpis">
+      <div class="box">
+        <div class="kpiLabel">Courses terminées</div>
+        <div class="kpiValue" id="kpiFinished">0</div>
+        <div class="kpiSub">Nombre de courses avec un temps validé</div>
+      </div>
+
+      <div class="box">
+        <div class="kpiLabel">Temps de course total</div>
+        <div class="kpiValue" id="kpiTotalTime">00:00:00</div>
+        <div class="kpiSub">Somme des temps (HH:MM:SS)</div>
+      </div>
+
+      <div class="box">
+        <div class="kpiLabel">Distance totale</div>
+        <div class="kpiValue"><span id="kpiTotalDist">0.0</span> <span class="muted" style="font-size:14px">km</span></div>
+        <div class="kpiSub">Somme des distances</div>
+      </div>
+
+      <div class="box">
+        <div class="kpiLabel">Dénivelé total</div>
+        <div class="kpiValue">+<span id="kpiTotalDplus">0</span> <span class="muted" style="font-size:14px">m</span></div>
+        <div class="kpiSub">Somme des D+</div>
+      </div>
+
+      <div class="box">
+        <div class="kpiLabel">Course la plus longue</div>
+        <div class="kpiValue" id="kpiLongest">—</div>
+        <div class="kpiSub">Distance max (avec nom de course)</div>
+      </div>
+
+      <div class="box">
+        <div class="kpiLabel">Plus gros dénivelé</div>
+        <div class="kpiValue" id="kpiMaxDplus">—</div>
+        <div class="kpiSub">D+ max (avec nom de course)</div>
+      </div>
+
+      <div class="box">
+        <div class="kpiLabel">—</div>
+        <div class="kpiValue"> </div>
+        <div class="kpiSub muted">Emplacement libre (option)</div>
+      </div>
+
+      <div class="box">
+        <div class="kpiLabel">—</div>
+        <div class="kpiValue"> </div>
+        <div class="kpiSub muted">Emplacement libre (option)</div>
+      </div>
+    </div>
+
+    <!-- 2e bloc -->
+    <h3 class="sectionTitle">Records</h3>
+    <div class="grid two">
+      <div class="box">
+        <div class="kpiLabel">Meilleure performance</div>
+        <div class="kpiValue" id="bestPerformance">DNF</div>
+        <div class="kpiSub">Meilleur “Race Score” / score global (selon ton modèle)</div>
+      </div>
+
+      <div class="box">
+        <div class="kpiLabel">Meilleur classement</div>
+        <div class="kpiValue" id="bestRanking">DNF</div>
+        <div class="kpiSub">Meilleur rang (genre / catégorie selon tes règles)</div>
+      </div>
+    </div>
+
+    <!-- 3e bloc -->
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px">
+      <h3 class="sectionTitle" style="margin:0">3 derniers résultats</h3>
+      <a class="btn ghost" href="#" id="btnSeeAll">Tout voir →</a>
+    </div>
+
+    <div style="margin-top:10px; overflow:auto">
+      <table aria-label="3 derniers résultats">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Course</th>
+            <th>Pays</th>
+            <th>Distance / D+</th>
+            <th>Points MTB</th>
+            <th>Classement</th>
+            <th>Temps</th>
+            <th class="right">Race Score</th>
+          </tr>
+        </thead>
+        <tbody id="lastResults">
+          <tr>
+            <td>—</td>
+            <td class="muted">Aucun résultat</td>
+            <td class="muted">—</td>
+            <td class="muted">—</td>
+            <td class="muted">—</td>
+            <td class="muted">—</td>
+            <td class="muted">—</td>
+            <td class="right"><span class="tag err">DNF</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4e bloc -->
+    <h3 class="sectionTitle">Classements par catégorie d’âge</h3>
+    <div class="grid two">
+      <div class="box">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:1000">Classement mondial</div>
+            <div class="muted" style="font-size:12px;margin-top:4px">Catégorie : <b id="rankAgeCatW">M 35–39</b></div>
+          </div>
+          <span class="pill"><span class="dot"></span> Monde</span>
+        </div>
+        <div style="margin-top:10px;font-size:22px;font-weight:1100;letter-spacing:-.3px">
+          <span id="worldAgeRank">DNF</span> <span class="muted" style="font-size:14px">/</span> <span class="muted" id="worldAgeTotal">DNF</span>
+        </div>
+        <div class="muted" style="font-size:12px;margin-top:6px">Rang / total (catégorie d’âge)</div>
+      </div>
+
+      <div class="box">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:1000">Classement continental</div>
+            <div class="muted" style="font-size:12px;margin-top:4px">Catégorie : <b id="rankAgeCatEU">M 35–39</b></div>
+          </div>
+          <span class="pill"><span class="dot warn"></span> Europe</span>
+        </div>
+        <div style="margin-top:10px;font-size:22px;font-weight:1100;letter-spacing:-.3px">
+          <span id="euAgeRank">DNF</span> <span class="muted" style="font-size:14px">/</span> <span class="muted" id="euAgeTotal">DNF</span>
+        </div>
+        <div class="muted" style="font-size:12px;margin-top:6px">Rang / total (catégorie d’âge)</div>
+      </div>
+
+      <div class="box">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:1000">Classement national</div>
+            <div class="muted" style="font-size:12px;margin-top:4px">Catégorie : <b id="rankAgeCatFR">M 35–39</b></div>
+          </div>
+          <span class="pill"><span class="dot ok"></span> France</span>
+        </div>
+        <div style="margin-top:10px;font-size:22px;font-weight:1100;letter-spacing:-.3px">
+          <span id="frAgeRank">DNF</span> <span class="muted" style="font-size:14px">/</span> <span class="muted" id="frAgeTotal">DNF</span>
+        </div>
+        <div class="muted" style="font-size:12px;margin-top:6px">Rang / total (catégorie d’âge)</div>
+      </div>
+
+      <div class="box">
+        <div style="font-weight:1000">Note</div>
+        <div class="muted" style="margin-top:8px;font-size:12px;line-height:1.55">
+          Ce bloc est prêt pour être alimenté depuis Supabase (ranks calculés) ou depuis un import (CSV/XLS).
+          Si tu veux, je te branche la récupération du rider connecté + résultats.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+/*
+  Version "statique prête à brancher".
+  Tu peux:
+  - Remplacer les valeurs ci-dessous (DATA) par tes vraies données,
+  - Ou brancher Supabase / localStorage.
+*/
+
+(function(){
+  const $ = (id)=>document.getElementById(id);
+
+  // ---- Données exemple (remplace par ton JSON réel)
+  const DATA = {
+    rider: {
+      name: "Nom Prénom",
+      sex: "Homme",
+      ageCat: "M 35–39",
+      country: "France (FRA)",
+      photoUrl: "./img/rider-placeholder.png",
+      mtbPoints: 0
+    },
+    stats: {
+      finished: 0,
+      totalTime: "00:00:00",
+      totalDistKm: 0.0,
+      totalDplusM: 0,
+      longest: "DNF",
+      maxDplus: "DNF"
+    },
+    records: {
+      bestPerformance: "DNF",
+      bestRanking: "DNF"
+    },
+    last3: [
+      // { date, title, country, distDplus, mtbPoints, rank, time, raceScore, status }
+    ],
+    ranksAge: {
+      ageCat: "M 35–39",
+      world: { rank: "DNF", total: "DNF" },
+      eu: { rank: "DNF", total: "DNF" },
+      fr: { rank: "DNF", total: "DNF" }
+    }
+  };
+
+  // ---- Inject rider
+  $("riderName").textContent = DATA.rider.name;
+  $("riderSex").textContent = DATA.rider.sex;
+  $("riderAgeCat").textContent = DATA.rider.ageCat;
+  $("riderCountry").textContent = DATA.rider.country;
+  $("mtbPoints").textContent = String(DATA.rider.mtbPoints ?? 0);
+  const img = $("riderPhoto");
+  if (img && DATA.rider.photoUrl) img.src = DATA.rider.photoUrl;
+
+  // ---- Stats
+  $("kpiFinished").textContent = String(DATA.stats.finished ?? 0);
+  $("kpiTotalTime").textContent = DATA.stats.totalTime || "00:00:00";
+  $("kpiTotalDist").textContent = String(DATA.stats.totalDistKm ?? 0);
+  $("kpiTotalDplus").textContent = String(DATA.stats.totalDplusM ?? 0);
+  $("kpiLongest").textContent = DATA.stats.longest || "DNF";
+  $("kpiMaxDplus").textContent = DATA.stats.maxDplus || "DNF";
+
+  // ---- Records
+  $("bestPerformance").textContent = DATA.records.bestPerformance || "DNF";
+  $("bestRanking").textContent = DATA.records.bestRanking || "DNF";
+
+  // ---- Last 3 results
+  const tbody = $("lastResults");
+  const rows = Array.isArray(DATA.last3) ? DATA.last3.slice(0,3) : [];
+  if (tbody){
+    if (!rows.length){
+      // laisse le placeholder
+    } else {
+      tbody.innerHTML = "";
+      for (const r of rows){
+        const status = r.status || (r.raceScore === "DNF" ? "err" : "ok");
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(r.date || "—")}</td>
+          <td>
+            <div style="font-weight:1000">${escapeHtml(r.title || "—")}</div>
+            <div class="muted" style="font-size:12px;margin-top:2px">${escapeHtml(r.league || "")}</div>
+          </td>
+          <td><span class="tag">${escapeHtml(r.country || "—")}</span></td>
+          <td>${escapeHtml(r.distDplus || "—")}</td>
+          <td><span class="tag ok">${escapeHtml(String(r.mtbPoints ?? "—"))}</span></td>
+          <td>${escapeHtml(r.rank || "—")}</td>
+          <td>${escapeHtml(r.time || "—")}</td>
+          <td class="right"><span class="tag ${status}">${escapeHtml(r.raceScore || "—")}</span></td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+  }
+
+  // ---- Ranks
+  $("rankAgeCatW").textContent = DATA.ranksAge.ageCat || "—";
+  $("rankAgeCatEU").textContent = DATA.ranksAge.ageCat || "—";
+  $("rankAgeCatFR").textContent = DATA.ranksAge.ageCat || "—";
+
+  $("worldAgeRank").textContent = DATA.ranksAge.world.rank || "DNF";
+  $("worldAgeTotal").textContent = DATA.ranksAge.world.total || "DNF";
+
+  $("euAgeRank").textContent = DATA.ranksAge.eu.rank || "DNF";
+  $("euAgeTotal").textContent = DATA.ranksAge.eu.total || "DNF";
+
+  $("frAgeRank").textContent = DATA.ranksAge.fr.rank || "DNF";
+  $("frAgeTotal").textContent = DATA.ranksAge.fr.total || "DNF";
+
+  // ---- CTA "Tout voir"
+  const btn = $("btnSeeAll");
+  if (btn){
+    btn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      alert("À brancher : page complète des résultats (ex: rider-results.html).");
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+})();
+</script>
+</body>
+</html>
