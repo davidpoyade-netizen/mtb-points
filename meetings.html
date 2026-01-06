@@ -4,209 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Événements — MTB Points</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <style>
-    :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--muted2:#64748b;--border:#e5e7eb;
-      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:22px;
-      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
-    a{color:inherit}
-    .muted{color:var(--muted)}
-    .muted2{color:var(--muted2)}
-    .chip{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
-    }
-    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .dot.ok{background:var(--ok)}
-    .dot.warn{background:var(--warn)}
-    .dot.err{background:var(--err)}
-
-    /* Header */
-    header.header{
-      position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    }
-    .brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
-    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    nav a{
-      text-decoration:none;
-      padding:8px 10px;
-      border-radius:10px;
-      color:var(--blue);
-      font-weight:900;
-      font-size:13px;
-    }
-    nav a:hover{background:#eff6ff}
-    nav a.active{background:#eff6ff;color:var(--blue2)}
-    .lang{display:flex;gap:8px;align-items:center}
-    .lang .btn{
-      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
-    }
-
-    /* Layout */
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--r);
-      padding:18px;
-      box-shadow:var(--shadow);
-    }
-
-    /* Hero */
-    .hero{
-      border-radius:22px;
-      padding:18px;
-      border:1px solid var(--border);
-      background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
-        #fff;
-    }
-    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
-    .hero .desc{margin-top:6px;line-height:1.55;color:#334155}
-    .heroActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-
-    /* Controls */
-    .filters{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns: 1.2fr 0.9fr 180px;
-      gap:10px;
-      align-items:end;
-    }
-    @media(max-width:900px){ .filters{grid-template-columns:1fr} }
-    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
-    input,select{
-      width:100%;
-      padding:10px;
-      margin-top:6px;
-      border:1px solid #cbd5e1;
-      border-radius:12px;
-      background:#fff;
-      font-size:14px;
-    }
-    input::placeholder{color:#94a3b8}
-
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
-      text-decoration:none;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-      white-space:nowrap;
-    }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
-    .btn.primary{background:var(--ok);border-color:var(--ok);color:#fff}
-    .btn.primary:hover{background:#15803d;border-color:#15803d}
-    .btn.ghost{background:#f8fafc}
-
-    /* List */
-    .list{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap:12px;
-      margin-top:14px;
-    }
-    @media(max-width:900px){ .list{grid-template-columns:1fr} }
-
-    .item{
-      display:block;
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:14px;
-      background:#fff;
-      text-decoration:none;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .item:hover{
-      transform:translateY(-2px);
-      box-shadow:0 16px 28px rgba(2,6,23,.10);
-      border-color:#dbeafe;
-    }
-
-    .topline{
-      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;
-    }
-    .title{font-weight:1000;font-size:16px;letter-spacing:-.15px}
-    .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      background:#f1f5f9;border:1px solid var(--border);
-      font-weight:1000;font-size:12px;color:#0f172a;
-      white-space:nowrap;
-    }
-    .meta{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.55}
-    .comment{
-      margin-top:10px;
-      color:#334155;
-      font-size:13px;
-      line-height:1.55;
-      border-top:1px dashed var(--border);
-      padding-top:10px;
-    }
-
-    .empty{
-      margin-top:14px;
-      border:1px dashed var(--border);
-      border-radius:18px;
-      padding:14px;
-      color:var(--muted);
-      background:#fff;
-    }
-
-    footer{
-      margin-top:14px;
-      color:var(--muted);
-      font-size:12px;
-      text-align:center;
-      line-height:1.5;
-    }
-
-    a:focus, button:focus, input:focus, select:focus{
-      outline:3px solid rgba(37,99,235,.25);
-      outline-offset:2px;
-    }
-  </style>
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
-<body>
 
+<body>
 <header class="header">
-  <div class="brand">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points — Événements</h1>
-    <span class="chip">Résultats : <span id="count">0</span></span>
+    <span class="pill"><span class="dot"></span> <span id="countMeetings">0</span> événement(s)</span>
   </div>
 
-  <nav>
+  <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html" class="active">Événements</a>
-    <a href="challengemtbpoints.html">Challenge</a>
-    <a href="reglement.html">Règlement</a>
-    <a href="methodologie.html">Méthodologie</a>
-    <a href="about.html">À propos</a>
+    <a href="events.html">Épreuves</a>
+    <a href="dashboard.html">Dashboard</a>
     <a href="login.html">Connexion</a>
-    <a href="contact.html">Contact</a>
   </nav>
 
-  <div class="lang">
-    <button class="btn" id="btnFR" type="button">FR</button>
-    <button class="btn" id="btnEN" type="button">EN</button>
+  <div class="headerRight" style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
   </div>
 </header>
 
@@ -215,166 +33,254 @@
 
     <section class="hero">
       <div class="heroTop">
-        <div style="min-width:260px;flex:1">
-          <h2>Liste des événements</h2>
-          <div class="desc">
-            Recherche par nom, lieu, commentaire. Clique sur un événement pour voir ses épreuves.
+        <div style="min-width:280px;flex:1">
+          <h2>Gérer tes événements</h2>
+          <div class="heroMeta">
+            Crée un événement, puis ajoute des épreuves rattachées (obligatoire).
+            Les événements multi-jours sont supportés.
           </div>
-          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-            <span class="chip"><span class="dot ok"></span> Épreuves rattachées</span>
-            <span class="chip"><span class="dot"></span> Tri par date</span>
-          </div>
+          <div class="heroDesc" id="hintBox" style="display:none;"></div>
         </div>
-
         <div class="heroActions">
-          <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
-          <button class="btn ghost" id="clearBtn" type="button">Effacer filtres</button>
-        </div>
-      </div>
-
-      <div class="filters">
-        <div>
-          <label for="q">Recherche</label>
-          <input id="q" type="text" placeholder="Nom, lieu, commentaire…" />
-        </div>
-
-        <div>
-          <label for="sortBy">Tri</label>
-          <select id="sortBy">
-            <option value="date_desc">Date (récent → ancien)</option>
-            <option value="date_asc">Date (ancien → récent)</option>
-            <option value="name_asc">Nom (A → Z)</option>
-            <option value="name_desc">Nom (Z → A)</option>
-          </select>
-        </div>
-
-        <div>
-          <button class="btn" id="refreshBtn" type="button" style="width:100%">↻ Actualiser</button>
+          <span class="pill"><span class="dot ok"></span> Multi-jours</span>
+          <span class="pill"><span class="dot"></span> Races rattachées</span>
         </div>
       </div>
     </section>
 
-    <div id="meetingsList" class="list"></div>
-    <div id="emptyBox" class="empty" style="display:none;">Aucun événement enregistré.</div>
+    <h3 class="sectionTitle" style="margin-top:18px;">Filtres & tri</h3>
 
-    <footer>
-      Astuce : tu peux rattacher une épreuve à un événement au moment de la création de l’épreuve.
-    </footer>
+    <div class="filters" style="grid-template-columns: 1.6fr 1fr 1fr 1fr 180px; align-items:end;">
+      <div class="spanAll" style="grid-column:1/2">
+        <label for="q">Recherche</label>
+        <input id="q" type="text" placeholder="Nom, lieu, commentaire…" />
+      </div>
+
+      <div>
+        <label for="fromDate">À partir du</label>
+        <input id="fromDate" type="date" />
+      </div>
+
+      <div>
+        <label for="toDate">Jusqu’au</label>
+        <input id="toDate" type="date" />
+      </div>
+
+      <div>
+        <label for="sortBy">Tri</label>
+        <select id="sortBy">
+          <option value="date_desc">Plus récents</option>
+          <option value="date_asc">Plus anciens</option>
+          <option value="name_asc">Nom A→Z</option>
+          <option value="races_desc">Épreuves ↓</option>
+        </select>
+      </div>
+
+      <div>
+        <button class="btn primary" id="btnReset" type="button">Réinitialiser</button>
+      </div>
+
+      <div class="hintRow" style="grid-column:1/-1;">
+        <div>Résultats : <strong id="countFiltered">0</strong></div>
+        <div class="muted">Astuce : crée une épreuve depuis un événement (rattachement auto).</div>
+      </div>
+    </div>
+
+    <h3 class="sectionTitle" style="margin-top:18px;">Liste des événements</h3>
+
+    <div id="meetings" class="list" style="margin-top:12px;"></div>
+    <div id="emptyBox" class="empty" style="display:none;">
+      Aucun événement trouvé. Clique sur <b>“+ Créer un événement”</b>.
+    </div>
+
   </div>
 </main>
 
-<script type="module">
-  import { exposeHybridToWindow } from "./js/storage-supabase.js";
-  exposeHybridToWindow();
-</script>
-
+<script src="js/data.js"></script>
 <script src="js/storage.js"></script>
+
 <script>
 (function(){
-  const list = document.getElementById("meetingsList");
-  const qEl = document.getElementById("q");
-  const sortEl = document.getElementById("sortBy");
-  const countEl = document.getElementById("count");
-  const emptyBox = document.getElementById("emptyBox");
-  const clearBtn = document.getElementById("clearBtn");
-  const refreshBtn = document.getElementById("refreshBtn");
+  const $ = (id) => document.getElementById(id);
 
-  function normalize(s){
-    return String(s||"")
-      .toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-      .trim();
-  }
   function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[m]));
+    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
-  function valOrDash(x){ const s = String(x??"").trim(); return s ? s : "—"; }
+  function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
 
-  function safeDateKey(d){
-    // YYYY-MM-DD -> yyyymmdd number ; fallback 0
-    const m = String(d||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  function setHint(html){
+    const el = $("hintBox");
+    if (!el) return;
+    el.style.display = html ? "block" : "none";
+    el.innerHTML = html || "";
+  }
+
+  // ---- Storage adapters
+  function listMeetingsSafe(){
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    if (typeof window.getMeetings === "function") return window.getMeetings();
+    try {
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    try {
+      const raw = localStorage.getItem("mtb.races.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+
+  const allMeetings = listMeetingsSafe();
+  const allRaces = listRacesSafe();
+
+  // map: meetingId -> count races
+  const countByMeeting = new Map();
+  for (const r of allRaces){
+    if (!r) continue;
+    const mid = r.meetingId || r.eventGroupId || null;
+    if (!mid) continue;
+    countByMeeting.set(mid, (countByMeeting.get(mid) || 0) + 1);
+  }
+
+  // Use meeting.raceIds if available as the truth for counts (fallback to race meetingId)
+  function meetingRaceCount(m){
     if (!m) return 0;
-    return Number(m[1] + m[2] + m[3]);
+    const ids = Array.isArray(m.raceIds) ? m.raceIds : [];
+    if (ids.length) return ids.length;
+    return countByMeeting.get(m.id) || 0;
   }
 
-  function loadAll(){
-    return (typeof loadMeetings === "function") ? loadMeetings() : [];
-  }
+  // ---- UI + filters
+  const qEl = $("q");
+  const fromEl = $("fromDate");
+  const toEl = $("toDate");
+  const sortEl = $("sortBy");
 
-  let MEETINGS = loadAll();
+  function inRange(meeting, fromISO, toISO){
+    const start = meeting.date || null;
+    const end = meeting.endDate || meeting.date || null;
 
-  function render(items){
-    countEl.textContent = String(items.length);
+    // if no dates, keep
+    if (!start) return true;
 
-    if (!items.length) {
-      list.innerHTML = "";
-      emptyBox.style.display = "block";
-      return;
-    }
-    emptyBox.style.display = "none";
+    // compare as YYYY-MM-DD lexicographic is OK
+    const s = start;
+    const e = end || start;
 
-    list.innerHTML = items.map(m => {
-      const nRaces = (m.raceIds && m.raceIds.length) ? m.raceIds.length : 0;
-      const date = valOrDash(m.date);
-      const loc  = valOrDash(m.location);
-
-      const raceBadge = nRaces
-        ? `<span class="badge">🏁 ${nRaces} épreuve${nRaces>1?"s":""}</span>`
-        : `<span class="badge">— aucune épreuve</span>`;
-
-      return `
-        <a class="item" href="meeting.html?id=${encodeURIComponent(m.id)}">
-          <div class="topline">
-            <div class="title">${esc(valOrDash(m.name))}</div>
-            <div class="badges">${raceBadge}</div>
-          </div>
-          <div class="meta">📅 ${esc(date)} &nbsp;•&nbsp; 📍 ${esc(loc)}</div>
-          ${m.comment ? `<div class="comment">${esc(m.comment)}</div>` : ``}
-        </a>
-      `;
-    }).join("");
+    // if filter range intersects [s,e]
+    if (fromISO && e < fromISO) return false;
+    if (toISO && s > toISO) return false;
+    return true;
   }
 
   function apply(){
-    const q = normalize(qEl.value);
-    const sortBy = sortEl.value;
+    const q = (qEl.value || "").trim().toLowerCase();
+    const fromISO = (fromEl.value || "").trim();
+    const toISO = (toEl.value || "").trim();
 
-    let items = MEETINGS.slice();
+    let out = allMeetings.slice();
 
-    if (q) {
-      items = items.filter(m => {
-        const hay = normalize([m.name, m.location, m.comment].join(" "));
-        return hay.includes(q);
+    if (q){
+      out = out.filter(m=>{
+        const txt = `${m.name||""} ${m.location||""} ${m.comment||""}`.toLowerCase();
+        return txt.includes(q);
       });
     }
 
-    // Tri
-    if (sortBy === "date_desc") items.sort((a,b) => safeDateKey(b.date) - safeDateKey(a.date) || normalize(a.name).localeCompare(normalize(b.name)));
-    if (sortBy === "date_asc")  items.sort((a,b) => safeDateKey(a.date) - safeDateKey(b.date) || normalize(a.name).localeCompare(normalize(b.name)));
-    if (sortBy === "name_asc")  items.sort((a,b) => normalize(a.name).localeCompare(normalize(b.name)));
-    if (sortBy === "name_desc") items.sort((a,b) => normalize(b.name).localeCompare(normalize(a.name)));
+    out = out.filter(m => inRange(m, fromISO || null, toISO || null));
 
-    render(items);
+    const sortBy = sortEl.value || "date_desc";
+    out.sort((a,b)=>{
+      const ad = a.date || "";
+      const bd = b.date || "";
+      const an = (a.name || "").toLowerCase();
+      const bn = (b.name || "").toLowerCase();
+      const ar = meetingRaceCount(a);
+      const br = meetingRaceCount(b);
+
+      if (sortBy === "date_desc") return bd.localeCompare(ad);
+      if (sortBy === "date_asc") return ad.localeCompare(bd);
+      if (sortBy === "name_asc") return an.localeCompare(bn);
+      if (sortBy === "races_desc") return br - ar;
+      return 0;
+    });
+
+    render(out);
   }
 
-  qEl.addEventListener("input", apply);
-  sortEl.addEventListener("change", apply);
+  function render(list){
+    $("countMeetings").textContent = String(allMeetings.length);
+    $("countFiltered").textContent = String(list.length);
 
-  clearBtn.addEventListener("click", () => {
+    const root = $("meetings");
+    const empty = $("emptyBox");
+    root.innerHTML = "";
+
+    if (!allMeetings.length){
+      setHint("⚠️ Aucun événement en mémoire. Crée ton premier événement pour commencer.");
+    } else {
+      setHint("");
+    }
+
+    if (!list.length){
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    for (const m of list){
+      const start = m.date || "—";
+      const end = m.endDate || null;
+      const range = end ? `${start} → ${end}` : start;
+
+      const racesCount = meetingRaceCount(m);
+
+      const viewUrl = `meeting.html?id=${encodeURIComponent(m.id)}`;
+      const createRaceUrl = `course-create.html?meetingId=${encodeURIComponent(m.id)}`;
+
+      const el = document.createElement("div");
+      el.className = "item";
+      el.style.display = "block";
+
+      el.innerHTML = `
+        <div class="topline">
+          <div class="title">${esc(m.name || "Événement")}</div>
+          <div class="badge">${esc(range)}</div>
+        </div>
+
+        <div class="metaLine">
+          ${m.location ? `📍 ${esc(m.location)} • ` : ""}🏁 ${esc(String(racesCount))} épreuve(s)
+        </div>
+
+        <div class="miniRow" style="margin-top:10px;">
+          <a class="btn" href="${viewUrl}" style="width:auto;">Voir</a>
+          <a class="btn primary" href="${createRaceUrl}" style="width:auto;">+ Créer une épreuve</a>
+          <a class="btn ghost" href="events.html" style="width:auto;">Toutes les épreuves</a>
+        </div>
+
+        ${m.comment ? `<div class="muted" style="margin-top:10px; font-size:12px; line-height:1.5;">${esc(m.comment)}</div>` : ""}
+      `;
+
+      root.appendChild(el);
+    }
+  }
+
+  // wire
+  [qEl, fromEl, toEl, sortEl].forEach(el => el.addEventListener("input", apply));
+  $("btnReset").addEventListener("click", ()=>{
     qEl.value = "";
+    fromEl.value = "";
+    toEl.value = "";
     sortEl.value = "date_desc";
     apply();
   });
 
-  refreshBtn.addEventListener("click", () => {
-    MEETINGS = loadAll();
-    apply();
-  });
-
-  // Initial
-  sortEl.value = "date_desc";
   apply();
 })();
 </script>
