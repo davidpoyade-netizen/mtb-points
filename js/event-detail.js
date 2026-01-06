@@ -227,7 +227,9 @@
         ? `course-create.html?meetingId=${encodeURIComponent(meetingId)}`
         : "meetings.html";
     }
-  }
+  }// À la fin de render(), après avoir trouvé/chargé race :
+setupPdfButtons(() => race);
+
 
   render();
   // ---- PDF (print to PDF)
