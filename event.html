@@ -5,6 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Épreuve — MTB Points</title>
   <link rel="stylesheet" href="./css/style.css" />
+
+  <!-- Leaflet (HTTPS) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <!-- PRINT (PDF) styling -->
+  <style>
+    /* On identifie la zone "fiche" à imprimer */
+    .printWrap { }
+
+    @media print {
+      /* format PDF (A4) et marges */
+      @page { size: A4; margin: 12mm; }
+
+      /* cacher les éléments non utiles */
+      header.header,
+      nav.nav,
+      .headerRight,
+      .noPrint,
+      #btnBack,
+      #btnOpenMeeting,
+      #btnCreateSibling,
+      #btnGoMeeting2,
+      #btnCreateSibling2,
+      #btnEdit {
+        display: none !important;
+      }
+
+      body {
+        background: #fff !important;
+      }
+      .wrap {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .card {
+        box-shadow: none !important;
+        border: 0 !important;
+        padding: 0 !important;
+      }
+      .hero {
+        border: 1px solid #e5e7eb !important;
+        box-shadow: none !important;
+      }
+
+      /* Carte/profil : on force une taille stable */
+      #map { height: 260px !important; }
+      #elevCanvas { height: 260px !important; }
+
+      /* éviter les coupures moches */
+      .kpiGrid, .panel { break-inside: avoid; page-break-inside: avoid; }
+      h3.sectionTitle { break-after: avoid; }
+
+      /* liens imprimés plus propres */
+      a { text-decoration: none !important; color: #111827 !important; }
+    }
+  </style>
 </head>
 
 <body>
@@ -30,10 +92,11 @@
     <a class="btn ghost" id="btnBack" href="events.html">← Retour</a>
     <a class="btn" id="btnOpenMeeting" href="#" style="display:none;">Voir l’événement</a>
     <a class="btn primary" id="btnCreateSibling" href="#" style="display:none;">Créer une autre épreuve</a>
+    <button class="btn" id="btnPdfTop" type="button" title="Imprimer / Enregistrer en PDF">📄 Télécharger PDF</button>
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap printWrap" id="printArea">
   <div class="card">
 
     <!-- HERO -->
@@ -45,9 +108,9 @@
           <div class="heroDesc" id="raceComment" style="display:none;"></div>
         </div>
 
-        <div class="heroActions">
+        <div class="heroActions noPrint">
           <span class="pill"><span class="dot ok"></span> Épreuve</span>
-          <span class="pill"><span class="dot"></span> Scores</span>
+          <span class="pill"><span class="dot"></span> GPX</span>
         </div>
       </div>
     </section>
@@ -95,9 +158,58 @@
       </div>
     </div>
 
+    <!-- GPX / MAP -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Trace & carte</h3>
+
+    <div id="gpxEmpty" class="empty" style="display:none;">
+      <b>Aucune trace GPX enregistrée</b> pour cette épreuve.<br/>
+      Importe un GPX ci-dessous pour afficher la carte et le profil.
+    </div>
+
+    <div class="filters noPrint" style="grid-template-columns: 1.4fr 1fr 1fr; align-items:end; margin-top:10px;">
+      <div class="spanAll" style="grid-column:1/2">
+        <label for="gpxFile">Importer / remplacer le GPX</label>
+        <input id="gpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml" />
+        <div class="muted" style="font-size:12px; margin-top:6px;">
+          La trace sera enregistrée dans l’épreuve (localStorage). Pour afficher carte/profil.
+        </div>
+      </div>
+
+      <div>
+        <button class="btn" id="btnAnalyze" type="button">Analyser + enregistrer</button>
+      </div>
+
+      <div>
+        <button class="btn ghost" id="btnClearTrace" type="button">Supprimer la trace</button>
+      </div>
+    </div>
+
+    <div id="gpxStatus" class="empty noPrint" style="display:none; margin-top:12px;"></div>
+
+    <div class="filters" style="grid-template-columns: 1fr 1fr; gap:12px; align-items:start; margin-top:12px;">
+      <div class="panel" style="padding:12px;">
+        <div class="row" style="justify-content:space-between;">
+          <h3 style="margin:0;font-size:14px;">Carte</h3>
+          <span class="pill"><span class="dot"></span> OSM</span>
+        </div>
+        <div id="map" style="height:360px; border-radius:16px; border:1px solid var(--border); margin-top:10px;"></div>
+        <div class="muted" style="font-size:12px; margin-top:8px;" id="mapHint">—</div>
+      </div>
+
+      <div class="panel" style="padding:12px;">
+        <div class="row" style="justify-content:space-between;">
+          <h3 style="margin:0;font-size:14px;">Profil altimétrique</h3>
+          <span class="pill"><span class="dot"></span> GPX</span>
+        </div>
+        <canvas id="elevCanvas" width="900" height="360"
+          style="width:100%; height:360px; border-radius:16px; border:1px solid var(--border); margin-top:10px; background:#fff;"></canvas>
+        <div class="muted" style="font-size:12px; margin-top:8px;" id="elevHint">—</div>
+      </div>
+    </div>
+
     <!-- ACTIONS -->
     <h3 class="sectionTitle" style="margin-top:18px;">Actions</h3>
-    <div class="filters" style="grid-template-columns: 1fr 1fr 1fr; align-items:end;">
+    <div class="filters noPrint" style="grid-template-columns: 1fr 1fr 1fr 1fr; align-items:end;">
       <div>
         <a class="btn" id="btnEdit" href="#">Modifier (optionnel)</a>
       </div>
@@ -105,3 +217,31 @@
         <a class="btn" id="btnGoMeeting2" href="#" style="display:none;">Voir l’événement</a>
       </div>
       <div>
+        <a class="btn primary" id="btnCreateSibling2" href="#" style="display:none;">Créer une autre épreuve</a>
+      </div>
+      <div>
+        <button class="btn" id="btnPdfBottom" type="button">📄 Télécharger PDF</button>
+      </div>
+    </div>
+
+    <div class="hintRow noPrint" style="margin-top:12px;">
+      <div class="muted">Règle : une épreuve doit être rattachée à un événement.</div>
+      <div class="muted">Astuce : crée tes épreuves depuis la fiche événement.</div>
+    </div>
+
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/gpx.js"></script>
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+
+<script src="js/event-detail.js"></script>
+</body>
+</html>
