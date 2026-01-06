@@ -1,0 +1,402 @@
+-- MTB Points — Supabase SQL (aligné storage.js)
+-- ✅ IDs en TEXT pour meetings / races (compat localStorage)
+-- ✅ results.id en UUID
+-- ✅ race_ids (TEXT[]) pour coller à meeting.raceIds
+-- ✅ vues publiques: v_public_races, v_public_results, v_public_ranking
+-- ✅ RLS + GRANTS cohérents (public ranking + events publics)
+
+create extension if not exists "pgcrypto";
+
+-- ------------------------------------------------------------
+-- 0) Helpers
+-- ------------------------------------------------------------
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+-- ------------------------------------------------------------
+-- 1) PROFILES
+-- ------------------------------------------------------------
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text,
+  display_name text,
+  role text not null default 'rider' check (role in ('rider','organizer','admin')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists profiles_role_idx on public.profiles(role);
+
+drop trigger if exists trg_profiles_updated_at on public.profiles;
+create trigger trg_profiles_updated_at
+before update on public.profiles
+for each row execute function public.set_updated_at();
+
+-- Trigger: auto-create profile on signup
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles(id, email, display_name, role)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email,'@',1)),
+    coalesce(new.raw_user_meta_data->>'role', 'rider')
+  )
+  on conflict (id) do update
+    set email = excluded.email,
+        display_name = excluded.display_name;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute function public.handle_new_user();
+
+-- ------------------------------------------------------------
+-- 2) RLS helpers
+-- ------------------------------------------------------------
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select exists(
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and p.role = 'admin'
+  );
+$$;
+
+create or replace function public.is_organizer()
+returns boolean
+language sql
+stable
+as $$
+  select exists(
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and p.role in ('organizer','admin')
+  );
+$$;
+
+-- ------------------------------------------------------------
+-- 3) MEETINGS (événements) — aligné storage.js
+-- ------------------------------------------------------------
+create table if not exists public.meetings (
+  id text primary key,                               -- ex: "roc-dazur-173..."
+  organizer_id uuid not null references public.profiles(id) on delete restrict,
+
+  name text not null,
+  date date,                                         -- storage: m.date ("YYYY-MM-DD")
+  location text,
+  comment text,
+
+  race_ids text[] not null default '{}',              -- storage: m.raceIds
+  is_published boolean not null default false,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists meetings_org_idx on public.meetings(organizer_id);
+create index if not exists meetings_date_idx on public.meetings(date desc);
+create index if not exists meetings_pub_idx on public.meetings(is_published);
+
+drop trigger if exists trg_meetings_updated_at on public.meetings;
+create trigger trg_meetings_updated_at
+before update on public.meetings
+for each row execute function public.set_updated_at();
+
+-- ------------------------------------------------------------
+-- 4) RACES (épreuves) — aligné localStorage "events"
+-- ------------------------------------------------------------
+create table if not exists public.races (
+  id text primary key,                               -- ex: makeIdFromName(name)
+  organizer_id uuid not null references public.profiles(id) on delete restrict,
+
+  meeting_id text references public.meetings(id) on delete set null,
+
+  name text not null,
+  date date not null,                                -- storage: ev.date
+  disc text,                                         -- storage: ev.disc (discipline)
+  level text,                                        -- storage: ev.level
+  ebike boolean not null default false,
+
+  distance_km numeric(8,2),
+  dplus_m integer,
+
+  score_phys integer check (score_phys is null or (score_phys between 0 and 100)),
+  score_tech integer check (score_tech is null or (score_tech between 0 and 100)),
+  score_global integer check (score_global is null or (score_global between 0 and 100)),
+
+  is_published boolean not null default false,
+
+  gpx jsonb,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists races_org_idx on public.races(organizer_id);
+create index if not exists races_meeting_idx on public.races(meeting_id);
+create index if not exists races_date_idx on public.races(date desc);
+create index if not exists races_pub_idx on public.races(is_published);
+
+drop trigger if exists trg_races_updated_at on public.races;
+create trigger trg_races_updated_at
+before update on public.races
+for each row execute function public.set_updated_at();
+
+-- ------------------------------------------------------------
+-- 5) RESULTS (résultats importés)
+-- ------------------------------------------------------------
+create table if not exists public.results (
+  id uuid primary key default gen_random_uuid(),
+
+  race_id text not null references public.races(id) on delete cascade,
+  organizer_id uuid not null references public.profiles(id) on delete restrict,
+
+  last_name text not null,
+  first_name text not null,
+  club text,
+  category text,
+
+  rank integer check (rank is null or rank >= 1),
+  time_seconds integer check (time_seconds is null or time_seconds >= 0),
+  time_display text,
+
+  -- points: tu utilises numeric(10,2) -> ok, mais ton JS attend souvent un int => à toi de voir
+  points numeric(10,2) check (points is null or points >= 0),
+
+  created_at timestamptz not null default now()
+);
+
+create index if not exists results_race_idx on public.results(race_id);
+create index if not exists results_org_idx on public.results(organizer_id);
+create index if not exists results_rank_idx on public.results(race_id, rank);
+
+-- ------------------------------------------------------------
+-- 6) VUES PUBLIQUES
+--    IMPORTANT: ton js/public-ranking.js lit v_public_ranking
+-- ------------------------------------------------------------
+
+-- Épreuves publiques (+ infos meeting)
+create or replace view public.v_public_races as
+select
+  r.id,
+  r.name,
+  r.date,
+  r.disc,
+  r.level,
+  r.ebike,
+  r.distance_km,
+  r.dplus_m,
+  r.score_phys,
+  r.score_tech,
+  r.score_global,
+  r.meeting_id,
+  m.name as meeting_name,
+  m.location as meeting_location
+from public.races r
+left join public.meetings m on m.id = r.meeting_id
+where r.is_published = true;
+
+-- Résultats publics (uniquement si la race est publiée)
+create or replace view public.v_public_results as
+select
+  res.id,
+  res.race_id,
+  r.name as race_name,
+  r.date as race_date,
+  res.rank,
+  res.last_name,
+  res.first_name,
+  res.club,
+  res.category,
+  res.time_seconds,
+  res.time_display,
+  res.points
+from public.results res
+join public.races r on r.id = res.race_id
+where r.is_published = true;
+
+-- Classement public agrégé (simple)
+-- ⚠️ Tu n’as pas (encore) birthYear / sex / nationality en DB :
+--    on les expose en NULL pour rester compatible avec le front.
+create or replace view public.v_public_ranking as
+select
+  md5(
+    lower(coalesce(res.last_name,'')) || '|' ||
+    lower(coalesce(res.first_name,'')) || '|' ||
+    lower(coalesce(res.club,''))
+  ) as rider_id,
+
+  trim(coalesce(res.last_name,'') || ' ' || coalesce(res.first_name,'')) as name,
+  null::text as sex,
+  null::int  as birth_year,
+  null::text as nationality,
+  coalesce(res.club, '—') as team,
+
+  -- score total (somme des points)
+  coalesce(sum(res.points), 0)::numeric(12,2) as score,
+
+  -- nb d’épreuves distinctes
+  count(distinct res.race_id)::int as races
+
+from public.results res
+join public.races r on r.id = res.race_id
+where r.is_published = true
+group by rider_id, name, team;
+
+-- ------------------------------------------------------------
+-- 7) RLS
+-- ------------------------------------------------------------
+
+-- PROFILES
+alter table public.profiles enable row level security;
+
+drop policy if exists "profiles read own" on public.profiles;
+create policy "profiles read own"
+on public.profiles for select
+using (id = auth.uid());
+
+drop policy if exists "profiles update own" on public.profiles;
+create policy "profiles update own"
+on public.profiles for update
+using (id = auth.uid())
+with check (id = auth.uid());
+
+drop policy if exists "profiles admin all" on public.profiles;
+create policy "profiles admin all"
+on public.profiles for all
+using (public.is_admin())
+with check (public.is_admin());
+
+-- MEETINGS
+alter table public.meetings enable row level security;
+
+drop policy if exists "meetings select published or own" on public.meetings;
+create policy "meetings select published or own"
+on public.meetings for select
+using (is_published = true or organizer_id = auth.uid() or public.is_admin());
+
+drop policy if exists "meetings insert organizer" on public.meetings;
+create policy "meetings insert organizer"
+on public.meetings for insert
+with check (public.is_organizer() and organizer_id = auth.uid());
+
+drop policy if exists "meetings update own" on public.meetings;
+create policy "meetings update own"
+on public.meetings for update
+using (organizer_id = auth.uid() or public.is_admin())
+with check (organizer_id = auth.uid() or public.is_admin());
+
+drop policy if exists "meetings delete own" on public.meetings;
+create policy "meetings delete own"
+on public.meetings for delete
+using (organizer_id = auth.uid() or public.is_admin());
+
+-- RACES
+alter table public.races enable row level security;
+
+drop policy if exists "races select published or own" on public.races;
+create policy "races select published or own"
+on public.races for select
+using (is_published = true or organizer_id = auth.uid() or public.is_admin());
+
+drop policy if exists "races insert organizer" on public.races;
+create policy "races insert organizer"
+on public.races for insert
+with check (public.is_organizer() and organizer_id = auth.uid());
+
+drop policy if exists "races update own" on public.races;
+create policy "races update own"
+on public.races for update
+using (organizer_id = auth.uid() or public.is_admin())
+with check (organizer_id = auth.uid() or public.is_admin());
+
+drop policy if exists "races delete own" on public.races;
+create policy "races delete own"
+on public.races for delete
+using (organizer_id = auth.uid() or public.is_admin());
+
+-- RESULTS
+alter table public.results enable row level security;
+
+drop policy if exists "results select public via published race or own" on public.results;
+create policy "results select public via published race or own"
+on public.results for select
+using (
+  organizer_id = auth.uid()
+  or public.is_admin()
+  or exists (
+    select 1
+    from public.races r
+    where r.id = results.race_id
+      and r.is_published = true
+  )
+);
+
+drop policy if exists "results insert organizer" on public.results;
+create policy "results insert organizer"
+on public.results for insert
+with check (public.is_organizer() and organizer_id = auth.uid());
+
+drop policy if exists "results update own" on public.results;
+create policy "results update own"
+on public.results for update
+using (organizer_id = auth.uid() or public.is_admin())
+with check (organizer_id = auth.uid() or public.is_admin());
+
+drop policy if exists "results delete own" on public.results;
+create policy "results delete own"
+on public.results for delete
+using (organizer_id = auth.uid() or public.is_admin());
+
+-- ------------------------------------------------------------
+-- 8) GRANTS (important pour PostgREST)
+-- ------------------------------------------------------------
+grant usage on schema public to anon, authenticated;
+
+-- ✅ Pour que les vues publiques marchent via PostgREST:
+grant select on public.v_public_races    to anon, authenticated;
+grant select on public.v_public_results  to anon, authenticated;
+grant select on public.v_public_ranking 
+to anon, authenticated;
+
+-- (Optionnel mais recommandé) : autoriser SELECT sur tables pour debug / requêtes directes
+grant select on public.meetings to anon, authenticated;
+grant select on public.races    to anon, authenticated;
+grant select on public.results  to anon, authenticated;
+
+-- Accès “app” côté authenticated (RLS fait foi)
+grant select, insert, update, delete on public.meetings to authenticated;
+grant select, insert, update, delete on public.races    to authenticated;
+grant select, insert, update, delete on public.results  to authenticated;
+
+-- profiles : en général pas d’insert (trigger) ; update own ok via RLS
+grant select, update on public.profiles to authenticated;
+
+-- ------------------------------------------------------------
+-- Notes
+-- ------------------------------------------------------------
+-- Promote organizer/admin :
+-- update public.profiles set role='organizer' where email='...';
+-- update public.profiles set role='admin' where email='...';
