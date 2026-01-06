@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Connexion Admin — MTB Points</title>
+  <title>Connexion Rider — MTB Points</title>
   <link rel="stylesheet" href="./css/style.css" />
   <style>
     :root{
@@ -51,9 +51,7 @@
     .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
     .hero p{margin:6px 0 0 0;line-height:1.55;color:#334155}
 
-    .panel{
-      margin-top:14px;border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
-    }
+    .panel{margin-top:14px;border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff}
     label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
     input{
       width:100%;padding:10px;margin-top:6px;
@@ -61,6 +59,7 @@
     }
     input::placeholder{color:#94a3b8}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:10px 12px;border-radius:12px;border:1px solid var(--border);
@@ -71,6 +70,8 @@
     .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
     .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
     .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+    .btn.ok:hover{background:#15803d;border-color:#15803d}
     .btn.ghost{background:#f8fafc}
     .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
 
@@ -91,7 +92,7 @@
 <body>
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Connexion Admin</h1>
+    <h1>MTB Points — Connexion Rider</h1>
     <span class="kpi" id="authState">Non connecté</span>
   </div>
 
@@ -100,8 +101,8 @@
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
     <a href="events.html">Épreuves</a>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="login.html" class="active">Admin</a>
+    <a href="login-rider.html" class="active">Rider</a>
+    <a href="login.html">Admin</a>
   </nav>
 
   <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -114,34 +115,35 @@
     <section class="hero">
       <div class="heroTop">
         <div style="min-width:260px;flex:1">
-          <h2>Accès Administrateur</h2>
+          <h2>Accès Cycliste</h2>
           <p class="muted">
-            Cette page est réservée aux comptes avec <code>profiles.role = 'admin'</code>.
-            Les riders auront un login séparé.
+            Cette page est réservée aux comptes avec <code>profiles.role = 'rider'</code>.
+            Après connexion, tu seras redirigé vers <code>rider.html</code>.
           </p>
         </div>
       </div>
       <div id="authMsg" class="msg"></div>
     </section>
 
-    <section class="panel" aria-label="Connexion admin">
-      <label for="email">Email admin</label>
-      <input id="email" type="email" autocomplete="email" placeholder="admin@email.com" />
+    <section class="panel" aria-label="Connexion rider">
+      <label for="email">Email rider</label>
+      <input id="email" type="email" autocomplete="email" placeholder="rider@email.com" />
 
       <label for="pass" style="margin-top:10px">Mot de passe</label>
       <input id="pass" type="password" autocomplete="current-password" placeholder="••••••••" />
 
       <div class="actions">
-        <button class="btn primary" id="btnSignIn" type="button">Se connecter (Admin)</button>
+        <button class="btn primary" id="btnSignIn" type="button">Se connecter (Rider)</button>
+        <button class="btn ok" id="btnSignUp" type="button">Créer un compte</button>
       </div>
 
       <div class="muted" style="margin-top:10px;font-size:12px;line-height:1.5">
-        Si la confirmation email est activée dans Supabase, valide ton email avant la connexion.
+        Si la confirmation email est activée, valide ton email avant de te connecter.
       </div>
     </section>
 
     <footer>
-      Astuce : promotion admin (SQL) — <code>update public.profiles set role='admin' where email='...';</code>
+      Si tu as un compte admin/organizer, utilise plutôt <code>login.html</code>.
     </footer>
   </div>
 </main>
@@ -161,7 +163,7 @@
   async function getRole(userId){
     const { data, error } = await supabase
       .from("profiles")
-      .select("role,email")
+      .select("role")
       .eq("id", userId)
       .maybeSingle();
     if (error) return null;
@@ -177,30 +179,59 @@
     el.textContent = `Connecté : ${s.user.email} (${role || "?"})`;
   }
 
-  async function guardAndRedirectIfAdmin(session){
+  async function guardAndRedirectRider(session){
     if (!session?.user) return;
     const role = await getRole(session.user.id);
 
-    if (role !== "admin") {
+    if (role !== "rider") {
       await supabase.auth.signOut();
       await renderAuthState();
-      throw new Error("Accès refusé : ce compte n’est pas administrateur.");
+      throw new Error("Accès refusé : ce compte n’est pas rider.");
     }
 
-    // ✅ admin => dashboard
-    location.href = "dashboard.html";
+    // ✅ rider => rider.html
+    location.href = "rider.html";
   }
 
   $("btnSignIn").addEventListener("click", async () => {
     try {
-      showMsg("Connexion admin…", "warn");
+      showMsg("Connexion rider…", "warn");
       const email = $("email").value.trim();
       const pass  = $("pass").value;
 
       const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
       if (error) throw error;
 
-      await guardAndRedirectIfAdmin(data?.session);
+      await guardAndRedirectRider(data?.session);
+    } catch(e){
+      showMsg(`Erreur: ${e?.message || e}`, "err");
+    }
+  });
+
+  $("btnSignUp").addEventListener("click", async () => {
+    try {
+      showMsg("Création du compte…", "warn");
+      const email = $("email").value.trim();
+      const pass  = $("pass").value;
+
+      // On met un hint role dans user_metadata (utile si tu as un trigger qui lit ça)
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: pass,
+        options: {
+          data: { role: "rider" },
+          emailRedirectTo: `${location.origin}/login-rider.html`
+        }
+      });
+      if (error) throw error;
+
+      showMsg(
+        data?.session
+          ? "Compte créé ✅"
+          : "Compte créé ✅ Vérifie ton email (spam) pour confirmer avant connexion.",
+        "ok"
+      );
+      await renderAuthState();
     } catch(e){
       showMsg(`Erreur: ${e?.message || e}`, "err");
     }
@@ -217,11 +248,11 @@
     }
   });
 
-  // Auto redirect if already signed-in admin
+  // Auto redirect if already signed-in rider
   supabase.auth.onAuthStateChange(async (event, session) => {
     await renderAuthState();
     if (event === "SIGNED_IN" && session?.user) {
-      try { await guardAndRedirectIfAdmin(session); } catch(_) {}
+      try { await guardAndRedirectRider(session); } catch(_) {}
     }
   });
 
@@ -229,7 +260,7 @@
   // if already logged
   const { data } = await supabase.auth.getSession();
   if (data?.session?.user) {
-    try { await guardAndRedirectIfAdmin(data.session); } catch (e) {
+    try { await guardAndRedirectRider(data.session); } catch (e) {
       showMsg(e?.message || String(e), "err");
     }
   }

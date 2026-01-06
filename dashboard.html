@@ -3,23 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard — MTB Points</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>Dashboard Admin — MTB Points</title>
+  <link rel="stylesheet" href="./css/style.css" />
   <style>
     :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--muted2:#64748b;--border:#e5e7eb;
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
       --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:22px;
-      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+      --r:22px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
     a{color:inherit}
     .muted{color:var(--muted)}
-    .muted2{color:var(--muted2)}
-    code{background:#f1f5f9;padding:2px 6px;border-radius:6px}
-
-    /* Header */
     header.header{
       position:sticky;top:0;z-index:20;
       background:rgba(255,255,255,.90);
@@ -31,78 +26,52 @@
     header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
     nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     nav a{
-      text-decoration:none;
-      padding:8px 10px;
-      border-radius:10px;
-      color:var(--blue);
-      font-weight:900;
-      font-size:13px;
+      text-decoration:none;padding:8px 10px;border-radius:10px;
+      color:var(--blue);font-weight:900;font-size:13px;
     }
     nav a:hover{background:#eff6ff}
     nav a.active{background:#eff6ff;color:var(--blue2)}
-    .kpi{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
-    }
-
-    /* Layout */
-    .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
-    .grid{
-      display:grid;
-      grid-template-columns: 280px 1fr;
-      gap:14px;
-      align-items:start;
-    }
-    @media(max-width:980px){ .grid{grid-template-columns:1fr} }
-
-    .panel{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
-      padding:16px;
-    }
-
-    /* Sidebar */
-    .sideTitle{margin:0 0 10px 0;font-size:14px;letter-spacing:.02em;text-transform:uppercase;color:#334155}
-    .sideLinks{display:grid;gap:8px}
-    .sideLinks a{
-      text-decoration:none;
-      border:1px solid var(--border);
-      background:#fff;
-      border-radius:14px;
-      padding:10px 12px;
-      font-weight:900;
-      color:#0f172a;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .sideLinks a:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
-    .sideSmall{margin-top:12px;border-top:1px dashed var(--border);padding-top:12px}
-    .chip{
+    .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;border:1px solid var(--border);
       background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
     }
     .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
     .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
     .dot.err{background:var(--err)}
 
-    /* Hero */
+    .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+
     .hero{
-      border-radius:22px;
-      padding:18px;
-      border:1px solid var(--border);
+      border-radius:22px;padding:18px;border:1px solid var(--border);
       background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.10), transparent 60%),
         #fff;
     }
     .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
     .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
-    .hero .desc{margin-top:6px;line-height:1.55;color:#334155}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .hero p{margin:6px 0 0 0;line-height:1.55;color:#334155}
+
+    .grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
+    @media(max-width:980px){.grid2{grid-template-columns:1fr}}
+
+    .kpiGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+    @media(max-width:1100px){.kpiGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.kpiGrid{grid-template-columns:1fr}}
+    .kpi{
+      border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .kpi .label{color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+    .kpi .value{margin-top:6px;font-size:26px;font-weight:1000;letter-spacing:-.4px}
+    .kpi .sub{margin-top:4px;color:var(--muted);font-size:12px}
+
+    .panel{border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff}
+    .panel h3{margin:0 0 8px 0;font-size:15px;letter-spacing:-.1px}
+    .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
 
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -114,441 +83,334 @@
     .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
     .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
     .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
-    .btn.ok:hover{background:#15803d;border-color:#15803d}
-    .btn.danger{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
-    .btn.danger:hover{background:#ffe4e6}
     .btn.ghost{background:#f8fafc}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
 
-    /* Filters */
-    .filters{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns: 1.2fr 220px 220px;
-      gap:10px;
-      align-items:end;
+    .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+    @media(max-width:900px){.list{grid-template-columns:1fr}}
+    .item{
+      display:block;border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
+      text-decoration:none;box-shadow:0 2px 10px rgba(0,0,0,.04);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    @media(max-width:980px){ .filters{grid-template-columns:1fr} }
-    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
-    input,select{
-      width:100%;
-      padding:10px;
-      margin-top:6px;
-      border:1px solid #cbd5e1;
-      border-radius:12px;
-      background:#fff;
-      font-size:14px;
-    }
-    input::placeholder{color:#94a3b8}
-
-    /* Table */
-    .tableWrap{
-      margin-top:14px;
-      border:1px solid var(--border);
-      border-radius:18px;
-      overflow:hidden;
-      background:#fff;
-    }
-    table{width:100%;border-collapse:collapse}
-    thead th{
-      text-align:left;
-      font-size:12px;
-      letter-spacing:.02em;
-      text-transform:uppercase;
-      color:#334155;
-      background:#f8fafc;
-      border-bottom:1px solid var(--border);
-      padding:10px 12px;
-      white-space:nowrap;
-    }
-    tbody td{padding:12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
-    tbody tr:hover{background:#fcfdff}
-    .right{text-align:right}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--border);
-      background:#fff;
-      font-weight:1000;font-size:12px;
-      white-space:nowrap;
-    }
-    .empty{
-      margin-top:14px;
-      border:1px dashed var(--border);
-      border-radius:18px;
-      padding:14px;
-      color:var(--muted);
-      background:#fff;
-    }
-    .notice{
-      margin-top:12px;
-      border:1px solid #dbeafe;
-      background:#eff6ff;
-      color:#1e3a8a;
-      border-radius:18px;
-      padding:12px 14px;
-      line-height:1.5;
-      font-size:13px;
-    }
-    .error{
-      border:1px solid #fecaca;
-      background:#fff1f2;
-      color:#991b1b;
-    }
-
-    a:focus, button:focus, input:focus, select:focus{
-      outline:3px solid rgba(37,99,235,.25);
-      outline-offset:2px;
-    }
+    .item:hover{transform:translateY(-2px);box-shadow:0 16px 28px rgba(2,6,23,.10);border-color:#dbeafe}
+    .title{font-weight:1000;font-size:16px;letter-spacing:-.2px}
+    .meta{margin-top:6px;color:var(--muted);font-size:13px;line-height:1.5}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid var(--border);font-weight:900;font-size:12px}
+    .empty{margin-top:10px;border:1px dashed var(--border);border-radius:18px;padding:14px;color:var(--muted);background:#fff}
+    .msg{margin-top:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:#fff;font-weight:900;display:none;line-height:1.45}
+    .msg.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .msg.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+    .msg.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+    a:focus, button:focus{outline:3px solid rgba(37,99,235,.25);outline-offset:2px}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
   </style>
 </head>
 
 <body>
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Tableau de bord</h1>
-    <span class="kpi" id="authState">—</span>
+    <h1>MTB Points — Dashboard Admin</h1>
+    <span class="pill"><span class="dot ok"></span><span id="authPill">—</span></span>
   </div>
 
   <nav>
     <a href="index.html">Accueil</a>
-    <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
-    <a href="challengemtbpoints.html">Challenge</a>
-    <a href="reglement.html">Règlement</a>
-    <a href="methodologie.html">Méthodologie</a>
-    <a href="about.html">À propos</a>
-    <a class="active" href="dashboard.html">Dashboard</a>
+    <a href="events.html">Épreuves</a>
+    <a href="import-results.html">Import résultats</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
   </nav>
 
-  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-    <button class="btn ghost" id="refreshBtn" type="button">↻ Actualiser</button>
-    <button class="btn danger" id="logoutBtn" type="button">Déconnexion</button>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
+    <button class="btn ghost" id="btnSignOut" type="button">Déconnexion</button>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="grid">
-    <!-- Sidebar -->
-    <aside class="panel">
-      <div class="sideTitle">Gestion</div>
-      <div class="sideLinks">
-        <a href="course-create.html">➕ Créer une épreuve <span class="muted2">→</span></a>
-        <a href="meeting-create.html">➕ Créer un événement <span class="muted2">→</span></a>
-        <a href="import-results.html">📥 Import résultats <span class="muted2">→</span></a>
-      </div>
+  <div class="card">
 
-      <div class="sideSmall">
-        <div class="sideTitle">Synchronisation</div>
-        <div class="muted2" style="font-size:13px;line-height:1.5">
-          Si tu avais déjà des données en <b>localStorage</b>, tu peux les migrer vers Supabase (une seule fois).
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2>Administration</h2>
+          <p class="muted">
+            Gestion rapide : événements, épreuves, imports, et contrôle des données locales.
+          </p>
         </div>
-        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn ok" id="migrateBtn" type="button">⇪ Migrer local → Supabase</button>
-        </div>
-        <div id="migrateMsg" class="notice" style="display:none;"></div>
-      </div>
 
-      <div class="sideSmall">
-        <div class="sideTitle">Statut</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-          <span class="chip"><span class="dot ok" id="dotAuth"></span><span id="authLabel">—</span></span>
-          <span class="chip"><span class="dot" id="dotRole"></span><span id="roleLabel">—</span></span>
-        </div>
-        <div class="muted2" style="margin-top:10px;font-size:13px;line-height:1.5">
-          Ce dashboard est pensé pour <b>organisateurs</b>. Si ton rôle est <code>rider</code>, tu seras redirigé.
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="pill"><span class="dot"></span><span id="dbMode">Local/Storage</span></span>
+          <span class="pill"><span class="dot"></span><span id="countsPill">—</span></span>
         </div>
       </div>
-    </aside>
 
-    <!-- Main content -->
-    <section class="panel">
-      <section class="hero">
-        <div class="heroTop">
-          <div style="min-width:260px;flex:1">
-            <h2>Mes épreuves</h2>
-            <div class="desc">
-              Liste de tes épreuves (Supabase si connecté, sinon localStorage). Clique sur une épreuve pour voir la fiche.
-            </div>
-            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-              <span class="kpi">Total : <span id="count">0</span></span>
-              <span class="badge" id="sourceBadge">Source : —</span>
-            </div>
-          </div>
+      <div id="msg" class="msg"></div>
+    </section>
 
-          <div class="actions">
-            <a class="btn primary" href="course-create.html">+ Nouvelle épreuve</a>
-            <a class="btn" href="meetings.html">Voir événements</a>
-          </div>
+    <div class="kpiGrid">
+      <div class="kpi">
+        <div class="label">Événements</div>
+        <div class="value" id="kMeetings">—</div>
+        <div class="sub">Total en mémoire</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Épreuves</div>
+        <div class="value" id="kRaces">—</div>
+        <div class="sub">Total rattachées</div>
+      </div>
+      <div class="kpi">
+        <div class="label">GPX présents</div>
+        <div class="value" id="kGpx">—</div>
+        <div class="sub">Épreuves avec points GPX</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Participants</div>
+        <div class="value" id="kParticipants">—</div>
+        <div class="sub">Somme participants</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <section class="panel">
+        <div class="row">
+          <h3>Actions rapides</h3>
+          <span class="badge">Admin</span>
         </div>
 
-        <div class="filters">
-          <div>
-            <label for="q">Recherche</label>
-            <input id="q" type="text" placeholder="Nom, discipline, niveau…" />
-          </div>
-          <div>
-            <label for="sortBy">Tri</label>
-            <select id="sortBy">
-              <option value="date_desc">Date (récent → ancien)</option>
-              <option value="date_asc">Date (ancien → récent)</option>
-              <option value="name_asc">Nom (A → Z)</option>
-              <option value="name_desc">Nom (Z → A)</option>
-            </select>
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <button class="btn ghost" id="clearBtn" type="button" style="width:100%">Effacer filtres</button>
-          </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+          <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
+          <a class="btn" href="meetings.html">Voir les événements</a>
+          <a class="btn" href="events.html">Voir les épreuves</a>
+          <a class="btn" href="import-results.html">Importer résultats</a>
+        </div>
+
+        <div class="empty" style="margin-top:12px;">
+          <b>Bon réflexe :</b> crée les épreuves depuis la fiche événement pour garantir le rattachement.<br/>
+          (ex: <code>course-create.html?meetingId=...</code>)
         </div>
       </section>
 
-      <div id="loading" class="empty" style="display:none;">Chargement…</div>
-      <div id="error" class="notice error" style="display:none;"></div>
-      <div id="empty" class="empty" style="display:none;">Aucune épreuve pour le moment.</div>
+      <section class="panel">
+        <div class="row">
+          <h3>Outils (local)</h3>
+          <span class="badge">Storage</span>
+        </div>
 
-      <div class="tableWrap" id="tableWrap" style="display:none;">
-        <table>
-          <thead>
-            <tr>
-              <th>Épreuve</th>
-              <th>Date</th>
-              <th>Discipline</th>
-              <th>Niveau</th>
-              <th class="right">Distance</th>
-              <th class="right">D+</th>
-              <th class="right">Global</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-    </section>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+          <button class="btn" id="btnExport" type="button">Exporter JSON</button>
+          <button class="btn ghost" id="btnClear" type="button">Vider la base locale</button>
+        </div>
+
+        <div class="muted" style="margin-top:10px;font-size:12px;line-height:1.5;">
+          Export utile pour sauvegarder tes données avant changement de structure.
+        </div>
+      </section>
+    </div>
+
+    <h3 style="margin:18px 0 10px 0;font-size:16px;letter-spacing:-.15px">Événements récents</h3>
+    <div id="recentMeetings" class="list"></div>
+    <div id="emptyMeetings" class="empty" style="display:none;">Aucun événement trouvé.</div>
+
+    <h3 style="margin:18px 0 10px 0;font-size:16px;letter-spacing:-.15px">Épreuves récentes</h3>
+    <div id="recentRaces" class="list"></div>
+    <div id="emptyRaces" class="empty" style="display:none;">Aucune épreuve trouvée.</div>
+
   </div>
 </main>
 
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+
 <script type="module">
   import { supabase } from "./js/supabaseClient.js";
-  import { renderAuthState, signOut } from "./js/auth.js";
-  import {
-    loadStoredEventsHybrid,
-    migrateLocalToSupabase
-  } from "./js/storage-supabase.js";
 
-  const $ = (id) => document.getElementById(id);
+  const $ = (id)=>document.getElementById(id);
+  const msgEl = $("msg");
 
-  const authState = $("authState");
-  const dotAuth = $("dotAuth");
-  const dotRole = $("dotRole");
-  const authLabel = $("authLabel");
-  const roleLabel = $("roleLabel");
-
-  const logoutBtn = $("logoutBtn");
-  const refreshBtn = $("refreshBtn");
-  const migrateBtn = $("migrateBtn");
-  const migrateMsg = $("migrateMsg");
-
-  const qEl = $("q");
-  const sortEl = $("sortBy");
-  const clearBtn = $("clearBtn");
-
-  const loadingEl = $("loading");
-  const emptyEl = $("empty");
-  const errorEl = $("error");
-  const tableWrap = $("tableWrap");
-  const tbody = $("tbody");
-
-  const countEl = $("count");
-  const sourceBadge = $("sourceBadge");
-
-  function show(el, yes){ el.style.display = yes ? "" : "none"; }
-
-  function normalize(s){
-    return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
-  }
-  function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[m]));
-  }
-  function valOrDash(x){
-    const s = String(x ?? "").trim();
-    return s ? s : "—";
-  }
-  function safeDateKey(d){
-    const m = String(d||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!m) return 0;
-    return Number(m[1] + m[2] + m[3]);
-  }
-  function fmtKm(x){
-    const n = Number(x);
-    if (!Number.isFinite(n)) return "—";
-    return `${n.toFixed(1).replace(".", ",")} km`;
-  }
-  function fmtM(x){
-    const n = Number(x);
-    if (!Number.isFinite(n)) return "—";
-    return `${Math.round(n)} m`;
+  function showMsg(text, kind="warn"){
+    if (!msgEl) return;
+    msgEl.className = `msg ${kind}`;
+    msgEl.textContent = text || "";
+    msgEl.style.display = text ? "block" : "none";
   }
 
-  async function requireOrganizerOrRedirect() {
-    const { data: s } = await supabase.auth.getSession();
-    const session = s?.session;
+  function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-    if (!session) {
-      // pas connecté -> login
-      window.location.href = "login.html";
-      return false;
-    }
-
-    dotAuth.classList.add("ok");
-    authLabel.textContent = "Connecté";
-
-    const { data: u } = await supabase.auth.getUser();
-    const user = u?.user;
-    authState.textContent = user?.email ? `Connecté : ${user.email}` : "Connecté";
-
-    // lire rôle via profiles
-    const { data: prof, error } = await supabase
+  async function getRole(userId){
+    const { data, error } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", user.id)
+      .eq("id", userId)
       .maybeSingle();
-
-    if (error || !prof) {
-      dotRole.classList.remove("ok");
-      dotRole.classList.add("err");
-      roleLabel.textContent = "Rôle introuvable";
-      // on autorise quand même l’accès si tu veux tester
-      return true;
-    }
-
-    const role = prof.role || "rider";
-    roleLabel.textContent = `Rôle : ${role}`;
-    dotRole.classList.add("ok");
-
-    if (role !== "organizer" && role !== "admin") {
-      // pas organisateur -> retour accueil (ou dashboard rider plus tard)
-      window.location.href = "index.html";
-      return false;
-    }
-    return true;
+    if (error) return null;
+    return data?.role || null;
   }
 
-  let ALL = [];
+  async function guardAdmin(){
+    const { data } = await supabase.auth.getSession();
+    const session = data?.session;
+    if (!session?.user) {
+      location.href = "login.html";
+      return null;
+    }
+    const role = await getRole(session.user.id);
+    if (role !== "admin") {
+      await supabase.auth.signOut();
+      location.href = "login.html";
+      return null;
+    }
+    $("authPill").textContent = session.user.email + " (admin)";
+    return session;
+  }
 
-  async function loadRaces() {
-    show(errorEl,false);
-    show(emptyEl,false);
-    show(tableWrap,false);
-    show(loadingEl,true);
-
+  // ---- Storage adapters
+  function listMeetingsSafe(){
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    if (typeof window.getMeetings === "function") return window.getMeetings();
     try {
-      // Détection source (Supabase vs local)
-      const { data: s } = await supabase.auth.getSession();
-      const authed = !!s?.session;
-      sourceBadge.textContent = authed ? "Source : Supabase" : "Source : Local";
-      ALL = await loadStoredEventsHybrid(); // renvoie races Supabase si authed, sinon localStorage
-      applyAndRender();
-    } catch (e) {
-      console.error(e);
-      errorEl.textContent = "Erreur lors du chargement des épreuves.";
-      show(errorEl,true);
-    } finally {
-      show(loadingEl,false);
-    }
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
   }
 
-  function applyAndRender() {
-    const q = normalize(qEl.value);
-    const sortBy = sortEl.value;
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    try {
+      const raw = localStorage.getItem("mtb.races.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
 
-    let items = Array.isArray(ALL) ? ALL.slice() : [];
+  function meetingRange(m){
+    const s = m.date || "—";
+    const e = m.endDate || "";
+    return e ? `${s} → ${e}` : s;
+  }
 
-    if (q) {
-      items = items.filter(ev => normalize([ev.name, ev.disc, ev.level].join(" ")).includes(q));
-    }
+  function renderLists(meetings, races){
+    // recent meetings
+    const mRoot = $("recentMeetings");
+    const mEmpty = $("emptyMeetings");
+    mRoot.innerHTML = "";
+    const ms = meetings.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))).slice(0, 8);
 
-    if (sortBy === "date_desc") items.sort((a,b) => safeDateKey(b.date) - safeDateKey(a.date) || normalize(a.name).localeCompare(normalize(b.name)));
-    if (sortBy === "date_asc")  items.sort((a,b) => safeDateKey(a.date) - safeDateKey(b.date) || normalize(a.name).localeCompare(normalize(b.name)));
-    if (sortBy === "name_asc")  items.sort((a,b) => normalize(a.name).localeCompare(normalize(b.name)));
-    if (sortBy === "name_desc") items.sort((a,b) => normalize(b.name).localeCompare(normalize(a.name)));
+    if (!ms.length) mEmpty.style.display = "block";
+    else mEmpty.style.display = "none";
 
-    countEl.textContent = String(items.length);
-
-    if (!items.length) {
-      tbody.innerHTML = "";
-      show(tableWrap,false);
-      show(emptyEl,true);
-      return;
-    }
-
-    show(emptyEl,false);
-    show(tableWrap,true);
-
-    tbody.innerHTML = items.map(ev => {
-      const g = (ev.scoreGlobal ?? ev.score_global);
-      const globalTxt = Number.isFinite(Number(g)) ? `${Math.round(Number(g))}/100` : "—";
-
-      return `
-        <tr>
-          <td><b>${esc(valOrDash(ev.name))}</b></td>
-          <td>${esc(valOrDash(ev.date))}</td>
-          <td>${esc(valOrDash(ev.disc))}</td>
-          <td>${esc(valOrDash(ev.level))}</td>
-          <td class="right">${esc(fmtKm(ev.distanceKm ?? ev.distance_km))}</td>
-          <td class="right">${esc(fmtM(ev.dplusM ?? ev.dplus_m))}</td>
-          <td class="right"><span class="badge">${esc(globalTxt)}</span></td>
-          <td>
-            <a class="btn" style="padding:7px 10px;border-radius:10px" href="event.html?id=${encodeURIComponent(ev.id)}">Voir</a>
-          </td>
-        </tr>
+    for (const m of ms){
+      const el = document.createElement("a");
+      el.className = "item";
+      el.href = `meeting.html?id=${encodeURIComponent(m.id)}`;
+      el.innerHTML = `
+        <div class="title">${esc(m.name || "Événement")}</div>
+        <div class="meta">📅 ${esc(meetingRange(m))}${m.location ? " • 📍 " + esc(m.location) : ""}</div>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+          <span class="badge">Voir</span>
+          <span class="badge">+ épreuve</span>
+        </div>
       `;
-    }).join("");
+      el.addEventListener("click", (e)=>{ /* normal */ });
+      mRoot.appendChild(el);
+    }
+
+    // recent races
+    const rRoot = $("recentRaces");
+    const rEmpty = $("emptyRaces");
+    rRoot.innerHTML = "";
+    const rs = races.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))).slice(0, 8);
+
+    if (!rs.length) rEmpty.style.display = "block";
+    else rEmpty.style.display = "none";
+
+    for (const r of rs){
+      const el = document.createElement("a");
+      el.className = "item";
+      el.href = `event.html?id=${encodeURIComponent(r.id)}`;
+      const g = (num(r.globalScore) ?? num(r.mrs));
+      el.innerHTML = `
+        <div class="title">${esc(r.name || "Épreuve")}</div>
+        <div class="meta">📅 ${esc(r.date || "—")} • ${esc(r.disc || "—")} • Global: <b>${g == null ? "—" : Math.round(g)}</b></div>
+        <div class="meta">${r.meetingId ? "🏁 meetingId: " + esc(r.meetingId) : "<span style='color:#dc2626;font-weight:900'>⚠️ orpheline</span>"}</div>
+      `;
+      rRoot.appendChild(el);
+    }
   }
 
-  // UI events
-  qEl.addEventListener("input", applyAndRender);
-  sortEl.addEventListener("change", applyAndRender);
+  function renderKPIs(meetings, races){
+    const totalMeetings = meetings.length;
+    const totalRaces = races.filter(r => r && (r.meetingId || r.eventGroupId)).length;
 
-  clearBtn.addEventListener("click", () => {
-    qEl.value = "";
-    sortEl.value = "date_desc";
-    applyAndRender();
-  });
+    const gpxCount = races.filter(r => Array.isArray(r.gpxPoints) && r.gpxPoints.length > 10).length;
+    const participants = races.map(r=>num(r.participants)).filter(v=>v!=null).reduce((s,x)=>s+x,0);
 
-  refreshBtn.addEventListener("click", loadRaces);
+    $("kMeetings").textContent = String(totalMeetings);
+    $("kRaces").textContent = String(totalRaces);
+    $("kGpx").textContent = String(gpxCount);
+    $("kParticipants").textContent = String(Math.round(participants));
 
-  logoutBtn.addEventListener("click", async () => {
+    $("countsPill").textContent = `${totalMeetings} meetings • ${totalRaces} races`;
+    $("dbMode").textContent = "LocalStorage / storage.js";
+  }
+
+  function downloadJson(filename, obj){
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type:"application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 0);
+  }
+
+  // ---- main
+  const session = await guardAdmin();
+  if (!session) return;
+
+  const meetings = listMeetingsSafe();
+  const races = listRacesSafe();
+
+  renderKPIs(meetings, races);
+  renderLists(meetings, races);
+
+  $("btnSignOut").addEventListener("click", async ()=>{
     try {
-      await signOut();
-    } finally {
-      window.location.href = "login.html";
+      showMsg("Déconnexion…", "warn");
+      await supabase.auth.signOut();
+      location.href = "login.html";
+    } catch(e){
+      showMsg(`Erreur: ${e?.message || e}`, "err");
     }
   });
 
-  migrateBtn.addEventListener("click", async () => {
-    show(migrateMsg, true);
-    migrateMsg.className = "notice";
-    migrateMsg.textContent = "Migration en cours…";
-
-    try {
-      const res = await migrateLocalToSupabase();
-      migrateMsg.textContent = `✅ Migration terminée : ${res.meetings} événement(s) + ${res.races} épreuve(s) envoyés vers Supabase.`;
-      await loadRaces();
-    } catch (e) {
-      console.error(e);
-      migrateMsg.className = "notice error";
-      migrateMsg.textContent = `❌ Migration impossible : ${e?.message || e}`;
-    }
+  $("btnExport").addEventListener("click", ()=>{
+    downloadJson("mtb-points-export.json", {
+      exportedAt: new Date().toISOString(),
+      meetings,
+      races
+    });
+    showMsg("Export JSON téléchargé ✅", "ok");
   });
 
-  // Boot
-  await renderAuthState();
-  const ok = await requireOrganizerOrRedirect();
-  if (ok) await loadRaces();
+  $("btnClear").addEventListener("click", ()=>{
+    const ok = confirm("Confirmer : vider toutes les données locales (meetings/races) ?");
+    if (!ok) return;
+    localStorage.removeItem("mtb.meetings.v1");
+    localStorage.removeItem("mtb.races.v1");
+    showMsg("Base locale vidée ✅ (reload la page).", "ok");
+    // refresh KPIs
+    renderKPIs([], []);
+    renderLists([], []);
+  });
+
 </script>
-
 </body>
 </html>
