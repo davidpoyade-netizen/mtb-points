@@ -230,6 +230,38 @@
   }
 
   render();
+  // ---- PDF (print to PDF)
+function buildPdfTitle(race) {
+  const safe = (s) => String(s || "").trim().replace(/[\\/:*?"<>|]+/g, "-");
+  const name = safe(race?.name || "epreuve");
+  const date = safe(race?.date || "");
+  return `MTB-Points_Fiche-epreuve_${name}${date ? "_" + date : ""}`;
+}
+
+function setupPdfButtons(getRaceFn) {
+  const btnTop = document.getElementById("btnPdfTop");
+  const btnBottom = document.getElementById("btnPdfBottom");
+
+  const handler = () => {
+    const race = typeof getRaceFn === "function" ? getRaceFn() : null;
+
+    // Nom du document imprimé (certains navigateurs l’utilisent)
+    const title = buildPdfTitle(race);
+    const prevTitle = document.title;
+    document.title = title;
+
+    // Petit délai : laisse Leaflet/canvas finir de peindre
+    setTimeout(() => {
+      window.print();
+      // restore
+      setTimeout(() => { document.title = prevTitle; }, 250);
+    }, 250);
+  };
+
+  if (btnTop) btnTop.addEventListener("click", handler);
+  if (btnBottom) btnBottom.addEventListener("click", handler);
+}
+
 })();
 
 
