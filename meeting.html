@@ -4,247 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Événement — MTB Points</title>
-  <link rel="stylesheet" href="css/style.css" />
-
-  <style>
-    :root{
-      --bg:#f4f4f4;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#667085;
-      --muted2:#64748b;
-      --border:#e5e7eb;
-      --blue:#2563eb;
-      --blue2:#1d4ed8;
-      --ok:#16a34a;
-      --warn:#ea580c;
-      --err:#dc2626;
-      --shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:22px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
-    a{color:inherit}
-
-    /* Header */
-    header.header{
-      position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    }
-    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
-    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    nav a{
-      text-decoration:none;
-      padding:8px 10px;border-radius:10px;
-      color:var(--blue);
-      font-weight:800;font-size:13px;
-    }
-    nav a:hover{background:#eff6ff}
-    nav a.active{background:#eff6ff;color:var(--blue2)}
-    .lang{display:flex;gap:8px;align-items:center}
-    .lang .btn{
-      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
-    }
-
-    /* Layout */
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--r);
-      padding:18px;
-      box-shadow:var(--shadow);
-    }
-
-    /* Hero */
-    .hero{
-      border-radius:22px;
-      padding:18px;
-      border:1px solid var(--border);
-      background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
-        #fff;
-    }
-    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
-    .hero .meta{margin-top:8px;color:#334155;line-height:1.55}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--border);
-      background:#fff;
-      font-weight:900;font-size:12px;
-      white-space:nowrap;
-    }
-    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .dot.ok{background:var(--ok)}
-    .dot.warn{background:var(--warn)}
-    .dot.err{background:var(--err)}
-    .desc{
-      margin-top:10px;
-      color:var(--muted2);
-      font-size:13px;
-      line-height:1.6;
-    }
-
-    /* Grid KPIs */
-    .kpiGrid{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:12px;
-      margin-top:14px;
-    }
-    @media(max-width:900px){.kpiGrid{grid-template-columns:1fr}}
-    .kpi{
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:14px;
-      background:#fff;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
-    }
-    .kpi .label{color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.02em;text-transform:uppercase}
-    .kpi .value{margin-top:6px;font-size:26px;font-weight:1000;letter-spacing:-.4px}
-    .kpi .sub{margin-top:4px;color:var(--muted);font-size:12px}
-    .bar{
-      margin-top:10px;height:10px;border-radius:999px;background:#f1f5f9;border:1px solid var(--border);overflow:hidden;
-    }
-    .bar > div{height:100%;width:0%}
-    /* no fixed colors requirement here; we keep neutral via gradient-like shading */
-    .bar > div{background:linear-gradient(90deg,#93c5fd,#22c55e)}
-
-    /* Sections */
-    h3.section{margin:16px 0 10px 0;font-size:16px;letter-spacing:-.15px}
-    .muted{color:var(--muted)}
-    label{display:block;font-weight:900;font-size:12px;color:#0f172a}
-    input,select{
-      width:100%;
-      padding:10px;
-      margin-top:6px;
-      border:1px solid #cbd5e1;
-      border-radius:12px;
-      background:#fff;
-    }
-    input::placeholder{color:#94a3b8}
-
-    .filters{
-      display:grid;
-      grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr 180px;
-      gap:10px;
-      align-items:end;
-    }
-    @media(max-width:1050px){
-      .filters{grid-template-columns:1fr 1fr; }
-      .filters .spanAll{grid-column:1/-1}
-    }
-
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
-      text-decoration:none;
-      transition:transform .12s ease, box-shadow .12s ease;
-      width:100%;
-    }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
-    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-
-    .hintRow{
-      margin-top:10px;
-      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    /* Mini chart */
-    #miniChart{
-      margin-top:10px;
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:12px;
-      background:#fff;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
-      overflow:auto;
-    }
-    .spark{
-      height:90px;
-      display:flex;gap:4px;align-items:flex-end;
-      min-width:420px;
-    }
-    .spark .b{
-      flex:1;
-      min-width:6px;
-      border-radius:8px;
-      border:1px solid rgba(2,6,23,.08);
-      background:linear-gradient(180deg, rgba(37,99,235,.25), rgba(37,99,235,.08));
-    }
-    .sparkMeta{margin-top:8px;color:var(--muted);font-size:12px}
-
-    /* List races */
-    .list{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:12px;
-      margin-top:10px;
-    }
-    @media(max-width:900px){.list{grid-template-columns:1fr}}
-    .item{
-      display:block;
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:14px;
-      background:#fff;
-      text-decoration:none;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .item:hover{
-      transform:translateY(-2px);
-      box-shadow:0 16px 28px rgba(2,6,23,.10);
-      border-color:#dbeafe;
-    }
-    .topline{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
-    .title{font-weight:1000;font-size:16px;letter-spacing:-.2px}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      background:#f1f5f9;border:1px solid var(--border);
-      font-weight:900;font-size:12px;color:#0f172a;
-      white-space:nowrap;
-    }
-    .metaLine{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5}
-    .miniRow{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap}
-    .miniPill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px;
-    }
-    .empty{
-      margin-top:10px;
-      border:1px dashed var(--border);
-      border-radius:18px;
-      padding:14px;
-      color:var(--muted);
-      background:#fff;
-    }
-
-    /* Accessibility focus */
-    a:focus, button:focus, input:focus, select:focus{
-      outline:3px solid rgba(37,99,235,.25);
-      outline-offset:2px;
-    }
-  </style>
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 
 <body>
@@ -254,7 +14,7 @@
     <span class="pill"><span class="dot"></span><span id="countPill">0</span> épreuve(s)</span>
   </div>
 
-  <nav>
+  <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html" class="active">Événements</a>
@@ -265,9 +25,9 @@
     <a href="login.html">Connexion</a>
   </nav>
 
-  <div class="lang">
-    <button class="btn" id="btnFR" type="button">FR</button>
-    <button class="btn" id="btnEN" type="button">EN</button>
+  <div class="headerRight">
+    <button class="btn ghost" id="btnFR" type="button">FR</button>
+    <button class="btn ghost" id="btnEN" type="button">EN</button>
   </div>
 </header>
 
@@ -279,11 +39,14 @@
       <div class="heroTop">
         <div style="min-width:260px;flex:1">
           <h2 id="mName">—</h2>
-          <div class="meta" id="mMeta">—</div>
-          <div class="desc" id="mComment"></div>
+          <div class="heroMeta" id="mMeta">—</div>
+          <div class="heroDesc" id="mComment"></div>
         </div>
 
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+        <div class="heroActions">
+          <!-- ✅ bouton demandé -->
+          <a id="btnCreateRace" class="btn primary" href="#">+ Créer une épreuve</a>
+
           <span class="pill"><span class="dot ok"></span> Résumé auto</span>
           <span class="pill"><span class="dot"></span> Filtres</span>
         </div>
@@ -291,52 +54,52 @@
     </section>
 
     <!-- KPIs -->
-    <h3 class="section">Résumé global</h3>
+    <h3 class="sectionTitle">Résumé global</h3>
     <div class="kpiGrid">
       <div class="kpi">
-        <div class="label">Épreuves (filtrées)</div>
-        <div class="value" id="kpiCount">—</div>
-        <div class="sub" id="kpiRange">—</div>
+        <div class="kpiLabel">Épreuves (filtrées)</div>
+        <div class="kpiValue" id="kpiCount">—</div>
+        <div class="kpiSub" id="kpiRange">—</div>
       </div>
 
       <div class="kpi">
-        <div class="label">Difficulté moyenne</div>
-        <div class="value"><span id="kpiGlobal">—</span><span class="muted"> /100</span></div>
-        <div class="sub">≈ <strong id="kpiGlobal5">—</strong> / 5</div>
+        <div class="kpiLabel">Difficulté moyenne</div>
+        <div class="kpiValue"><span id="kpiGlobal">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub">≈ <strong id="kpiGlobal5">—</strong> / 5</div>
         <div class="bar" aria-label="barre difficulté">
           <div id="kpiGlobalBar"></div>
         </div>
       </div>
 
       <div class="kpi">
-        <div class="label">Épreuve la plus difficile</div>
-        <div class="value" style="font-size:16px;line-height:1.2;">
+        <div class="kpiLabel">Épreuve la plus difficile</div>
+        <div class="kpiValue" style="font-size:16px;line-height:1.2;">
           <a id="kpiHardestLink" href="#" style="text-decoration:none;color:var(--blue);font-weight:1000;">—</a>
         </div>
-        <div class="sub" id="kpiHardestScore">—</div>
+        <div class="kpiSub" id="kpiHardestScore">—</div>
       </div>
 
       <div class="kpi">
-        <div class="label">Moyenne Physique</div>
-        <div class="value"><span id="kpiPhys">—</span><span class="muted"> /100</span></div>
-        <div class="sub">ScorePhys moyen</div>
+        <div class="kpiLabel">Moyenne Physique</div>
+        <div class="kpiValue"><span id="kpiPhys">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub">ScorePhys moyen</div>
       </div>
 
       <div class="kpi">
-        <div class="label">Moyenne Technique</div>
-        <div class="value"><span id="kpiTech">—</span><span class="muted"> /100</span></div>
-        <div class="sub">ScoreTech moyen</div>
+        <div class="kpiLabel">Moyenne Technique</div>
+        <div class="kpiValue"><span id="kpiTech">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub">ScoreTech moyen</div>
       </div>
 
       <div class="kpi">
-        <div class="label">Participants (total)</div>
-        <div class="value" id="kpiParticipants">—</div>
-        <div class="sub">Somme des participants renseignés</div>
+        <div class="kpiLabel">Participants (total)</div>
+        <div class="kpiValue" id="kpiParticipants">—</div>
+        <div class="kpiSub">Somme des participants renseignés</div>
       </div>
     </div>
 
     <!-- FILTERS -->
-    <h3 class="section" style="margin-top:18px;">Filtres & tri</h3>
+    <h3 class="sectionTitle" style="margin-top:18px;">Filtres & tri</h3>
     <div class="filters">
       <div class="spanAll" style="grid-column:1/3">
         <label for="q">Recherche</label>
@@ -393,14 +156,14 @@
     </div>
 
     <!-- CHART -->
-    <h3 class="section" style="margin-top:18px;">Graph rapide (Global)</h3>
-    <div id="miniChart" class="muted">
+    <h3 class="sectionTitle" style="margin-top:18px;">Graph rapide (Global)</h3>
+    <div id="miniChart" class="miniChart muted">
       <div class="spark" id="spark"></div>
       <div class="sparkMeta" id="sparkMeta">—</div>
     </div>
 
     <!-- LIST -->
-    <h3 class="section" style="margin-top:18px;">Épreuves disponibles</h3>
+    <h3 class="sectionTitle" style="margin-top:18px;">Épreuves disponibles</h3>
     <div id="races" class="list"></div>
     <div id="emptyBox" class="empty" style="display:none;">Aucune épreuve ne correspond aux filtres.</div>
 
@@ -413,17 +176,23 @@
 
 <script>
 /*
-  Ce script est "UI only" :
-  - Il ne remplace pas la logique de meeting.js, mais améliore l’UI (range label + sparkline).
-  - meeting.js doit déjà remplir/mettre à jour :
-    mName, mMeta, mComment, kpiCount, kpiRange, kpiGlobal, kpiGlobal5, kpiGlobalBar,
-    kpiHardestLink, kpiHardestScore, kpiPhys, kpiTech, kpiParticipants,
-    countFiltered, races, etc.
-  - Si ton meeting.js ne fait pas tout ça, ce script n’empêche rien : il ajoute juste la couche visuelle.
+  UI only:
+  - met à jour l'affichage du range
+  - construit un mini chart à partir des items visibles
+  - met à jour la pastille countPill
+  - ajoute le lien du bouton "+ Créer une épreuve" -> course.html?meetingId=...
 */
-
 (function(){
   const $ = (id)=>document.getElementById(id);
+
+  // ✅ bouton "+ Créer une épreuve"
+  (function initCreateRaceBtn(){
+    const btn = $("btnCreateRace");
+    if (!btn) return;
+    const meetingId = new URLSearchParams(location.search).get("id");
+    if (!meetingId) { btn.style.display = "none"; return; }
+    btn.href = `course.html?meetingId=${encodeURIComponent(meetingId)}`;
+  })();
 
   // range label live
   const rg = $("minGlobal");
@@ -434,26 +203,18 @@
     sync();
   }
 
-  // observe list changes and build a tiny bar chart from visible items (best-effort)
-  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-  function toNum(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
 
   function tryExtractGlobalScores(){
-    // best-effort: look for "Global" like patterns inside items text
     const list = $("races");
     if (!list) return [];
     const items = Array.from(list.querySelectorAll(".item, a, .race, .row")).slice(0, 32);
     const out = [];
     for (const el of items) {
       const t = (el.textContent || "").replace(/\s+/g," ").trim();
-      // try to capture "... 78/100" or "Global 78" etc.
       let m = t.match(/(\b\d{1,3})\s*\/\s*100\b/);
       if (!m) m = t.match(/\bglobal\b[^0-9]*([0-9]{1,3})\b/i);
-      if (m) {
-        const v = clamp(Number(m[1]), 0, 100);
-        out.push(v);
-      }
+      if (m) out.push(clamp(Number(m[1]), 0, 100));
     }
     return out;
   }
@@ -483,7 +244,6 @@
     meta.textContent = `Échantillon: ${scores.length} • min ${min}/100 • moy ${avg}/100 • max ${max}/100`;
   }
 
-  // Observe DOM changes in races list to update spark (meeting.js likely renders async)
   const races = $("races");
   if (races && window.MutationObserver) {
     const obs = new MutationObserver(() => {
@@ -495,12 +255,9 @@
     obs.observe(races, { childList:true, subtree:true });
   }
 
-  // First paint
   renderSpark(tryExtractGlobalScores());
 })();
 </script>
 
 </body>
 </html>
-
-
