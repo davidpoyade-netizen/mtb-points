@@ -4,20 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Import résultats — MTB Points</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="./css/style.css" />
   <style>
     :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--muted2:#64748b;--border:#e5e7eb;
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
       --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:22px;
-      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+      --r:22px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
     a{color:inherit}
-    code{background:#f1f5f9;padding:2px 6px;border-radius:6px}
-
-    /* Header */
+    .muted{color:var(--muted)}
     header.header{
       position:sticky;top:0;z-index:20;
       background:rgba(255,255,255,.90);
@@ -28,69 +25,45 @@
     }
     header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
     nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    nav a{
-      text-decoration:none;padding:8px 10px;border-radius:10px;
-      color:var(--blue);font-weight:900;font-size:13px;
-    }
+    nav a{text-decoration:none;padding:8px 10px;border-radius:10px;color:var(--blue);font-weight:900;font-size:13px}
     nav a:hover{background:#eff6ff}
     nav a.active{background:#eff6ff;color:var(--blue2)}
-    .kpi{
+    .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;border:1px solid var(--border);
       background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
     }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
 
-    /* Layout */
-    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
-      padding:18px;
-    }
-
-    /* Hero */
+    .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
     .hero{
-      border-radius:22px;
-      padding:18px;
-      border:1px solid var(--border);
+      border-radius:22px;padding:18px;border:1px solid var(--border);
       background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.10), transparent 60%),
         #fff;
     }
     .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
     .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
-    .hero .desc{margin-top:6px;line-height:1.55;color:#334155}
+    .hero p{margin:6px 0 0 0;line-height:1.55;color:#334155}
 
-    /* Controls */
-    .grid{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns: 1.1fr 1fr;
-      gap:12px;
-      align-items:start;
-    }
-    @media(max-width:980px){ .grid{grid-template-columns:1fr} }
-    .panel{
-      border:1px solid var(--border);
-      border-radius:18px;
-      background:#fff;
-      padding:14px;
-    }
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:12px;margin-top:12px}
+    @media(max-width:980px){.grid2{grid-template-columns:1fr}}
+
+    .panel{border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+    .panel h3{margin:0 0 8px 0;font-size:15px;letter-spacing:-.1px}
+    .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+
     label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
     input,select{
       width:100%;
-      padding:10px;
-      margin-top:6px;
-      border:1px solid #cbd5e1;
-      border-radius:12px;
-      background:#fff;
-      font-size:14px;
+      padding:10px;margin-top:6px;
+      border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:14px;
     }
-    input::placeholder{color:#94a3b8}
 
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -102,96 +75,56 @@
     .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
     .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
     .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
-    .btn.ok:hover{background:#15803d;border-color:#15803d}
     .btn.ghost{background:#f8fafc}
+    .btn.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
     .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
 
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
+    .msg{
+      margin-top:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);
+      background:#fff;font-weight:900;display:none;line-height:1.45;
     }
-    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .dot.ok{background:var(--ok)}
-    .dot.err{background:var(--err)}
-    .dot.warn{background:var(--warn)}
+    .msg.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .msg.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+    .msg.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
 
-    /* Messages */
-    .notice{
-      margin-top:12px;
-      border:1px solid #dbeafe;
-      background:#eff6ff;
-      color:#1e3a8a;
-      border-radius:18px;
-      padding:12px 14px;
-      line-height:1.5;
-      font-size:13px;
+    .drop{
+      margin-top:10px;border:2px dashed #cbd5e1;border-radius:18px;padding:16px;
+      background:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
-    .notice.ok{border-color:#bbf7d0;background:#f0fdf4;color:#14532d}
-    .notice.err{border-color:#fecaca;background:#fff1f2;color:#991b1b}
-    .notice.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+    .drop strong{font-weight:1000}
+    .hint{color:var(--muted);font-size:12px;line-height:1.5}
 
-    /* Table */
-    .tableWrap{
-      margin-top:14px;
-      border:1px solid var(--border);
-      border-radius:18px;
-      overflow:hidden;
-      background:#fff;
+    table{
+      width:100%;border-collapse:separate;border-spacing:0;
+      border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff;
     }
-    table{width:100%;border-collapse:collapse}
-    thead th{
-      text-align:left;
-      font-size:12px;
-      letter-spacing:.02em;
-      text-transform:uppercase;
-      color:#334155;
-      background:#f8fafc;
-      border-bottom:1px solid var(--border);
-      padding:10px 12px;
-      white-space:nowrap;
-    }
-    tbody td{padding:12px;border-bottom:1px solid #f1f5f9;vertical-align:top}
-    tbody tr:hover{background:#fcfdff}
-    .right{text-align:right}
-    .small{font-size:12px;color:var(--muted2)}
-    .statusOk{color:var(--ok);font-weight:900}
-    .statusBad{color:var(--err);font-weight:900}
-
-    footer{
-      margin-top:14px;
-      color:var(--muted);
-      font-size:12px;
-      text-align:center;
-      line-height:1.5;
-    }
-
-    a:focus, button:focus, input:focus, select:focus{
-      outline:3px solid rgba(37,99,235,.25);
-      outline-offset:2px;
-    }
+    th,td{padding:10px;border-bottom:1px solid var(--border);font-size:13px;text-align:left;vertical-align:top}
+    th{background:#f8fafc;font-weight:1000}
+    tr:last-child td{border-bottom:0}
+    .tag{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    a:focus, button:focus, input:focus, select:focus{outline:3px solid rgba(37,99,235,.25);outline-offset:2px}
   </style>
 </head>
 
 <body>
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Import des résultats</h1>
-    <span class="kpi" id="authState">—</span>
+    <h1>MTB Points — Import résultats</h1>
+    <span class="pill"><span class="dot"></span><span id="countPill">0</span> résultats</span>
   </div>
 
   <nav>
     <a href="index.html">Accueil</a>
-    <a href="dashboard.html" class="active">Dashboard</a>
-    <a href="course-create.html">Créer épreuve</a>
     <a href="meetings.html">Événements</a>
-    <a href="public-ranking.html">Classement</a>
+    <a href="events.html">Épreuves</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="import-results.html" class="active">Import résultats</a>
   </nav>
 
-  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-    <button class="btn ghost" id="refreshBtn" type="button">↻ Actualiser</button>
-    <a class="btn" href="dashboard.html">← Retour</a>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn ghost" id="btnExport" type="button">Exporter JSON</button>
+    <button class="btn danger" id="btnClear" type="button">Vider résultats</button>
   </div>
 </header>
 
@@ -200,486 +133,588 @@
 
     <section class="hero">
       <div class="heroTop">
-        <div style="min-width:260px;flex:1">
-          <h2>Importer un CSV</h2>
-          <div class="desc">
-            V1 : CSV simple. Colonnes attendues : <code>nom</code>, <code>prenom</code>, <code>temps</code> (HH:MM:SS). Optionnel :
-            <code>categorie</code>, <code>club</code>.
-          </div>
-          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-            <span class="pill"><span class="dot" id="dotMode"></span><span id="modeLabel">Mode : —</span></span>
-            <span class="pill">📅 Fenêtre : classement public 24 mois</span>
-          </div>
+        <div style="min-width:280px;flex:1">
+          <h2>Importer un classement (XLSX / CSV)</h2>
+          <p class="muted">
+            Les résultats sont stockés dans <code>localStorage</code> (clé <code>mtb.results.v1</code>) et rattachés à une
+            <b>épreuve</b> (raceId). Les riders verront leurs résultats via leur email.
+          </p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="pill"><span class="dot ok"></span> local</span>
+          <span class="pill"><span class="dot"></span> XLSX/CSV</span>
+        </div>
+      </div>
+      <div id="msg" class="msg"></div>
+    </section>
+
+    <div class="grid2">
+      <section class="panel">
+        <div class="row">
+          <h3>1) Choisir l’épreuve cible</h3>
+          <span class="tag">Obligatoire</span>
         </div>
 
+        <label for="raceSelect">Épreuve (raceId)</label>
+        <select id="raceSelect">
+          <option value="">— Sélectionner une épreuve —</option>
+        </select>
+
+        <div class="hint" style="margin-top:10px;">
+          Astuce : crée toujours les épreuves depuis la fiche événement pour éviter les épreuves orphelines.
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+          <a class="btn" id="btnOpenRace" href="#" style="display:none;">Ouvrir la fiche épreuve</a>
+          <a class="btn ghost" id="btnOpenMeeting" href="#" style="display:none;">Ouvrir l’événement</a>
+        </div>
+      </section>
+
+      <section class="panel">
         <div class="row">
-          <button class="btn" id="downloadTemplateBtn" type="button">⬇ Télécharger modèle</button>
+          <h3>2) Charger le fichier</h3>
+          <span class="tag">XLSX/CSV</span>
+        </div>
+
+        <label for="file">Fichier (xlsx / xls / csv)</label>
+        <input id="file" type="file" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" />
+
+        <div class="drop" id="drop">
+          <div>
+            <strong>Glisser-déposer ici</strong>
+            <div class="hint">ou utilise le bouton fichier. (Max raisonnable conseillé : &lt; 10 000 lignes)</div>
+          </div>
+          <span class="tag">Drag & Drop</span>
+        </div>
+
+        <div class="hint" style="margin-top:10px;">
+          Format conseillé colonnes : <code>rank</code>, <code>name</code>, <code>email</code>, <code>time</code>, <code>points</code>.
+          (Les noms peuvent varier : tu feras le mapping juste après.)
+        </div>
+      </section>
+    </div>
+
+    <section class="panel" style="margin-top:12px;">
+      <div class="row">
+        <h3>3) Mapping des colonnes</h3>
+        <span class="tag">Requis : Email ou Nom</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:10px;">
+        <div>
+          <label for="colName">Colonne Nom</label>
+          <select id="colName"></select>
+        </div>
+        <div>
+          <label for="colEmail">Colonne Email</label>
+          <select id="colEmail"></select>
+        </div>
+        <div>
+          <label for="colRank">Colonne Rang</label>
+          <select id="colRank"></select>
+        </div>
+        <div>
+          <label for="colTime">Colonne Temps</label>
+          <select id="colTime"></select>
+        </div>
+        <div>
+          <label for="colPoints">Colonne Points</label>
+          <select id="colPoints"></select>
         </div>
       </div>
 
-      <div class="grid">
-        <!-- Left: Select race -->
-        <div class="panel">
-          <div style="font-weight:1000;margin-bottom:8px">1) Choisir l’épreuve</div>
+      <div class="hint" style="margin-top:10px;">
+        Si <b>Points</b> n’est pas fourni, on enregistre <code>points=null</code> (tu pourras recalculer plus tard).
+        Le rider se base sur l’email si présent.
+      </div>
 
-          <div class="row">
-            <div style="flex:1;min-width:220px">
-              <label for="raceSelect">Épreuve</label>
-              <select id="raceSelect">
-                <option value="">Chargement…</option>
-              </select>
-              <div class="small" style="margin-top:8px">
-                Astuce : crée d’abord une épreuve dans <a href="course-create.html">Créer épreuve</a>.
-              </div>
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:10px">
-            <span class="pill">🏁 <span id="eventName">—</span></span>
-            <span class="pill">⭐ Score : <span id="eventScore">—</span></span>
-            <span class="pill">📅 Date : <span id="eventDate">—</span></span>
-          </div>
-
-          <div id="raceMsg" class="notice warn" style="display:none;margin-top:12px"></div>
-        </div>
-
-        <!-- Right: Upload file -->
-        <div class="panel">
-          <div style="font-weight:1000;margin-bottom:8px">2) Importer le fichier</div>
-
-          <div class="row">
-            <div style="flex:1;min-width:220px">
-              <label for="fileInput">Fichier CSV</label>
-              <input type="file" id="fileInput" accept=".csv,text/csv" />
-              <div class="small" style="margin-top:8px">
-                CSV séparé par virgule (,) — version simple (pas de guillemets complexes).
-              </div>
-            </div>
-          </div>
-
-          <div id="statusMsg" class="notice" style="display:none;"></div>
-        </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn primary" id="btnImport" type="button" disabled>Importer</button>
+        <button class="btn ghost" id="btnReset" type="button" disabled>Réinitialiser fichier</button>
       </div>
     </section>
 
-    <section id="previewBlock" style="display:none; margin-top:14px;">
-      <div class="row" style="justify-content:space-between;align-items:flex-start">
-        <div>
-          <h3 style="margin:0">Aperçu</h3>
-          <div class="small" id="summaryLine"></div>
-        </div>
-        <div class="row">
-          <button class="btn ghost" id="resetBtn" type="button">Réinitialiser</button>
-          <button class="btn ok" id="validateBtn" type="button" disabled>Valider & enregistrer</button>
-        </div>
+    <section class="panel" style="margin-top:12px;">
+      <div class="row">
+        <h3>Prévisualisation (20 premières lignes)</h3>
+        <span class="tag" id="sheetTag">—</span>
       </div>
 
-      <div class="tableWrap">
+      <div style="margin-top:10px; overflow:auto;">
         <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Nom</th>
-              <th>Prénom</th>
-              <th>Temps</th>
-              <th>Cat.</th>
-              <th>Club</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
+          <thead id="previewHead"></thead>
           <tbody id="previewBody"></tbody>
         </table>
       </div>
 
-      <footer>
-        À la validation : calcul des points (V1) + insertion dans Supabase <code>results</code> (si connecté).
-      </footer>
+      <div class="hint" style="margin-top:10px;">
+        Après import, les résultats seront accessibles dans <code>rider.html</code> (filtrage par email).
+      </div>
     </section>
 
   </div>
 </main>
 
-<script type="module">
-  import { supabase } from "./js/supabaseClient.js";
-  import { renderAuthState } from "./js/auth.js";
-  import { loadStoredEventsHybrid } from "./js/storage-supabase.js";
+<!-- XLSX parser (SheetJS) — HTTPS only -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-  /* --------------------------------------------------------------- */
-  /* Helpers temps                                                   */
-  /* --------------------------------------------------------------- */
-  function parseHMS(hms){
-    if (!hms || typeof hms !== "string") return null;
-    const m = hms.trim().match(/^(\d{1,2}):([0-5]\d):([0-5]\d)$/);
-    if (!m) return null;
-    const hh = Number(m[1]), mm = Number(m[2]), ss = Number(m[3]);
-    return hh * 3600 + mm * 60 + ss;
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+
+<script>
+(function(){
+  const $ = (id)=>document.getElementById(id);
+
+  const msgEl = $("msg");
+  function showMsg(text, kind="warn"){
+    msgEl.className = `msg ${kind}`;
+    msgEl.textContent = text || "";
+    msgEl.style.display = text ? "block" : "none";
   }
 
-  function formatHMS(totalSec){
-    const hh = Math.floor(totalSec / 3600);
-    const mm = Math.floor((totalSec % 3600) / 60);
-    const ss = totalSec % 60;
-    const pad = (n) => String(n).padStart(2,"0");
-    return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function num(x){
+    if (x == null) return null;
+    const n = Number(String(x).replace(",", ".").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+  function nowISO(){ return new Date().toISOString(); }
+  function makeId(prefix="res"){
+    return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   }
 
-  /* CSV parser simple (sans guillemets complexes) */
-  function parseCSV(text){
-    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-    if (lines.length < 2) return { headers: [], rows: [] };
+  // ---------- Storage adapters ----------
+  function listMeetingsSafe(){
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    if (typeof window.getMeetings === "function") return window.getMeetings();
+    try {
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
 
-    const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
-    const rows = lines.slice(1).map(line => {
-      const cols = line.split(",").map(c => c.trim());
-      const obj = {};
-      headers.forEach((h, i) => obj[h] = cols[i] ?? "");
-      return obj;
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    try {
+      const raw = localStorage.getItem("mtb.races.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+
+  function listResultsSafe(){
+    try{
+      const raw = localStorage.getItem("mtb.results.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(_){ return []; }
+  }
+
+  function saveResults(arr){
+    localStorage.setItem("mtb.results.v1", JSON.stringify(arr || []));
+  }
+
+  // ---------- UI state ----------
+  const STATE = {
+    meetings: [],
+    races: [],
+    racesById: new Map(),
+    meetingsById: new Map(),
+    fileName: null,
+    sheetName: null,
+    rows: null,      // array of objects
+    headers: null,   // headers list
+  };
+
+  function refreshCountPill(){
+    const all = listResultsSafe();
+    $("countPill").textContent = String(all.length);
+  }
+
+  function buildRaceLabel(r){
+    const m = r.meetingId ? STATE.meetingsById.get(r.meetingId) : null;
+    const meet = m?.name ? ` — ${m.name}` : "";
+    const dt = r.date ? ` • ${r.date}` : "";
+    const disc = r.disc ? ` • ${r.disc}` : "";
+    return `${r.name || "Épreuve"}${meet}${dt}${disc}`;
+  }
+
+  function fillRaceSelect(){
+    STATE.meetings = listMeetingsSafe();
+    STATE.races = listRacesSafe();
+
+    STATE.meetingsById = new Map(STATE.meetings.map(m => [m.id, m]));
+    STATE.racesById = new Map(STATE.races.map(r => [r.id, r]));
+
+    const sel = $("raceSelect");
+    sel.innerHTML = `<option value="">— Sélectionner une épreuve —</option>`;
+
+    // tri : date desc puis nom
+    const sorted = STATE.races.slice().sort((a,b)=>{
+      const ad = String(a.date||"");
+      const bd = String(b.date||"");
+      if (bd !== ad) return bd.localeCompare(ad);
+      return String(a.name||"").localeCompare(String(b.name||""));
     });
 
-    return { headers, rows };
-  }
-
-  function hasRequiredHeaders(headers){
-    return ["nom","prenom","temps"].every(r => headers.includes(r));
-  }
-
-  /* Coeff de place (V1) */
-  function coeffForPlace(place){
-    if (place === 1) return 1.00;
-    if (place === 2) return 0.80;
-    if (place === 3) return 0.65;
-    if (place === 4) return 0.55;
-    if (place === 5) return 0.45;
-    if (place >= 6 && place <= 10){
-      const start = 0.40, end = 0.15;
-      const t = (place - 6) / (10 - 6);
-      return start + (end - start) * t;
+    for (const r of sorted){
+      const opt = document.createElement("option");
+      opt.value = r.id;
+      opt.textContent = buildRaceLabel(r);
+      sel.appendChild(opt);
     }
-    return 0;
   }
 
-  function escapeHTML(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[m]));
-  }
+  function setRaceLinks(raceId){
+    const race = raceId ? STATE.racesById.get(raceId) : null;
+    const btnRace = $("btnOpenRace");
+    const btnMeet = $("btnOpenMeeting");
 
-  function show(el, yes){ el.style.display = yes ? "" : "none"; }
-
-  /* --------------------------------------------------------------- */
-  /* UI refs                                                         */
-  /* --------------------------------------------------------------- */
-  const dotMode = document.getElementById("dotMode");
-  const modeLabel = document.getElementById("modeLabel");
-  const refreshBtn = document.getElementById("refreshBtn");
-
-  const raceSelect = document.getElementById("raceSelect");
-  const raceMsg = document.getElementById("raceMsg");
-
-  const eventNameEl = document.getElementById("eventName");
-  const eventScoreEl = document.getElementById("eventScore");
-  const eventDateEl = document.getElementById("eventDate");
-
-  const downloadTemplateBtn = document.getElementById("downloadTemplateBtn");
-  const fileInput = document.getElementById("fileInput");
-  const statusMsg = document.getElementById("statusMsg");
-
-  const previewBlock = document.getElementById("previewBlock");
-  const previewBody = document.getElementById("previewBody");
-  const summaryLine = document.getElementById("summaryLine");
-
-  const validateBtn = document.getElementById("validateBtn");
-  const resetBtn = document.getElementById("resetBtn");
-
-  /* --------------------------------------------------------------- */
-  /* State                                                           */
-  /* --------------------------------------------------------------- */
-  let RACES = [];
-  let selectedRace = null;
-
-  // imported rows: {nom, prenom, tempsStr, timeSec, category, club, ok, err}
-  let imported = [];
-
-  function setRaceHeader(r){
-    if (!r){
-      eventNameEl.textContent = "—";
-      eventScoreEl.textContent = "—";
-      eventDateEl.textContent = "—";
+    if (!race){
+      btnRace.style.display = "none";
+      btnMeet.style.display = "none";
+      btnRace.href = "#";
+      btnMeet.href = "#";
       return;
     }
-    eventNameEl.textContent = r.name || "—";
-    // score global si dispo, sinon 100 par défaut (à adapter)
-    const s = Number(r.scoreGlobal ?? r.score_global ?? 100);
-    eventScoreEl.textContent = Number.isFinite(s) ? `${Math.round(s)} pts` : "—";
-    eventDateEl.textContent = r.date || "—";
-  }
 
-  function setNotice(type, text){
-    statusMsg.className = `notice ${type || ""}`.trim();
-    statusMsg.textContent = text;
-    show(statusMsg, true);
-  }
+    btnRace.href = `event.html?id=${encodeURIComponent(race.id)}`;
+    btnRace.style.display = "inline-flex";
 
-  function clearNotice(){
-    show(statusMsg, false);
-    statusMsg.textContent = "";
-  }
-
-  /* --------------------------------------------------------------- */
-  /* Load races                                                      */
-  /* --------------------------------------------------------------- */
-  async function loadRaces(){
-    show(raceMsg, false);
-    raceSelect.innerHTML = `<option value="">Chargement…</option>`;
-    setRaceHeader(null);
-
-    const { data: sess } = await supabase.auth.getSession();
-    const authed = !!sess?.session;
-
-    dotMode.className = "dot " + (authed ? "ok" : "warn");
-    modeLabel.textContent = authed ? "Mode : Supabase" : "Mode : Local (démo)";
-
-    try{
-      RACES = await loadStoredEventsHybrid();
-      RACES = Array.isArray(RACES) ? RACES : [];
-      if (!RACES.length){
-        raceSelect.innerHTML = `<option value="">Aucune épreuve</option>`;
-        raceMsg.textContent = "Aucune épreuve trouvée. Crée une épreuve avant d’importer des résultats.";
-        show(raceMsg, true);
-        return;
-      }
-
-      raceSelect.innerHTML =
-        `<option value="">— Sélectionner —</option>` +
-        RACES
-          .slice()
-          .sort((a,b) => String(b.date||"").localeCompare(String(a.date||"")))
-          .map(r => `<option value="${escapeHTML(r.id)}">${escapeHTML(r.date || "—")} — ${escapeHTML(r.name || r.id)}</option>`)
-          .join("");
-
-      // auto-sélection si query ?race_id=
-      const params = new URLSearchParams(location.search);
-      const rid = params.get("race_id");
-      if (rid){
-        raceSelect.value = rid;
-        onRaceChange();
-      }
-    } catch(e){
-      console.error(e);
-      raceSelect.innerHTML = `<option value="">Erreur</option>`;
-      raceMsg.textContent = "Erreur au chargement des épreuves.";
-      show(raceMsg, true);
+    const meeting = race.meetingId ? STATE.meetingsById.get(race.meetingId) : null;
+    if (meeting){
+      btnMeet.href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+      btnMeet.style.display = "inline-flex";
+    }else{
+      btnMeet.style.display = "none";
+      btnMeet.href = "#";
     }
   }
 
-  function onRaceChange(){
-    const id = raceSelect.value;
-    selectedRace = RACES.find(r => String(r.id) === String(id)) || null;
-    setRaceHeader(selectedRace);
-    // reset import state when race changes
-    resetImportUI(false);
+  // ---------- File parsing ----------
+  function toObjectsFromSheet(ws){
+    // header row -> keys
+    return XLSX.utils.sheet_to_json(ws, { defval: "", raw: true });
   }
 
-  raceSelect.addEventListener("change", onRaceChange);
+  function getHeadersFromRows(rows){
+    const set = new Set();
+    for (const r of rows || []) {
+      Object.keys(r || {}).forEach(k => set.add(k));
+    }
+    return Array.from(set);
+  }
 
-  /* --------------------------------------------------------------- */
-  /* Template download                                               */
-  /* --------------------------------------------------------------- */
-  downloadTemplateBtn.addEventListener("click", () => {
-    const template =
-`nom,prenom,temps,categorie,club
-DUPONT,Julien,03:42:18,M40,VTT Limoges
-MARTIN,Paul,03:45:02,M30,Club X
-`;
-    const blob = new Blob([template], { type: "text/csv;charset=utf-8" });
+  function fillMappingSelects(headers){
+    const selects = ["colName","colEmail","colRank","colTime","colPoints"].map(id => $(id));
+    for (const s of selects){
+      s.innerHTML = "";
+      const opt0 = document.createElement("option");
+      opt0.value = "";
+      opt0.textContent = "— (aucune) —";
+      s.appendChild(opt0);
+
+      for (const h of headers){
+        const opt = document.createElement("option");
+        opt.value = h;
+        opt.textContent = h;
+        s.appendChild(opt);
+      }
+    }
+
+    // auto-guess
+    const guess = (reList) => headers.find(h => reList.some(re => re.test(String(h)))) || "";
+
+    $("colName").value   = guess([/^name$/i,/nom/i,/rider/i,/coureur/i,/athlete/i]);
+    $("colEmail").value  = guess([/^email$/i,/mail/i,/e-mail/i]);
+    $("colRank").value   = guess([/^rank$/i,/place/i,/pos/i,/rang/i,/classement/i]);
+    $("colTime").value   = guess([/^time$/i,/chrono/i,/temps/i,/finish/i,/duration/i]);
+    $("colPoints").value = guess([/^points$/i,/score/i,/mtb/i]);
+
+    enableImportIfReady();
+  }
+
+  function renderPreview(headers, rows){
+    const head = $("previewHead");
+    const body = $("previewBody");
+    head.innerHTML = "";
+    body.innerHTML = "";
+
+    const trh = document.createElement("tr");
+    for (const h of headers.slice(0, 12)){ // limit columns
+      const th = document.createElement("th");
+      th.textContent = h;
+      trh.appendChild(th);
+    }
+    head.appendChild(trh);
+
+    const sample = (rows || []).slice(0, 20);
+    for (const r of sample){
+      const tr = document.createElement("tr");
+      for (const h of headers.slice(0, 12)){
+        const td = document.createElement("td");
+        td.textContent = String(r?.[h] ?? "");
+        tr.appendChild(td);
+      }
+      body.appendChild(tr);
+    }
+
+    $("sheetTag").textContent = `${STATE.fileName || "—"} • ${sample.length} / ${(rows||[]).length} lignes`;
+  }
+
+  function resetFileState(){
+    STATE.fileName = null;
+    STATE.sheetName = null;
+    STATE.rows = null;
+    STATE.headers = null;
+
+    $("file").value = "";
+    $("sheetTag").textContent = "—";
+    $("previewHead").innerHTML = "";
+    $("previewBody").innerHTML = "";
+
+    ["colName","colEmail","colRank","colTime","colPoints"].forEach(id => $(id).innerHTML = "");
+    $("btnImport").disabled = true;
+    $("btnReset").disabled = true;
+
+    showMsg("", "warn");
+  }
+
+  async function parseFile(file){
+    if (!file) return;
+    STATE.fileName = file.name;
+
+    const ext = (file.name.split(".").pop() || "").toLowerCase();
+
+    try{
+      showMsg("Lecture du fichier…", "warn");
+
+      if (ext === "csv"){
+        const text = await file.text();
+        const wb = XLSX.read(text, { type: "string" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = toObjectsFromSheet(sheet);
+        STATE.sheetName = wb.SheetNames[0];
+        STATE.rows = rows;
+        STATE.headers = getHeadersFromRows(rows);
+      }else{
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array" });
+        const sheetName = wb.SheetNames[0];
+        const sheet = wb.Sheets[sheetName];
+        const rows = toObjectsFromSheet(sheet);
+
+        STATE.sheetName = sheetName;
+        STATE.rows = rows;
+        STATE.headers = getHeadersFromRows(rows);
+      }
+
+      if (!STATE.rows || !STATE.rows.length){
+        throw new Error("Aucune ligne trouvée dans le fichier.");
+      }
+      if (!STATE.headers || !STATE.headers.length){
+        throw new Error("Impossible de détecter des colonnes.");
+      }
+
+      fillMappingSelects(STATE.headers);
+      renderPreview(STATE.headers, STATE.rows);
+
+      $("btnReset").disabled = false;
+      showMsg("Fichier chargé ✅ Configure le mapping puis clique Importer.", "ok");
+    }catch(e){
+      resetFileState();
+      showMsg(`Erreur fichier: ${e?.message || e}`, "err");
+    }
+  }
+
+  function enableImportIfReady(){
+    const raceId = $("raceSelect").value;
+    const hasRows = Array.isArray(STATE.rows) && STATE.rows.length > 0;
+
+    const colEmail = $("colEmail").value;
+    const colName  = $("colName").value;
+
+    // on exige au moins une identité (email ou nom) + raceId + rows
+    const ok = !!raceId && hasRows && (colEmail || colName);
+    $("btnImport").disabled = !ok;
+  }
+
+  function normalizeTime(x){
+    // accepte "hh:mm:ss", "mm:ss", nombre Excel, ou texte
+    if (x == null) return null;
+    const s = String(x).trim();
+    if (!s) return null;
+
+    // Excel time fraction day -> seconds
+    const n = num(s);
+    if (n != null && n > 0 && n < 1){
+      const totalSec = Math.round(n * 24 * 3600);
+      const hh = String(Math.floor(totalSec / 3600)).padStart(2,"0");
+      const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2,"0");
+      const ss = String(totalSec % 60).padStart(2,"0");
+      return `${hh}:${mm}:${ss}`;
+    }
+
+    // if already like 01:23:45 or 23:45
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) return s;
+
+    return s; // keep raw
+  }
+
+  function importNow(){
+    const raceId = $("raceSelect").value;
+    const race = STATE.racesById.get(raceId);
+    if (!race){
+      showMsg("Sélectionne une épreuve valide.", "err");
+      return;
+    }
+
+    const colName   = $("colName").value || null;
+    const colEmail  = $("colEmail").value || null;
+    const colRank   = $("colRank").value || null;
+    const colTime   = $("colTime").value || null;
+    const colPoints = $("colPoints").value || null;
+
+    const rows = STATE.rows || [];
+    const imported = [];
+    let skipped = 0;
+
+    for (const row of rows){
+      const riderName  = colName  ? String(row[colName] ?? "").trim() : "";
+      const riderEmail = colEmail ? String(row[colEmail] ?? "").trim().toLowerCase() : "";
+
+      // identifiant minimal
+      if (!riderEmail && !riderName){
+        skipped++;
+        continue;
+      }
+
+      const rank = colRank ? num(row[colRank]) : null;
+      const time = colTime ? normalizeTime(row[colTime]) : null;
+      const pts  = colPoints ? num(row[colPoints]) : null;
+
+      imported.push({
+        id: makeId("res"),
+        raceId: raceId,
+
+        // rider identification (rider.html filtre sur riderEmail)
+        riderId: null,                 // (optionnel si un jour tu résous via profiles)
+        riderEmail: riderEmail || null,
+        riderName: riderName || null,
+
+        rank: rank != null ? Math.round(rank) : null,
+        time: time,
+        points: pts != null ? Math.round(pts * 100) / 100 : null,
+
+        createdAt: nowISO(),
+
+        // utile debug / traçabilité
+        source: {
+          file: STATE.fileName,
+          sheet: STATE.sheetName,
+          importedAt: nowISO()
+        }
+      });
+    }
+
+    if (!imported.length){
+      showMsg("Aucune ligne importable (vérifie mapping Email/Nom).", "err");
+      return;
+    }
+
+    // merge into existing results
+    const existing = listResultsSafe();
+    const merged = existing.concat(imported);
+    saveResults(merged);
+
+    refreshCountPill();
+
+    const warnNoPoints = imported.some(x => x.points == null);
+    showMsg(
+      `Import terminé ✅ ${imported.length} lignes importées` + (skipped ? ` • ${skipped} ignorées` : "") +
+      (warnNoPoints ? ` • ⚠️ Points manquants sur certaines lignes` : ""),
+      warnNoPoints ? "warn" : "ok"
+    );
+  }
+
+  function downloadJson(filename, obj){
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type:"application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "modele_resultats_mtb_points.csv";
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
-    a.remove();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  // ---------- wire ----------
+  fillRaceSelect();
+  refreshCountPill();
+  resetFileState();
+
+  $("raceSelect").addEventListener("change", (e)=>{
+    setRaceLinks(e.target.value);
+    enableImportIfReady();
   });
 
-  /* --------------------------------------------------------------- */
-  /* Import flow                                                     */
-  /* --------------------------------------------------------------- */
-  function resetImportUI(clearFile = true){
-    imported = [];
-    if (clearFile) fileInput.value = "";
-    previewBody.innerHTML = "";
-    show(previewBlock, false);
-    clearNotice();
-    validateBtn.disabled = true;
-  }
-
-  resetBtn.addEventListener("click", () => resetImportUI(true));
-
-  fileInput.addEventListener("change", async () => {
-    resetImportUI(false);
-
-    if (!selectedRace){
-      setNotice("warn", "⚠️ Sélectionne d’abord une épreuve.");
-      fileInput.value = "";
-      return;
-    }
-
-    const file = fileInput.files && fileInput.files[0];
-    if (!file) return;
-
-    const text = await file.text();
-    const { headers, rows } = parseCSV(text);
-
-    if (!hasRequiredHeaders(headers)){
-      setNotice("err", "❌ Colonnes manquantes : il faut nom, prenom, temps (HH:MM:SS).");
-      return;
-    }
-
-    imported = rows.map((r, idx) => {
-      const nom = String(r.nom || "").trim();
-      const prenom = String(r.prenom || "").trim();
-      const tempsStr = String(r.temps || "").trim();
-      const timeSec = parseHMS(tempsStr);
-
-      const category = String(r.categorie || r.category || "").trim();
-      const club = String(r.club || "").trim();
-
-      if (!nom || !prenom){
-        return { nom, prenom, tempsStr, timeSec, category, club, ok:false, err:`Ligne ${idx+2}: nom/prénom manquant` };
-      }
-      if (timeSec === null){
-        return { nom, prenom, tempsStr, timeSec, category, club, ok:false, err:`Ligne ${idx+2}: temps invalide` };
-      }
-      return { nom, prenom, tempsStr, timeSec, category, club, ok:true, err:"" };
-    });
-
-    renderPreview();
+  ["colName","colEmail","colRank","colTime","colPoints"].forEach(id=>{
+    $(id).addEventListener("change", enableImportIfReady);
   });
 
-  function renderPreview(){
-    previewBody.innerHTML = "";
+  $("file").addEventListener("change", async (e)=>{
+    const f = e.target.files && e.target.files[0];
+    await parseFile(f);
+    enableImportIfReady();
+  });
 
-    const errors = imported.filter(x => !x.ok);
-    const okRows = imported.filter(x => x.ok).slice().sort((a,b) => a.timeSec - b.timeSec);
+  // Drag & drop
+  const drop = $("drop");
+  drop.addEventListener("dragover", (e)=>{ e.preventDefault(); drop.style.borderColor = "#93c5fd"; });
+  drop.addEventListener("dragleave", ()=>{ drop.style.borderColor = "#cbd5e1"; });
+  drop.addEventListener("drop", async (e)=>{
+    e.preventDefault();
+    drop.style.borderColor = "#cbd5e1";
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    await parseFile(f);
+    enableImportIfReady();
+  });
 
-    const okCount = okRows.length;
-    const errCount = errors.length;
-
-    summaryLine.textContent = `Lignes valides : ${okCount} • Erreurs : ${errCount}`;
-
-    if (errCount === 0 && okCount > 0){
-      setNotice("ok", `✅ Import OK (${okCount} lignes valides).`);
-    } else if (errCount > 0){
-      setNotice("err", `❌ ${errCount} erreur(s) détectée(s). Corrige avant validation.`);
-      console.warn("Erreurs import:", errors.map(e => e.err));
-    } else {
-      setNotice("warn", "⚠️ Aucun résultat valide.");
-    }
-
-    // Aperçu : 25 ok + 5 erreurs max
-    const toShow = okRows.slice(0, 25).concat(errors.slice(0, 5));
-
-    toShow.forEach((r, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${i+1}</td>
-        <td>${escapeHTML(r.nom)}</td>
-        <td>${escapeHTML(r.prenom)}</td>
-        <td>${escapeHTML(r.tempsStr)}</td>
-        <td>${escapeHTML(r.category || "—")}</td>
-        <td>${escapeHTML(r.club || "—")}</td>
-        <td class="${r.ok ? "statusOk" : "statusBad"}">
-          ${r.ok ? "✔ OK" : "❌ Erreur"}${r.ok ? "" : ` <span class="small">— ${escapeHTML(r.err)}</span>`}
-        </td>
-      `;
-      previewBody.appendChild(tr);
-    });
-
-    show(previewBlock, true);
-    validateBtn.disabled = errCount > 0 || okCount === 0;
-  }
-
-  /* --------------------------------------------------------------- */
-  /* Validation: calc points + insert Supabase                        */
-  /* --------------------------------------------------------------- */
-  async function insertResultsSupabase(rowsWithPoints){
-    const { data: u } = await supabase.auth.getUser();
-    const user = u?.user;
-    if (!user) throw new Error("Non connecté.");
-
-    // points de l'épreuve : score_global si dispo sinon 100
-    const eventScore = Number(selectedRace.scoreGlobal ?? selectedRace.score_global ?? 100) || 100;
-
-    const payload = rowsWithPoints.map(r => ({
-      race_id: selectedRace.id,
-      organizer_id: user.id,
-      last_name: r.nom,
-      first_name: r.prenom,
-      club: r.club || null,
-      category: r.category || null,
-      rank: r.place,
-      time_seconds: r.timeSec,
-      time_display: r.tempsStr || formatHMS(r.timeSec),
-      points: r.points
-    }));
-
-    const { error } = await supabase.from("results").insert(payload);
-    if (error) throw error;
-
-    return { inserted: payload.length, eventScore };
-  }
-
-  validateBtn.addEventListener("click", async () => {
-    if (!selectedRace) return;
-
-    const okRows = imported.filter(x => x.ok).slice().sort((a,b) => a.timeSec - b.timeSec);
-    const eventScore = Number(selectedRace.scoreGlobal ?? selectedRace.score_global ?? 100) || 100;
-
-    // enrich + points V1
-    const enriched = okRows.map((r, idx) => {
-      const place = idx + 1;
-      const coeff = coeffForPlace(place);
-      const points = coeff > 0 ? Math.round(eventScore * coeff) : 10; // TODO: finishers hors top10
-      return { ...r, place, coeff, points };
-    });
-
-    // si connecté -> insert supabase, sinon démo console
-    const { data: sess } = await supabase.auth.getSession();
-    const authed = !!sess?.session;
-
-    validateBtn.disabled = true;
-    setNotice("warn", "Validation en cours…");
-
+  $("btnImport").addEventListener("click", ()=>{
     try{
-      if (!authed){
-        console.table(enriched.map(x => ({
-          place: x.place,
-          nom: x.nom,
-          prenom: x.prenom,
-          temps: x.tempsStr,
-          points: x.points
-        })));
-        setNotice("ok", "✅ Validé (mode local / démo). Ouvre la console (F12) pour voir les points.");
-        return;
-      }
-
-      const res = await insertResultsSupabase(enriched);
-      setNotice("ok", `✅ ${res.inserted} résultat(s) inséré(s) dans Supabase pour “${selectedRace.name}”.`);
-    } catch(e){
-      console.error(e);
-      setNotice("err", `❌ Erreur : ${e?.message || e}`);
-    } finally{
-      validateBtn.disabled = false;
+      importNow();
+    }catch(e){
+      showMsg(`Erreur import: ${e?.message || e}`, "err");
     }
   });
 
-  /* --------------------------------------------------------------- */
-  /* Boot                                                            */
-  /* --------------------------------------------------------------- */
-  refreshBtn.addEventListener("click", loadRaces);
+  $("btnReset").addEventListener("click", ()=>{
+    resetFileState();
+  });
 
-  await renderAuthState();
-  await loadRaces();
+  $("btnClear").addEventListener("click", ()=>{
+    const ok = confirm("Confirmer : supprimer TOUS les résultats (mtb.results.v1) ?");
+    if (!ok) return;
+    localStorage.removeItem("mtb.results.v1");
+    refreshCountPill();
+    showMsg("Résultats supprimés ✅", "ok");
+  });
+
+  $("btnExport").addEventListener("click", ()=>{
+    const all = listResultsSafe();
+    downloadJson("mtb-results-export.json", {
+      exportedAt: nowISO(),
+      count: all.length,
+      results: all
+    });
+    showMsg("Export téléchargé ✅", "ok");
+  });
+
+  // init links hidden
+  setRaceLinks("");
+
+})();
 </script>
-
 </body>
 </html>
