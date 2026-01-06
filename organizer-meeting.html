@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Organisateur — Événement | MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:22px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{ text-decoration:none;padding:8px 10px;border-radius:10px;color:var(--blue);font-weight:900;font-size:13px; }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .kpi{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
+    }
+    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+    .hero{
+      border-radius:22px;padding:18px;border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
+        #fff;
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .hero .muted{margin-top:6px;line-height:1.55;color:#334155}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
+    input,select,textarea{
+      width:100%;padding:10px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:14px
+    }
+    textarea{min-height:80px;resize:vertical}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);text-decoration:none;white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+    .btn.ok:hover{background:#15803d;border-color:#15803d}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+    .list{
+      display:grid;grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:12px;margin-top:14px;
+    }
+    @media(max-width:900px){.list{grid-template-columns:1fr}}
+    .item{
+      border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .topline{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .title{font-weight:1000;font-size:16px;letter-spacing:-.1px}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid var(--border);
+      font-weight:1000;font-size:12px;color:#0f172a;white-space:nowrap;
+    }
+    .meta{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5}
+    .msg{
+      margin-top:12px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);
+      background:#fff;font-weight:900;display:none;line-height:1.45;
+    }
+    .msg.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .msg.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+    .msg.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Événement</h1>
+    <span class="kpi" id="whoami">Chargement…</span>
+  </div>
+
+  <nav>
+    <a href="organizer-dashboard.html" class="active">Espace orga</a>
+    <a href="events.html">Épreuves publiques</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="login.html">Connexion</a>
+  </nav>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <a class="btn" href="organizer-dashboard.html">← Mes événements</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:260px;flex:1">
+          <h2 id="meetingName">Chargement…</h2>
+          <div class="muted" id="meetingMeta">—</div>
+        </div>
+      </div>
+
+      <div id="msg" class="msg"></div>
+
+      <div class="grid2" style="margin-top:14px;">
+        <div>
+          <label>Nom épreuve</label>
+          <input id="raceName" placeholder="Ex : XC Elite / Marathon 60 km" />
+        </div>
+        <div>
+          <label>Date épreuve</label>
+          <input id="raceDate" type="date" />
+        </div>
+
+        <div>
+          <label>Discipline</label>
+          <select id="raceDisc">
+            <option value="">—</option>
+            <option>XC</option><option>Enduro</option><option>DH</option><option>Gravel</option><option>Marathon</option><option>Ultra</option>
+          </select>
+        </div>
+        <div>
+          <label>Niveau</label>
+          <select id="raceLevel">
+            <option value="">—</option>
+            <option>Local</option><option>Regional</option><option>National</option><option>International</option>
+          </select>
+        </div>
+
+        <div class="grid3" style="grid-column:1/-1">
+          <div>
+            <label>Distance (km)</label>
+            <input id="raceDist" type="number" step="0.01" placeholder="ex: 48.5" />
+          </div>
+          <div>
+            <label>D+ (m)</label>
+            <input id="raceDplus" type="number" step="1" placeholder="ex: 1600" />
+          </div>
+          <div>
+            <label>eBike</label>
+            <div style="margin-top:6px;display:flex;gap:10px;align-items:center">
+              <input id="raceEbike" type="checkbox" style="width:auto;margin:0;transform:scale(1.1)" />
+              <span class="muted" style="font-size:13px">Catégorie VTTAE</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column:1/-1">
+          <label>Publié</label>
+          <div style="margin-top:6px;display:flex;gap:10px;align-items:center">
+            <input id="racePublished" type="checkbox" style="width:auto;margin:0;transform:scale(1.1)" />
+            <span class="muted" style="font-size:13px">Visible dans <code>events.html</code> si publié</span>
+          </div>
+        </div>
+
+        <div style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn ok" id="createRaceBtn" type="button">+ Ajouter l’épreuve</button>
+          <button class="btn" id="reloadBtn" type="button">↻ Recharger</button>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-top:14px;">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div class="kpi">Épreuves : <span id="count">0</span></div>
+      </div>
+
+      <div id="racesList" class="list"></div>
+      <div id="empty" class="msg warn" style="display:none">Aucune épreuve pour cet événement.</div>
+    </section>
+
+  </div>
+</main>
+
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
+
+  const $ = (id) => document.getElementById(id);
+
+  const whoami = $("whoami");
+  const msg = $("msg");
+  const meetingName = $("meetingName");
+  const meetingMeta = $("meetingMeta");
+
+  const racesList = $("racesList");
+  const empty = $("empty");
+  const count = $("count");
+
+  const raceName = $("raceName");
+  const raceDate = $("raceDate");
+  const raceDisc = $("raceDisc");
+  const raceLevel = $("raceLevel");
+  const raceDist = $("raceDist");
+  const raceDplus = $("raceDplus");
+  const raceEbike = $("raceEbike");
+  const racePublished = $("racePublished");
+
+  const createRaceBtn = $("createRaceBtn");
+  const reloadBtn = $("reloadBtn");
+
+  const params = new URLSearchParams(location.search);
+  const meetingId = params.get("id");
+
+  function showMsg(text, kind="warn"){
+    msg.className = `msg ${kind}`;
+    msg.textContent = text || "";
+    msg.style.display = text ? "block" : "none";
+  }
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function slugId(name){
+    const base = String(name||"")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .trim()
+      .replace(/[^a-z0-9]+/g,"-")
+      .replace(/(^-|-$)/g,"")
+      .slice(0,60);
+    return `${base || "race"}-${Date.now()}`;
+  }
+
+  async function requireOrganizer(){
+    const { data: u, error: ue } = await supabase.auth.getUser();
+    if (ue) throw ue;
+    const user = u?.user;
+    if (!user) {
+      whoami.textContent = "Non connecté";
+      throw new Error("Tu dois être connecté.");
+    }
+
+    const { data: p, error: pe } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    if (pe) throw pe;
+
+    const role = p?.role || "rider";
+    whoami.textContent = `${user.email} (${role})`;
+
+    if (!(role === "organizer" || role === "admin")) {
+      throw new Error("Accès réservé aux organisateurs.");
+    }
+    return user;
+  }
+
+  let meeting = null;
+  let races = [];
+
+  async function loadMeetingAndRaces(){
+    if (!meetingId) throw new Error("ID événement manquant.");
+
+    const user = await requireOrganizer();
+    showMsg("Chargement…", "warn");
+
+    // Meeting (sécurisé par RLS: select published or own)
+    const { data: m, error: me } = await supabase
+      .from("meetings")
+      .select("id,organizer_id,name,date,location,comment,is_published,race_ids")
+      .eq("id", meetingId)
+      .maybeSingle();
+
+    if (me) throw me;
+    if (!m) throw new Error("Événement introuvable.");
+    if (m.organizer_id !== user.id) {
+      // admin pourrait voir mais simple : si admin, on laisse; sinon refuse
+      const { data: p } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+      if (p?.role !== "admin") throw new Error("Cet événement ne t’appartient pas.");
+    }
+
+    meeting = m;
+    meetingName.textContent = meeting.name;
+    meetingMeta.textContent = `📅 ${meeting.date || "—"} • 📍 ${meeting.location || "—"} • ${meeting.is_published ? "✅ Publié" : "🕒 Brouillon"}`;
+
+    // Races du meeting
+    const { data: rr, error: re } = await supabase
+      .from("races")
+      .select("id,name,date,disc,level,ebike,distance_km,dplus_m,is_published,score_global")
+      .eq("meeting_id", meetingId)
+      .order("date", { ascending: false });
+
+    if (re) throw re;
+
+    races = rr || [];
+    renderRaces();
+    showMsg("", "warn");
+  }
+
+  function renderRaces(){
+    count.textContent = String(races.length);
+
+    if (!races.length){
+      racesList.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    racesList.innerHTML = races.map(r => {
+      const pub = r.is_published ? "✅ Publiée" : "🕒 Brouillon";
+      return `
+        <div class="item">
+          <div class="topline">
+            <div class="title">${esc(r.name)}</div>
+            <span class="badge">${pub}</span>
+          </div>
+          <div class="meta">
+            📅 ${esc(r.date)} • 🏷️ ${esc(r.disc || "—")} • 🎚️ ${esc(r.level || "—")}
+            • ${r.distance_km ?? "—"} km • D+ ${r.dplus_m ?? "—"} m
+            • Score ${r.score_global ?? "—"}
+          </div>
+          <div class="row" style="margin-top:10px;justify-content:flex-end">
+            <a class="btn primary" href="event.html?id=${encodeURIComponent(r.id)}">Voir fiche</a>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  async function updateMeetingRaceIdsAppend(raceId){
+    // on lit meeting.race_ids et on ajoute si absent
+    const current = Array.isArray(meeting.race_ids) ? meeting.race_ids.slice() : [];
+    if (!current.includes(raceId)) current.push(raceId);
+
+    const { error } = await supabase
+      .from("meetings")
+      .update({ race_ids: current })
+      .eq("id", meeting.id);
+
+    if (error) throw error;
+    meeting.race_ids = current;
+  }
+
+  createRaceBtn.addEventListener("click", async () => {
+    try{
+      const user = await requireOrganizer();
+      if (!meeting) throw new Error("Meeting non chargé.");
+
+      const name = raceName.value.trim();
+      const date = raceDate.value;
+      if (!name) throw new Error("Nom épreuve obligatoire.");
+      if (!date) throw new Error("Date épreuve obligatoire.");
+
+      const id = slugId(name);
+
+      showMsg("Création de l’épreuve…", "warn");
+
+      const payload = {
+        id,
+        organizer_id: user.id,
+        meeting_id: meeting.id,
+        name,
+        date,
+        disc: raceDisc.value || null,
+        level: raceLevel.value || null,
+        ebike: !!raceEbike.checked,
+        distance_km: raceDist.value ? Number(raceDist.value) : null,
+        dplus_m: raceDplus.value ? Number(raceDplus.value) : null,
+        is_published: !!racePublished.checked
+      };
+
+      const { error } = await supabase.from("races").insert(payload);
+      if (error) throw error;
+
+      // maintenir meeting.race_ids aligné storage.js
+      await updateMeetingRaceIdsAppend(id);
+
+      showMsg("Épreuve ajoutée ✅", "ok");
+
+      // reset champs
+      raceName.value = "";
+      raceDate.value = "";
+      raceDisc.value = "";
+      raceLevel.value = "";
+      raceDist.value = "";
+      raceDplus.value = "";
+      raceEbike.checked = false;
+      racePublished.checked = false;
+
+      await loadMeetingAndRaces();
+    } catch(e){
+      showMsg(`Erreur: ${e?.message || e}`, "err");
+    }
+  });
+
+  reloadBtn.addEventListener("click", () => loadMeetingAndRaces().catch(e => showMsg(`Erreur: ${e?.message || e}`, "err")));
+
+  // Boot
+  loadMeetingAndRaces().catch(e => showMsg(`Erreur: ${e?.message || e}`, "err"));
+</script>
+
+</body>
+</html>
