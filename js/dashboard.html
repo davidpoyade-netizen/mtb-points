@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Admin — MTB Points</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <style>
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:22px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+    .muted{color:var(--muted)}
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;padding:8px 10px;border-radius:10px;
+      color:var(--blue);font-weight:900;font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
+
+    .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+
+    .hero{
+      border-radius:22px;padding:18px;border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.10), transparent 60%),
+        #fff;
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .hero p{margin:6px 0 0 0;line-height:1.55;color:#334155}
+
+    .grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
+    @media(max-width:980px){.grid2{grid-template-columns:1fr}}
+
+    .kpiGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+    @media(max-width:1100px){.kpiGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:560px){.kpiGrid{grid-template-columns:1fr}}
+    .kpi{
+      border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .kpi .label{color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+    .kpi .value{margin-top:6px;font-size:26px;font-weight:1000;letter-spacing:-.4px}
+    .kpi .sub{margin-top:4px;color:var(--muted);font-size:12px}
+
+    .panel{border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff}
+    .panel h3{margin:0 0 8px 0;font-size:15px;letter-spacing:-.1px}
+    .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ghost{background:#f8fafc}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+
+    .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+    @media(max-width:900px){.list{grid-template-columns:1fr}}
+    .item{
+      display:block;border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;
+      text-decoration:none;box-shadow:0 2px 10px rgba(0,0,0,.04);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .item:hover{transform:translateY(-2px);box-shadow:0 16px 28px rgba(2,6,23,.10);border-color:#dbeafe}
+    .title{font-weight:1000;font-size:16px;letter-spacing:-.2px}
+    .meta{margin-top:6px;color:var(--muted);font-size:13px;line-height:1.5}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid var(--border);font-weight:900;font-size:12px}
+    .empty{margin-top:10px;border:1px dashed var(--border);border-radius:18px;padding:14px;color:var(--muted);background:#fff}
+    .msg{margin-top:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:#fff;font-weight:900;display:none;line-height:1.45}
+    .msg.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .msg.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+    .msg.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+    a:focus, button:focus{outline:3px solid rgba(37,99,235,.25);outline-offset:2px}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  </style>
+</head>
+
+<body>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Dashboard Admin</h1>
+    <span class="pill"><span class="dot ok"></span><span id="authPill">—</span></span>
+  </div>
+
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="meetings.html">Événements</a>
+    <a href="events.html">Épreuves</a>
+    <a href="import-results.html">Import résultats</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
+  </nav>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
+    <button class="btn ghost" id="btnSignOut" type="button">Déconnexion</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2>Administration</h2>
+          <p class="muted">
+            Gestion rapide : événements, épreuves, imports, et contrôle des données locales.
+          </p>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="pill"><span class="dot"></span><span id="dbMode">Local/Storage</span></span>
+          <span class="pill"><span class="dot"></span><span id="countsPill">—</span></span>
+        </div>
+      </div>
+
+      <div id="msg" class="msg"></div>
+    </section>
+
+    <div class="kpiGrid">
+      <div class="kpi">
+        <div class="label">Événements</div>
+        <div class="value" id="kMeetings">—</div>
+        <div class="sub">Total en mémoire</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Épreuves</div>
+        <div class="value" id="kRaces">—</div>
+        <div class="sub">Total rattachées</div>
+      </div>
+      <div class="kpi">
+        <div class="label">GPX présents</div>
+        <div class="value" id="kGpx">—</div>
+        <div class="sub">Épreuves avec points GPX</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Participants</div>
+        <div class="value" id="kParticipants">—</div>
+        <div class="sub">Somme participants</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <section class="panel">
+        <div class="row">
+          <h3>Actions rapides</h3>
+          <span class="badge">Admin</span>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+          <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
+          <a class="btn" href="meetings.html">Voir les événements</a>
+          <a class="btn" href="events.html">Voir les épreuves</a>
+          <a class="btn" href="import-results.html">Importer résultats</a>
+        </div>
+
+        <div class="empty" style="margin-top:12px;">
+          <b>Bon réflexe :</b> crée les épreuves depuis la fiche événement pour garantir le rattachement.<br/>
+          (ex: <code>course-create.html?meetingId=...</code>)
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="row">
+          <h3>Outils (local)</h3>
+          <span class="badge">Storage</span>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+          <button class="btn" id="btnExport" type="button">Exporter JSON</button>
+          <button class="btn ghost" id="btnClear" type="button">Vider la base locale</button>
+        </div>
+
+        <div class="muted" style="margin-top:10px;font-size:12px;line-height:1.5;">
+          Export utile pour sauvegarder tes données avant changement de structure.
+        </div>
+      </section>
+    </div>
+
+    <h3 style="margin:18px 0 10px 0;font-size:16px;letter-spacing:-.15px">Événements récents</h3>
+    <div id="recentMeetings" class="list"></div>
+    <div id="emptyMeetings" class="empty" style="display:none;">Aucun événement trouvé.</div>
+
+    <h3 style="margin:18px 0 10px 0;font-size:16px;letter-spacing:-.15px">Épreuves récentes</h3>
+    <div id="recentRaces" class="list"></div>
+    <div id="emptyRaces" class="empty" style="display:none;">Aucune épreuve trouvée.</div>
+
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
+
+  const $ = (id)=>document.getElementById(id);
+  const msgEl = $("msg");
+
+  function showMsg(text, kind="warn"){
+    if (!msgEl) return;
+    msgEl.className = `msg ${kind}`;
+    msgEl.textContent = text || "";
+    msgEl.style.display = text ? "block" : "none";
+  }
+
+  function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  async function getRole(userId){
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+    if (error) return null;
+    return data?.role || null;
+  }
+
+  async function guardAdmin(){
+    const { data } = await supabase.auth.getSession();
+    const session = data?.session;
+    if (!session?.user) {
+      location.href = "login.html";
+      return null;
+    }
+    const role = await getRole(session.user.id);
+    if (role !== "admin") {
+      await supabase.auth.signOut();
+      location.href = "login.html";
+      return null;
+    }
+    $("authPill").textContent = session.user.email + " (admin)";
+    return session;
+  }
+
+  // ---- Storage adapters
+  function listMeetingsSafe(){
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    if (typeof window.getMeetings === "function") return window.getMeetings();
+    try {
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    try {
+      const raw = localStorage.getItem("mtb.races.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+
+  function meetingRange(m){
+    const s = m.date || "—";
+    const e = m.endDate || "";
+    return e ? `${s} → ${e}` : s;
+  }
+
+  function renderLists(meetings, races){
+    // recent meetings
+    const mRoot = $("recentMeetings");
+    const mEmpty = $("emptyMeetings");
+    mRoot.innerHTML = "";
+    const ms = meetings.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))).slice(0, 8);
+
+    if (!ms.length) mEmpty.style.display = "block";
+    else mEmpty.style.display = "none";
+
+    for (const m of ms){
+      const el = document.createElement("a");
+      el.className = "item";
+      el.href = `meeting.html?id=${encodeURIComponent(m.id)}`;
+      el.innerHTML = `
+        <div class="title">${esc(m.name || "Événement")}</div>
+        <div class="meta">📅 ${esc(meetingRange(m))}${m.location ? " • 📍 " + esc(m.location) : ""}</div>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+          <span class="badge">Voir</span>
+          <span class="badge">+ épreuve</span>
+        </div>
+      `;
+      el.addEventListener("click", (e)=>{ /* normal */ });
+      mRoot.appendChild(el);
+    }
+
+    // recent races
+    const rRoot = $("recentRaces");
+    const rEmpty = $("emptyRaces");
+    rRoot.innerHTML = "";
+    const rs = races.slice().sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))).slice(0, 8);
+
+    if (!rs.length) rEmpty.style.display = "block";
+    else rEmpty.style.display = "none";
+
+    for (const r of rs){
+      const el = document.createElement("a");
+      el.className = "item";
+      el.href = `event.html?id=${encodeURIComponent(r.id)}`;
+      const g = (num(r.globalScore) ?? num(r.mrs));
+      el.innerHTML = `
+        <div class="title">${esc(r.name || "Épreuve")}</div>
+        <div class="meta">📅 ${esc(r.date || "—")} • ${esc(r.disc || "—")} • Global: <b>${g == null ? "—" : Math.round(g)}</b></div>
+        <div class="meta">${r.meetingId ? "🏁 meetingId: " + esc(r.meetingId) : "<span style='color:#dc2626;font-weight:900'>⚠️ orpheline</span>"}</div>
+      `;
+      rRoot.appendChild(el);
+    }
+  }
+
+  function renderKPIs(meetings, races){
+    const totalMeetings = meetings.length;
+    const totalRaces = races.filter(r => r && (r.meetingId || r.eventGroupId)).length;
+
+    const gpxCount = races.filter(r => Array.isArray(r.gpxPoints) && r.gpxPoints.length > 10).length;
+    const participants = races.map(r=>num(r.participants)).filter(v=>v!=null).reduce((s,x)=>s+x,0);
+
+    $("kMeetings").textContent = String(totalMeetings);
+    $("kRaces").textContent = String(totalRaces);
+    $("kGpx").textContent = String(gpxCount);
+    $("kParticipants").textContent = String(Math.round(participants));
+
+    $("countsPill").textContent = `${totalMeetings} meetings • ${totalRaces} races`;
+    $("dbMode").textContent = "LocalStorage / storage.js";
+  }
+
+  function downloadJson(filename, obj){
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type:"application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 0);
+  }
+
+  // ---- main
+  const session = await guardAdmin();
+  if (!session) return;
+
+  const meetings = listMeetingsSafe();
+  const races = listRacesSafe();
+
+  renderKPIs(meetings, races);
+  renderLists(meetings, races);
+
+  $("btnSignOut").addEventListener("click", async ()=>{
+    try {
+      showMsg("Déconnexion…", "warn");
+      await supabase.auth.signOut();
+      location.href = "login.html";
+    } catch(e){
+      showMsg(`Erreur: ${e?.message || e}`, "err");
+    }
+  });
+
+  $("btnExport").addEventListener("click", ()=>{
+    downloadJson("mtb-points-export.json", {
+      exportedAt: new Date().toISOString(),
+      meetings,
+      races
+    });
+    showMsg("Export JSON téléchargé ✅", "ok");
+  });
+
+  $("btnClear").addEventListener("click", ()=>{
+    const ok = confirm("Confirmer : vider toutes les données locales (meetings/races) ?");
+    if (!ok) return;
+    localStorage.removeItem("mtb.meetings.v1");
+    localStorage.removeItem("mtb.races.v1");
+    showMsg("Base locale vidée ✅ (reload la page).", "ok");
+    // refresh KPIs
+    renderKPIs([], []);
+    renderLists([], []);
+  });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Epreuves – MTB Points - Epreuves</title>
+    <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0;color:#0f172a}
+    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
+
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .blockTitle{font-weight:900;margin:0 0 10px 0}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .item{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
+    .label{color:#667085;font-size:12px;margin-bottom:6px}
+    .value{font-weight:900;font-size:18px;color:#0f172a}
+    .muted{color:#667085;font-size:12px;margin-top:6px}
+
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid #e5e7eb;background:#f8fafc;color:#0f172a}
+    .pillDot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
+
+    .barWrap{margin-top:8px;background:#f1f5f9;border-radius:999px;overflow:hidden;border:1px solid #e5e7eb;height:16px}
+    .barSeg{height:16px;display:block;float:left}
+    .segRoad{background:#64748b}
+    .segTrack{background:#22c55e}
+    .segSingle{background:#ef4444}
+
+    #map{height:380px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
+    #profileWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
+    #profileCanvas{width:100%;display:block}
+
+    .legendRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 10px 0}
+    .legendItem{display:inline-flex;align-items:center;gap:6px}
+    .legendSwatch{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+    .linkBtn{display:inline-block;padding:10px 14px;border-radius:10px;background:#2563eb;color:#fff;text-decoration:none;font-weight:900}
+    .linkBtn.secondary{background:#f1f5f9;color:#0f172a;border:1px solid #e5e7eb}
+
+    @media(max-width:900px){
+      .grid,.grid3,.twoCol{grid-template-columns:1fr}
+      #map{height:320px}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <nav>
+<a href="index.html">Acceuil</a>
+<a href="public-ranking.html">Classement</a>
+<a href="meetings.html">Événements</a>
+<a href="reglement.html">Règlement</a>
+<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
+<a href="about.html">À propos</a>
+<a href="login.html">Connexion</a>
+  </nav>
+  <div class="muted">Fiche épreuve</div>
+</header>
+<div id="eventsList">Chargement...</div>
+
+<script type="module">
+  import { fetchPublishedRaces } from "./js/racesPublic.js";
+
+  const wrap = document.getElementById("eventsList");
+
+  try{
+    const races = await fetchPublishedRaces(50);
+    if(!races.length){
+      wrap.textContent = "Aucune épreuve publiée.";
+    } else {
+      wrap.innerHTML = races.map(r => `
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:8px 0;">
+          <div style="font-weight:900;">${r.name}</div>
+          <div style="color:#667085;font-size:13px;">
+            ${r.date || ""} • ${r.discipline || ""} • ${r.level || ""} • ${r.distance_km ?? "—"} km • D+ ${r.dplus_m ?? "—"} m • Score ${r.score_global ?? "—"}
+          </div>
+        </div>
+      `).join("");
+    }
+  } catch(e){
+    wrap.textContent = "Erreur: " + e.message;
+  }
+</script>
+
+
+
+
+
