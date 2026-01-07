@@ -84,3 +84,483 @@
     .kpi .big{font-size:18px;font-weight:900}
     .kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}
     @media(max-width:700px){ .kpis{grid-template-columns:1fr} }
+
+    /* Feature cards */
+    .miniCard{border:1px solid var(--border);border-radius:16px;padding:14px;background:#fff}
+    .miniCard h3{margin:0 0 6px 0;font-size:16px}
+    .miniCard p{margin:0;color:#334155;line-height:1.55}
+    .miniCard .muted{margin-top:6px}
+
+    /* List */
+    ul.clean{margin:10px 0 0 18px;color:#334155;line-height:1.6}
+    .note{margin-top:12px;border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:14px;padding:12px}
+
+    /* Footer */
+    footer{margin-top:18px;color:var(--muted);font-size:12px}
+
+    /* ============================= */
+    /* NEW: Aperçus horizontaux      */
+    /* ============================= */
+    .previewRow{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    .preview{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      padding:14px;
+      box-shadow:0 2px 10px rgba(0,0,0,.05);
+      cursor:pointer;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .preview:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 26px rgba(2,6,23,.08);
+      border-color:#dbeafe;
+    }
+    .previewTop{
+      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;
+    }
+    .previewTop h3{margin:0;font-size:16px;letter-spacing:-.2px}
+    .previewTop .sub{margin-top:4px;color:#64748b;font-size:12px}
+    .previewBadge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-size:12px;font-weight:900;color:#0f172a;
+      white-space:nowrap;
+    }
+    .previewBody{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media(max-width:900px){ .previewBody{grid-template-columns:1fr} }
+
+    .miniTable{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      background:#fff;
+    }
+    .miniTable .title{
+      font-weight:900;font-size:13px;margin:0 0 8px 0;color:#0f172a;
+      display:flex;align-items:center;gap:8px;
+    }
+    .miniList{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+    .miniItem{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      border:1px solid #eef2f7;border-radius:12px;padding:10px;
+      background:#fff;
+    }
+    .miniItem .left{display:flex;gap:10px;align-items:center;min-width:0}
+    .medal{font-size:16px}
+    .name{
+      font-weight:900;font-size:13px;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      max-width:260px;
+    }
+    .rightScore{font-weight:900;font-size:13px;color:#0f172a;white-space:nowrap}
+    .mutedSmall{color:#64748b;font-size:12px}
+    .eventsGrid{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+    }
+    @media(max-width:900px){ .eventsGrid{grid-template-columns:1fr 1fr} }
+    @media(max-width:520px){ .eventsGrid{grid-template-columns:1fr} }
+    .eventCard{
+      border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff;
+    }
+    .eventCard .t{font-weight:900;font-size:13px;margin:0}
+    .eventCard .m{margin-top:6px;color:#64748b;font-size:12px;line-height:1.4}
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points</h1>
+    <span class="chip">Classement VTT multi-courses</span>
+  </div>
+
+  <nav>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="methodologie.html">Méthodologie</a>
+    <a href="about.html">À propos</a>
+    <a href="contact.html">Contact</a>
+    <a href="login.html">Connexion</a>
+  </nav>
+
+  <div class="lang">
+    <button class="btn" id="btnFR">FR</button>
+    <button class="btn" id="btnEN">EN</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <h2>Un classement VTT comparable entre courses</h2>
+    <p>
+      <strong>MTB Points</strong> transforme chaque épreuve en un score objectif (physique + technique)
+      à partir de la trace <strong>GPX</strong> et de la cartographie <strong>OSM</strong>, puis attribue des points aux coureurs
+      pour construire un classement public sur <strong>24 mois glissants</strong>.
+    </p>
+
+    <div class="chips">
+      <span class="chip">GPX → Distance & D+</span>
+      <span class="chip">ScoreTech V2 Hybrid (OSM + bonus capé)</span>
+      <span class="chip">Badges Challenge</span>
+    </div>
+
+    <div class="heroActions">
+      <a class="btn2 primary" href="login.html">Je suis organisateur</a>
+      <a class="btn2" href="public-ranking.html">Voir le classement</a>
+      <a class="btn2" href="challengemtbpoints.html">Voir le challenge</a>
+      <a class="btn2" href="contact.html">Nous contacter</a>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="big">24 mois</div>
+        <div class="sub">fenêtre glissante</div>
+      </div>
+      <div class="kpi">
+        <div class="big">Physique + Technique</div>
+        <div class="sub">score d’épreuve (MRS)</div>
+      </div>
+      <div class="kpi">
+        <div class="big">XC • Enduro • DH</div>
+        <div class="sub">disciplines & catégories</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEW: APERÇUS -->
+  <section class="previewRow" aria-label="Aperçus">
+    <!-- 1) Classement -->
+    <div class="preview" id="previewRanking" role="link" tabindex="0" title="Ouvrir le classement">
+      <div class="previewTop">
+        <div>
+          <h3>Classement mondial — Global</h3>
+          <div class="sub">Top 3 Hommes / Femmes (aperçu)</div>
+        </div>
+        <span class="previewBadge">→ Voir le classement</span>
+      </div>
+
+      <div class="previewBody">
+        <div class="miniTable">
+          <div class="title">🏅 Hommes</div>
+          <ul class="miniList" id="rankMen">
+            <li class="miniItem"><div class="left"><span class="medal">…</span><span class="name">Chargement…</span></div><span class="rightScore">—</span></li>
+          </ul>
+        </div>
+
+        <div class="miniTable">
+          <div class="title">🏅 Femmes</div>
+          <ul class="miniList" id="rankWomen">
+            <li class="miniItem"><div class="left"><span class="medal">…</span><span class="name">Chargement…</span></div><span class="rightScore">—</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mutedSmall" id="rankHint" style="margin-top:10px">Source: Supabase</div>
+    </div>
+
+    <!-- 2) Challenge -->
+    <div class="preview" id="previewChallenge" role="link" tabindex="0" title="Ouvrir le challenge">
+      <div class="previewTop">
+        <div>
+          <h3>Challenge MTB Points</h3>
+          <div class="sub">Top 3 (aperçu)</div>
+        </div>
+        <span class="previewBadge">→ Voir le challenge</span>
+      </div>
+
+      <div class="previewBody" style="grid-template-columns:1fr;">
+        <div class="miniTable">
+          <div class="title">🔥 Leaders</div>
+          <ul class="miniList" id="challengeTop">
+            <li class="miniItem"><div class="left"><span class="medal">…</span><span class="name">Chargement…</span></div><span class="rightScore">—</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mutedSmall" id="challengeHint" style="margin-top:10px">Source: Supabase</div>
+    </div>
+
+    <!-- 3) Événements à venir -->
+    <div class="preview" id="previewMeetings" role="link" tabindex="0" title="Voir les événements">
+      <div class="previewTop">
+        <div>
+          <h3>Événements à venir</h3>
+          <div class="sub">Les 4 prochains meetings publiés</div>
+        </div>
+        <span class="previewBadge">→ Voir tous les événements</span>
+      </div>
+
+      <div class="eventsGrid" id="upcomingMeetings">
+        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
+        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
+        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
+        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
+      </div>
+
+      <div class="mutedSmall" id="meetingsHint" style="margin-top:10px">Source: Supabase</div>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <div class="grid">
+
+    <!-- LEFT -->
+    <div class="card">
+      <h3 style="margin:0;">Qu’est-ce que les points MTB ?</h3>
+      <p class="muted" style="margin:8px 0 0 0;line-height:1.6;color:#334155">
+        Les <strong>points MTB</strong> sont un système de classement pour les épreuves de VTT.
+        L’objectif : comparer des performances sur des courses très différentes, avec un calcul basé sur des critères objectifs :
+        <strong>distance</strong>, <strong>dénivelé</strong>, <strong>profil</strong> et <strong>terrain</strong>.
+      </p>
+
+      <h4 style="margin:14px 0 6px 0;">Pour les cyclistes</h4>
+      <p style="margin:0;color:#334155;line-height:1.6;">
+        Cumule des points selon tes résultats. Le classement utilise une <strong>fenêtre glissante de 24 mois</strong> et propose
+        des filtres par <strong>âge</strong>, <strong>sexe</strong> et <strong>discipline</strong>.
+      </p>
+      <ul class="clean">
+        <li>Comparer ton niveau sur des courses différentes</li>
+        <li>Suivre ta progression</li>
+        <li>Débloquer des badges du <strong>Challenge MTB Points</strong></li>
+      </ul>
+
+      <h4 style="margin:14px 0 6px 0;">Pour les organisateurs</h4>
+      <p style="margin:0;color:#334155;line-height:1.6;">
+        Analyse ton parcours via la trace <strong>GPX</strong> : distance, D+, profil, et ScoreTech V2 (OSM).
+        Publie ensuite tes résultats et génère une fiche épreuve.
+      </p>
+
+      <div class="note">
+        ✅ Nouveau : une page dédiée au <strong>Challenge</strong> avec badges (500 / 750 / 1000 / 2000).
+      </div>
+
+      <footer>
+        Astuce : commence par créer une épreuve et importer un fichier GPX. Le ScoreTech V2 est calculé côté serveur (OSM + cache).
+        • <a href="contact.html" style="color:#2563eb;font-weight:900;text-decoration:none;">Contact</a>
+      </footer>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="card">
+      <div class="miniCard">
+        <h3>Espace Organisateur</h3>
+        <p>Créer une épreuve, analyser le GPX, importer les résultats, publier le classement.</p>
+        <div style="margin-top:10px">
+          <a class="btn2 primary" href="login.html">Accéder</a>
+        </div>
+        <div class="muted" style="margin-top:8px;font-size:12px;">Connexion requise</div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="miniCard">
+        <h3>Espace Cycliste</h3>
+        <p>Consulter les épreuves, le classement public, et suivre les badges du challenge.</p>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn2" href="public-ranking.html">Classement</a>
+          <a class="btn2" href="challengemtbpoints.html">Challenge</a>
+        </div>
+        <div class="muted" style="margin-top:8px;font-size:12px;">Accès public</div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="miniCard">
+        <h3>Raccourcis</h3>
+        <p class="muted" style="margin:0 0 10px 0;">Pages clés du projet</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <a class="btn2" href="meetings.html">Événements</a>
+          <a class="btn2" href="reglement.html">Règlement</a>
+          <a class="btn2" href="methodologie.html">Méthodologie</a>
+          <a class="btn2" href="about.html">À propos</a>
+          <a class="btn2" href="contact.html">Contact</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NEW: Chargement des aperçus depuis Supabase -->
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
+
+  const $ = (id) => document.getElementById(id);
+
+  const medals = ["🥇","🥈","🥉"];
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  function bindOpen(el, href){
+    if (!el) return;
+    el.addEventListener("click", () => location.href = href);
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); location.href = href; }
+    });
+  }
+
+  bindOpen($("previewRanking"), "public-ranking.html");
+  bindOpen($("previewChallenge"), "challengemtbpoints.html");
+  bindOpen($("previewMeetings"), "meetings.html");
+
+  function renderTopList(ul, rows, scoreKey="score"){
+    if (!ul) return;
+    if (!rows || !rows.length){
+      ul.innerHTML = `<li class="miniItem"><div class="left"><span class="medal">—</span><span class="name">Aucune donnée</span></div><span class="rightScore">—</span></li>`;
+      return;
+    }
+    ul.innerHTML = rows.slice(0,3).map((r,i) => `
+      <li class="miniItem">
+        <div class="left">
+          <span class="medal">${medals[i] || "•"}</span>
+          <span class="name">${esc(r.name || "—")}</span>
+        </div>
+        <span class="rightScore">${Number.isFinite(Number(r[scoreKey])) ? Number(r[scoreKey]) : "—"}</span>
+      </li>
+    `).join("");
+  }
+
+  async function loadRankingPreview(){
+    const menUl = $("rankMen");
+    const womenUl = $("rankWomen");
+    const hint = $("rankHint");
+
+    try{
+      const { data, error } = await supabase
+        .from("v_public_ranking")
+        .select("*")
+        .order("score", { ascending: false })
+        .limit(300);
+
+      if (error) throw error;
+
+      const rows = (data || []).map(r => ({
+        name: r.name ?? `${r.last_name || ""} ${r.first_name || ""}`.trim(),
+        sex: r.sex ?? null,
+        score: Number(r.score ?? 0)
+      }));
+
+      const men = rows.filter(r => r.sex === "M").slice(0,3);
+      const women = rows.filter(r => r.sex === "F").slice(0,3);
+
+      renderTopList(menUl, men, "score");
+      renderTopList(womenUl, women, "score");
+
+      if (hint) hint.textContent = "Source: Supabase (v_public_ranking)";
+    } catch(e){
+      console.warn("[index] ranking preview failed", e);
+      renderTopList(menUl, [], "score");
+      renderTopList(womenUl, [], "score");
+      if (hint) hint.textContent = "⚠️ Classement indisponible (vue absente / RLS / config).";
+    }
+  }
+
+  async function loadChallengePreview(){
+    const ul = $("challengeTop");
+    const hint = $("challengeHint");
+
+    // On tente une vue dédiée si tu l’ajoutes (idéal)
+    // Colonnes attendues possibles : name, points/score, etc.
+    const tryViews = [
+      { view: "v_public_challenge_ranking", scoreKey: "score" },
+      { view: "v_public_challenge_ranking", scoreKey: "points" },
+      // fallback: on réutilise le score global si pas de vue challenge
+      { view: "v_public_ranking", scoreKey: "score" }
+    ];
+
+    for (const t of tryViews){
+      try{
+        const { data, error } = await supabase
+          .from(t.view)
+          .select("*")
+          .order(t.scoreKey, { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+
+        const rows = (data || []).map(r => ({
+          name: r.name ?? `${r.last_name || ""} ${r.first_name || ""}`.trim(),
+          [t.scoreKey]: Number(r[t.scoreKey] ?? 0)
+        }));
+
+        renderTopList(ul, rows, t.scoreKey);
+        if (hint) hint.textContent = `Source: Supabase (${t.view})`;
+        return;
+      } catch(e){
+        // continue
+      }
+    }
+
+    // Si tout échoue
+    renderTopList(ul, [], "score");
+    if (hint) hint.textContent = "⚠️ Challenge indisponible (vue absente / RLS / config).";
+  }
+
+  async function loadUpcomingMeetings(){
+    const box = $("upcomingMeetings");
+    const hint = $("meetingsHint");
+    if (!box) return;
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth()+1).padStart(2,"0");
+    const dd = String(today.getDate()).padStart(2,"0");
+    const iso = `${yyyy}-${mm}-${dd}`;
+
+    try{
+      const { data, error } = await supabase
+        .from("meetings")
+        .select("id,name,date,location,is_published")
+        .eq("is_published", true)
+        .gte("date", iso)
+        .order("date", { ascending: true })
+        .limit(4);
+
+      if (error) throw error;
+
+      const meetings = data || [];
+      if (!meetings.length){
+        box.innerHTML = `<div class="eventCard"><p class="t">Aucun événement à venir</p><div class="m">Publie un meeting pour l’afficher ici.</div></div>`;
+        if (hint) hint.textContent = "Source: Supabase (meetings)";
+        return;
+      }
+
+      box.innerHTML = meetings.map(m => `
+        <div class="eventCard">
+          <p class="t">${esc(m.name || "—")}</p>
+          <div class="m">📅 ${esc(m.date || "—")}<br/>📍 ${esc(m.location || "—")}</div>
+        </div>
+      `).join("");
+
+      if (hint) hint.textContent = "Source: Supabase (meetings)";
+    } catch(e){
+      console.warn("[index] meetings preview failed", e);
+      box.innerHTML = `<div class="eventCard"><p class="t">Événements indisponibles</p><div class="m">⚠️ Problème Supabase (RLS/config).</div></div>`;
+      if (hint) hint.textContent = "⚠️ Événements indisponibles (RLS/config).";
+    }
+  }
+
+  await loadRankingPreview();
+  await loadChallengePreview();
+  await loadUpcomingMeetings();
+</script>
+
+</body>
+</html>
+
