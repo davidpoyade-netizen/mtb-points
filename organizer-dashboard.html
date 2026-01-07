@@ -6,116 +6,47 @@
   <title>Organisateur — Événements | MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
-      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:22px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
-    a{color:inherit}
-    header.header{
-      position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    }
-    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
-    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    nav a{ text-decoration:none;padding:8px 10px;border-radius:10px;color:var(--blue);font-weight:900;font-size:13px; }
-    nav a:hover{background:#eff6ff}
-    nav a.active{background:#eff6ff;color:var(--blue2)}
-    .kpi{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
-    }
-    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
-    .hero{
-      border-radius:22px;padding:18px;border:1px solid var(--border);
-      background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
-        #fff;
-    }
-    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
-    .hero .muted{margin-top:6px;line-height:1.55;color:#334155}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
-    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
-    input,textarea{
-      width:100%;padding:10px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:14px
-    }
-    textarea{min-height:90px;resize:vertical}
-    input::placeholder,textarea::placeholder{color:#94a3b8}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);text-decoration:none;white-space:nowrap;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
-    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
-    .btn.ok:hover{background:#15803d;border-color:#15803d}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:900px){.grid2{grid-template-columns:1fr}}
-    .list{
-      display:grid;grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap:12px;margin-top:14px;
-    }
+    /* mini-ajouts (garde ton style.css comme base) */
+    .muted2{color:#64748b;font-size:12px}
+    .row2{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .pillBtn{display:inline-flex;gap:8px;align-items:center;white-space:nowrap}
+    .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
     @media(max-width:900px){.list{grid-template-columns:1fr}}
-    .item{
-      display:block;border:1px solid var(--border);border-radius:18px;padding:14px;background:#fff;text-decoration:none;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .item:hover{transform:translateY(-2px);box-shadow:0 16px 28px rgba(2,6,23,.10);border-color:#dbeafe}
+    .item{border:1px solid #e5e7eb;border-radius:16px;background:#fff;padding:14px;text-decoration:none;display:block}
+    .item:hover{border-color:#dbeafe;box-shadow:0 14px 26px rgba(2,6,23,.08);transform:translateY(-1px)}
     .topline{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
-    .title{font-weight:1000;font-size:16px;letter-spacing:-.1px}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid var(--border);
-      font-weight:1000;font-size:12px;color:#0f172a;white-space:nowrap;
-    }
-    .meta{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5}
-    .msg{
-      margin-top:12px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);
-      background:#fff;font-weight:900;display:none;line-height:1.45;
-    }
+    .title{font-weight:900;font-size:16px}
+    .meta{margin-top:8px;color:#64748b;font-size:13px;line-height:1.4}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e5e7eb;font-weight:900;font-size:12px}
+    .msg{margin-top:12px;padding:10px 12px;border-radius:14px;border:1px solid #e5e7eb;background:#fff;font-weight:900;display:none;line-height:1.45}
     .msg.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
     .msg.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}
     .msg.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
-    .empty{
-      margin-top:14px;border:1px dashed var(--border);border-radius:18px;padding:14px;color:var(--muted);background:#fff;
-    }
+    .empty{margin-top:14px;border:1px dashed #e5e7eb;border-radius:16px;padding:14px;color:#64748b;background:#fff}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr}}
   </style>
 </head>
-<body>
 
+<body>
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points — Organisateur</h1>
-    <span class="kpi" id="whoami">Chargement…</span>
+    <span class="pill" id="whoami"><span class="dot"></span> Chargement…</span>
   </div>
 
-  <nav>
+  <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
     <a href="events.html">Épreuves</a>
     <a href="organizer-dashboard.html" class="active">Espace orga</a>
-    <a href="reglement.html">Règlement</a>
-    <a href="methodologie.html">Méthodologie</a>
-    <a href="about.html">À propos</a>
-    <a href="login.html">Connexion</a>
+    <a href="import-results.html">Import résultats</a>
   </nav>
 
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <a class="btn" href="login.html">Compte</a>
+  <div class="headerRight" style="display:flex;gap:10px;flex-wrap:wrap">
+    <a class="btn ghost" href="login.html" id="btnAccount">Compte</a>
+    <button class="btn" id="btnLogout" type="button" style="display:none">Déconnexion</button>
   </div>
 </header>
 
@@ -123,10 +54,16 @@
   <div class="card">
 
     <section class="hero">
-      <div class="heroTop">
+      <div class="row2">
         <div style="min-width:260px;flex:1">
-          <h2>Mes événements</h2>
-          <div class="muted">Crée un événement, puis ajoute des épreuves dedans.</div>
+          <h2 style="margin:0">Mes événements</h2>
+          <div class="muted2" style="margin-top:6px">
+            Crée un événement, puis ajoute des épreuves (avec analyse GPX auto).
+          </div>
+        </div>
+        <div class="pillBtn">
+          <span class="badge">📌 Meeting → Épreuves</span>
+          <span class="badge">⚡ GPX auto</span>
         </div>
       </div>
 
@@ -134,7 +71,7 @@
 
       <div class="grid2" style="margin-top:14px;">
         <div>
-          <label for="name">Nom de l’événement</label>
+          <label for="name">Nom de l’événement *</label>
           <input id="name" placeholder="Ex : Roc d’Azur 2026" />
         </div>
         <div>
@@ -147,9 +84,9 @@
         </div>
         <div>
           <label for="published">Publié</label>
-          <div style="margin-top:6px;display:flex;gap:10px;align-items:center">
+          <div style="margin-top:8px;display:flex;gap:10px;align-items:center">
             <input id="published" type="checkbox" style="width:auto;margin:0;transform:scale(1.1)" />
-            <span class="muted" style="font-size:13px">Affiché publiquement si publié</span>
+            <span class="muted2">Visible publiquement si coché</span>
           </div>
         </div>
         <div style="grid-column:1/-1">
@@ -157,20 +94,19 @@
           <textarea id="comment" placeholder="Infos générales, programme, liens…"></textarea>
         </div>
         <div style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn ok" id="createBtn" type="button">+ Créer l’événement</button>
+          <button class="btn primary" id="createBtn" type="button">+ Créer l’événement</button>
           <button class="btn" id="reloadBtn" type="button">↻ Recharger</button>
         </div>
       </div>
     </section>
 
     <section style="margin-top:14px;">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <div class="kpi">Résultats : <span id="count">0</span></div>
-        <div class="row" style="gap:10px;align-items:end">
-          <div style="min-width:240px;flex:1">
-            <label for="q">Recherche</label>
-            <input id="q" placeholder="Nom, lieu, commentaire…" />
-          </div>
+      <div class="row2">
+        <div class="badge">Résultats : <span id="count">0</span></div>
+
+        <div style="min-width:260px;flex:1;max-width:420px">
+          <label for="q">Recherche</label>
+          <input id="q" placeholder="Nom, lieu, commentaire…" />
         </div>
       </div>
 
@@ -201,6 +137,7 @@
 
   const createBtn = $("createBtn");
   const reloadBtn = $("reloadBtn");
+  const btnLogout = $("btnLogout");
 
   function showMsg(text, kind="warn"){
     msg.className = `msg ${kind}`;
@@ -227,31 +164,55 @@
     return `${base || "meeting"}-${Date.now()}`;
   }
 
-  async function requireOrganizer(){
+  async function requireOrganizerOrRedirect(){
     const { data: u, error: ue } = await supabase.auth.getUser();
     if (ue) throw ue;
+
     const user = u?.user;
     if (!user) {
-      whoami.textContent = "Non connecté";
-      throw new Error("Tu dois être connecté.");
+      whoami.innerHTML = `<span class="dot err"></span> Non connecté`;
+      // page login organisateur
+      location.href = "login.html";
+      throw new Error("Non connecté");
     }
 
-    const { data: p, error: pe } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    const { data: p, error: pe } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
     if (pe) throw pe;
 
     const role = p?.role || "rider";
-    whoami.textContent = `${user.email} (${role})`;
+    whoami.innerHTML = `<span class="dot ok"></span> ${esc(user.email)} • ${esc(role)}`;
+
+    // montrer logout
+    btnLogout.style.display = "inline-flex";
 
     if (!(role === "organizer" || role === "admin")) {
-      throw new Error("Accès réservé aux organisateurs. Connecte-toi en organisateur.");
+      showMsg("Accès réservé aux organisateurs. Connecte-toi avec un compte organisateur.", "err");
+      // redirige vers login ou home
+      setTimeout(() => location.href = "login.html", 800);
+      throw new Error("Accès refusé");
     }
-    return user;
+
+    return { user, role };
   }
+
+  btnLogout.addEventListener("click", async () => {
+    try{
+      await supabase.auth.signOut();
+      location.href = "login.html";
+    } catch(_) {
+      location.href = "login.html";
+    }
+  });
 
   let meetings = [];
 
   async function loadMeetings(){
-    const user = await requireOrganizer();
+    const { user } = await requireOrganizerOrRedirect();
     showMsg("Chargement…", "warn");
 
     const { data, error } = await supabase
@@ -262,6 +223,7 @@
       .order("created_at", { ascending: false });
 
     if (error) throw error;
+
     meetings = data || [];
     showMsg("", "warn");
     applyFilter();
@@ -280,15 +242,26 @@
     list.innerHTML = items.map(m => {
       const n = Array.isArray(m.race_ids) ? m.race_ids.length : 0;
       const pub = m.is_published ? "✅ Publié" : "🕒 Brouillon";
+      const when = m.date || "—";
+      const where = m.location || "—";
+
       return `
-        <a class="item" href="organizer-meeting.html?id=${encodeURIComponent(m.id)}">
+        <div class="item">
           <div class="topline">
-            <div class="title">${esc(m.name)}</div>
+            <div>
+              <div class="title">${esc(m.name)}</div>
+              <div class="meta">📅 ${esc(when)} • 📍 ${esc(where)} • ${pub}</div>
+            </div>
             <span class="badge">🏁 ${n} épreuve${n>1?"s":""}</span>
           </div>
-          <div class="meta">📅 ${esc(m.date || "—")} • 📍 ${esc(m.location || "—")} • ${pub}</div>
-          ${m.comment ? `<div class="meta" style="margin-top:8px;color:#334155;border-top:1px dashed var(--border);padding-top:10px">${esc(m.comment)}</div>` : ``}
-        </a>
+
+          ${m.comment ? `<div class="meta" style="margin-top:10px;color:#334155;border-top:1px dashed #e5e7eb;padding-top:10px">${esc(m.comment)}</div>` : ``}
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+            <a class="btn" href="organizer-meeting.html?id=${encodeURIComponent(m.id)}">Ouvrir</a>
+            <a class="btn primary" href="course-create.html?meetingId=${encodeURIComponent(m.id)}">+ Ajouter une épreuve</a>
+          </div>
+        </div>
       `;
     }).join("");
   }
@@ -306,7 +279,7 @@
 
   createBtn.addEventListener("click", async () => {
     try{
-      const user = await requireOrganizer();
+      const { user } = await requireOrganizerOrRedirect();
 
       const name = nameEl.value.trim();
       if (!name) throw new Error("Nom obligatoire.");
@@ -328,6 +301,7 @@
       if (error) throw error;
 
       showMsg("Événement créé ✅", "ok");
+
       // reset
       nameEl.value = "";
       dateEl.value = "";
@@ -341,7 +315,9 @@
     }
   });
 
-  reloadBtn.addEventListener("click", () => loadMeetings().catch(e => showMsg(`Erreur: ${e?.message || e}`, "err")));
+  reloadBtn.addEventListener("click", () => {
+    loadMeetings().catch(e => showMsg(`Erreur: ${e?.message || e}`, "err"));
+  });
 
   // Boot
   loadMeetings().catch(e => showMsg(`Erreur: ${e?.message || e}`, "err"));
