@@ -5,13 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Créer une épreuve — MTB Points</title>
   <link rel="stylesheet" href="./css/style.css" />
+
+  <style>
+    /* Petit plus UI (compatible avec ton style.css) */
+    .muted2{color:#64748b;font-size:12px}
+    .grid2{display:grid;gap:12px}
+    .gridCols{grid-template-columns: 1.3fr 1fr 1fr}
+    .gridCols2{grid-template-columns: 1.4fr 1fr 1fr 1fr}
+    @media (max-width: 980px){
+      .gridCols,.gridCols2{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 
 <body>
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points — Créer une épreuve</h1>
-    <span class="pill"><span class="dot ok"></span> Épreuve rattachée</span>
+    <span class="pill"><span class="dot ok"></span> Meeting obligatoire</span>
+    <span class="pill"><span class="dot ok"></span> GPX obligatoire</span>
   </div>
 
   <nav class="nav">
@@ -31,80 +43,82 @@
 <main class="wrap">
   <div class="card">
 
+    <!-- HERO -->
     <section class="hero">
       <div class="heroTop">
         <div style="min-width:280px;flex:1">
           <h2>Nouvelle épreuve</h2>
           <div class="heroMeta">
-            Une épreuve <b>doit</b> appartenir à un événement. La date est pré-remplie à partir de l’événement
-            (et bornée si l’événement dure plusieurs jours).
+            1) Choisis l’événement • 2) Importe la trace GPX (analyse auto) • 3) Crée l’épreuve
           </div>
           <div id="meetingHint" class="heroDesc"></div>
-          <div id="debug" class="muted" style="margin-top:10px;font-size:12px;"></div>
         </div>
 
         <div class="heroActions">
-          <span class="pill"><span class="dot"></span> GPX optionnel</span>
-          <span class="pill"><span class="dot ok"></span> Meeting obligatoire</span>
+          <span class="pill"><span class="dot ok"></span> Auto distance / D+</span>
+          <span class="pill"><span class="dot warn"></span> ScoreTech via Render</span>
         </div>
       </div>
     </section>
 
-    <!-- STATUS (GPX) -->
-    <div id="statusBox" class="empty" style="display:none; margin-top:14px;">
-      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <span class="pill" id="statusPhase"><span class="dot"></span> —</span>
-        <span id="statusMsg" class="muted">—</span>
-      </div>
-      <div class="bar" style="margin-top:10px; display:none;" id="statusBarWrap" aria-label="progress">
-        <div id="statusBar"></div>
-      </div>
-      <div class="muted" style="font-size:12px; margin-top:8px;" id="statusSub"></div>
-    </div>
+    <!-- STATUS (GPX) : géré par course-create.js via mtb:status -->
+    <!-- (Injection auto si absent) -->
 
+    <!-- FORM -->
     <h3 class="sectionTitle" style="margin-top:18px;">Rattachement & date</h3>
 
-    <div class="filters" style="grid-template-columns: 1.3fr 1fr 1fr; align-items:end;">
-      <div class="spanAll" style="grid-column:1/2">
-        <label for="meetingId">Événement *</label>
-        <select id="meetingId"></select>
-        <div class="muted" style="font-size:12px; margin-top:6px;">
+    <div class="filters grid2 gridCols" style="align-items:end;">
+      <div>
+        <label for="eventGroupId">Événement *</label>
+        <select id="eventGroupId"></select>
+        <div class="muted2" id="dateHint" style="margin-top:6px;">
           Une épreuve ne peut pas exister sans événement.
         </div>
       </div>
 
       <div>
-        <label for="date">Date de l’épreuve *</label>
-        <input id="date" type="date" />
-        <div class="muted" style="font-size:12px; margin-top:6px;" id="dateHint">
+        <label for="courseDate">Date de l’épreuve *</label>
+        <input id="courseDate" type="date" />
+        <div class="muted2" style="margin-top:6px;" id="meetingDateHint">
           La date est pré-remplie à partir de l’événement.
         </div>
       </div>
 
       <div>
-        <label for="time">Heure (optionnel)</label>
-        <input id="time" type="time" />
+        <label for="startTime">Heure (optionnel)</label>
+        <input id="startTime" type="time" />
       </div>
     </div>
 
     <h3 class="sectionTitle" style="margin-top:18px;">Infos épreuve</h3>
 
-    <div class="filters" style="grid-template-columns: 1.4fr 1fr 1fr 1fr; align-items:end;">
-      <div class="spanAll" style="grid-column:1/3">
-        <label for="name">Nom de l’épreuve *</label>
-        <input id="name" type="text" placeholder="Ex: Spéciale 1 — Roc Noir / XC 45km / etc." />
+    <div class="filters grid2 gridCols2" style="align-items:end;">
+      <div style="grid-column:1/3">
+        <label for="courseName">Nom de l’épreuve *</label>
+        <input id="courseName" type="text" placeholder="Ex: XC 45 km — Roc Noir / Enduro — Spéciale 1 / etc." />
       </div>
 
       <div>
-        <label for="disc">Discipline</label>
+        <label for="disc">Discipline *</label>
         <select id="disc">
-          <option value="">Auto</option>
+          <option value="">Auto (recommandé)</option>
           <option value="XC">XC</option>
           <option value="Enduro">Enduro</option>
           <option value="DH">DH</option>
           <option value="Gravel">Gravel</option>
           <option value="Marathon">Marathon</option>
           <option value="Ultra">Ultra</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="level">Niveau *</label>
+        <select id="level">
+          <option value="">—</option>
+          <option value="Débutant">Débutant</option>
+          <option value="Intermédiaire">Intermédiaire</option>
+          <option value="Avancé">Avancé</option>
+          <option value="Expert">Expert</option>
         </select>
       </div>
 
@@ -117,44 +131,44 @@
       </div>
 
       <div>
-        <label for="distanceKm">Distance (km)</label>
-        <input id="distanceKm" type="number" step="0.1" min="0" placeholder="ex: 42.5" />
+        <label for="distanceKm">Distance (km) *</label>
+        <input id="distanceKm" type="number" step="0.1" min="0" placeholder="Auto via GPX" />
       </div>
 
       <div>
-        <label for="dplusM">D+ (m)</label>
-        <input id="dplusM" type="number" step="1" min="0" placeholder="ex: 1200" />
+        <label for="dplusM">D+ (m) *</label>
+        <input id="dplusM" type="number" step="1" min="0" placeholder="Auto via GPX" />
       </div>
 
       <div>
-        <label for="participants">Participants</label>
-        <input id="participants" type="number" step="1" min="0" placeholder="ex: 250" />
+        <label for="participantsCount">Participants</label>
+        <input id="participantsCount" type="number" step="1" min="0" placeholder="ex: 250" />
       </div>
 
-      <div class="spanAll" style="grid-column:1/-1">
+      <div style="grid-column:1/-1">
         <label for="comment">Commentaire</label>
         <input id="comment" type="text" placeholder="Optionnel (infos parcours, météo, etc.)" />
       </div>
     </div>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">GPX (optionnel)</h3>
+    <h3 class="sectionTitle" style="margin-top:18px;">Trace GPX (obligatoire)</h3>
 
-    <div class="filters" style="grid-template-columns: 1.4fr 1fr 1fr; align-items:end;">
-      <div class="spanAll" style="grid-column:1/2">
-        <label for="gpxFile">Fichier GPX</label>
-        <input id="gpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml" />
-        <div class="muted" style="font-size:12px; margin-top:6px;">
-          Si tu importes un GPX : distance/D+ seront pré-remplis + ScorePhys calculé.
-          Le ScoreTech “officiel” dépend d’un serveur (désactivé sur GitHub Pages).
+    <div class="filters grid2" style="grid-template-columns: 1.4fr 1fr 1fr; align-items:end;">
+      <div>
+        <label for="courseGpxFile">Fichier GPX *</label>
+        <input id="courseGpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml" />
+        <div class="muted2" style="margin-top:6px;">
+          L’analyse se lance automatiquement : distance/D+ + ScorePhys + ScoreTech (Render).
+          <br/>Astuce : sur Render free, la 1ère analyse après inactivité peut être lente.
         </div>
       </div>
 
       <div>
-        <button class="btn" id="btnAnalyze" type="button">Analyser GPX</button>
+        <button class="btn ghost" id="btnClearGPX" type="button">Effacer GPX</button>
       </div>
 
       <div>
-        <button class="btn ghost" id="btnClearGPX" type="button">Effacer GPX</button>
+        <button class="btn" id="saveCourseBtn" type="button">Créer l’épreuve</button>
       </div>
     </div>
 
@@ -176,32 +190,109 @@
       </div>
     </div>
 
+    <!-- Options avancées (surface/terrain/technicité finale) : si tu les as déjà ailleurs, on peut les remettre ensuite -->
     <div class="hintRow" style="margin-top:14px;">
       <div class="muted">* Champs obligatoires</div>
-      <div class="muted" id="saveHint">Astuce : tu peux créer plusieurs épreuves pour le même événement.</div>
-    </div>
-
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
-      <button class="btn primary" id="btnSave" type="button">Créer l’épreuve</button>
-      <button class="btn" id="btnSaveAndNew" type="button">Créer + ajouter une autre épreuve</button>
-      <button class="btn ghost" id="btnReset" type="button">Réinitialiser</button>
+      <div class="muted" id="saveHint">Tu peux créer plusieurs épreuves pour le même événement.</div>
     </div>
 
     <div id="msg" class="empty" style="display:none; margin-top:14px;"></div>
+
   </div>
 </main>
 
 <!-- deps -->
-<script src="./js/data.js"></script>
-<script src="./js/storage.js"></script>
-<script src="./js/gpx.js"></script>
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
 
-<!-- page logic -->
-<script src="./js/course-create.js"></script>
+<!-- GPX analyzer (frontend) -->
+<script src="js/gpx.js"></script>
+
+<!-- Create course logic (nouvelle version) -->
+<script src="js/course-create.js"></script>
+
 <script>
-  console.log("COURSE-CREATE HTML LOADED");
-  document.getElementById("btnSave")?.addEventListener("click", () => alert("CLICK OK"));
+/**
+ * Petit glue: meetingId -> pré-remplir la date + retour vers la fiche meeting
+ * (simple et sans dépendre d'un énorme script inline)
+ */
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function findMeetingSafe(id){
+    if (!id) return null;
+    if (typeof window.findMeeting === "function") return window.findMeeting(id);
+    try {
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr.find(m => m && m.id === id) : null;
+    } catch(_){ return null; }
+  }
+
+  function applyMeetingDefaults(mid){
+    const m = findMeetingSafe(mid);
+    const hint = $("meetingHint");
+    const dateEl = $("courseDate");
+    const dateHint = $("meetingDateHint");
+    const back = $("btnBack");
+
+    if (!m){
+      if (hint) hint.innerHTML = `⚠️ Événement introuvable.`;
+      if (dateEl){ dateEl.min = ""; dateEl.max = ""; }
+      if (dateHint) dateHint.textContent = "La date sera pré-remplie à partir de l’événement.";
+      if (back) back.href = "meetings.html";
+      return;
+    }
+
+    const start = m.date || null;
+    const end = m.endDate || null;
+
+    if (hint){
+      const range = end ? `${esc(start)} → ${esc(end)}` : esc(start || "—");
+      hint.innerHTML = `<b>${esc(m.name)}</b> • ${esc(m.location || "Lieu non précisé")} • Dates: <b>${range}</b>`;
+    }
+
+    if (dateEl){
+      dateEl.min = start || "";
+      dateEl.max = end || "";
+      if (!dateEl.value && start) dateEl.value = start;
+      if (start && dateEl.value && dateEl.value < start) dateEl.value = start;
+      if (end && dateEl.value && dateEl.value > end) dateEl.value = start || end;
+    }
+
+    if (dateHint){
+      dateHint.textContent = end
+        ? "Événement multi-jours : la date de l’épreuve doit être dans la plage."
+        : "Événement 1 jour : date de l’épreuve = date de l’événement (par défaut).";
+    }
+
+    if (back){
+      back.href = `meeting.html?id=${encodeURIComponent(m.id)}`;
+    }
+  }
+
+  // preselect from URL if present
+  const sel = $("eventGroupId");
+  const mid = params.get("meetingId") || params.get("eventGroupId");
+  if (sel && mid){
+    // Le select est rempli par course-create.js (initMeetingSelect),
+    // donc on applique après un petit délai microtask.
+    setTimeout(() => {
+      sel.value = mid;
+      applyMeetingDefaults(mid);
+    }, 0);
+  }
+
+  // update on change
+  if (sel) sel.addEventListener("change", () => applyMeetingDefaults(sel.value));
+})();
 </script>
 
 </body>
 </html>
+
