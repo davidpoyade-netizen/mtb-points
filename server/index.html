@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:16px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:10px;
+      color:var(--blue);
+      font-weight:800;
+      font-size:13px;
+    }
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+    }
+
+    /* Layout */
+    .wrap{max-width:1100px;margin:26px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .muted{color:var(--muted)}
+    .grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:14px;margin-top:14px}
+    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+
+    /* Hero */
+    .hero{
+      border-radius:22px;
+      padding:22px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(1000px 260px at 15% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 220px at 95% 10%, rgba(16,185,129,.14), transparent 60%),
+        #fff;
+      box-shadow:var(--shadow);
+    }
+    .hero h2{margin:0;font-size:28px;letter-spacing:-.4px}
+    .hero p{margin:10px 0 0 0;line-height:1.6;color:#334155}
+    .heroActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+    /* Buttons */
+    .btn2{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:12px 14px;border-radius:12px;text-decoration:none;
+      border:1px solid var(--border);background:#fff;font-weight:900;color:var(--text);
+    }
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
+    .btn2.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn2.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-size:12px;font-weight:900;color:#0f172a;
+    }
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+    .kpi{border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff}
+    .kpi .big{font-size:18px;font-weight:900}
+    .kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}
+    @media(max-width:700px){ .kpis{grid-template-columns:1fr} }
