@@ -103,3 +103,6 @@ app.listen(PORT, () => {
   console.log(`[mtb-points] API server listening on http://localhost:${PORT}`);
   console.log(`[mtb-points] POST /api/analyze-gpx (Content-Type: application/gpx+xml)`);
 });
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`[mtb-points] API server listening on http://0.0.0.0:${PORT}`);
+});
