@@ -1,0 +1,19 @@
+{
+  "name": "mtb-points-gpx-osm-server",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "NODE_ENV=production node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "fast-xml-parser": "^4.5.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
