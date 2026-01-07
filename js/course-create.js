@@ -1,344 +1,299 @@
 // js/course-create.js
-// MTB Points — Create course (épreuve)
-// - Auto analyse GPX via window.analyzeGPX (js/gpx.js)
-// - Remplit distance/dplus automatiquement
-// - Stocke l'analyse GPX dans l'épreuve (gpx: {...})
-// - Rattache l'épreuve au meeting (eventGroupId) si présent
+// MTB Points — course-create (organizer)
+// - Auto analyse GPX au chargement du fichier (window.analyzeGPX de gpx.js)
+// - Remplit distance/D+ + KPIs + met window.GPX_CACHE
+// - Empêche "Créer l’épreuve" tant que GPX pas analysé
 
 (function () {
-  // -------------------------
-  // Helpers DOM
-  // -------------------------
   const $ = (id) => document.getElementById(id);
 
-  function val(id) {
-    const el = $(id);
-    return el ? String(el.value || "").trim() : "";
+  // --- Elements (doivent exister dans course-create.html)
+  const selMeeting = $("eventGroupId");
+  const inpName = $("courseName");
+  const inpDate = $("courseDate");
+  const inpStartTime = $("startTime");
+  const selDisc = $("disc");
+  const selEbike = $("ebike");
+  const selLevel = $("level");
+  const inpDistance = $("distanceKm");
+  const inpDplus = $("dplusM");
+  const inpParticipants = $("participantsCount");
+  const inpComment = $("comment");
+
+  const inpGpx = $("courseGpxFile");
+  const btnClearGPX = $("btnClearGPX");
+  const btnSave = $("saveCourseBtn");
+
+  const kpiPhys = $("kpiPhys");
+  const kpiPhysSub = $("kpiPhysSub");
+  const kpiTech = $("kpiTech");
+  const kpiTechSub = $("kpiTechSub");
+  const kpiGlobal = $("kpiGlobal");
+  const kpiGlobalSub = $("kpiGlobalSub");
+
+  // (optionnel) si tu as une box status dans le HTML
+  const statusBox = $("statusBox");
+  const statusPhase = $("statusPhase");
+  const statusMsg = $("statusMsg");
+  const statusBarWrap = $("statusBarWrap");
+  const statusBar = $("statusBar");
+  const statusSub = $("statusSub");
+
+  // --- Helpers
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (m) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
   }
 
-  function num(id) {
-    const v = val(id);
-    if (!v) return null;
-    const n = Number(String(v).replace(",", "."));
+  function showMsg(text, ok = true) {
+    const el = $("msg");
+    if (!el) return;
+    el.style.display = text ? "block" : "none";
+    el.innerHTML = text ? (ok ? `✅ ${esc(text)}` : `❌ ${esc(text)}`) : "";
+  }
+
+  function toNumberOrNull(v) {
+    const n = Number(String(v ?? "").replace(",", "."));
     return Number.isFinite(n) ? n : null;
   }
 
-  function getCheckedValues(selector) {
-    return Array.from(document.querySelectorAll(selector))
-      .filter(x => x.checked)
-      .map(x => x.value);
+  function makeIdFromName(name) {
+    const slug = String(name || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      .slice(0, 60) || "race";
+    return `${slug}-${Date.now()}`;
   }
 
-  function clamp(n, a, b) {
-    return Math.max(a, Math.min(b, n));
+  // --- STATUS UI (écoute mtb:status émis par gpx.js)
+  function setStatusUI(d) {
+    if (!statusBox) return;
+
+    statusBox.style.display = "block";
+    const phase = d?.phase || "—";
+    const message = d?.message || "—";
+    const progress = (typeof d?.progress === "number") ? d.progress : null;
+    const spinning = d?.spinning !== false;
+
+    const dotClass = phase === "error" ? "err" : (phase === "done" ? "ok" : (phase === "osm" ? "warn" : ""));
+    if (statusPhase) statusPhase.innerHTML = `<span class="dot ${dotClass}"></span> ${esc(phase)}`;
+    if (statusMsg) statusMsg.textContent = message;
+
+    const hasProgress = typeof progress === "number" && progress >= 0 && progress <= 1;
+    if (statusBarWrap) statusBarWrap.style.display = hasProgress ? "block" : "none";
+    if (statusBar && hasProgress) statusBar.style.width = Math.round(progress * 100) + "%";
+
+    if (statusSub) {
+      const sub =
+        phase === "gpx" ? "Analyse pente • effort • stats…" :
+        phase === "osm" ? "Analyse terrain OSM • technicité…" :
+        phase === "done" ? "Terminé" :
+        phase === "error" ? "Erreur" : "—";
+      statusSub.textContent = spinning ? sub : "";
+    }
   }
 
-  function getTechFinal5() {
-    const checked = document.querySelector(".techFinal:checked");
-    return checked ? Number(checked.value) : null;
+  window.addEventListener("mtb:status", (e) => setStatusUI(e.detail || {}));
+
+  // --- Meetings select (depuis storage.js local)
+  function loadMeetingsSafe() {
+    if (typeof window.loadMeetings === "function") return window.loadMeetings();
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    try {
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) {
+      return [];
+    }
   }
 
-  // -------------------------
-  // State (GPX)
-  // -------------------------
-  let GPX_ANALYSIS = null; // résultat de window.analyzeGPX(file)
+  function findMeetingSafe(id) {
+    if (!id) return null;
+    if (typeof window.findMeeting === "function") return window.findMeeting(id);
+    const all = loadMeetingsSafe();
+    return all.find(m => m && m.id === id) || null;
+  }
 
-  // -------------------------
-  // Meeting select init
-  // -------------------------
-  (function initMeetingSelect() {
-    const sel = $("eventGroupId");
-    if (!sel) return;
+  function initMeetingSelect() {
+    if (!selMeeting) return;
 
-    const meetings = loadMeetings();
+    const meetings = loadMeetingsSafe();
+    selMeeting.innerHTML = "";
+
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = meetings.length ? "— Sélectionner un événement —" : "⚠️ Aucun événement (crée-en un d’abord)";
+    selMeeting.appendChild(opt0);
+
     meetings.forEach(m => {
       const opt = document.createElement("option");
       opt.value = m.id;
       opt.textContent = `${m.name} (${m.date || "—"})`;
-      sel.appendChild(opt);
-    });
-  })();
-
-  // -------------------------
-  // UI Status (spinner + messages)
-  // -------------------------
-  function ensureStatusBox() {
-    // Si tu as déjà un bloc status dans le HTML, on l’utilise.
-    // Sinon on en injecte un minimal sous l’input GPX.
-    if ($("gpxStatus")) return;
-
-    const gpxInput =
-      $("courseGpxFile") || $("raceGpxFile") || $("gpxFile") ||
-      document.querySelector('input[type="file"][accept*="gpx"]');
-
-    if (!gpxInput) return;
-
-    const wrap = document.createElement("div");
-    wrap.id = "gpxStatus";
-    wrap.style.display = "none";
-    wrap.style.marginTop = "10px";
-    wrap.style.border = "1px solid #e5e7eb";
-    wrap.style.borderRadius = "12px";
-    wrap.style.padding = "10px";
-    wrap.style.background = "#fff";
-
-    wrap.innerHTML = `
-      <div style="display:flex;gap:10px;align-items:center">
-        <div id="gpxSpinner" class="mtb-spinner"></div>
-        <div style="flex:1">
-          <div id="gpxMsg" style="font-weight:900">Analyse…</div>
-          <div id="gpxSub" style="font-size:12px;color:#64748b;margin-top:2px">—</div>
-          <div class="mtb-progress" style="margin-top:8px"><div id="gpxBar"></div></div>
-        </div>
-        <span id="gpxBadge" class="mtb-badge">…</span>
-      </div>
-    `;
-    gpxInput.insertAdjacentElement("afterend", wrap);
-
-    // CSS spinner minimal (utilise celui de gpx.js si dispo)
-    if (window.ensureMTBSpinnerCSS) window.ensureMTBSpinnerCSS();
-  }
-
-  function setUI({ show = true, message = "", sub = "—", progress = null, phase = "gpx", spinning = true }) {
-    const box = $("gpxStatus");
-    const msgEl = $("gpxMsg");
-    const subEl = $("gpxSub");
-    const barEl = $("gpxBar");
-    const badgeEl = $("gpxBadge");
-    const spinner = $("gpxSpinner");
-
-    if (box) box.style.display = show ? "block" : "none";
-    if (msgEl) msgEl.textContent = message || "";
-    if (subEl) subEl.textContent = sub || "—";
-
-    if (barEl) {
-      const pct = (typeof progress === "number") ? Math.round(clamp(progress, 0, 1) * 100) : 0;
-      barEl.style.width = pct + "%";
-    }
-
-    if (badgeEl) {
-      badgeEl.textContent = String(phase || "…").toUpperCase();
-      badgeEl.classList.remove("ok", "warn", "err");
-      if (phase === "done") badgeEl.classList.add("ok");
-      else if (phase === "error") badgeEl.classList.add("err");
-      else badgeEl.classList.add("warn");
-    }
-
-    if (spinner) spinner.style.display = spinning ? "block" : "none";
-  }
-
-  function attachStatusListener() {
-    // ton gpx.js émet déjà mtb:status {phase,message,progress,spinning}
-    window.addEventListener("mtb:status", (e) => {
-      const d = e.detail || {};
-      const niceSub =
-        d.phase === "gpx" ? "Lecture GPX • altitude • pente • effort…" :
-        d.phase === "osm" ? "Analyse OSM • surface • technicité…" :
-        d.phase === "done" ? "Terminé" :
-        d.phase === "error" ? "Erreur" : "—";
-
-      setUI({
-        show: true,
-        message: d.message || "Analyse…",
-        sub: niceSub,
-        progress: (typeof d.progress === "number") ? d.progress : null,
-        phase: d.phase || "gpx",
-        spinning: d.spinning !== false
-      });
+      selMeeting.appendChild(opt);
     });
   }
 
-  // -------------------------
-  // Auto GPX analysis on file import
-  // -------------------------
-  async function runAutoAnalysis(file) {
-    GPX_ANALYSIS = null;
+  // --- GPX analysis
+  async function runAnalysisFromFile(file) {
+    showMsg("", true);
+    window.GPX_CACHE = null;
 
     if (!file) return;
-
     if (typeof window.analyzeGPX !== "function") {
-      setUI({ show: true, message: "Erreur: js/gpx.js n’est pas chargé (analyzeGPX introuvable).", phase: "error", spinning: false });
+      showMsg("analyzeGPX introuvable : vérifie que js/gpx.js est bien chargé.", false);
       return;
     }
 
     try {
-      setUI({ show: true, message: "Préparation de l’analyse…", sub: "Initialisation", phase: "gpx", progress: 0.05, spinning: true });
-      const res = await window.analyzeGPX(file, { keepPoints: false });
-      GPX_ANALYSIS = res;
+      // Option: on ne renvoie pas les points si tu ne fais pas encore le profil/carte ici
+      const a = await window.analyzeGPX(file, { keepPoints: false });
 
-      // Remplissage automatique distance/dplus si les champs existent
-      // (adapte si tes IDs sont différents)
-      const distEl = $("distanceKm") || $("courseDistance") || $("raceDist") || $("distance");
-      const dplusEl = $("dplusM") || $("courseDplus") || $("raceDplus") || $("dplus");
+      // Cache global pour sauver l’épreuve
+      window.GPX_CACHE = a;
 
-      if (distEl && res?.distanceKm != null) distEl.value = String(res.distanceKm);
-      if (dplusEl && res?.dplusM != null) dplusEl.value = String(res.dplusM);
+      // Autofill distance / d+
+      if (inpDistance) inpDistance.value = String(a.distanceKm ?? "");
+      if (inpDplus) inpDplus.value = String(a.dplusM ?? "");
 
-      setUI({ show: true, message: "Distance et D+ renseignés ✅", sub: "Tu peux enregistrer l’épreuve", phase: "done", progress: 1, spinning: false });
-    } catch (err) {
-      GPX_ANALYSIS = null;
-      setUI({ show: true, message: err?.message || "Erreur analyse GPX", sub: "Vérifie le GPX / réseau", phase: "error", spinning: false });
+      // KPIs
+      if (kpiPhys) kpiPhys.textContent = (a?.phys?.score ?? "—");
+      if (kpiPhysSub) kpiPhysSub.textContent = a?.phys ? `Effort: ${a.phys.effort ?? "—"} • IPB: ${a.phys.ipbOverall ?? "—"}` : "—";
+
+      const techScore = (a?.techV2 && typeof a.techV2.techScoreV2 === "number") ? a.techV2.techScoreV2 : null;
+      if (kpiTech) kpiTech.textContent = techScore ?? "—";
+      if (kpiTechSub) kpiTechSub.textContent = techScore != null ? "TechScoreV2 officiel (OSM + bonus GPX capé)" : "ScoreTech indisponible (serveur / réseau)";
+
+      if (kpiGlobal) kpiGlobal.textContent = (typeof a?.mrs === "number") ? a.mrs : "—";
+      if (kpiGlobalSub) kpiGlobalSub.textContent = (typeof a?.mrs === "number") ? "0.55 Phys + 0.45 Tech" : "Score global si Tech disponible";
+
+      // Discipline auto hint (si pas choisi)
+      if (selDisc && !selDisc.value && a?.discipline?.hint) selDisc.value = a.discipline.hint;
+
+      showMsg("Analyse GPX terminée : distance/D+ renseignés ✅", true);
+    } catch (e) {
+      window.GPX_CACHE = null;
+      showMsg(e?.message || "Erreur analyse GPX/OSM.", false);
     }
   }
 
-  function initGpxAutoAnalyze() {
-    ensureStatusBox();
-    attachStatusListener();
+  function clearGPX() {
+    window.GPX_CACHE = null;
+    if (inpGpx) inpGpx.value = "";
+    if (inpDistance) inpDistance.value = "";
+    if (inpDplus) inpDplus.value = "";
 
-    const fileInput =
-      $("courseGpxFile") || $("raceGpxFile") || $("gpxFile") ||
-      document.querySelector('input[type="file"][accept*="gpx"]');
+    if (kpiPhys) kpiPhys.textContent = "—";
+    if (kpiPhysSub) kpiPhysSub.textContent = "—";
+    if (kpiTech) kpiTech.textContent = "—";
+    if (kpiTechSub) kpiTechSub.textContent = "—";
+    if (kpiGlobal) kpiGlobal.textContent = "—";
+    if (kpiGlobalSub) kpiGlobalSub.textContent = "—";
 
-    if (!fileInput) return;
-
-    fileInput.addEventListener("change", () => {
-      const f = fileInput.files && fileInput.files[0];
-      if (f) runAutoAnalysis(f);
-    });
+    if (statusBox) statusBox.style.display = "none";
+    showMsg("GPX effacé.", true);
   }
 
-  initGpxAutoAnalyze();
+  // --- Save (localStorage via storage.js)
+  function requireFields() {
+    const meetingId = selMeeting?.value || "";
+    const name = inpName?.value?.trim() || "";
+    const date = inpDate?.value || "";
+    const disc = selDisc?.value || "";
 
-  // -------------------------
-  // Save course
-  // -------------------------
-  const btn = $("saveCourseBtn");
-  if (!btn) return;
+    if (!meetingId) return "Événement obligatoire.";
+    if (!name) return "Nom d’épreuve obligatoire.";
+    if (!date) return "Date d’épreuve obligatoire.";
+    if (!disc) return "Discipline obligatoire (ou Auto si tu gardes l’option Auto).";
+    if (!window.GPX_CACHE) return "Importe un GPX : l’analyse est obligatoire pour distance/D+.";
 
-  btn.addEventListener("click", () => {
-    // Required fields
-    const name = val("courseName");
-    const date = val("courseDate");
-    const disc = val("disc");
-    const level = val("level"); // tu avais commencé à le rendre obligatoire
+    return null;
+  }
 
-    if (!name || !date || !disc || !level) {
-      alert("⚠️ Champs obligatoires : Nom, Date, Discipline, Niveau");
+  function saveCourse() {
+    const err = requireFields();
+    if (err) {
+      alert("⚠️ " + err);
       return;
     }
 
-    // GPX obligatoire (pour distance/d+ auto)
-    if (!GPX_ANALYSIS) {
-      alert("⚠️ Importe une trace GPX (obligatoire) : l’analyse remplira Distance et D+ automatiquement.");
-      return;
-    }
-
-    // technicité finale obligatoire
-    const tech5 = getTechFinal5();
-    if (!tech5) {
-      alert("⚠️ Choisis une technicité finale (1 à 5).");
-      return;
-    }
-
-    // surface total <= 100
-    const roadPct = Number(val("roadPct") || 0);
-    const trackPct = Number(val("trackPct") || 0);
-    const singlePct = Number(val("singlePct") || 0);
-    const total = roadPct + trackPct + singlePct;
-    if (total > 100) {
-      alert("⚠️ Le total des types de voie ne peut pas dépasser 100%.");
-      return;
-    }
-
-    // laps
-    const lapsDefault = Number(val("lapsDefault") || 1);
-    const lapsMen = Number(val("lapsMen") || lapsDefault || 1);
-    const lapsWomen = Number(val("lapsWomen") || lapsDefault || 1);
-
-    // Meeting link
-    const eventGroupId = val("eventGroupId") || null;
-
-    // Scores depuis analyse
-    const physScore = Number(GPX_ANALYSIS?.phys?.score);
-    const techScore = Number(GPX_ANALYSIS?.techV2?.techScoreV2);
-    const globalScore =
-      (Number.isFinite(physScore) && Number.isFinite(techScore))
-        ? Math.round(0.55 * physScore + 0.45 * techScore)
-        : null;
+    // build object (simple + stable)
+    const meetingId = selMeeting.value;
+    const m = findMeetingSafe(meetingId);
 
     const ev = {
-      id: makeIdFromName(name),
-      name,
-      date,
-      disc,
-      level,
+      id: makeIdFromName(inpName.value),
+      name: inpName.value.trim(),
+      date: inpDate.value,
+      disc: selDisc.value,
 
-      eventGroupId,
+      // infos
+      level: selLevel?.value || null,
+      startTime: inpStartTime?.value || null,
+      ebike: (selEbike?.value === "1"),
+      participantsCount: toNumberOrNull(inpParticipants?.value),
+      comment: (inpComment?.value || "").trim() || null,
 
-      ebike: (val("ebike") === "1"),
-      bikeWash: (val("bikeWash") === "1"),
-      ageCategories: getCheckedValues(".ageCat"),
+      // rattachement
+      eventGroupId: meetingId,
+      meetingName: m?.name || null,
 
-      laps: {
-        default: Number.isFinite(lapsDefault) ? lapsDefault : 1,
-        bySex: { M: Number.isFinite(lapsMen) ? lapsMen : 1, F: Number.isFinite(lapsWomen) ? lapsWomen : 1 },
-        rules: []
-      },
+      // FROM GPX
+      distanceKm: window.GPX_CACHE.distanceKm,
+      dplusM: window.GPX_CACHE.dplusM,
 
-      // FROM GPX ONLY
-      distanceKm: GPX_ANALYSIS.distanceKm,
-      dplusM: GPX_ANALYSIS.dplusM,
+      // scores
+      physScore: window.GPX_CACHE?.phys?.score ?? null,
+      techV2: window.GPX_CACHE?.techV2 ?? null,
+      globalScore: window.GPX_CACHE?.mrs ?? null,
 
-      category: val("category"),
-      startPlace: val("startPlace"),
-      finishPlace: val("finishPlace"),
-      startTime: val("startTime") || null,
-
-      aidStations: num("aidStations"),
-      mechStations: num("mechStations"),
-      cutoffTime: val("cutoffTime") || null,
-      participantsCount: num("participantsCount"),
-      comment: val("comment"),
-
-      // type de voie
-      surface: { roadPct, trackPct, singlePct },
-
-      // terrain / obstacles
-      rockyPct: num("rockyPct"),
-      hairpins: num("hairpins"),
-      jumps: num("jumps"),
-      hikeabike: num("hikeabike"),
-
-      // technicité finale imposée
-      tech5,
-
-      // scores (optionnel mais utile)
-      scores: {
-        phys: Number.isFinite(physScore) ? physScore : null,
-        tech: Number.isFinite(techScore) ? techScore : null,
-        global: Number.isFinite(globalScore) ? globalScore : null,
-        disciplineHint: GPX_ANALYSIS?.discipline?.hint || null
-      },
-
-      // GPX analysis data (compact)
+      // gpx meta (si tu veux l’afficher ensuite)
       gpx: {
-        fileName: GPX_ANALYSIS.fileName,
-        distanceKm: GPX_ANALYSIS.distanceKm,
-        dplusM: GPX_ANALYSIS.dplusM,
-        hasElevation: GPX_ANALYSIS.hasElevation,
-        steep: GPX_ANALYSIS.steep,
-        phys: GPX_ANALYSIS.phys,
-        techV2: GPX_ANALYSIS.techV2,
-        discipline: GPX_ANALYSIS.discipline,
-        mrs: GPX_ANALYSIS.mrs
-      }
+        fileName: window.GPX_CACHE.fileName,
+        distanceKm: window.GPX_CACHE.distanceKm,
+        dplusM: window.GPX_CACHE.dplusM,
+        hasElevation: window.GPX_CACHE.hasElevation,
+        steep: window.GPX_CACHE.steep
+      },
+
+      createdAt: Date.now()
     };
 
-    // Save (localStorage)
-    addStoredEvent(ev);
-
-    // Link to meeting
-    if (ev.eventGroupId) {
-      const m = findMeeting(ev.eventGroupId);
-      if (m) {
-        m.raceIds = m.raceIds || [];
-        if (!m.raceIds.includes(ev.id)) m.raceIds.push(ev.id);
-        updateMeeting(m);
-      }
+    // storage.js : tu utilises addStoredEvent(ev)
+    if (typeof window.addStoredEvent === "function") window.addStoredEvent(ev);
+    else {
+      // fallback minimal si jamais
+      const key = "vtt_events_v1";
+      let arr = [];
+      try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch (_) { arr = []; }
+      if (!Array.isArray(arr)) arr = [];
+      arr.unshift(ev);
+      localStorage.setItem(key, JSON.stringify(arr));
     }
 
     alert("✅ Épreuve enregistrée !");
-    window.location.href = "events.html";
-  });
+    location.href = "events.html";
+  }
 
+  // --- Wire
+  initMeetingSelect();
+
+  if (inpGpx) {
+    inpGpx.addEventListener("change", () => {
+      const file = inpGpx.files?.[0] || null;
+      runAnalysisFromFile(file);
+    });
+  }
+
+  if (btnClearGPX) btnClearGPX.addEventListener("click", clearGPX);
+  if (btnSave) btnSave.addEventListener("click", saveCourse);
+
+  // optional
+  if (window.ensureMTBSpinnerCSS) window.ensureMTBSpinnerCSS();
 })();
+
+
