@@ -1,7 +1,22 @@
 // js/gpx.js
-// MTB Points — Frontend GPX analyzer (safe for static hosting)
+// MTB Points — Frontend GPX analyzer
 // Expose: window.analyzeGPX(file, opts?) -> Promise<GPXAnalysis>
-// Also: window.ensureMTBSpinnerCSS()
+//
+// Meilleure solution (OFFICIEL):
+// - Front: parse GPX + calcule ScorePhys local + stats + (optionnel) points pour profil altimétrique
+// - Serveur: calcule ScoreTech V2 Hybrid officiel (OSM socle + bonus GPX capé) + Discipline hint
+//
+// UI Indicateurs:
+// - Dispatch d'événements: "mtb:status" avec { phase, message, progress, spinning }
+//   => ton UI peut écouter et afficher "Analyse GPX..." puis "Analyse OSM..."
+// - Animation CSS simple conseillée (classe .spinner)
+//
+// Usage:
+//   window.addEventListener("mtb:status", (e)=> console.log(e.detail));
+//   const res = await window.analyzeGPX(file);
+//
+// Important:
+// - L'endpoint serveur attendu: POST /api/analyze-gpx (voir index.js adapté)
 
 (function () {
   // -------------------------
@@ -145,22 +160,10 @@
   // Server call (ScoreTech V2 Hybrid officiel + Discipline)
   // -------------------------
   async function fetchServerAnalysis(gpxText) {
-    // Sur GitHub Pages (statique), il n’y a pas de backend /api
-    const isStaticHost =
-      location.hostname.endsWith("github.io") ||
-      location.hostname.includes("netlify.app") ||
-      location.hostname.includes("pages.dev");
+    // Petit délai pour laisser l'UI afficher le spinner
+    await sleep(30);
 
-    if (isStaticHost) {
-      return {
-        ok: true,
-        tech: null,
-        discipline: null,
-        meta: { mode: "LOCAL_ONLY", reason: "Static host: no /api/analyze-gpx" }
-      };
-    }
-
-    const res = await fetch("/api/analyze-gpx", {
+    const res = await fetch("https://mtb-points.onrender.com/api/analyze-gpx", {
       method: "POST",
       headers: { "Content-Type": "application/gpx+xml" },
       body: gpxText
@@ -181,6 +184,7 @@
   // -------------------------
   function friendlyErrorMessage(err) {
     const msg = (err && err.message) ? String(err.message) : String(err || "Erreur inconnue.");
+    // messages fréquents
     if (/Aucun point <trkpt>/i.test(msg)) return "Ce fichier GPX ne contient pas de trace exploitable (trkpt absent).";
     if (/GPX invalide/i.test(msg) || /erreur XML/i.test(msg)) return "GPX invalide : le fichier est corrompu ou mal formé.";
     if (/trop volumineux/i.test(msg)) return "GPX trop volumineux : essaye une trace plus légère.";
@@ -194,7 +198,7 @@
   // -------------------------
   async function analyzeGPX(file, opts = {}) {
     const options = {
-      keepPoints: true,
+      keepPoints: true,     // true => renvoie points pour profil altimétrique
       ...opts
     };
 
@@ -202,22 +206,26 @@
       setPhase("gpx", "Analyse GPX en cours…", { spinning: true });
 
       if (!file) throw new Error("Aucun fichier GPX.");
+      if (!/\.gpx$/i.test(file.name || "") && file.type && !/xml|gpx/i.test(file.type)) {
+        // soft warning only
+      }
 
       // 1) Lire le fichier GPX
       const gpxText = await readFileAsText(file);
 
       // 2) Parser localement (stats + score physique)
+      // Simule un petit "progress" pour l'UI (sans vrai streaming)
       setPhase("gpx", "Lecture et parsing du GPX…", { progress: 0.35, spinning: true });
-      await sleep(10);
+      await sleep(20);
 
       const points = parseGPXText(gpxText);
 
       setPhase("gpx", "Calcul des statistiques…", { progress: 0.65, spinning: true });
-      await sleep(10);
+      await sleep(20);
 
       const stats = computeStats(points);
 
-      // ScorePhys local (0..100)
+      // ---- ScorePhys local (0..100)
       const D = Number(stats.distanceKm || 0);
       const H = Number(stats.dplusM || 0);
       const effort = Math.sqrt(Math.max(0, D)) + (H / 1000);
@@ -225,8 +233,8 @@
       let ipbOverall = 0;
       if (stats.hasElevation && D > 0) {
         const vm = H / Math.max(D, 0.01); // m/km
-        const p10 = Number(stats.steep?.p10 || 0);
-        const p15 = Number(stats.steep?.p15 || 0);
+        const p10 = Number(stats.steep?.p10 || 0); // 0..1
+        const p15 = Number(stats.steep?.p15 || 0); // 0..1
         ipbOverall = clamp(0.06 * vm + 30 * p10 + 45 * p15, 0, 120);
       }
 
@@ -235,12 +243,14 @@
       const physScore = Math.round(100 * clamp(0.70 * effortN + 0.30 * ipbN, 0, 1));
 
       setPhase("gpx", "Analyse GPX terminée ✅", { progress: 1, spinning: false });
-      await sleep(30);
+      await sleep(60);
 
-      // 3) Appel serveur (optionnel)
-      setPhase("osm", "Analyse OSM…", { spinning: true });
+      // 3) Appel serveur (OSM + TechScore officiel)
+      setPhase("osm", "Analyse OSM en cours… (calcul ScoreTech officiel)", { spinning: true });
+
       const server = await fetchServerAnalysis(gpxText);
 
+      // 4) Résultats
       const tech = server.tech || null;
       const discipline = server.discipline || null;
 
@@ -253,40 +263,51 @@
       return {
         fileName: file.name,
 
+        // stats GPX locales
         distanceKm: stats.distanceKm,
         dplusM: stats.dplusM,
         hasElevation: stats.hasElevation,
         steep: stats.steep,
 
+        // points seulement si besoin (profil altimétrique)
         points: options.keepPoints ? points : undefined,
 
+        // score physique local
         phys: {
           effort: Math.round(effort * 1000) / 1000,
           ipbOverall: Math.round(ipbOverall * 10) / 10,
           score: physScore
         },
 
+        // ScoreTech V2 Hybrid officiel (serveur) + Discipline
         techV2: tech,
         discipline,
 
+        // Score global
         mrs,
+
+        // Infos serveur optionnelles
         serverMeta: server.meta || null
       };
     } catch (err) {
       const msg = friendlyErrorMessage(err);
       setPhase("error", msg, { spinning: false });
+
+      // On relance une erreur "propre" pour ton UI si tu veux afficher un toast
       throw new Error(msg);
     }
   }
 
   // -------------------------
-  // Optional minimal spinner CSS helper
+  // Inject minimal spinner CSS (optional helper)
   // -------------------------
+  // Tu peux appeler window.ensureMTBSpinnerCSS() une fois dans ta page.
   function ensureMTBSpinnerCSS() {
     const id = "mtb-spinner-css";
     if (document.getElementById(id)) return;
 
     const css = `
+/* MTB Points — status spinner (minimal) */
 .mtb-status{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
 .mtb-status .label{font-size:14px;color:#0f172a}
 .mtb-status .sub{font-size:12px;color:#64748b;margin-top:2px}
