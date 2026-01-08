@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Créer un événement — MTB Points</title>
   <link rel="stylesheet" href="./css/style.css" />
+  <style>
+    .muted{color:#667085}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:900px){.row2,.row3{grid-template-columns:1fr}}
+    .mini{font-size:12px;color:#667085;margin-top:6px}
+    .geoBox{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+    .geoBox > div{flex:1;min-width:170px}
+    .emptyLike{border:1px solid #e5e7eb;background:#f8fafc;border-radius:14px;padding:12px}
+  </style>
 </head>
 
 <body>
@@ -30,20 +40,21 @@
 
 <main class="wrap">
   <div class="card">
+
     <section class="hero">
       <div class="heroTop">
         <div style="min-width:280px;flex:1">
           <h2>Nouvel événement</h2>
           <div class="heroMeta">
-            Un événement peut durer <b>1 jour</b> ou <b>plusieurs jours</b>.
+            Champs minimum : <b>Nom + date de début</b>.
             Les épreuves créées depuis l’événement seront automatiquement rattachées, avec une date par défaut dans la plage.
           </div>
           <div id="msg" class="heroDesc" style="display:none;"></div>
-          <div id="debug" class="muted" style="margin-top:10px;font-size:12px;"></div>
         </div>
-
         <div class="heroActions">
           <span class="pill"><span class="dot"></span> Multi-jours OK</span>
+          <span class="pill"><span class="dot"></span> Lieu + géoloc</span>
+          <span class="pill"><span class="dot"></span> URL événement</span>
         </div>
       </div>
     </section>
@@ -59,22 +70,42 @@
       <div>
         <label for="mDate">Date début *</label>
         <input id="mDate" type="date" />
-        <div class="muted" style="font-size:12px; margin-top:6px;">
-          La date par défaut des épreuves = date de début.
-        </div>
+        <div class="mini">La date par défaut des épreuves = date de début.</div>
       </div>
 
       <div>
         <label for="mEndDate">Date fin (optionnel)</label>
         <input id="mEndDate" type="date" />
-        <div class="muted" style="font-size:12px; margin-top:6px;">
-          Laisse vide si l’événement dure 1 jour.
-        </div>
+        <div class="mini">Laisse vide si l’événement dure 1 jour.</div>
       </div>
 
       <div class="spanAll" style="grid-column:1/-1">
         <label for="mLocation">Lieu</label>
         <input id="mLocation" type="text" placeholder="Ex: Briançon (05)" />
+        <div class="mini">Tu peux remplir automatiquement les coordonnées via le bouton “Géolocaliser”.</div>
+      </div>
+
+      <div class="spanAll" style="grid-column:1/-1">
+        <div class="geoBox">
+          <div>
+            <label for="mLat">Latitude</label>
+            <input id="mLat" type="number" step="0.000001" placeholder="ex: 43.700000" />
+          </div>
+          <div>
+            <label for="mLng">Longitude</label>
+            <input id="mLng" type="number" step="0.000001" placeholder="ex: 7.250000" />
+          </div>
+          <div style="flex:0 0 auto;min-width:240px">
+            <button class="btn" id="btnGeo" type="button">📍 Géolocaliser</button>
+            <div class="mini" id="geoHint">Utilise le GPS du navigateur (si autorisé).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spanAll" style="grid-column:1/-1">
+        <label for="mUrl">Lien URL vers l’événement (inscription, site…)</label>
+        <input id="mUrl" type="url" placeholder="Ex: https://www.engage-sports.com/..." />
+        <div class="mini">Optionnel, mais affiché sur la fiche événement + fiche épreuve.</div>
       </div>
 
       <div class="spanAll" style="grid-column:1/-1">
@@ -84,46 +115,151 @@
     </div>
 
     <div class="hintRow" style="margin-top:14px;">
-      <div class="muted">
-        Règle: une épreuve ne doit pas exister hors événement. Tu la créeras ensuite via le bouton dédié.
-      </div>
-      <div class="muted">
-        * Champs obligatoires
-      </div>
+      <div class="muted">* Champs obligatoires</div>
+      <div class="muted">Astuce : tu peux créer l’événement puis enchaîner sur la création d’épreuve.</div>
     </div>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
-      <button class="btn primary" id="btnCreate" type="button"
-        onclick="window.__fallbackCreateMeeting && window.__fallbackCreateMeeting(false)">
-        Créer l’événement
-      </button>
-
-      <button class="btn" id="btnCreateAndRace" type="button"
-        onclick="window.__fallbackCreateMeeting && window.__fallbackCreateMeeting(true)">
-        Créer + ajouter une épreuve
-      </button>
-
+      <button class="btn primary" id="btnCreate" type="button">Créer l’événement</button>
+      <button class="btn" id="btnCreateAndRace" type="button">Créer + ajouter une épreuve</button>
       <button class="btn ghost" id="btnReset" type="button">Réinitialiser</button>
     </div>
 
-    <div class="empty" style="margin-top:16px;">
+    <div class="emptyLike" style="margin-top:16px;">
       Après création, tu seras redirigé vers la fiche événement.
-      Tu y trouveras le bouton <b>“+ Créer une épreuve”</b> (rattachée automatiquement).
+      Si tu choisis <b>“Créer + ajouter une épreuve”</b>, tu seras redirigé vers <b>course-create.html</b> avec l’événement déjà sélectionné.
     </div>
+
   </div>
 </main>
 
-<!-- Fallback minimal : si le JS principal ne charge pas, on affiche au moins une alerte -->
 <script>
-  window.__fallbackCreateMeeting = function(goRace){
-    alert("Le JS principal (meeting-create.js) ne semble pas chargé. Vérifie la console (F12) / Network (404).");
-    console.log("Fallback click OK. goRace =", goRace);
-  };
-  document.getElementById("debug").textContent =
-    "Debug: page chargée — si cliquer ne fait rien, le script n’est probablement pas chargé.";
-</script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const KEY_MEETINGS = "mtb.meetings.v1";
 
-<script src="./js/meeting-create.js"></script>
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  function showMsg(html, ok=true){
+    const el = $("msg");
+    if (!el) return;
+    el.style.display = html ? "block" : "none";
+    el.innerHTML = html ? (ok ? `✅ ${html}` : `❌ ${html}`) : "";
+  }
+
+  function safeTrim(v){ return String(v ?? "").trim(); }
+
+  function loadMeetings(){
+    try{
+      const raw = localStorage.getItem(KEY_MEETINGS);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(_){ return []; }
+  }
+
+  function saveMeetings(arr){
+    try{ localStorage.setItem(KEY_MEETINGS, JSON.stringify(arr || [])); }catch(_){}
+  }
+
+  function makeIdFromName(name){
+    const slug = String(name || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      .slice(0, 60) || "meeting";
+    return `${slug}-${Date.now()}`;
+  }
+
+  function validateDates(start, end){
+    if (!start) return "Date début obligatoire.";
+    if (end && end < start) return "La date de fin doit être ≥ date de début.";
+    return null;
+  }
+
+  function buildMeeting(){
+    const name = safeTrim($("mName").value);
+    const date = safeTrim($("mDate").value);
+    const endDate = safeTrim($("mEndDate").value) || null;
+    const location = safeTrim($("mLocation").value) || null;
+    const comment = safeTrim($("mComment").value) || null;
+    const url = safeTrim($("mUrl").value) || null;
+
+    const lat = $("mLat").value !== "" ? Number($("mLat").value) : null;
+    const lng = $("mLng").value !== "" ? Number($("mLng").value) : null;
+    const geo = (Number.isFinite(lat) && Number.isFinite(lng)) ? { lat, lng } : null;
+
+    return {
+      id: makeIdFromName(name),
+      name,
+      date,
+      endDate,
+      location,
+      geo,
+      url,
+      comment,
+      raceIds: [],
+      createdAt: Date.now()
+    };
+  }
+
+  function doCreate(goRace){
+    const name = safeTrim($("mName").value);
+    const date = safeTrim($("mDate").value);
+    const endDate = safeTrim($("mEndDate").value);
+
+    if (!name) return showMsg("Nom obligatoire.", false);
+    const err = validateDates(date, endDate);
+    if (err) return showMsg(err, false);
+
+    const meeting = buildMeeting();
+    const all = loadMeetings();
+    all.unshift(meeting);
+    saveMeetings(all);
+
+    showMsg(`Événement créé : <b>${esc(meeting.name)}</b>`, true);
+
+    if (goRace){
+      location.href = `course-create.html?meetingId=${encodeURIComponent(meeting.id)}`;
+    } else {
+      location.href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+    }
+  }
+
+  $("btnCreate").addEventListener("click", () => doCreate(false));
+  $("btnCreateAndRace").addEventListener("click", () => doCreate(true));
+
+  $("btnReset").addEventListener("click", ()=>{
+    ["mName","mDate","mEndDate","mLocation","mLat","mLng","mUrl","mComment"].forEach(id=>{
+      const el = $(id); if (el) el.value = "";
+    });
+    showMsg("");
+  });
+
+  $("btnGeo").addEventListener("click", async ()=>{
+    const hint = $("geoHint");
+    if (!navigator.geolocation){
+      hint.textContent = "Géolocalisation indisponible sur ce navigateur.";
+      return;
+    }
+    hint.textContent = "Demande d’autorisation…";
+    navigator.geolocation.getCurrentPosition(
+      (pos)=>{
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        $("mLat").value = String(Math.round(lat * 1e6)/1e6);
+        $("mLng").value = String(Math.round(lng * 1e6)/1e6);
+        hint.textContent = "✅ Coordonnées récupérées.";
+      },
+      (err)=>{
+        hint.textContent = "❌ Impossible de récupérer la position (refus / erreur).";
+        console.warn(err);
+      },
+      { enableHighAccuracy:true, timeout:12000, maximumAge:60000 }
+    );
+  });
+})();
+</script>
 </body>
 </html>
-

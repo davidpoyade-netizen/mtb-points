@@ -4,19 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Créer une épreuve — MTB Points</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="./css/style.css" />
   <style>
+    .muted{color:#667085}
+    .mini{font-size:12px;color:#667085}
+    .box{border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#fff}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px}
-    @media(max-width:980px){.grid2,.grid3{grid-template-columns:1fr}}
-    .kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
-    @media(max-width:980px){.kpis{grid-template-columns:1fr}}
-    .kpi{border:1px solid #e5e7eb;border-radius:16px;background:#fff;padding:12px}
-    .kpiLabel{font-size:12px;color:#64748b}
-    .kpiValue{font-size:22px;font-weight:1000;margin-top:6px}
-    .kpiSub{font-size:12px;color:#64748b;margin-top:4px}
-    .hint{font-size:12px;color:#64748b;margin-top:6px}
-    .right{display:flex;justify-content:flex-end}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+    .statusRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .progressWrap{height:12px;border:1px solid #e5e7eb;background:#f1f5f9;border-radius:999px;overflow:hidden}
+    .progressBar{height:12px;width:0%}
+    .pillSmall{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid #e5e7eb;background:#f8fafc;color:#0f172a}
+    .warnBox{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:12px;padding:10px}
+    .okBox{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:12px;padding:10px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .ageTable .head, .ageTable .row{
+      display:grid;grid-template-columns:1fr 120px 120px;
+      gap:10px;align-items:center;
+    }
+    .ageTable .head{font-weight:900;color:#0f172a;margin-bottom:8px}
+    .ageTable .row{padding:8px 0;border-bottom:1px dashed #e5e7eb}
+    .ageTable .row:last-child{border-bottom:0}
+    .ageTable label{display:flex;gap:10px;align-items:flex-start;margin:0;cursor:pointer}
+    .ageTable input[type="checkbox"]{width:auto;margin-top:3px}
+    .ageTable input[type="number"]{width:100%;padding:10px;border-radius:12px;border:1px solid #cbd5e1}
   </style>
 </head>
 
@@ -24,7 +36,7 @@
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points — Créer une épreuve</h1>
-    <span class="pill"><span class="dot ok"></span> Organisateur</span>
+    <span class="pill"><span class="dot ok"></span> Épreuve rattachée</span>
   </div>
 
   <nav class="nav">
@@ -33,10 +45,11 @@
     <a href="meetings.html">Événements</a>
     <a href="events.html" class="active">Épreuves</a>
     <a href="dashboard.html">Dashboard</a>
+    <a href="login.html">Connexion</a>
   </nav>
 
   <div class="headerRight">
-    <a class="btn ghost" href="meetings.html">← Retour</a>
+    <a class="btn ghost" id="btnBack" href="meetings.html">← Retour</a>
   </div>
 </header>
 
@@ -48,158 +61,676 @@
         <div style="min-width:280px;flex:1">
           <h2>Nouvelle épreuve</h2>
           <div class="heroMeta">
-            Crée une épreuve rattachée à un événement. Le GPX est optionnel mais recommandé.
+            Bloc 1 : infos • Bloc 2 : analyse GPX + OSM (animation + timeout) • Puis “Créer”.
           </div>
+          <div id="meetingHint" class="heroDesc"></div>
         </div>
         <div class="heroActions">
-          <span class="pill"><span class="dot"></span> GPX optionnel</span>
-          <span class="pill"><span class="dot ok"></span> Public si publié</span>
+          <span class="pill"><span class="dot ok"></span> Meeting</span>
+          <span class="pill"><span class="dot"></span> Multi-tours</span>
+          <span class="pill"><span class="dot"></span> GPX + OSM</span>
         </div>
       </div>
     </section>
 
-    <!-- STATUS (écouté par course-create.js si gpx.js émet mtb:status) -->
-    <div id="statusBox" class="empty" style="display:none; margin-top:14px;">
-      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <span class="pill" id="statusPhase"><span class="dot"></span> —</span>
-        <span id="statusMsg" class="muted">—</span>
-      </div>
-      <div class="bar" style="margin-top:10px; display:none;" id="statusBarWrap" aria-label="progress">
-        <div id="statusBar"></div>
-      </div>
-      <div class="muted" style="font-size:12px; margin-top:8px;" id="statusSub"></div>
-    </div>
-
+    <!-- Bloc 0: rattachement -->
     <h3 class="sectionTitle" style="margin-top:18px;">Rattachement & date</h3>
-    <div class="grid3">
+    <div class="filters" style="grid-template-columns:1.4fr 1fr 1fr;align-items:end;">
       <div>
-        <label for="eventGroupId">Événement *</label>
-        <select id="eventGroupId"></select>
-        <div class="hint">Obligatoire : l’épreuve appartient à un événement.</div>
+        <label for="meetingId">Événement *</label>
+        <select id="meetingId"></select>
+        <div class="mini">L’épreuve sera rattachée automatiquement.</div>
       </div>
-
       <div>
-        <label for="courseDate">Date *</label>
-        <input id="courseDate" type="date" />
+        <label for="date">Date de l’épreuve *</label>
+        <input id="date" type="date" />
+        <div class="mini" id="dateHint">Date bornée par l’événement.</div>
       </div>
-
       <div>
-        <label for="startTime">Heure (optionnel)</label>
-        <input id="startTime" type="time" />
+        <label for="time">Heure de départ</label>
+        <input id="time" type="time" />
       </div>
     </div>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">Infos épreuve</h3>
-    <div class="grid3">
+    <!-- Bloc 1: informations -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Bloc 1 — Informations</h3>
+
+    <div class="filters" style="grid-template-columns:1.6fr 1fr 1fr 1fr;align-items:end;">
+      <div class="spanAll" style="grid-column:1/3">
+        <label for="name">Nom de l’épreuve *</label>
+        <input id="name" type="text" placeholder="Ex: 20 km / 30 km / Spéciale 1 / etc." />
+      </div>
+
       <div>
-        <label for="courseName">Nom *</label>
-        <input id="courseName" type="text" placeholder="Ex: XC 45km / Spéciale 1 / etc." />
+        <label for="cutoff">Barrière horaire (optionnel)</label>
+        <input id="cutoff" type="text" placeholder="Ex: 05:30" />
+      </div>
+
+      <div>
+        <label for="level">Catégorie d’épreuve</label>
+        <select id="level">
+          <option value="Locale">Locale</option>
+          <option value="Régionale">Régionale</option>
+          <option value="Nationale">Nationale</option>
+          <option value="Internationale">Internationale</option>
+        </select>
       </div>
 
       <div>
         <label for="disc">Discipline</label>
         <select id="disc">
-          <option value="">Auto</option>
           <option value="XC">XC</option>
           <option value="Enduro">Enduro</option>
           <option value="DH">DH</option>
-          <option value="Gravel">Gravel</option>
           <option value="Marathon">Marathon</option>
           <option value="Ultra">Ultra</option>
+          <option value="Gravel">Gravel</option>
         </select>
       </div>
 
       <div>
-        <label for="ebike">Type vélo</label>
-        <select id="ebike">
-          <option value="0">Musculaire</option>
-          <option value="1">Assistance électrique</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="grid3" style="margin-top:12px">
-      <div>
-        <label for="level">Niveau</label>
-        <select id="level">
-          <option value="">—</option>
-          <option value="Local">Local</option>
-          <option value="Regional">Régional</option>
-          <option value="National">National</option>
-          <option value="International">International</option>
+        <label for="bikeType">Type de vélo</label>
+        <select id="bikeType">
+          <option value="musculaire">Musculaire</option>
+          <option value="ebike">Assistance électrique</option>
         </select>
       </div>
 
       <div>
-        <label for="distanceKm">Distance (km)</label>
-        <input id="distanceKm" type="number" step="0.1" placeholder="Ex: 42.5" />
+        <label for="bikeWash">Lavage des vélos</label>
+        <select id="bikeWash">
+          <option value="0">Non</option>
+          <option value="1">Oui</option>
+        </select>
       </div>
 
       <div>
-        <label for="dplusM">Dénivelé + (m)</label>
-        <input id="dplusM" type="number" step="1" placeholder="Ex: 1450" />
+        <label for="mechAssist">Assistance mécanique</label>
+        <select id="mechAssist">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+        </select>
       </div>
-    </div>
 
-    <div class="grid2" style="margin-top:12px">
       <div>
-        <label for="participantsCount">Participants (optionnel)</label>
-        <input id="participantsCount" type="number" step="1" placeholder="Ex: 180" />
+        <label for="aidStations">Ravitaillements</label>
+        <select id="aidStations">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+        </select>
       </div>
-      <div>
-        <label for="comment">Commentaire (optionnel)</label>
-        <input id="comment" type="text" placeholder="Infos complémentaires…" />
+
+      <div class="spanAll" style="grid-column:1/-1">
+        <label for="comment">Commentaire libre</label>
+        <textarea id="comment" rows="3" placeholder="Ex: portage, zones techniques, obstacles, etc."></textarea>
       </div>
     </div>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">GPX (optionnel)</h3>
-    <div class="grid2">
-      <div>
-        <label for="courseGpxFile">Fichier GPX</label>
-        <input id="courseGpxFile" type="file" accept=".gpx,application/gpx+xml" />
-        <div class="hint">Si tu ajoutes un GPX, on calcule distance / D+ et les scores.</div>
+    <!-- Multi-tours -->
+    <div class="box" style="margin-top:14px;">
+      <div class="statusRow">
+        <div style="font-weight:900;">Épreuve en plusieurs tours (par sexe + catégories UCI)</div>
+        <label class="pillSmall" style="cursor:pointer;">
+          <input id="isLaps" type="checkbox" style="width:auto;margin:0 8px 0 0"> Activer
+        </label>
       </div>
-      <div class="right" style="align-items:end">
-        <button class="btn ghost" id="btnClearGPX" type="button">🧹 Retirer le GPX</button>
+      <div class="mini" style="margin-top:6px;">
+        Si activé : tu coches les catégories présentes et tu mets le nombre de tours pour <b>Hommes</b> et <b>Femmes</b>.
+        Codes courts : U7, U9, U11, U13, U15, U17, U23, SEN, M1…M9.
+      </div>
+
+      <div id="lapsBox" style="display:none;margin-top:10px;">
+        <div class="ageTable">
+          <div class="head">
+            <div>Catégorie</div><div>Tours H</div><div>Tours F</div>
+          </div>
+          <div id="ageRows"></div>
+        </div>
+        <div class="mini" style="margin-top:8px;">
+          Interprétation : le GPX est le <b>circuit</b> (1 tour). Distance/D+ finaux dépendront des tours.
+        </div>
       </div>
     </div>
 
-    <div class="kpis">
-      <div class="kpi">
-        <div class="kpiLabel">ScorePhys</div>
-        <div class="kpiValue"><span id="kpiPhys">—</span><span class="muted"> /100</span></div>
-        <div class="kpiSub" id="kpiPhysSub">—</div>
+    <!-- Bloc 2: analyse -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Bloc 2 — Analyse GPX + OSM</h3>
+
+    <div class="box">
+      <div class="grid2">
+        <div>
+          <label for="gpxFile">Fichier GPX *</label>
+          <input id="gpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml"/>
+          <div class="mini">L’analyse calcule automatiquement distance + D+ (et tente une analyse OSM si dispo).</div>
+        </div>
+        <div class="actions" style="align-items:flex-end">
+          <button class="btn" id="btnAnalyze" type="button">Analyser</button>
+          <button class="btn ghost" id="btnClear" type="button">Effacer</button>
+        </div>
       </div>
-      <div class="kpi">
-        <div class="kpiLabel">ScoreTech</div>
-        <div class="kpiValue"><span id="kpiTech">—</span><span class="muted"> /100</span></div>
-        <div class="kpiSub" id="kpiTechSub">—</div>
-      </div>
-      <div class="kpi">
-        <div class="kpiLabel">Score Global</div>
-        <div class="kpiValue"><span id="kpiGlobal">—</span><span class="muted"> /100</span></div>
-        <div class="kpiSub" id="kpiGlobalSub">—</div>
+
+      <div style="margin-top:12px;">
+        <div class="statusRow">
+          <span class="pillSmall" id="phasePill"><span class="dot"></span> En attente</span>
+          <span class="muted" id="phaseTxt">Aucun fichier analysé.</span>
+        </div>
+
+        <div class="progressWrap" style="margin-top:10px;display:none" id="progWrap">
+          <div class="progressBar" id="progBar"></div>
+        </div>
+
+        <div class="mini" style="margin-top:8px" id="phaseSub"></div>
+
+        <div class="grid3" style="margin-top:12px;">
+          <div class="box" style="margin:0">
+            <div class="mini">Distance (auto)</div>
+            <div style="font-weight:900;font-size:18px" id="autoDist">—</div>
+          </div>
+          <div class="box" style="margin:0">
+            <div class="mini">Dénivelé + (auto)</div>
+            <div style="font-weight:900;font-size:18px" id="autoDplus">—</div>
+          </div>
+          <div class="box" style="margin:0">
+            <div class="mini">Type de voie (si dispo)</div>
+            <div style="font-weight:900;font-size:14px" id="autoSurface">—</div>
+          </div>
+        </div>
+
+        <div id="timeoutBox" class="warnBox" style="display:none;margin-top:12px;">
+          ⚠️ Analyse OSM trop longue / indisponible. Tu peux quand même créer l’épreuve (distance/D+ depuis GPX).
+        </div>
+
+        <div id="okBox" class="okBox" style="display:none;margin-top:12px;">
+          ✅ Analyse terminée.
+        </div>
       </div>
     </div>
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
-      <button class="btn primary" id="saveCourseBtn" type="button">Créer l’épreuve</button>
-      <a class="btn ok" id="btnViewRace" href="#" style="display:none;">👁️ Voir la fiche épreuve</a>
+    <!-- Actions -->
+    <div class="hintRow" style="margin-top:14px;">
+      <div class="muted">* Champs obligatoires : Événement, date, nom, GPX</div>
+      <div class="muted" id="saveHint">Tu pourras voir la fiche épreuve après création.</div>
     </div>
 
-    <div id="msg" class="empty" style="display:none; margin-top:14px;"></div>
+    <div class="actions" style="margin-top:14px;">
+      <button class="btn primary" id="btnSave" type="button">Créer l’épreuve</button>
+      <button class="btn" id="btnSaveAndNew" type="button">Créer + ajouter une autre épreuve</button>
+      <a class="btn ok" id="btnViewRace" href="#" style="display:none;">👁️ Voir la fiche de l’épreuve</a>
+    </div>
+
+    <div id="msg" class="empty" style="display:none;margin-top:14px;"></div>
+
   </div>
 </main>
 
-<!-- deps -->
-<script src="js/data.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/gpx.js"></script>
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
 
-<!-- ✅ logique page -->
-<script src="js/course-create.js"></script>
+  // ---------------- Storage (local) ----------------
+  const KEY_MEETINGS = "mtb.meetings.v1";
+  const KEY_RACES = "mtb.races.v1";
+
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function showMsg(html, ok=true){
+    const el = $("msg");
+    if (!el) return;
+    el.style.display = html ? "block" : "none";
+    el.innerHTML = html ? (ok ? `✅ ${html}` : `❌ ${html}`) : "";
+  }
+
+  function loadJSON(key){
+    try{ const raw = localStorage.getItem(key); const v = raw ? JSON.parse(raw) : []; return Array.isArray(v) ? v : []; }
+    catch(_){ return []; }
+  }
+  function saveJSON(key, arr){
+    try{ localStorage.setItem(key, JSON.stringify(arr || [])); }catch(_){}
+  }
+
+  function makeIdFromName(name){
+    const slug = String(name || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      .slice(0, 60) || "race";
+    return `${slug}-${Date.now()}`;
+  }
+
+  function listMeetings(){ return loadJSON(KEY_MEETINGS); }
+  function findMeeting(id){ return listMeetings().find(m => m && m.id === id) || null; }
+
+  function upsertRace(race){
+    const all = loadJSON(KEY_RACES);
+    const i = all.findIndex(r => r && r.id === race.id);
+    if (i >= 0) all[i] = race; else all.unshift(race);
+    saveJSON(KEY_RACES, all);
+  }
+
+  function upsertMeeting(meeting){
+    const all = loadJSON(KEY_MEETINGS);
+    const i = all.findIndex(m => m && m.id === meeting.id);
+    if (i >= 0) all[i] = meeting; else all.unshift(meeting);
+    saveJSON(KEY_MEETINGS, all);
+  }
+
+  // ---------------- Meeting select + date range ----------------
+  function applyMeetingDefaults(mid){
+    const m = findMeeting(mid);
+    const hint = $("meetingHint");
+    const dateEl = $("date");
+    const dateHint = $("dateHint");
+    const back = $("btnBack");
+
+    if (!m){
+      if (hint) hint.innerHTML = `⚠️ Événement introuvable.`;
+      if (dateEl){ dateEl.min=""; dateEl.max=""; }
+      if (dateHint) dateHint.textContent = "Date bornée par l’événement.";
+      if (back) back.href = "meetings.html";
+      return;
+    }
+
+    const start = m.date || "";
+    const end = m.endDate || "";
+
+    if (hint){
+      const range = end ? `${esc(start)} → ${esc(end)}` : esc(start || "—");
+      const loc = m.location ? ` • 📍 ${esc(m.location)}` : "";
+      hint.innerHTML = `<b>${esc(m.name)}</b> • 📅 <b>${range}</b>${loc}`;
+    }
+
+    if (dateEl){
+      dateEl.min = start || "";
+      dateEl.max = end || "";
+      if (!dateEl.value && start) dateEl.value = start;
+      if (start && dateEl.value && dateEl.value < start) dateEl.value = start;
+      if (end && dateEl.value && dateEl.value > end) dateEl.value = start || end;
+    }
+
+    if (dateHint){
+      dateHint.textContent = end
+        ? "Événement multi-jours : la date de l’épreuve doit être dans la plage."
+        : "Événement 1 jour : date de l’épreuve = date de l’événement (par défaut).";
+    }
+
+    if (back) back.href = `meeting.html?id=${encodeURIComponent(m.id)}`;
+  }
+
+  function initMeetings(){
+    const sel = $("meetingId");
+    const meetings = listMeetings();
+    sel.innerHTML = `<option value="">— Choisir un événement —</option>` +
+      meetings.map(m => `<option value="${esc(m.id)}">${esc(m.name)}${m.date ? ` (${esc(m.date)})` : ""}</option>`).join("");
+
+    const mid = params.get("meetingId") || "";
+    if (mid){
+      sel.value = mid;
+      applyMeetingDefaults(mid);
+    }
+    sel.addEventListener("change", ()=> applyMeetingDefaults(sel.value));
+  }
+
+  // ---------------- UCI age rows (codes courts) ----------------
+  const AGE = [
+    ["U7","Poussin (7–8)"],
+    ["U9","Pupille (9–10)"],
+    ["U11","Benjamin (11–12)"],
+    ["U13","Minime (13–14)"],
+    ["U15","Cadet (15–16)"],
+    ["U17","Junior (17–18)"],
+    ["U23","Espoir (19–22)"],
+    ["SEN","Élite/Senior (19–34)"],
+    ["M1","Masters 1 (35–39)"],
+    ["M2","Masters 2 (40–44)"],
+    ["M3","Masters 3 (45–49)"],
+    ["M4","Masters 4 (50–54)"],
+    ["M5","Masters 5 (55–59)"],
+    ["M6","Masters 6 (60–64)"],
+    ["M7","Masters 7 (65–69)"],
+    ["M8","Masters 8 (70–74)"],
+    ["M9","Masters 9 (75–79)"],
+  ];
+
+  function renderAgeRows(){
+    const root = $("ageRows");
+    root.innerHTML = AGE.map(([code,label])=>`
+      <div class="row">
+        <label><input type="checkbox" class="ageChk" value="${code}"> <b>${code}</b> — <span class="mini">${esc(label)}</span></label>
+        <input type="number" min="1" step="1" value="1" class="lapsInp" data-age="${code}" data-sex="M">
+        <input type="number" min="1" step="1" value="1" class="lapsInp" data-age="${code}" data-sex="F">
+      </div>
+    `).join("");
+  }
+
+  $("isLaps").addEventListener("change", ()=>{
+    $("lapsBox").style.display = $("isLaps").checked ? "block" : "none";
+  });
+
+  function collectLapsConfig(){
+    if (!$("isLaps").checked) return null;
+    const selected = Array.from(document.querySelectorAll(".ageChk")).filter(c=>c.checked).map(c=>c.value);
+    const rules = Array.from(document.querySelectorAll(".lapsInp")).map(inp=>({
+      age: inp.getAttribute("data-age"),
+      sex: inp.getAttribute("data-sex"),
+      laps: Math.max(1, Number(inp.value)||1)
+    }));
+    return { mode:"by_age_sex", selected, rules };
+  }
+
+  // ---------------- Analysis (GPX + OSM) ----------------
+  let ANALYSIS = null;
+
+  function setPhase(kind, text, sub, progress, isOk=false, isErr=false){
+    const pill = $("phasePill");
+    const txt = $("phaseTxt");
+    const subEl = $("phaseSub");
+    const wrap = $("progWrap");
+    const bar = $("progBar");
+
+    pill.innerHTML = `<span class="dot ${isErr ? "err" : (isOk ? "ok" : "")}"></span> ${esc(kind)}`;
+    txt.textContent = text || "";
+    subEl.textContent = sub || "";
+
+    const hasProg = typeof progress === "number";
+    wrap.style.display = hasProg ? "block" : "none";
+    if (hasProg) bar.style.width = Math.max(0, Math.min(100, Math.round(progress*100))) + "%";
+  }
+
+  function fmt1(n){ return (n==null) ? "—" : (Math.round(n*10)/10).toString().replace(".", ","); }
+
+  function surfaceText(s){
+    if (!s) return "—";
+    const road = Math.round(s.roadPct ?? 0);
+    const track = Math.round(s.trackPct ?? 0);
+    const single = Math.round(s.singlePct ?? 0);
+    return `Route ~${road}% • Piste ~${track}% • Single ~${single}%`;
+  }
+
+  function setAutoFields(res){
+    const dist = res?.distanceKm ?? null;
+    const dplus = res?.dplusM ?? null;
+    $("autoDist").textContent = dist==null ? "—" : `${fmt1(dist)} km`;
+    $("autoDplus").textContent = dplus==null ? "—" : `${Math.round(dplus)} m`;
+    $("autoSurface").textContent = surfaceText(res?.surfaceEstimate || res?.surface || null);
+  }
+
+  function startAnimation(){
+    const frames = [
+      "Lecture GPX…",
+      "Calcul distance & D+…",
+      "Analyse pentes…",
+      "Interrogation OSM…",
+      "Fusion des segments…",
+      "Finalisation…"
+    ];
+    let i = 0;
+    return setInterval(()=>{
+      i = (i+1) % frames.length;
+      $("phaseSub").textContent = frames[i];
+    }, 900);
+  }
+
+  async function analyze(){
+    $("timeoutBox").style.display = "none";
+    $("okBox").style.display = "none";
+    ANALYSIS = null;
+    setAutoFields(null);
+    showMsg("");
+
+    const file = $("gpxFile").files?.[0];
+    if (!file){ showMsg("Choisis un fichier GPX.", false); return; }
+
+    // Timeout global (OSM peut bloquer)
+    const TIMEOUT_MS = 25000;
+    let timedOut = false;
+
+    setPhase("Analyse", "Démarrage…", "Préparation…", 0.05);
+    const anim = startAnimation();
+
+    const timeoutPromise = new Promise((_, rej)=>{
+      setTimeout(()=>{
+        timedOut = true;
+        rej(new Error("timeout"));
+      }, TIMEOUT_MS);
+    });
+
+    // Si ton gpx.js expose analyzeGPX(file, opts) et dispatch mtb:status, on l'utilise.
+    const runPromise = (async ()=>{
+      if (typeof window.analyzeGPX !== "function"){
+        throw new Error("analyzeGPX() introuvable. Vérifie ton js/gpx.js.");
+      }
+      // opts libres: ton gpx.js peut ignorer
+      const res = await window.analyzeGPX(file, { keepPoints:true });
+      return res;
+    })();
+
+    try{
+      const res = await Promise.race([runPromise, timeoutPromise]);
+      clearInterval(anim);
+
+      ANALYSIS = {
+        fileName: file.name,
+        analyzedAt: Date.now(),
+        raw: res,
+        distanceKm: res?.distanceKm ?? res?.stats?.distanceKm ?? null,
+        dplusM: res?.dplusM ?? res?.stats?.dplusM ?? null,
+        hasElevation: !!(res?.hasElevation ?? res?.stats?.hasElevation),
+        physScore: res?.phys?.score ?? res?.physScore ?? null,
+        techScore: res?.tech?.techScore ?? res?.techScore ?? null,
+        globalScore: (Number.isFinite(Number(res?.phys?.score ?? res?.physScore)) && Number.isFinite(Number(res?.tech?.techScore ?? res?.techScore)))
+          ? Math.round(0.55*Number(res?.phys?.score ?? res?.physScore) + 0.45*Number(res?.tech?.techScore ?? res?.techScore))
+          : null,
+        surfaceEstimate: res?.surfaceEstimate ?? null,
+        // points pour race.html (profil/carte) si dispo
+        points: res?.points ?? res?.track ?? res?.raw?.points ?? null
+      };
+
+      setAutoFields(ANALYSIS);
+      setPhase("Terminé", "Analyse terminée.", "OK", 1, true, false);
+      $("okBox").style.display = "block";
+    }catch(e){
+      clearInterval(anim);
+
+      if (timedOut || e?.message === "timeout"){
+        setPhase("Timeout", "Analyse OSM trop longue.", "Tu peux créer l’épreuve avec distance/D+ GPX.", 0.85, false, true);
+        $("timeoutBox").style.display = "block";
+
+        // On attend quand même le GPX “local” si possible
+        try{
+          const res = await runPromise; // si finalement ça répond
+          ANALYSIS = {
+            fileName: file.name,
+            analyzedAt: Date.now(),
+            raw: res,
+            distanceKm: res?.distanceKm ?? res?.stats?.distanceKm ?? null,
+            dplusM: res?.dplusM ?? res?.stats?.dplusM ?? null,
+            hasElevation: !!(res?.hasElevation ?? res?.stats?.hasElevation),
+            physScore: res?.phys?.score ?? res?.physScore ?? null,
+            techScore: res?.tech?.techScore ?? res?.techScore ?? null,
+            globalScore: null,
+            surfaceEstimate: res?.surfaceEstimate ?? null,
+            points: res?.points ?? res?.track ?? res?.raw?.points ?? null
+          };
+          setAutoFields(ANALYSIS);
+        }catch(_){}
+        return;
+      }
+
+      setPhase("Erreur", "Échec analyse", (e?.message || "Erreur"), null, false, true);
+      showMsg(e?.message || "Erreur analyse", false);
+      ANALYSIS = null;
+      setAutoFields(null);
+    }
+  }
+
+  $("btnAnalyze").addEventListener("click", analyze);
+
+  $("btnClear").addEventListener("click", ()=>{
+    $("gpxFile").value = "";
+    ANALYSIS = null;
+    setAutoFields(null);
+    $("timeoutBox").style.display = "none";
+    $("okBox").style.display = "none";
+    setPhase("En attente", "Aucun fichier analysé.", "", null, false, false);
+    showMsg("");
+  });
+
+  // Si ton gpx.js envoie des events de statut, on les affiche aussi (bonus)
+  window.addEventListener("mtb:status", (e)=>{
+    const d = e?.detail || {};
+    if (!d.phase) return;
+    const phase = String(d.phase);
+    const msg = d.message || "";
+    const prog = (typeof d.progress === "number") ? d.progress : null;
+    const isErr = phase === "error";
+    const isOk = phase === "done";
+    setPhase(phase, msg, $("phaseSub").textContent, prog, isOk, isErr);
+  });
+
+  // ---------------- Save ----------------
+  function val(id){ return String($(id).value || "").trim(); }
+
+  function validate(){
+    if (!val("meetingId")) return "Événement obligatoire.";
+    if (!val("date")) return "Date obligatoire.";
+    if (!val("name")) return "Nom obligatoire.";
+    if (!ANALYSIS) return "Analyse GPX obligatoire (au minimum distance/D+).";
+    return null;
+  }
+
+  function buildRace(){
+    const meetingId = val("meetingId");
+    const meeting = findMeeting(meetingId);
+
+    return {
+      id: makeIdFromName(val("name")),
+      meetingId,
+      date: val("date"),
+      time: val("time") || null,
+
+      name: val("name"),
+      cutoffTime: val("cutoff") || null,
+      level: val("level") || null,
+      disc: val("disc") || null,
+
+      bikeType: val("bikeType"), // musculaire | ebike
+      ebike: (val("bikeType") === "ebike"),
+
+      bikeWash: (val("bikeWash") === "1"),
+      mechStations: Number(val("mechAssist") || 0),
+      aidStations: Number(val("aidStations") || 0),
+
+      comment: val("comment") || null,
+
+      // event url inherited (useful on race.html)
+      meetingUrl: meeting?.url || null,
+
+      // computed
+      distanceKm: ANALYSIS.distanceKm ?? null,
+      dplusM: ANALYSIS.dplusM ?? null,
+      physScore: ANALYSIS.physScore ?? null,
+      techScore: ANALYSIS.techScore ?? null,
+      globalScore: ANALYSIS.globalScore ?? null,
+      surfaceEstimate: ANALYSIS.surfaceEstimate ?? null,
+
+      gpx: {
+        fileName: ANALYSIS.fileName,
+        hasElevation: ANALYSIS.hasElevation,
+        // pour race.html (profil/carte)
+        points: ANALYSIS.points || null
+      },
+
+      lapsConfig: collectLapsConfig(), // null ou {mode,selected,rules}
+      createdAt: Date.now()
+    };
+  }
+
+  function attachRaceToMeeting(race){
+    const m = findMeeting(race.meetingId);
+    if (!m) return;
+    m.raceIds = Array.isArray(m.raceIds) ? m.raceIds : [];
+    if (!m.raceIds.includes(race.id)) m.raceIds.push(race.id);
+    upsertMeeting(m);
+  }
+
+  function showViewBtn(raceId){
+    const a = $("btnViewRace");
+    a.href = `race.html?id=${encodeURIComponent(raceId)}`;
+    a.style.display = "inline-flex";
+  }
+  function hideViewBtn(){
+    const a = $("btnViewRace");
+    a.style.display = "none";
+    a.href = "#";
+  }
+
+  function resetForm(keepMeeting=true){
+    const keepMid = keepMeeting ? val("meetingId") : "";
+    const keepDate = keepMeeting ? val("date") : "";
+
+    ["name","cutoff","time","comment"].forEach(id=> $(id).value = "");
+    $("level").value = "Locale";
+    $("disc").value = "XC";
+    $("bikeType").value = "musculaire";
+    $("bikeWash").value = "0";
+    $("mechAssist").value = "0";
+    $("aidStations").value = "0";
+
+    $("isLaps").checked = false;
+    $("lapsBox").style.display = "none";
+    document.querySelectorAll(".ageChk").forEach(c=> c.checked = false);
+    document.querySelectorAll(".lapsInp").forEach(i=> i.value = "1");
+
+    $("gpxFile").value = "";
+    ANALYSIS = null;
+    setAutoFields(null);
+    $("timeoutBox").style.display = "none";
+    $("okBox").style.display = "none";
+    setPhase("En attente", "Aucun fichier analysé.", "", null);
+    hideViewBtn();
+    showMsg("");
+
+    if (keepMeeting){
+      $("meetingId").value = keepMid;
+      $("date").value = keepDate;
+      applyMeetingDefaults(keepMid);
+    }
+  }
+
+  function doSave(thenNew){
+    hideViewBtn();
+    const err = validate();
+    if (err){ showMsg(err, false); return; }
+
+    const race = buildRace();
+    upsertRace(race);
+    attachRaceToMeeting(race);
+
+    showMsg(`Épreuve créée : <b>${esc(race.name)}</b>`, true);
+    showViewBtn(race.id);
+
+    if (thenNew){
+      setTimeout(()=> resetForm(true), 60);
+    }
+  }
+
+  $("btnSave").addEventListener("click", ()=> doSave(false));
+  $("btnSaveAndNew").addEventListener("click", ()=> doSave(true));
+
+  // Init
+  initMeetings();
+  renderAgeRows();
+
+  // defaults
+  setPhase("En attente", "Aucun fichier analysé.", "", null);
+
+})();
+</script>
+
+<!-- Si tu as déjà gpx.js dans ton projet, garde-le : -->
+<script src="./js/gpx.js"></script>
 </body>
 </html>
-
-
-

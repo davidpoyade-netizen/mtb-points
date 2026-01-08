@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fiche épreuve – MTB Points</title>
+  <title>Fiche épreuve — MTB Points</title>
 
-  <!-- Leaflet (carte) -->
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="./css/style.css" />
 
   <style>
-    /* Base (compatible avec ton style.css) */
     .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
     .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
     .blockTitle{font-weight:900;margin:0 0 10px 0}
@@ -33,7 +32,6 @@
       padding:8px 10px;border-radius:999px;border:1px solid #e5e7eb;background:#fff;
       font-weight:900;font-size:12px;white-space:nowrap;
     }
-    .scoreBadge b{font-size:13px}
 
     .barWrap{margin-top:8px;background:#f1f5f9;border-radius:999px;overflow:hidden;border:1px solid #e5e7eb;height:16px}
     .barSeg{height:16px;display:block;float:left}
@@ -44,10 +42,6 @@
     #map{height:380px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
     #profileWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
     #profileCanvas{width:100%;display:block}
-
-    .legendRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 10px 0}
-    .legendItem{display:inline-flex;align-items:center;gap:6px}
-    .legendSwatch{width:10px;height:10px;border-radius:3px;display:inline-block}
 
     .linkBtn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -75,7 +69,6 @@
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
     <a href="events.html">Épreuves</a>
-    <a href="challengemtbpoints.html">Challenge</a>
     <a href="login.html">Connexion</a>
   </nav>
 
@@ -86,7 +79,7 @@
 
 <div class="wrap">
 
-  <!-- 1) Identité -->
+  <!-- Bloc 1 -->
   <section class="card">
     <h2 class="blockTitle" id="raceName">—</h2>
 
@@ -100,7 +93,7 @@
         <div class="value" id="raceDisc">—</div>
       </div>
       <div class="item">
-        <div class="label">Niveau</div>
+        <div class="label">Catégorie</div>
         <div class="value" id="raceLevel">—</div>
       </div>
     </div>
@@ -112,165 +105,99 @@
         <div class="muted" id="raceDistanceHint">—</div>
       </div>
       <div class="item">
-        <div class="label">Dénivelé</div>
+        <div class="label">Dénivelé +</div>
         <div class="value" id="raceDplus">—</div>
         <div class="muted" id="raceElevInfo">—</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 2) Scores -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Scores & difficulté</h3>
-
-    <div class="scoreRow">
-      <span class="scoreBadge" id="scorePhysBadge">💪 Phys <b id="scorePhysVal">—</b>/100</span>
-      <span class="scoreBadge" id="scoreTechBadge">🪨 Tech <b id="scoreTechVal">—</b>/100</span>
-      <span class="scoreBadge" id="scoreGlobalBadge">🏁 Global <b id="scoreGlobalVal">—</b>/100</span>
-    </div>
-
-    <div class="grid3" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Score technique (officiel)</div>
-        <div class="value" id="scoreTechVal2">—</div>
-        <div class="muted" id="techInfo">OSM + bonus GPX capé (serveur Render)</div>
-      </div>
-      <div class="item">
-        <div class="label">Indicateur technique</div>
-        <div class="value" id="techP75">—</div>
-        <div class="muted" id="techP75Info">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Score physique</div>
-        <div class="value" id="scorePhysVal2">—</div>
-        <div class="muted" id="physInfo">—</div>
       </div>
     </div>
 
     <div class="grid" style="margin-top:12px;">
       <div class="item">
-        <div class="label">Score global</div>
-        <div class="value" id="scoreGlobalVal2">—</div>
-        <div class="muted">Synthèse technique + physique</div>
+        <div class="label">Type vélo</div>
+        <div class="value" id="raceBike">—</div>
       </div>
       <div class="item">
-        <div class="label">Niveau de difficulté</div>
-        <div class="pill" id="diffPill">
-          <span class="pillDot" id="diffDot"></span>
-          <span id="diffLabel">—</span>
-        </div>
-        <div class="muted" id="diffHint">—</div>
+        <div class="label">Barrière horaire</div>
+        <div class="value" id="raceCutoff">—</div>
       </div>
-    </div>
-
-    <div class="item" style="margin-top:12px;">
-      <div class="label">Résumé automatique</div>
-      <div class="value" id="autoSummary" style="font-size:14px;font-weight:800;">—</div>
-      <div class="muted">Synthèse depuis la trace / scores</div>
-    </div>
-
-    <div class="item" style="margin-top:12px;">
-      <div class="label">Type de voie (si disponible)</div>
-      <div class="value" id="surfaceText">—</div>
-
-      <div class="barWrap" aria-label="Route / Piste large / Single">
-        <span class="barSeg segRoad" id="barRoad" style="width:0%"></span>
-        <span class="barSeg segTrack" id="barTrack" style="width:0%"></span>
-        <span class="barSeg segSingle" id="barSingle" style="width:0%"></span>
-      </div>
-
-      <div class="muted">Route (gris) • Piste (vert) • Single (rouge)</div>
     </div>
   </section>
 
-  <!-- 3) Profil + carte -->
+  <!-- Bloc 2 -->
+  <section class="card" style="margin-top:14px;">
+    <h3 class="blockTitle">Scores & difficulté</h3>
+
+    <div class="scoreRow">
+      <span class="scoreBadge">💪 Phys <b id="scorePhysVal">—</b>/100</span>
+      <span class="scoreBadge">🪨 Tech <b id="scoreTechVal">—</b>/100</span>
+      <span class="scoreBadge">🏁 Global <b id="scoreGlobalVal">—</b>/100</span>
+    </div>
+
+    <div class="grid3" style="margin-top:12px;">
+      <div class="item">
+        <div class="label">Niveau de difficulté</div>
+        <div class="value" id="diffLabel">—</div>
+        <div class="muted" id="diffHint">—</div>
+      </div>
+      <div class="item">
+        <div class="label">Type de voie</div>
+        <div class="value" id="surfaceText">—</div>
+        <div class="barWrap" aria-label="Route / Piste / Single">
+          <span class="barSeg segRoad" id="barRoad" style="width:0%"></span>
+          <span class="barSeg segTrack" id="barTrack" style="width:0%"></span>
+          <span class="barSeg segSingle" id="barSingle" style="width:0%"></span>
+        </div>
+        <div class="muted">Route (gris) • Piste (vert) • Single (rouge)</div>
+      </div>
+      <div class="item">
+        <div class="label">Résumé automatique</div>
+        <div class="value" id="autoSummary" style="font-size:14px;font-weight:800;">—</div>
+        <div class="muted">Synthèse depuis la trace / scores</div>
+      </div>
+    </div>
+
+    <div class="item" style="margin-top:12px;">
+      <div class="label">Multi-tours (si activé)</div>
+      <div class="value" id="lapsInfo" style="font-size:14px;font-weight:800;">—</div>
+      <div class="muted" id="lapsHint">—</div>
+    </div>
+  </section>
+
+  <!-- Bloc 3 -->
   <section class="card" style="margin-top:14px;">
     <h3 class="blockTitle">Profil & carte</h3>
 
     <div class="twoCol">
       <div id="profileWrap">
         <div class="label">Profil altimétrique</div>
-
-        <div class="legendRow muted">
-          <span class="legendItem"><span class="legendSwatch" style="background:#22c55e;"></span> Facile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#3b82f6;"></span> Modéré</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#ef4444;"></span> Difficile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#111827;"></span> Très difficile</span>
-          <span class="muted" style="margin-left:auto;">Survole</span>
-        </div>
-
-        <div style="position:relative;">
-          <canvas id="profileCanvas" height="220"></canvas>
-          <div id="profileTooltip"
-               style="position:absolute;display:none;pointer-events:none;
-                      background:#0f172a;color:#fff;padding:8px 10px;border-radius:10px;
-                      font-size:12px;line-height:1.35;box-shadow:0 10px 30px rgba(0,0,0,.25);">
-          </div>
-        </div>
-
+        <canvas id="profileCanvas" height="220"></canvas>
         <div class="muted" id="profileInfo">—</div>
       </div>
 
       <div>
         <div class="label">Carte du tracé</div>
-
-        <div class="legendRow muted">
-          <span class="legendItem"><span class="legendSwatch" style="background:#22c55e;"></span> Facile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#3b82f6;"></span> Modéré</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#ef4444;"></span> Difficile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#111827;"></span> Très difficile</span>
-        </div>
-
         <div id="map"></div>
-
-        <div class="muted">Départ / Arrivée affichés si le script les détecte</div>
+        <div class="muted">Départ / arrivée affichés si détectés</div>
       </div>
     </div>
   </section>
 
-  <!-- 4) Infos pratiques -->
+  <!-- Infos pratiques -->
   <section class="card" style="margin-top:14px;">
     <h3 class="blockTitle">Informations pratiques</h3>
 
-    <div class="grid">
-      <div class="item">
-        <div class="label">Départ</div>
-        <div class="value" id="startPlace">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Arrivée</div>
-        <div class="value" id="finishPlace">—</div>
-      </div>
-    </div>
-
-    <div class="grid3" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Heure de départ</div>
-        <div class="value" id="startTime">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Ravitaillements</div>
-        <div class="value" id="aidStations">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Assistance mécanique</div>
-        <div class="value" id="mechStations">—</div>
-      </div>
-    </div>
-
-    <div class="grid3" style="margin-top:12px;">
+    <div class="grid3">
       <div class="item">
         <div class="label">Lavage vélos</div>
         <div class="value" id="bikeWash">—</div>
       </div>
       <div class="item">
-        <div class="label">Barrière horaire</div>
-        <div class="value" id="cutoffTime">—</div>
+        <div class="label">Assistance mécanique</div>
+        <div class="value" id="mechStations">—</div>
       </div>
       <div class="item">
-        <div class="label">Catégories d’âge</div>
-        <div class="value" id="ageCategories">—</div>
-        <div class="muted" id="ageHint">—</div>
+        <div class="label">Ravitaillements</div>
+        <div class="value" id="aidStations">—</div>
       </div>
     </div>
 
@@ -280,41 +207,262 @@
     </div>
   </section>
 
-  <!-- 5) Lien événement -->
+  <!-- Événement -->
   <section class="card" style="margin-top:14px;">
     <h3 class="blockTitle">Événement</h3>
-    <div id="meetingBlock">
-      <div class="muted">Cette épreuve n’est rattachée à aucun événement.</div>
-    </div>
+    <div id="meetingBlock" class="muted">—</div>
   </section>
 
   <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
     <a class="linkBtn secondary" href="events.html">← Retour aux épreuves</a>
     <a class="linkBtn" id="meetingLinkBtn" href="meetings.html" style="display:none">Voir l’événement</a>
+    <a class="linkBtn secondary" id="meetingUrlBtn" href="#" target="_blank" rel="noopener" style="display:none">Ouvrir le lien officiel</a>
   </div>
-
 </div>
 
-<!-- Scripts projet -->
-<script src="js/storage.js"></script>
-
-<!-- Important : ton event-detail.js doit maintenant remplir les IDs de race.html -->
-<script src="js/event-detail.js"></script>
-
 <script>
-  // Petits helpers visuels de statut (optionnel)
-  (function(){
-    const dot = document.getElementById("statusDot");
-    const txt = document.getElementById("statusText");
-    function set(ok, t){
-      if (!dot || !txt) return;
-      dot.style.background = ok ? "#16a34a" : "#94a3b8";
-      txt.textContent = t || (ok ? "OK" : "—");
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  const KEY_RACES = "mtb.races.v1";
+  const KEY_MEETINGS = "mtb.meetings.v1";
+
+  function setStatus(ok, t){
+    $("statusDot").style.background = ok ? "#16a34a" : "#94a3b8";
+    $("statusText").textContent = t || (ok ? "OK" : "—");
+  }
+
+  function loadJSON(key){
+    try{
+      const raw = localStorage.getItem(key);
+      const v = raw ? JSON.parse(raw) : [];
+      return Array.isArray(v) ? v : [];
+    }catch(_){ return []; }
+  }
+
+  function fmt1(n){ return (n==null) ? "—" : (Math.round(n*10)/10).toString().replace(".", ","); }
+  function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
+
+  function diffLabelFromGlobal(g){
+    if (g == null) return { label:"—", hint:"Score global indisponible." };
+    if (g < 25) return { label:"Facile", hint:"Accessible à la majorité des pratiquants." };
+    if (g < 50) return { label:"Modéré", hint:"Relief / technicité intermédiaires." };
+    if (g < 75) return { label:"Difficile", hint:"Exigeant physiquement et/ou techniquement." };
+    return { label:"Très difficile", hint:"Très exigeant : préparation recommandée." };
+  }
+
+  function surfaceToBars(s){
+    const road = Math.max(0, Math.min(100, Math.round(s?.roadPct ?? 0)));
+    const track = Math.max(0, Math.min(100, Math.round(s?.trackPct ?? 0)));
+    const single = Math.max(0, Math.min(100, Math.round(s?.singlePct ?? 0)));
+    const sum = road + track + single || 1;
+    return {
+      road: Math.round(road/sum*100),
+      track: Math.round(track/sum*100),
+      single: Math.max(0, 100 - Math.round(road/sum*100) - Math.round(track/sum*100))
+    };
+  }
+
+  function summarize(race){
+    const dist = num(race.distanceKm);
+    const dplus = num(race.dplusM);
+    const g = num(race.globalScore);
+    const disc = race.disc || "VTT";
+    const lvl = race.level ? `(${race.level})` : "";
+    const parts = [];
+    parts.push(`${disc} ${lvl}`.trim());
+    if (dist!=null) parts.push(`${fmt1(dist)} km`);
+    if (dplus!=null) parts.push(`D+ ${Math.round(dplus)} m`);
+    if (g!=null) parts.push(`Global ${Math.round(g)}/100`);
+    return parts.join(" • ");
+  }
+
+  function drawProfile(points){
+    const canvas = $("profileCanvas");
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width = canvas.clientWidth;
+    const h = canvas.height;
+
+    ctx.clearRect(0,0,w,h);
+    if (!Array.isArray(points) || points.length < 10){
+      $("profileInfo").textContent = "Profil indisponible (points/altitude manquants).";
+      return;
     }
-    set(false, "Chargement…");
-    window.addEventListener("mtb:raceLoaded", () => set(true, "Données chargées"));
-    window.addEventListener("mtb:raceError", (e) => set(false, (e.detail && e.detail.message) ? e.detail.message : "Erreur"));
-  })();
+
+    const ele = points.map(p => Number(p.ele)).filter(v => Number.isFinite(v));
+    if (ele.length < 10){
+      $("profileInfo").textContent = "Profil indisponible (altitude manquante).";
+      return;
+    }
+
+    const minE = Math.min(...ele);
+    const maxE = Math.max(...ele);
+    const span = Math.max(1, maxE - minE);
+
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i=0;i<points.length;i++){
+      const p = points[i];
+      const e = Number(p.ele);
+      if (!Number.isFinite(e)) continue;
+      const x = (i/(points.length-1)) * w;
+      const y = h - ((e - minE)/span) * (h-10) - 5;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+
+    $("profileInfo").textContent = `Altitude: ${Math.round(minE)}–${Math.round(maxE)} m`;
+  }
+
+  function drawMap(points){
+    const map = L.map("map");
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+
+    if (!Array.isArray(points) || points.length < 2){
+      map.setView([46.5, 2.5], 5);
+      return;
+    }
+
+    const latlngs = points
+      .map(p => [Number(p.lat), Number(p.lon)])
+      .filter(a => Number.isFinite(a[0]) && Number.isFinite(a[1]));
+
+    if (latlngs.length < 2){
+      map.setView([46.5, 2.5], 5);
+      return;
+    }
+
+    const poly = L.polyline(latlngs, { weight: 4 }).addTo(map);
+    map.fitBounds(poly.getBounds(), { padding:[20,20] });
+
+    // markers start/end
+    L.circleMarker(latlngs[0], { radius:6, weight:2 }).addTo(map).bindPopup("Départ");
+    L.circleMarker(latlngs[latlngs.length-1], { radius:6, weight:2 }).addTo(map).bindPopup("Arrivée");
+  }
+
+  function main(){
+    const id = params.get("id");
+    if (!id){
+      setStatus(false, "ID manquant");
+      $("raceName").textContent = "Épreuve introuvable";
+      return;
+    }
+
+    const races = loadJSON(KEY_RACES);
+    const meetings = loadJSON(KEY_MEETINGS);
+    const race = races.find(r => r && r.id === id) || null;
+
+    if (!race){
+      setStatus(false, "Épreuve introuvable");
+      $("raceName").textContent = "Épreuve introuvable";
+      return;
+    }
+
+    const meeting = race.meetingId ? (meetings.find(m => m && m.id === race.meetingId) || null) : null;
+
+    // Bloc 1
+    $("raceName").textContent = race.name || "Épreuve";
+    $("raceDate").textContent = race.date || "—";
+    $("raceDisc").textContent = race.disc || "—";
+    $("raceLevel").textContent = race.level || "—";
+
+    const dist = num(race.distanceKm);
+    const dplus = num(race.dplusM);
+
+    $("raceDistance").textContent = dist==null ? "—" : `${fmt1(dist)} km`;
+    $("raceDistanceHint").textContent = race.lapsConfig ? "Distance = distance GPX (1 tour) × tours (selon catégorie/sex)." : "Distance calculée depuis GPX.";
+    $("raceDplus").textContent = dplus==null ? "—" : `+${Math.round(dplus)} m`;
+    $("raceElevInfo").textContent = race.gpx?.hasElevation ? "Altitude OK" : "Altitude incertaine (GPX)";
+
+    $("raceBike").textContent = race.ebike ? "Assistance électrique" : "Musculaire";
+    $("raceCutoff").textContent = race.cutoffTime || "—";
+
+    // Bloc 2 scores
+    const phys = num(race.physScore);
+    const tech = num(race.techScore);
+    const global = num(race.globalScore);
+
+    $("scorePhysVal").textContent = phys==null ? "—" : String(Math.round(phys));
+    $("scoreTechVal").textContent = tech==null ? "—" : String(Math.round(tech));
+    $("scoreGlobalVal").textContent = global==null ? "—" : String(Math.round(global));
+
+    const d = diffLabelFromGlobal(global);
+    $("diffLabel").textContent = d.label;
+    $("diffHint").textContent = d.hint;
+
+    const s = race.surfaceEstimate || null;
+    if (s){
+      $("surfaceText").textContent = `Route ~${Math.round(s.roadPct||0)}% • Piste ~${Math.round(s.trackPct||0)}% • Single ~${Math.round(s.singlePct||0)}%`;
+      const bars = surfaceToBars(s);
+      $("barRoad").style.width = bars.road + "%";
+      $("barTrack").style.width = bars.track + "%";
+      $("barSingle").style.width = bars.single + "%";
+    } else {
+      $("surfaceText").textContent = "—";
+      $("barRoad").style.width = "0%";
+      $("barTrack").style.width = "0%";
+      $("barSingle").style.width = "0%";
+    }
+
+    $("autoSummary").textContent = summarize(race);
+
+    // Laps info
+    if (race.lapsConfig && race.lapsConfig.mode === "by_age_sex"){
+      const sel = Array.isArray(race.lapsConfig.selected) ? race.lapsConfig.selected : [];
+      $("lapsInfo").textContent = sel.length ? `Catégories: ${sel.join(", ")}` : "Multi-tours activé (catégories non précisées).";
+      $("lapsHint").textContent = "Les tours peuvent différer selon Homme/Femme et catégorie UCI.";
+    } else {
+      $("lapsInfo").textContent = "Non";
+      $("lapsHint").textContent = "Épreuve en une seule boucle (ou tours identiques).";
+    }
+
+    // Infos pratiques
+    $("bikeWash").textContent = race.bikeWash ? "Oui" : "Non";
+    $("mechStations").textContent = String(num(race.mechStations) ?? 0);
+    $("aidStations").textContent = String(num(race.aidStations) ?? 0);
+    $("raceComment").textContent = race.comment || "—";
+
+    // Meeting block
+    if (meeting){
+      const range = meeting.endDate ? `${meeting.date} → ${meeting.endDate}` : (meeting.date || "—");
+      const loc = meeting.location ? ` • 📍 ${meeting.location}` : "";
+      $("meetingBlock").innerHTML = `<b>${meeting.name}</b> • 📅 ${range}${loc}`;
+      $("meetingLinkBtn").style.display = "inline-flex";
+      $("meetingLinkBtn").href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+
+      const url = meeting.url || race.meetingUrl || null;
+      if (url){
+        $("meetingUrlBtn").style.display = "inline-flex";
+        $("meetingUrlBtn").href = url;
+      }
+    } else {
+      $("meetingBlock").textContent = "Cette épreuve n’est rattachée à aucun événement.";
+    }
+
+    // Bloc 3 map/profile
+    // On essaie de normaliser les points (lat/lon/ele). Si ton analyzeGPX renvoie autre chose, on adaptera.
+    const ptsRaw = race.gpx?.points || race.gpx?.raw?.points || null;
+
+    // Normalisation flexible (on accepte {lat,lon,ele} ou {latitude,longitude,elevation})
+    const points = Array.isArray(ptsRaw) ? ptsRaw.map(p => ({
+      lat: p.lat ?? p.latitude,
+      lon: p.lon ?? p.lng ?? p.longitude,
+      ele: p.ele ?? p.alt ?? p.elevation
+    })) : null;
+
+    drawProfile(points);
+    drawMap(points);
+
+    setStatus(true, "Données chargées");
+  }
+
+  try{ main(); }
+  catch(e){
+    console.error(e);
+    setStatus(false, "Erreur");
+  }
+})();
 </script>
 </body>
 </html>
