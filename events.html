@@ -3,90 +3,279 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Epreuves – MTB Points - Epreuves</title>
-    <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0;color:#0f172a}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .blockTitle{font-weight:900;margin:0 0 10px 0}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .item{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
-    .label{color:#667085;font-size:12px;margin-bottom:6px}
-    .value{font-weight:900;font-size:18px;color:#0f172a}
-    .muted{color:#667085;font-size:12px;margin-top:6px}
-
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid #e5e7eb;background:#f8fafc;color:#0f172a}
-    .pillDot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
-
-    .barWrap{margin-top:8px;background:#f1f5f9;border-radius:999px;overflow:hidden;border:1px solid #e5e7eb;height:16px}
-    .barSeg{height:16px;display:block;float:left}
-    .segRoad{background:#64748b}
-    .segTrack{background:#22c55e}
-    .segSingle{background:#ef4444}
-
-    #map{height:380px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
-    #profileWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
-    #profileCanvas{width:100%;display:block}
-
-    .legendRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 10px 0}
-    .legendItem{display:inline-flex;align-items:center;gap:6px}
-    .legendSwatch{width:10px;height:10px;border-radius:3px;display:inline-block}
-
-    .linkBtn{display:inline-block;padding:10px 14px;border-radius:10px;background:#2563eb;color:#fff;text-decoration:none;font-weight:900}
-    .linkBtn.secondary{background:#f1f5f9;color:#0f172a;border:1px solid #e5e7eb}
-
-    @media(max-width:900px){
-      .grid,.grid3,.twoCol{grid-template-columns:1fr}
-      #map{height:320px}
+  <title>Épreuves — MTB Points</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <style>
+    .muted2{color:#64748b;font-size:12px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+    .list{display:grid;gap:12px;margin-top:12px}
+    .raceCard{
+      display:flex;gap:12px;align-items:flex-start;justify-content:space-between;
+      border:1px solid #e5e7eb;border-radius:16px;background:#fff;padding:12px;
     }
+    .raceLeft{min-width:240px;flex:1}
+    .raceName{font-weight:900;font-size:16px;margin:0}
+    .meta{color:#334155;font-size:13px;margin-top:6px;line-height:1.5}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid #e5e7eb;
+      background:#f8fafc;font-size:12px;font-weight:900;color:#0f172a;
+      white-space:nowrap;
+    }
+    .btnRow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+    .btn{cursor:pointer}
+    .empty{
+      border:1px dashed #e5e7eb;border-radius:16px;background:#fff;padding:14px;
+      color:#334155;line-height:1.5
+    }
+    .searchRow{
+      display:grid;grid-template-columns:1fr 200px;gap:12px;align-items:end;margin-top:12px
+    }
+    @media(max-width:900px){.searchRow{grid-template-columns:1fr}}
   </style>
 </head>
 
 <body>
-<header>
-  <nav>
-<a href="index.html">Acceuil</a>
-<a href="public-ranking.html">Classement</a>
-<a href="meetings.html">Événements</a>
-<a href="reglement.html">Règlement</a>
-<a href="methodologie.html" class="active">Méthodologie (calcul)</a>
-<a href="about.html">À propos</a>
-<a href="login.html">Connexion</a>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Épreuves</h1>
+    <span class="pill" id="pillMeeting"><span class="dot"></span> <span id="pillMeetingTxt">—</span></span>
+  </div>
+
+  <nav class="nav">
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="races.html" class="active">Épreuves</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="login.html">Connexion</a>
   </nav>
-  <div class="muted">Fiche épreuve</div>
+
+  <div class="headerRight" style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="btn ghost" id="btnBack" href="meetings.html">← Retour</a>
+    <a class="btn" id="btnOpenMeeting" href="#" style="display:none;">Voir l’événement</a>
+    <a class="btn primary" id="btnCreateRace" href="#" style="display:none;">+ Créer une épreuve</a>
+  </div>
 </header>
-<div id="eventsList">Chargement...</div>
 
-<script type="module">
-  import { fetchPublishedRaces } from "./js/racesPublic.js";
+<main class="wrap">
+  <div class="card">
 
-  const wrap = document.getElementById("eventsList");
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2 id="pageTitle">Épreuves de l’événement</h2>
+          <div class="heroMeta" id="pageMeta">—</div>
+        </div>
+        <div class="heroActions" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+          <span class="pill"><span class="dot ok"></span> Filtré par événement</span>
+        </div>
+      </div>
+    </section>
 
-  try{
-    const races = await fetchPublishedRaces(50);
-    if(!races.length){
-      wrap.textContent = "Aucune épreuve publiée.";
-    } else {
-      wrap.innerHTML = races.map(r => `
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin:8px 0;">
-          <div style="font-weight:900;">${r.name}</div>
-          <div style="color:#667085;font-size:13px;">
-            ${r.date || ""} • ${r.discipline || ""} • ${r.level || ""} • ${r.distance_km ?? "—"} km • D+ ${r.dplus_m ?? "—"} m • Score ${r.score_global ?? "—"}
+    <div class="searchRow">
+      <div>
+        <label class="lbl">Recherche (nom, discipline, niveau…)</label>
+        <input class="inp" id="q" type="text" placeholder="Ex: XCO, Marathon, 30 km…" />
+      </div>
+      <div>
+        <label class="lbl">Tri</label>
+        <select class="inp" id="sort">
+          <option value="date_desc">Date ↓</option>
+          <option value="date_asc">Date ↑</option>
+          <option value="name_asc">Nom A→Z</option>
+          <option value="name_desc">Nom Z→A</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="list" class="list" style="margin-top:12px;"></div>
+
+    <div id="empty" class="empty" style="display:none; margin-top:12px;">
+      <b>Aucune épreuve trouvée</b> pour cet événement.<br/>
+      Clique sur <b>“+ Créer une épreuve”</b> pour ajouter la première.
+    </div>
+
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // -------- Storage adapters (localStorage fallback)
+  function listMeetingsSafe(){
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    if (typeof window.getMeetings === "function") return window.getMeetings();
+    try{
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(_){ return []; }
+  }
+  function findMeetingSafe(id){
+    if (!id) return null;
+    if (typeof window.findMeeting === "function") return window.findMeeting(id);
+    return listMeetingsSafe().find(m => m && m.id === id) || null;
+  }
+
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    try{
+      const raw = localStorage.getItem("mtb.races.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(_){ return []; }
+  }
+
+  // -------- Render
+  function formatRaceMeta(r){
+    const bits = [];
+    if (r.date) bits.push("📅 " + esc(r.date));
+    if (r.time) bits.push("🕒 " + esc(r.time));
+    if (r.disc) bits.push("🏷️ " + esc(r.disc));
+    if (r.level) bits.push("⭐ " + esc(r.level));
+    bits.push((r.ebike === true) ? "⚡ E-bike" : "🚴 Musculaire");
+    return bits.join(" • ") || "—";
+  }
+
+  function formatKpiLine(r){
+    // base (sans multiplier par tours) : la fiche race.html gère les tours au besoin :contentReference[oaicite:1]{index=1}
+    const dist = (r.distanceKm ?? r.analysis?.distanceKm ?? null);
+    const dplus = (r.dplusM ?? r.analysis?.dplusM ?? null);
+    const g = (r.globalScore ?? r.analysis?.globalScore ?? null);
+    const parts = [];
+    parts.push("Distance: " + (dist == null ? "—" : (Math.round(dist*10)/10) + " km"));
+    parts.push("D+: " + (dplus == null ? "—" : ("+" + Math.round(dplus) + " m")));
+    if (g != null) parts.push("Global: " + Math.round(g) + "/100");
+    return parts.join(" • ");
+  }
+
+  function applySort(arr, mode){
+    const a = arr.slice();
+    if (mode === "name_asc")  a.sort((x,y)=> String(x.name||"").localeCompare(String(y.name||""), "fr"));
+    if (mode === "name_desc") a.sort((x,y)=> String(y.name||"").localeCompare(String(x.name||""), "fr"));
+    if (mode === "date_asc")  a.sort((x,y)=> String(x.date||"").localeCompare(String(y.date||""), "fr"));
+    if (mode === "date_desc") a.sort((x,y)=> String(y.date||"").localeCompare(String(x.date||""), "fr"));
+    return a;
+  }
+
+  function renderList(all, meeting){
+    const q = ($("q").value || "").trim().toLowerCase();
+    const sort = $("sort").value;
+
+    let arr = all.slice();
+
+    // filtre meeting obligatoire
+    arr = arr.filter(r => (r.meetingId || r.meeting_id) === meeting.id);
+
+    // recherche
+    if (q){
+      arr = arr.filter(r => {
+        const hay = [
+          r.name, r.disc, r.level, r.meetingName, r.meeting_name,
+          (r.ebike === true ? "ebike" : "musculaire"),
+          r.sexAllowed
+        ].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    arr = applySort(arr, sort);
+
+    const list = $("list");
+    const empty = $("empty");
+
+    if (!arr.length){
+      list.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    list.innerHTML = arr.map(r => {
+      const rid = r.id;
+      const href = `race.html?id=${encodeURIComponent(rid)}`;
+      return `
+        <div class="raceCard">
+          <div class="raceLeft">
+            <p class="raceName">${esc(r.name || "Épreuve")}</p>
+            <div class="meta">${formatRaceMeta(r)}</div>
+            <div class="chips">
+              <span class="chip">${esc(r.disc || "Discipline —")}</span>
+              <span class="chip">${esc(r.level || "Niveau —")}</span>
+              <span class="chip">${esc(formatKpiLine(r))}</span>
+            </div>
+            <div class="muted2" style="margin-top:8px;">
+              Cliquez pour ouvrir la fiche : <b>race.html</b>
+            </div>
+          </div>
+          <div class="btnRow">
+            <a class="btn" href="${href}">Voir la fiche</a>
           </div>
         </div>
-      `).join("");
-    }
-  } catch(e){
-    wrap.textContent = "Erreur: " + e.message;
+      `;
+    }).join("");
   }
+
+  function init(){
+    const meetingId = params.get("meetingId") || params.get("id"); // tolérance
+    if (!meetingId){
+      $("pillMeetingTxt").textContent = "Aucun événement";
+      $("pageTitle").textContent = "Épreuves";
+      $("pageMeta").textContent = "⚠️ meetingId manquant dans l’URL. Exemple : races.html?meetingId=xxx";
+      $("empty").style.display = "block";
+      $("empty").innerHTML = `<b>meetingId manquant</b><br/>Ouvre cette page depuis un événement (meeting).`;
+      return;
+    }
+
+    const meeting = findMeetingSafe(meetingId);
+    if (!meeting){
+      $("pillMeetingTxt").textContent = "Événement introuvable";
+      $("pageTitle").textContent = "Épreuves";
+      $("pageMeta").textContent = "❌ Cet événement n’existe pas (dans le stockage local).";
+      $("empty").style.display = "block";
+      return;
+    }
+
+    // header links
+    $("pillMeetingTxt").textContent = meeting.name || "Événement";
+    $("btnBack").href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+    $("btnOpenMeeting").href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+    $("btnOpenMeeting").style.display = "inline-flex";
+
+    $("btnCreateRace").href = `course-create.html?meetingId=${encodeURIComponent(meeting.id)}`;
+    $("btnCreateRace").style.display = "inline-flex";
+
+    // hero
+    $("pageTitle").textContent = "Épreuves — " + (meeting.name || "");
+    const md = meeting.date || "—";
+    const me = meeting.endDate || "";
+    $("pageMeta").textContent = me ? `📅 ${md} → ${me} • ${meeting.location || ""}` : `📅 ${md} • ${meeting.location || ""}`;
+
+    const races = listRacesSafe();
+    const rerender = ()=> renderList(races, meeting);
+
+    $("q").addEventListener("input", rerender);
+    $("sort").addEventListener("change", rerender);
+
+    rerender();
+  }
+
+  init();
+})();
 </script>
 
-
-
-
-
+</body>
+</html>
