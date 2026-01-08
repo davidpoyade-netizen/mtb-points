@@ -1,341 +1,163 @@
-/* css/style.css — MTB Points (base design system)
-   Objectif: unifier toutes les pages (header, cards, boutons, grilles, formulaires, listes)
-*/
-
-:root{
-  --bg:#f4f4f4;
-  --card:#ffffff;
-  --text:#0f172a;
-  --muted:#667085;
-  --muted2:#64748b;
-  --border:#e5e7eb;
-
-  --blue:#2563eb;
-  --blue2:#1d4ed8;
-
-  --ok:#16a34a;
-  --warn:#ea580c;
-  --err:#dc2626;
-
-  --shadow:0 10px 30px rgba(2,6,23,.10);
-  --shadow2:0 16px 38px rgba(2,6,23,.12);
-
-  --r:22px;
-  --r2:18px;
-
-  --focus:rgba(37,99,235,.25);
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
-a{color:inherit}
-.muted{color:var(--muted)}
-.muted2{color:var(--muted2)}
-
-/* ---------------- Header ---------------- */
-.header{
-  position:sticky; top:0; z-index:20;
-  background:rgba(255,255,255,.90);
-  backdrop-filter:saturate(180%) blur(8px);
-  border-bottom:1px solid var(--border);
-  padding:14px 16px;
-  display:flex; align-items:center; justify-content:space-between;
-  gap:12px; flex-wrap:wrap;
-}
-.header h1{margin:0; font-size:18px; letter-spacing:.2px}
-.nav{
-  display:flex; flex-wrap:wrap;
-  gap:10px; align-items:center;
-}
-.nav a{
-  text-decoration:none;
-  padding:8px 10px;
-  border-radius:10px;
-  color:var(--blue);
-  font-weight:900;
-  font-size:13px;
-}
-.nav a:hover{background:#eff6ff}
-.nav a.active{background:#eff6ff; color:var(--blue2)}
-
-/* small utility row in header */
-.headerRight{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
+.header {
+  background: #1e293b;
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
 }
 
-/* ---------------- Layout ---------------- */
-.wrap{max-width:1100px; margin:24px auto; padding:0 16px}
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  padding:18px;
-  box-shadow:var(--shadow);
-}
-.sectionTitle{
-  margin:16px 0 10px 0;
-  font-size:16px;
-  letter-spacing:-.15px;
+.header a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
 }
 
-/* ---------------- Hero ---------------- */
-.hero{
-  border-radius:var(--r);
-  padding:18px;
-  border:1px solid var(--border);
-  background:
-    radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-    radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
-    #fff;
-}
-.heroTop{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:flex-start;
-  flex-wrap:wrap;
-}
-.hero h2{
-  margin:0;
-  font-size:24px;
-  letter-spacing:-.25px;
-}
-.heroMeta{margin-top:8px; color:#334155; line-height:1.55}
-.heroDesc{margin-top:10px; color:var(--muted2); font-size:13px; line-height:1.6}
-.heroActions{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  align-items:flex-start;
+.hero {
+  background: white;
+  text-align: center;
+  padding: 80px 20px;
 }
 
-/* ---------------- Pills ---------------- */
-.pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-weight:900;
-  font-size:12px;
-  white-space:nowrap;
+.btn {
+  display: inline-block;
+  margin-top: 20px;
+  background: #2563eb;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
 }
-.dot{width:10px; height:10px; border-radius:999px; background:#94a3b8; display:inline-block}
-.dot.ok{background:var(--ok)}
-.dot.warn{background:var(--warn)}
-.dot.err{background:var(--err)}
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
 
-/* ---------------- Buttons ---------------- */
-.btn{
+.sidebar {
+  width: 220px;
+  background: #0f172a;
+  color: white;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+}
+
+.sidebar a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  margin: 12px 0;
+}
+
+.content {
+  flex: 1;
+  padding: 30px;
+}
+
+table {
+  width: 100%;
+  background: white;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: #f1f5f9;
+  text-align: left;
+}
+.container {
+  display: flex;
+  gap: 40px;
+  padding: 40px;
+}
+
+.form {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 350px;
+}
+
+.form h2 {
+  margin-top: 0;
+}
+
+.form label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.form input,
+.form select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+}
+
+.analysis {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  flex: 1;
+}
+.scoreBadge{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
-  padding:10px 12px;
+  min-width:48px;
+  padding:8px 10px;
   border-radius:12px;
-  border:1px solid var(--border);
-  background:#fff;
-  cursor:pointer;
   font-weight:900;
-  color:var(--text);
-  text-decoration:none;
-  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
-.btn:hover{
-  transform:translateY(-1px);
-  box-shadow:0 10px 18px rgba(2,6,23,.08);
-  border-color:#dbeafe;
-}
-.btn.primary{background:var(--blue); border-color:var(--blue); color:#fff}
-.btn.primary:hover{background:var(--blue2); border-color:var(--blue2)}
-.btn.ghost{background:#f8fafc}
-.btn:disabled{opacity:.55; cursor:not-allowed; transform:none; box-shadow:none}
-
-/* ---------------- Forms ---------------- */
-label{display:block; font-weight:900; font-size:12px; color:var(--text)}
-input,select{
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  border:1px solid #cbd5e1;
-  border-radius:12px;
-  background:#fff;
-  color:var(--text);
-}
-input::placeholder{color:#94a3b8}
-
-/* ---------------- KPI grid ---------------- */
-.kpiGrid{
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap:12px;
-  margin-top:14px;
-}
-@media(max-width:900px){.kpiGrid{grid-template-columns:1fr}}
-.kpi{
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:14px;
-  background:#fff;
-  box-shadow:0 2px 10px rgba(0,0,0,.04);
-}
-.kpiLabel{
-  color:var(--muted);
-  font-size:12px;
-  font-weight:900;
-  letter-spacing:.02em;
-  text-transform:uppercase;
-}
-.kpiValue{
-  margin-top:6px;
-  font-size:26px;
-  font-weight:1000;
-  letter-spacing:-.4px;
-}
-.kpiSub{margin-top:4px; color:var(--muted); font-size:12px}
-.bar{
-  margin-top:10px;
-  height:10px;
-  border-radius:999px;
-  background:#f1f5f9;
-  border:1px solid var(--border);
-  overflow:hidden;
-}
-.bar > div{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#93c5fd,#22c55e);
-}
-
-/* ---------------- Filters grid ---------------- */
-.filters{
-  display:grid;
-  grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr 180px;
-  gap:10px;
-  align-items:end;
-}
-@media(max-width:1050px){
-  .filters{grid-template-columns:1fr 1fr;}
-  .spanAll{grid-column:1/-1;}
-}
-.hintRow{
-  margin-top:10px;
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  flex-wrap:wrap;
-  color:var(--muted);
-  font-size:12px;
-}
-
-/* ---------------- Mini chart ---------------- */
-.miniChart{
-  margin-top:10px;
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:12px;
-  background:#fff;
-  box-shadow:0 2px 10px rgba(0,0,0,.04);
-  overflow:auto;
-}
-.spark{
-  height:90px;
-  display:flex;
-  gap:4px;
-  align-items:flex-end;
-  min-width:420px;
-}
-.spark .b{
-  flex:1;
-  min-width:6px;
-  border-radius:8px;
-  border:1px solid rgba(2,6,23,.08);
-  background:linear-gradient(180deg, rgba(37,99,235,.25), rgba(37,99,235,.08));
-}
-.sparkMeta{margin-top:8px; color:var(--muted); font-size:12px}
-
-/* ---------------- List cards ---------------- */
-.list{
-  display:grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap:12px;
-  margin-top:10px;
-}
-@media(max-width:900px){.list{grid-template-columns:1fr}}
-.item{
-  display:block;
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:14px;
-  background:#fff;
-  text-decoration:none;
-  box-shadow:0 2px 10px rgba(0,0,0,.04);
-  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-}
-.item:hover{
-  transform:translateY(-2px);
-  box-shadow:var(--shadow2);
-  border-color:#dbeafe;
-}
-.topline{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  align-items:flex-start;
-  flex-wrap:wrap;
-}
-.title{font-weight:1000; font-size:16px; letter-spacing:-.2px}
+/* ===== BADGES MTB POINTS ===== */
 .badge{
   display:inline-flex;
   align-items:center;
   gap:8px;
   padding:6px 10px;
   border-radius:999px;
-  background:#f1f5f9;
-  border:1px solid var(--border);
-  font-weight:900;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  box-shadow:0 1px 6px rgba(0,0,0,.06);
   font-size:12px;
-  color:var(--text);
+  font-weight:800;
+  line-height:1;
   white-space:nowrap;
 }
-.metaLine{margin-top:8px; color:var(--muted); font-size:13px; line-height:1.5}
-.miniRow{margin-top:10px; display:flex; gap:10px; flex-wrap:wrap}
-.miniPill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-weight:900;
-  font-size:12px;
-}
+.badge .b-icon{width:16px;height:16px;display:inline-block}
+.badge .b-sub{font-weight:700;opacity:.85;font-size:11px}
 
-/* ---------------- Empty / info boxes ---------------- */
-.empty{
-  margin-top:10px;
-  border:1px dashed var(--border);
-  border-radius:18px;
-  padding:14px;
-  color:var(--muted);
-  background:#fff;
-}
+/* Niveaux */
+.badge.bronze{border-color:#f1d1b3}
+.badge.argent{border-color:#d7dde5}
+.badge.mtb1000{border-color:#c8e4ff}
+.badge.elite{border-color:#e7d9ff}
+.badge.legende{border-color:#ffe3a3}
 
-/* ---------------- Focus accessibility ---------------- */
-a:focus, button:focus, input:focus, select:focus{
-  outline:3px solid var(--focus);
-  outline-offset:2px;
+/* Variante compacte (classement) */
+.badge.sm{
+  padding:4px 8px;
+  font-size:11px;
+  gap:6px;
 }
+.badge.sm .b-icon{width:14px;height:14px}
 
+/* Alignement en tableau */
+.badge-row{display:flex;gap:8px;flex-wrap:wrap}
+button.disabled{
+  opacity:0.7;
+  cursor:not-allowed;
+}
