@@ -4,43 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Créer une épreuve — MTB Points</title>
-  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    .muted2{color:#64748b;font-size:12px}
-    .grid2{display:grid;gap:12px}
-    .grid3{display:grid;gap:12px}
-    .grid4{display:grid;gap:12px}
-    .cols2{grid-template-columns:1fr 1fr}
-    .cols3{grid-template-columns:1fr 1fr 1fr}
-    .cols4{grid-template-columns:1.4fr 1fr 1fr 1fr}
-    @media (max-width: 980px){
-      .cols2,.cols3,.cols4{grid-template-columns:1fr}
-    }
-
-    .blockTitle{margin-top:18px}
-    .panel{
-      border:1px solid #e5e7eb;
-      border-radius:16px;
-      background:#fff;
-      padding:14px;
-    }
-    .panelHeader{
-      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start;
-      margin-bottom:10px;
-    }
-    .panelHeader .hint{color:#64748b;font-size:12px;line-height:1.4}
-    .miniCard{
-      border:1px dashed #e5e7eb;border-radius:16px;background:#fff;padding:14px;color:#64748b;
-    }
-    .miniCard strong{color:#0f172a}
-    .mapBox{
-      border:1px dashed #e5e7eb;border-radius:16px;background:#fff;min-height:260px;
-      display:flex;align-items:center;justify-content:center;color:#64748b;
-    }
-    .chartBox{
-      border:1px dashed #e5e7eb;border-radius:16px;background:#fff;min-height:220px;
-      display:flex;align-items:center;justify-content:center;color:#64748b;
-    }
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px}
+    @media(max-width:980px){.grid2,.grid3{grid-template-columns:1fr}}
+    .kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
+    @media(max-width:980px){.kpis{grid-template-columns:1fr}}
+    .kpi{border:1px solid #e5e7eb;border-radius:16px;background:#fff;padding:12px}
+    .kpiLabel{font-size:12px;color:#64748b}
+    .kpiValue{font-size:22px;font-weight:1000;margin-top:6px}
+    .kpiSub{font-size:12px;color:#64748b;margin-top:4px}
+    .hint{font-size:12px;color:#64748b;margin-top:6px}
+    .right{display:flex;justify-content:flex-end}
   </style>
 </head>
 
@@ -48,8 +24,7 @@
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points — Créer une épreuve</h1>
-    <span class="pill"><span class="dot ok"></span> Événement obligatoire</span>
-    <span class="pill"><span class="dot ok"></span> GPX obligatoire</span>
+    <span class="pill"><span class="dot ok"></span> Organisateur</span>
   </div>
 
   <nav class="nav">
@@ -58,351 +33,171 @@
     <a href="meetings.html">Événements</a>
     <a href="events.html" class="active">Épreuves</a>
     <a href="dashboard.html">Dashboard</a>
-    <a href="login.html">Connexion</a>
   </nav>
 
   <div class="headerRight">
-    <a class="btn ghost" id="btnBack" href="meetings.html">← Retour</a>
+    <a class="btn ghost" href="meetings.html">← Retour</a>
   </div>
 </header>
 
 <main class="wrap">
   <div class="card">
 
-    <!-- HERO -->
     <section class="hero">
       <div class="heroTop">
         <div style="min-width:280px;flex:1">
           <h2>Nouvelle épreuve</h2>
           <div class="heroMeta">
-            1) Événement + infos • 2) Import GPX (analyse auto) • 3) Enregistrer
+            Crée une épreuve rattachée à un événement. Le GPX est optionnel mais recommandé.
           </div>
-          <div id="meetingHint" class="heroDesc"></div>
         </div>
-
         <div class="heroActions">
-          <span class="pill"><span class="dot ok"></span> Distance/D+ auto</span>
-          <span class="pill"><span class="dot warn"></span> ScoreTech via Render</span>
+          <span class="pill"><span class="dot"></span> GPX optionnel</span>
+          <span class="pill"><span class="dot ok"></span> Public si publié</span>
         </div>
       </div>
     </section>
 
-    <!-- ===================================================== -->
-    <!-- 1) Événement rattaché + Date + Nom + Heure + Tours     -->
-    <!-- ===================================================== -->
-    <h3 class="sectionTitle blockTitle">1) Événement & paramètres</h3>
-    <div class="panel">
-      <div class="panelHeader">
-        <div>
-          <div class="hint" id="meetingDateHint">La date est pré-remplie à partir de l’événement.</div>
-        </div>
-        <div class="pill"><span class="dot ok"></span> Rattachement requis</div>
+    <!-- STATUS (écouté par course-create.js si gpx.js émet mtb:status) -->
+    <div id="statusBox" class="empty" style="display:none; margin-top:14px;">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span class="pill" id="statusPhase"><span class="dot"></span> —</span>
+        <span id="statusMsg" class="muted">—</span>
+      </div>
+      <div class="bar" style="margin-top:10px; display:none;" id="statusBarWrap" aria-label="progress">
+        <div id="statusBar"></div>
+      </div>
+      <div class="muted" style="font-size:12px; margin-top:8px;" id="statusSub"></div>
+    </div>
+
+    <h3 class="sectionTitle" style="margin-top:18px;">Rattachement & date</h3>
+    <div class="grid3">
+      <div>
+        <label for="eventGroupId">Événement *</label>
+        <select id="eventGroupId"></select>
+        <div class="hint">Obligatoire : l’épreuve appartient à un événement.</div>
       </div>
 
-      <div class="filters grid2 cols3" style="align-items:end;">
-        <div>
-          <label for="eventGroupId">Événement *</label>
-          <select id="eventGroupId"></select>
-          <div class="muted2" style="margin-top:6px" id="dateHint">Une épreuve ne peut pas exister sans événement.</div>
-        </div>
-
-        <div>
-          <label for="courseDate">Date de l’épreuve *</label>
-          <input id="courseDate" type="date" />
-        </div>
-
-        <div>
-          <label for="courseName">Nom de l’épreuve *</label>
-          <input id="courseName" type="text" placeholder="Ex : 10 km • 20 km • Spéciale 1 • Spéciale 2…" />
-        </div>
+      <div>
+        <label for="courseDate">Date *</label>
+        <input id="courseDate" type="date" />
       </div>
 
-      <div class="filters grid2 cols3" style="align-items:end;margin-top:12px;">
-        <div>
-          <label for="startTime">Heure de départ</label>
-          <input id="startTime" type="time" />
-        </div>
-
-        <div>
-          <label for="lapsDefault">Nombre de tours</label>
-          <!-- course-create.js lit lapsDefault via val("lapsDefault") -->
-          <input id="lapsDefault" type="number" min="1" step="1" value="1" />
-          <div class="muted2" style="margin-top:6px">1 = course en ligne / 2+ = circuit.</div>
-        </div>
-
-        <div>
-          <label for="participantsCount">Participants (optionnel)</label>
-          <input id="participantsCount" type="number" step="1" min="0" placeholder="ex: 250" />
-        </div>
+      <div>
+        <label for="startTime">Heure (optionnel)</label>
+        <input id="startTime" type="time" />
       </div>
     </div>
 
-    <!-- ===================================================== -->
-    <!-- 2) Infos épreuve + catégorie + discipline              -->
-    <!-- ===================================================== -->
-    <h3 class="sectionTitle blockTitle">2) Infos épreuve</h3>
-    <div class="panel">
-      <div class="panelHeader">
-        <div class="hint">Catégorie d’épreuve + discipline + informations libres.</div>
-        <div class="pill"><span class="dot"></span> Infos</div>
+    <h3 class="sectionTitle" style="margin-top:18px;">Infos épreuve</h3>
+    <div class="grid3">
+      <div>
+        <label for="courseName">Nom *</label>
+        <input id="courseName" type="text" placeholder="Ex: XC 45km / Spéciale 1 / etc." />
       </div>
 
-      <div class="filters grid2 cols3" style="align-items:end;">
-        <div>
-          <label for="category">Catégorie d’épreuve</label>
-          <select id="category">
-            <option value="">—</option>
-            <option value="Local">Local</option>
-            <option value="Regional">Régional</option>
-            <option value="National">National</option>
-            <option value="International">International</option>
-          </select>
-        </div>
-
-        <!-- ✅ On garde l’ID disc attendu par ton JS, mais on met tes options -->
-        <div>
-          <label for="disc">Discipline *</label>
-          <select id="disc">
-            <option value="">— Choisir —</option>
-            <option value="XC">XC</option>
-            <option value="DH">DH</option>
-            <option value="Enduro">Enduro</option>
-            <option value="Gravel">Gravel</option>
-          </select>
-          <div class="muted2" style="margin-top:6px">Le type vélo se règle juste à côté.</div>
-        </div>
-
-        <!-- ✅ Tu voulais “XC électrique / XC musculaire” : on le gère avec ebike -->
-        <div>
-          <label for="ebike">Type vélo</label>
-          <select id="ebike">
-            <option value="0">Musculaire</option>
-            <option value="1">Assistance électrique</option>
-          </select>
-          <div class="muted2" style="margin-top:6px">Pour XC : musculaire vs VTTAE.</div>
-        </div>
+      <div>
+        <label for="disc">Discipline</label>
+        <select id="disc">
+          <option value="">Auto</option>
+          <option value="XC">XC</option>
+          <option value="Enduro">Enduro</option>
+          <option value="DH">DH</option>
+          <option value="Gravel">Gravel</option>
+          <option value="Marathon">Marathon</option>
+          <option value="Ultra">Ultra</option>
+        </select>
       </div>
 
-      <div class="filters" style="margin-top:12px;">
-        <label for="comment">Commentaire libre</label>
-        <input id="comment" type="text" placeholder="Optionnel : infos parcours, météo, zones techniques, consignes…" />
-      </div>
-
-      <!-- ✅ ton JS demande un champ level obligatoire : on le garde, mais on le rend “catégorie”/“niveau” cohérent -->
-      <div class="filters grid2 cols2" style="align-items:end;margin-top:12px;">
-        <div>
-          <label for="level">Niveau *</label>
-          <select id="level">
-            <option value="">—</option>
-            <option value="Local">Local</option>
-            <option value="Regional">Régional</option>
-            <option value="National">National</option>
-            <option value="International">International</option>
-          </select>
-          <div class="muted2" style="margin-top:6px">Aligné avec la “catégorie d’épreuve”.</div>
-        </div>
-
-        <div class="miniCard">
-          <strong>Astuce</strong><br/>
-          Tu peux mettre “catégorie” et “niveau” identiques pour l’instant.
-          On pourra ensuite supprimer l’un des deux (et adapter le JS) si tu veux simplifier.
-        </div>
+      <div>
+        <label for="ebike">Type vélo</label>
+        <select id="ebike">
+          <option value="0">Musculaire</option>
+          <option value="1">Assistance électrique</option>
+        </select>
       </div>
     </div>
 
-    <!-- ===================================================== -->
-    <!-- 3) Analyse GPX & OSM + champs auto + scores            -->
-    <!-- ===================================================== -->
-    <h3 class="sectionTitle blockTitle">3) Analyse GPX & OSM</h3>
-    <div class="panel">
-      <div class="panelHeader">
-        <div class="hint">
-          Import GPX → analyse auto : distance/D+ + ScorePhys + ScoreTech (serveur Render) + score global.
-        </div>
-        <div class="pill"><span class="dot ok"></span> Auto</div>
+    <div class="grid3" style="margin-top:12px">
+      <div>
+        <label for="level">Niveau</label>
+        <select id="level">
+          <option value="">—</option>
+          <option value="Local">Local</option>
+          <option value="Regional">Régional</option>
+          <option value="National">National</option>
+          <option value="International">International</option>
+        </select>
       </div>
 
-      <div class="filters grid2 cols3" style="align-items:end;">
-        <div>
-          <label for="courseGpxFile">Fichier GPX *</label>
-          <input id="courseGpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml" />
-          <div class="muted2" style="margin-top:6px;">
-            L’analyse se lance automatiquement au choix du fichier.
-            <br/>Render free : la 1ère analyse après inactivité peut être lente.
-          </div>
-        </div>
-
-        <div>
-          <label for="distanceKm">Distance (km) *</label>
-          <input id="distanceKm" type="number" step="0.1" min="0" placeholder="Auto via GPX" />
-        </div>
-
-        <div>
-          <label for="dplusM">Dénivelé positif (m) *</label>
-          <input id="dplusM" type="number" step="1" min="0" placeholder="Auto via GPX" />
-        </div>
+      <div>
+        <label for="distanceKm">Distance (km)</label>
+        <input id="distanceKm" type="number" step="0.1" placeholder="Ex: 42.5" />
       </div>
 
-      <div class="filters" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-        <button class="btn ghost" id="btnClearGPX" type="button">Effacer GPX</button>
-        <button class="btn primary" id="saveCourseBtn" type="button">Créer l’épreuve</button>
-      </div>
-
-      <!-- KPIs -->
-      <div class="kpiGrid" style="margin-top:14px;">
-        <div class="kpi">
-          <div class="kpiLabel">ScorePhys</div>
-          <div class="kpiValue"><span id="kpiPhys">—</span><span class="muted"> /100</span></div>
-          <div class="kpiSub" id="kpiPhysSub">—</div>
-        </div>
-        <div class="kpi">
-          <div class="kpiLabel">ScoreTech</div>
-          <div class="kpiValue"><span id="kpiTech">—</span><span class="muted"> /100</span></div>
-          <div class="kpiSub" id="kpiTechSub">—</div>
-        </div>
-        <div class="kpi">
-          <div class="kpiLabel">Score Global</div>
-          <div class="kpiValue"><span id="kpiGlobal">—</span><span class="muted"> /100</span></div>
-          <div class="kpiSub" id="kpiGlobalSub">—</div>
-        </div>
-      </div>
-
-      <div id="msg" class="empty" style="display:none; margin-top:14px;"></div>
-    </div>
-
-    <!-- ===================================================== -->
-    <!-- 4) Profil + Carte                                      -->
-    <!-- ===================================================== -->
-    <h3 class="sectionTitle blockTitle">4) Profil & carte</h3>
-          <!-- Actions bloc 4 -->
-      <div class="filters" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-        <a class="btn ok"
-           id="viewRaceBtn"
-           href="#"
-           style="display:none">
-          👁️ Voir la fiche épreuve
-        </a>
-      </div>
-
-    <div class="panel">
-      <div class="panelHeader">
-        <div class="hint">
-          Profil tous les 5 km + couleurs (à brancher) • circuit sur une carte (à brancher).
-        </div>
-        <div class="pill"><span class="dot"></span> Visualisation</div>
-      </div>
-
-      <div class="grid2 cols2">
-        <div class="chartBox" id="profileBox">
-          Profil altimétrique (bientôt)
-        </div>
-        <div class="mapBox" id="mapBox">
-          Carte du parcours (bientôt)
-        </div>
-      </div>
-
-      <div class="muted2" style="margin-top:10px">
-        Note : on activera ce bloc quand on branche un rendu (Canvas/SVG pour le profil + Leaflet pour la carte).
+      <div>
+        <label for="dplusM">Dénivelé + (m)</label>
+        <input id="dplusM" type="number" step="1" placeholder="Ex: 1450" />
       </div>
     </div>
 
-    <div class="hintRow" style="margin-top:14px;">
-      <div class="muted">* Champs obligatoires</div>
-      <div class="muted" id="saveHint">Tu peux créer plusieurs épreuves pour le même événement.</div>
+    <div class="grid2" style="margin-top:12px">
+      <div>
+        <label for="participantsCount">Participants (optionnel)</label>
+        <input id="participantsCount" type="number" step="1" placeholder="Ex: 180" />
+      </div>
+      <div>
+        <label for="comment">Commentaire (optionnel)</label>
+        <input id="comment" type="text" placeholder="Infos complémentaires…" />
+      </div>
     </div>
 
+    <h3 class="sectionTitle" style="margin-top:18px;">GPX (optionnel)</h3>
+    <div class="grid2">
+      <div>
+        <label for="courseGpxFile">Fichier GPX</label>
+        <input id="courseGpxFile" type="file" accept=".gpx,application/gpx+xml" />
+        <div class="hint">Si tu ajoutes un GPX, on calcule distance / D+ et les scores.</div>
+      </div>
+      <div class="right" style="align-items:end">
+        <button class="btn ghost" id="btnClearGPX" type="button">🧹 Retirer le GPX</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpiLabel">ScorePhys</div>
+        <div class="kpiValue"><span id="kpiPhys">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub" id="kpiPhysSub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpiLabel">ScoreTech</div>
+        <div class="kpiValue"><span id="kpiTech">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub" id="kpiTechSub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpiLabel">Score Global</div>
+        <div class="kpiValue"><span id="kpiGlobal">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub" id="kpiGlobalSub">—</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+      <button class="btn primary" id="saveCourseBtn" type="button">Créer l’épreuve</button>
+      <a class="btn ok" id="btnViewRace" href="#" style="display:none;">👁️ Voir la fiche épreuve</a>
+    </div>
+
+    <div id="msg" class="empty" style="display:none; margin-top:14px;"></div>
   </div>
 </main>
 
 <!-- deps -->
 <script src="js/data.js"></script>
 <script src="js/storage.js"></script>
-
-<!-- GPX analyzer (frontend) -->
 <script src="js/gpx.js"></script>
 
-<!-- Create course logic -->
+<!-- ✅ logique page -->
 <script src="js/course-create.js"></script>
-
-<script>
-/**
- * Glue meetingId -> pré-remplir la date + retour vers la fiche meeting
- * (simple et sans dépendre d'un gros script inline)
- */
-(function(){
-  const $ = (id) => document.getElementById(id);
-  const params = new URLSearchParams(location.search);
-
-  function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-
-  function findMeetingSafe(id){
-    if (!id) return null;
-    if (typeof window.findMeeting === "function") return window.findMeeting(id);
-    try {
-      const raw = localStorage.getItem("mtb.meetings.v1");
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr.find(m => m && m.id === id) : null;
-    } catch(_){ return null; }
-  }
-
-  function applyMeetingDefaults(mid){
-    const m = findMeetingSafe(mid);
-    const hint = $("meetingHint");
-    const dateEl = $("courseDate");
-    const dateHint = $("meetingDateHint");
-    const back = $("btnBack");
-
-    if (!m){
-      if (hint) hint.innerHTML = `⚠️ Événement introuvable.`;
-      if (dateEl){ dateEl.min = ""; dateEl.max = ""; }
-      if (dateHint) dateHint.textContent = "La date sera pré-remplie à partir de l’événement.";
-      if (back) back.href = "meetings.html";
-      return;
-    }
-
-    const start = m.date || null;
-    const end = m.endDate || null;
-
-    if (hint){
-      const range = end ? `${esc(start)} → ${esc(end)}` : esc(start || "—");
-      hint.innerHTML = `<b>${esc(m.name)}</b> • ${esc(m.location || "Lieu non précisé")} • Dates: <b>${range}</b>`;
-    }
-
-    if (dateEl){
-      dateEl.min = start || "";
-      dateEl.max = end || "";
-      if (!dateEl.value && start) dateEl.value = start;
-      if (start && dateEl.value && dateEl.value < start) dateEl.value = start;
-      if (end && dateEl.value && dateEl.value > end) dateEl.value = start || end;
-    }
-
-    if (dateHint){
-      dateHint.textContent = end
-        ? "Événement multi-jours : la date de l’épreuve doit être dans la plage."
-        : "Événement 1 jour : date de l’épreuve = date de l’événement (par défaut).";
-    }
-
-    if (back){
-      back.href = `meeting.html?id=${encodeURIComponent(m.id)}`;
-    }
-  }
-
-  const sel = $("eventGroupId");
-  const mid = params.get("meetingId") || params.get("eventGroupId");
-
-  if (sel && mid){
-    setTimeout(() => {
-      sel.value = mid;
-      applyMeetingDefaults(mid);
-    }, 0);
-  }
-
-  if (sel) sel.addEventListener("change", () => applyMeetingDefaults(sel.value));
-})();
-</script>
-
 </body>
 </html>
 
