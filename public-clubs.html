@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Classement clubs — MTB Points</title>
+  <link rel="stylesheet" href="./css/style.css" />
+
+  <style>
+    .wrap{max-width:1280px}
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .tab{
+      border:1px solid var(--border);background:#fff;border-radius:999px;
+      padding:8px 12px;font-weight:1000;font-size:13px;cursor:pointer;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .tab:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .tab.active{background:#eff6ff;border-color:#bfdbfe;color:var(--blue2)}
+
+    .panel{
+      margin-top:12px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+      overflow:hidden;
+    }
+    .panelHead{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;
+      background:#f8fafc;
+    }
+    .panelHead h3{margin:0;font-size:14px;letter-spacing:-.1px}
+    .panelBody{padding:0}
+
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    thead th{
+      position:sticky;top:0;
+      background:#fff;z-index:1;text-align:left;
+      font-size:12px;color:#475569;
+      padding:10px 12px;border-bottom:1px solid var(--border);
+      white-space:nowrap;
+    }
+    tbody td{
+      padding:10px 12px;border-bottom:1px solid var(--border);
+      font-size:13px;vertical-align:top;
+    }
+    tbody tr:hover td{background:#fbfdff}
+    tbody tr:last-child td{border-bottom:0}
+
+    .rank{font-weight:1000}
+    .name{font-weight:1000}
+    .small{font-size:12px;color:var(--muted)}
+    .points{font-weight:1000;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .empty{padding:14px;border-top:1px dashed var(--border);color:var(--muted)}
+
+    .sourceBox{
+      margin-top:12px;
+      border:1px dashed var(--border);
+      border-radius:18px;
+      padding:12px;
+      background:#fff;
+      color:var(--muted);
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+      font-size:12px;
+    }
+    .sourceBox b{color:var(--text)}
+  </style>
+</head>
+
+<body>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Classement clubs</h1>
+    <span class="pill"><span class="dot ok"></span><span id="pillCount">0</span> clubs</span>
+  </div>
+
+  <nav class="nav">
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement riders</a>
+    <a href="public-clubs.html" class="active">Classement clubs</a>
+    <a href="meetings.html">Événements</a>
+    <a href="events.html">Épreuves</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="about.html">À propos</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="card">
+
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2>Classement — Clubs</h2>
+          <div class="heroMeta">
+            Somme des points de tous les riders d’un club (filtrable par discipline / e-bike).
+          </div>
+          <div class="heroDesc">
+            Champs attendus (au moins) : <code>club</code> (ou <code>team</code>/<code>equipe</code>) dans les résultats.
+          </div>
+        </div>
+
+        <div class="heroActions">
+          <span class="pill"><span class="dot"></span><span id="pillMode">Général</span></span>
+          <span class="pill"><span class="dot"></span><span id="pillRows">0</span> lignes</span>
+          <span class="pill"><span class="dot warn"></span><span id="pillSource">—</span></span>
+        </div>
+      </div>
+
+      <div class="tabs" id="tabs"></div>
+    </section>
+
+    <!-- Filters -->
+    <div class="filters" style="margin-top:14px;">
+      <div class="spanAll">
+        <label for="q">Recherche club</label>
+        <input id="q" type="text" placeholder="Nom du club…" />
+      </div>
+
+      <div>
+        <label for="nat">Nationalité</label>
+        <select id="nat"><option value="">Toutes</option></select>
+      </div>
+
+      <div>
+        <label for="minPts">Points min</label>
+        <input id="minPts" type="number" min="0" placeholder="ex: 500" />
+      </div>
+
+      <div>
+        <label for="sortBy">Tri</label>
+        <select id="sortBy">
+          <option value="points_desc">Points ↓</option>
+          <option value="points_asc">Points ↑</option>
+          <option value="club_asc">Club A→Z</option>
+          <option value="riders_desc">Riders ↓</option>
+        </select>
+      </div>
+
+      <div>
+        <button class="btn primary" id="btnReset" type="button">Réinitialiser</button>
+      </div>
+
+      <div class="spanAll hintRow" style="margin-top:6px">
+        <div>Affichage : <strong id="countShown">0</strong> clubs</div>
+        <div>Astuce : standardise le champ <code>club</code> dans tes imports résultats.</div>
+      </div>
+    </div>
+
+    <div class="sourceBox">
+      <div>Mode données : <b id="sourceLabel">—</b></div>
+      <div class="muted2" id="sourceHint">—</div>
+    </div>
+
+    <!-- Table clubs -->
+    <section class="panel">
+      <div class="panelHead">
+        <h3>🏁 Clubs</h3>
+        <span class="pill"><span class="dot"></span><span id="countClubs">0</span></span>
+      </div>
+      <div class="panelBody">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:56px;">#</th>
+              <th>Club</th>
+              <th style="width:130px;">Nation</th>
+              <th style="width:120px;">Riders</th>
+              <th style="width:120px;">Résultats</th>
+              <th style="width:110px;">Points</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyClubs"></tbody>
+        </table>
+        <div id="emptyClubs" class="empty" style="display:none;">
+          Aucun club trouvé. Ajoute un champ <code>club</code> (ou <code>team</code>/<code>equipe</code>) dans tes résultats.
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- deps locales (fallback localStorage) -->
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+
+<script type="module">
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const esc = (s)=>String(s??"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const num = (x)=>{ const n = Number(String(x??"").replace(",", ".").trim()); return Number.isFinite(n) ? n : null; };
+
+  function setSource(kind, hint){
+    $("pillSource").textContent = kind || "—";
+    $("sourceLabel").textContent = kind || "—";
+    $("sourceHint").textContent = hint || "—";
+    const dot = $("pillSource")?.closest(".pill")?.querySelector(".dot");
+    if (dot){
+      dot.classList.remove("ok","warn","err");
+      dot.classList.add(kind === "Supabase" ? "ok" : "warn");
+    }
+  }
+
+  // ---------- normalize ----------
+  function pick(obj, keys){
+    for (const k of keys){
+      if (obj && obj[k] != null && String(obj[k]).trim() !== "") return obj[k];
+    }
+    return null;
+  }
+  function normDisc(v){ return (String(v||"").trim()) || ""; }
+  function normSex(v){
+    const s = String(v||"").trim().toLowerCase();
+    if (!s) return null;
+    if (["m","h","homme","male","masculin"].includes(s)) return "M";
+    if (["f","femme","female","feminin","féminin"].includes(s)) return "F";
+    return null;
+  }
+  function isEbike(v){
+    if (v == null) return null;
+    const s = String(v).trim().toLowerCase();
+    if (s === "1" || s === "true" || s === "yes") return true;
+    if (s === "0" || s === "false" || s === "no") return false;
+    return null;
+  }
+  function normalizeRow(r){
+    return {
+      raceId: r?.raceId ?? r?.race_id ?? r?.eventId ?? null,
+      points: num(r?.points ?? r?.score ?? r?.mtbPoints) ?? 0,
+
+      riderId: pick(r, ["riderId","rider_id","athlete_id","id"]) || null,
+      riderEmail: (pick(r, ["riderEmail","email","mail","e-mail"]) || "").toString().trim().toLowerCase() || null,
+      riderName: (pick(r, ["riderName","name","nom","prenom","prénom","athlete","coureur"]) || "").toString().trim() || null,
+
+      sex: normSex(pick(r, ["sex","gender","sexe"])),
+      nationality: (pick(r, ["nationality","nation","country","pays","nat"]) || "").toString().trim() || null,
+
+      club: (pick(r, ["club","team","equipe","équipe","club_name","team_name"]) || "").toString().trim() || null,
+
+      disc: normDisc(pick(r, ["disc","discipline"])),
+      ebike: (pick(r, ["ebike","isEbike","eBike"]) ?? null),
+    };
+  }
+
+  // ---------- tabs / modes ----------
+  const MODES = [
+    { key:"general", label:"Général", disc:null, ebike:null },
+    { key:"xc_m", label:"XC musculaire", disc:"XC", ebike:false },
+    { key:"xc_e", label:"XC assistance électrique", disc:"XC", ebike:true },
+    { key:"dh", label:"DH", disc:"DH", ebike:null },
+    { key:"enduro", label:"Enduro", disc:"Enduro", ebike:null },
+    { key:"gravel", label:"Gravel", disc:"Gravel", ebike:null },
+  ];
+  let ACTIVE_MODE = "general";
+
+  function buildTabs(enabled=true){
+    const root = $("tabs");
+    root.innerHTML = "";
+    for (const m of MODES){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = `tab ${m.key === ACTIVE_MODE ? "active" : ""}`;
+      b.textContent = m.label;
+      b.disabled = !enabled && m.key !== "general";
+      b.title = (!enabled && m.key !== "general") ? "Vue discipline indisponible (données agrégées)" : "";
+      b.addEventListener("click", ()=>{
+        ACTIVE_MODE = m.key;
+        buildTabs(enabled);
+        renderAll();
+      });
+      root.appendChild(b);
+    }
+  }
+
+  // ---------- data ----------
+  let SOURCE_MODE = "Local";
+  let rows = [];
+  let racesById = new Map();
+
+  function safeJson(key){
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(_){ return null; }
+  }
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    const arr = safeJson("mtb.races.v1");
+    return Array.isArray(arr) ? arr : [];
+  }
+  function listResultsSafe(){
+    if (typeof window.listResults === "function") return window.listResults();
+    if (typeof window.getResults === "function") return window.getResults();
+    const arr = safeJson("mtb.results.v1");
+    return Array.isArray(arr) ? arr : [];
+  }
+
+  function normalizeLocalRace(r){
+    return {
+      id: r?.id ?? null,
+      disc: normDisc(r?.disc ?? r?.discipline),
+      ebike: r?.ebike ?? r?.isEbike ?? r?.eBike ?? null,
+    };
+  }
+
+  function modeFilter(row){
+    const mode = MODES.find(x => x.key === ACTIVE_MODE) || MODES[0];
+    if (!mode || mode.key === "general") return true;
+
+    const disc = row.disc || racesById.get(row.raceId)?.disc || "";
+    const eb = isEbike(row.ebike ?? racesById.get(row.raceId)?.ebike);
+
+    if (mode.disc && String(disc||"").toLowerCase() !== String(mode.disc).toLowerCase()) return false;
+    if (mode.ebike !== null){
+      if (eb === null) return false;
+      if (eb !== mode.ebike) return false;
+    }
+    return true;
+  }
+
+  async function tryLoadFromSupabase(){
+    try{
+      const { supabase } = await import("./js/supabaseClient.js");
+
+      // idéal: v_public_results
+      try{
+        const { data, error } = await supabase
+          .from("v_public_results")
+          .select("*")
+          .limit(10000);
+
+        if (error) throw error;
+
+        rows = (data || []).map(normalizeRow);
+        SOURCE_MODE = "Supabase";
+        setSource("Supabase", "Source: v_public_results (tabs discipline actives si disc/ebike présents)");
+        return true;
+      } catch(_) {
+        // fallback: v_public_ranking (agrégé -> pas de club normalement, mais on tente quand même)
+        const { data, error } = await supabase
+          .from("v_public_ranking")
+          .select("*")
+          .limit(10000);
+
+        if (error) throw error;
+
+        rows = (data || []).map(r => normalizeRow({
+          score: r.score ?? r.points,
+          nationality: r.nationality ?? r.nat,
+          club: r.club ?? r.team ?? r.equipe,
+          name: r.name
+        }));
+        SOURCE_MODE = "Supabase";
+        setSource("Supabase", "Source: v_public_ranking (agrégé : club souvent indisponible)");
+        return true;
+      }
+    } catch(e){
+      return false;
+    }
+  }
+
+  function loadFromLocal(){
+    const races = listRacesSafe().map(normalizeLocalRace);
+    racesById = new Map(races.filter(r => r.id).map(r => [r.id, r]));
+
+    rows = listResultsSafe().map(normalizeRow);
+    SOURCE_MODE = "Local";
+    setSource("Local", "Source: localStorage (mtb.results.v1 + mtb.races.v1)");
+  }
+
+  // ---------- aggregate clubs ----------
+  function aggregateClubs(){
+    const map = new Map();
+
+    for (const r of rows){
+      if (!modeFilter(r)) continue;
+      if (!r.club) continue;
+
+      const key = r.club.trim().toLowerCase();
+      if (!key) continue;
+
+      if (!map.has(key)){
+        map.set(key, {
+          club: r.club,
+          nationality: r.nationality || null,
+          points: 0,
+          results: 0,
+          ridersSet: new Set()
+        });
+      }
+      const it = map.get(key);
+
+      it.points += (num(r.points) ?? 0);
+      it.results += 1;
+
+      const rk = r.riderEmail ? `email:${r.riderEmail}` :
+                r.riderId ? `id:${r.riderId}` :
+                r.riderName ? `name:${r.riderName.toLowerCase()}` : null;
+      if (rk) it.ridersSet.add(rk);
+
+      it.nationality = it.nationality || r.nationality || null;
+    }
+
+    return Array.from(map.values()).map(x => ({
+      club: x.club,
+      nationality: x.nationality,
+      points: Math.round(x.points),
+      results: x.results,
+      riders: x.ridersSet.size
+    }));
+  }
+
+  // ---------- filters ----------
+  function fillNatOptions(clubs){
+    const nats = Array.from(new Set(clubs.map(c => (c.nationality||"").trim()).filter(Boolean)))
+      .sort((a,b)=>a.localeCompare(b));
+    const sel = $("nat");
+    const keep = sel.value;
+    sel.innerHTML = `<option value="">Toutes</option>` + nats.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+    if (keep) sel.value = keep;
+  }
+
+  function applyFilters(clubs){
+    const q = ($("q").value || "").trim().toLowerCase();
+    const nat = ($("nat").value || "").trim();
+    const minPts = num($("minPts").value) ?? 0;
+
+    return clubs.filter(c=>{
+      if (q && !String(c.club||"").toLowerCase().includes(q)) return false;
+      if (nat && (c.nationality||"") !== nat) return false;
+      if ((c.points ?? 0) < minPts) return false;
+      return true;
+    });
+  }
+
+  function sortClubs(arr){
+    const s = $("sortBy").value || "points_desc";
+    const a = arr.slice();
+    a.sort((x,y)=>{
+      if (s === "points_desc") return (y.points||0) - (x.points||0);
+      if (s === "points_asc") return (x.points||0) - (y.points||0);
+      if (s === "club_asc") return String(x.club||"").toLowerCase().localeCompare(String(y.club||"").toLowerCase());
+      if (s === "riders_desc") return (y.riders||0) - (x.riders||0);
+      return 0;
+    });
+    return a;
+  }
+
+  // ---------- render ----------
+  function renderTable(list){
+    const tb = $("tbodyClubs");
+    const empty = $("emptyClubs");
+    tb.innerHTML = "";
+
+    if (!list.length){
+      empty.style.display = "block";
+      $("countClubs").textContent = "0";
+      return;
+    }
+    empty.style.display = "none";
+    $("countClubs").textContent = String(list.length);
+
+    list.forEach((c, idx)=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="rank">${idx+1}</td>
+        <td>
+          <div class="name">${esc(c.club || "—")}</div>
+          <div class="small">${esc(c.nationality || "—")}</div>
+        </td>
+        <td>${esc(c.nationality || "—")}</td>
+        <td>${esc(String(c.riders ?? 0))}</td>
+        <td>${esc(String(c.results ?? 0))}</td>
+        <td class="points">${esc(String(c.points ?? 0))} pts</td>
+      `;
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderAll(){
+    const mode = MODES.find(x=>x.key===ACTIVE_MODE) || MODES[0];
+    $("pillMode").textContent = mode.label;
+    $("pillRows").textContent = String(rows.length);
+
+    const clubsAgg = aggregateClubs();
+    $("pillCount").textContent = String(clubsAgg.length);
+
+    fillNatOptions(clubsAgg);
+
+    let list = applyFilters(clubsAgg);
+    list = sortClubs(list);
+
+    $("countShown").textContent = String(list.length);
+    renderTable(list);
+  }
+
+  $("btnReset").addEventListener("click", ()=>{
+    $("q").value = "";
+    $("nat").value = "";
+    $("minPts").value = "";
+    $("sortBy").value = "points_desc";
+    renderAll();
+  });
+
+  ["q","nat","minPts","sortBy"].forEach(id=>{
+    $(id).addEventListener("input", renderAll);
+    $(id).addEventListener("change", renderAll);
+  });
+
+  // ---------- boot ----------
+  (async function init(){
+    const ok = await tryLoadFromSupabase();
+    if (!ok) loadFromLocal();
+
+    // tabs: si rows ne portent pas disc/ebike/raceId => on disable modes sauf Général
+    const tabsEnabled = rows.some(r => r.disc || r.raceId || r.ebike != null);
+    buildTabs(tabsEnabled);
+
+    renderAll();
+  })();
+
+})();
+</script>
+
+</body>
+</html>
