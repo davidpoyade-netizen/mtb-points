@@ -3,466 +3,555 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fiche épreuve — MTB Points</title>
-
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+  <title>Épreuve — MTB Points</title>
   <link rel="stylesheet" href="./css/style.css" />
-
   <style>
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .blockTitle{font-weight:900;margin:0 0 10px 0}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .item{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:12px}
-    .label{color:#667085;font-size:12px;margin-bottom:6px}
-    .value{font-weight:900;font-size:18px;color:#0f172a}
-    .muted{color:#667085;font-size:12px;margin-top:6px}
-
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid #e5e7eb;background:#f8fafc;color:#0f172a}
-    .pillDot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
-
-    .scoreRow{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0 0}
-    .scoreBadge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;border:1px solid #e5e7eb;background:#fff;
-      font-weight:900;font-size:12px;white-space:nowrap;
+    .muted2{color:#64748b;font-size:12px}
+    .rowBtns{display:flex;gap:10px;flex-wrap:wrap}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+    .kpiGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    @media(max-width:900px){.kpiGrid{grid-template-columns:1fr}}
+    .kpi{border:1px solid #e5e7eb;border-radius:16px;background:#fff;padding:12px}
+    .kpiLabel{color:#64748b;font-size:12px;font-weight:800}
+    .kpiValue{font-weight:900;font-size:20px;margin-top:6px}
+    .kpiSub{color:#64748b;font-size:12px;margin-top:4px}
+    .item{border:1px solid #e5e7eb;border-radius:16px;background:#fff;padding:12px}
+    .label{color:#64748b;font-size:12px;font-weight:900}
+    .value{font-weight:900;font-size:18px;margin-top:6px}
+    .noPrint{display:block}
+    @media print{
+      .noPrint{display:none !important;}
+      .wrap{max-width:100% !important; padding:0 !important}
+      .card{box-shadow:none !important; border:none !important}
+      a{color:#000 !important; text-decoration:none !important}
     }
-
-    .barWrap{margin-top:8px;background:#f1f5f9;border-radius:999px;overflow:hidden;border:1px solid #e5e7eb;height:16px}
-    .barSeg{height:16px;display:block;float:left}
-    .segRoad{background:#64748b}
-    .segTrack{background:#22c55e}
-    .segSingle{background:#ef4444}
-
-    #map{height:380px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
-    #profileWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
-    #profileCanvas{width:100%;display:block}
-
-    .linkBtn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 14px;border-radius:12px;background:#2563eb;color:#fff;
-      text-decoration:none;font-weight:900;border:1px solid #2563eb;
-    }
-    .linkBtn.secondary{background:#fff;color:#0f172a;border:1px solid #e5e7eb}
-
-    @media(max-width:900px){
-      .grid,.grid3,.twoCol{grid-template-columns:1fr}
-      #map{height:320px}
-    }
+    #map{height:420px;border-radius:16px;border:1px solid #e5e7eb;margin-top:10px;background:#fff}
+    canvas{background:#fff}
   </style>
 </head>
 
 <body>
-<header class="header">
+<header class="header noPrint">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1 style="margin:0;font-size:18px">MTB Points — Fiche épreuve</h1>
-    <span class="pill"><span class="pillDot" id="statusDot"></span> <span id="statusText">Chargement…</span></span>
+    <h1>MTB Points — Épreuve</h1>
+    <span class="pill" id="pillMeeting"><span class="dot"></span> <span id="pillMeetingTxt">—</span></span>
   </div>
 
   <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
-    <a href="events.html">Épreuves</a>
+    <a href="races.html" class="active">Épreuves</a>
+    <a href="challengemtbpoints.html">Challenge</a>
     <a href="login.html">Connexion</a>
   </nav>
 
-  <div class="headerRight" style="display:flex;gap:10px;flex-wrap:wrap">
-    <a class="linkBtn secondary" href="events.html">← Épreuves</a>
+  <div class="headerRight" style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="btn ghost" id="btnBack" href="races.html">← Retour</a>
+    <button class="btn" id="btnPrintTop" type="button">🖨️ Imprimer / PDF</button>
   </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
+  <div class="card">
 
-  <!-- Bloc 1 -->
-  <section class="card">
-    <h2 class="blockTitle" id="raceName">—</h2>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2 id="raceName">—</h2>
+          <div class="heroMeta" id="raceMeta">—</div>
+          <div class="heroDesc" id="raceComment" style="display:none;"></div>
+          <div id="alertBox" class="empty" style="display:none; margin-top:12px;"></div>
+        </div>
 
-    <div class="grid3">
+        <div class="heroActions" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+          <span class="pill"><span class="dot ok"></span> Fiche épreuve</span>
+          <a class="btn ghost" id="btnOpenMeeting" href="#" style="display:none;">Voir l’événement</a>
+          <a class="btn primary" id="btnCreateSibling" href="#" style="display:none;">+ Créer une autre épreuve</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOC 1 : INFORMATIONS -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Bloc 1 — Informations</h3>
+    <div class="grid2">
       <div class="item">
-        <div class="label">Date</div>
-        <div class="value" id="raceDate">—</div>
+        <div class="label">Événement</div>
+        <div class="value" id="infoMeeting">—</div>
+        <div class="muted2" id="infoMeetingDates">—</div>
+      </div>
+      <div class="item">
+        <div class="label">Date / heure</div>
+        <div class="value" id="infoDateTime">—</div>
+        <div class="muted2" id="infoCutoff">—</div>
       </div>
       <div class="item">
         <div class="label">Discipline</div>
-        <div class="value" id="raceDisc">—</div>
+        <div class="value" id="infoDisc">—</div>
+        <div class="muted2" id="infoEbike">—</div>
       </div>
       <div class="item">
-        <div class="label">Catégorie</div>
-        <div class="value" id="raceLevel">—</div>
+        <div class="label">Niveau</div>
+        <div class="value" id="infoLevel">—</div>
+        <div class="muted2" id="infoMisc">—</div>
       </div>
     </div>
 
-    <div class="grid" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Distance</div>
-        <div class="value" id="raceDistance">—</div>
-        <div class="muted" id="raceDistanceHint">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Dénivelé +</div>
-        <div class="value" id="raceDplus">—</div>
-        <div class="muted" id="raceElevInfo">—</div>
-      </div>
-    </div>
+    <!-- BLOC 2 : SCORES & DIFFICULTÉS -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Bloc 2 — Scores & difficultés</h3>
 
-    <div class="grid" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Type vélo</div>
-        <div class="value" id="raceBike">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Barrière horaire</div>
-        <div class="value" id="raceCutoff">—</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Bloc 2 -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Scores & difficulté</h3>
-
-    <div class="scoreRow">
-      <span class="scoreBadge">💪 Phys <b id="scorePhysVal">—</b>/100</span>
-      <span class="scoreBadge">🪨 Tech <b id="scoreTechVal">—</b>/100</span>
-      <span class="scoreBadge">🏁 Global <b id="scoreGlobalVal">—</b>/100</span>
-    </div>
-
-    <div class="grid3" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Niveau de difficulté</div>
-        <div class="value" id="diffLabel">—</div>
-        <div class="muted" id="diffHint">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Type de voie</div>
-        <div class="value" id="surfaceText">—</div>
-        <div class="barWrap" aria-label="Route / Piste / Single">
-          <span class="barSeg segRoad" id="barRoad" style="width:0%"></span>
-          <span class="barSeg segTrack" id="barTrack" style="width:0%"></span>
-          <span class="barSeg segSingle" id="barSingle" style="width:0%"></span>
-        </div>
-        <div class="muted">Route (gris) • Piste (vert) • Single (rouge)</div>
-      </div>
-      <div class="item">
-        <div class="label">Résumé automatique</div>
-        <div class="value" id="autoSummary" style="font-size:14px;font-weight:800;">—</div>
-        <div class="muted">Synthèse depuis la trace / scores</div>
-      </div>
-    </div>
-
-    <div class="item" style="margin-top:12px;">
-      <div class="label">Multi-tours (si activé)</div>
-      <div class="value" id="lapsInfo" style="font-size:14px;font-weight:800;">—</div>
-      <div class="muted" id="lapsHint">—</div>
-    </div>
-  </section>
-
-  <!-- Bloc 3 -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Profil & carte</h3>
-
-    <div class="twoCol">
-      <div id="profileWrap">
-        <div class="label">Profil altimétrique</div>
-        <canvas id="profileCanvas" height="220"></canvas>
-        <div class="muted" id="profileInfo">—</div>
-      </div>
-
+    <!-- Sélecteur tours (si dispo) -->
+    <div class="filters noPrint" style="grid-template-columns: 1fr 1fr 1fr; align-items:end; margin-top:10px;">
       <div>
-        <div class="label">Carte du tracé</div>
-        <div id="map"></div>
-        <div class="muted">Départ / arrivée affichés si détectés</div>
+        <label class="lbl">Catégorie (pour calcul tours)</label>
+        <select class="inp" id="selAgeCat">
+          <option value="">—</option>
+        </select>
+        <div class="muted2">Si l’épreuve est multi-tours, choisis une catégorie.</div>
       </div>
-    </div>
-  </section>
-
-  <!-- Infos pratiques -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Informations pratiques</h3>
-
-    <div class="grid3">
-      <div class="item">
-        <div class="label">Lavage vélos</div>
-        <div class="value" id="bikeWash">—</div>
+      <div>
+        <label class="lbl">Sexe</label>
+        <select class="inp" id="selSex">
+          <option value="M">H</option>
+          <option value="F">F</option>
+        </select>
+        <div class="muted2">Utilisé si multi-tours par sexe.</div>
       </div>
-      <div class="item">
-        <div class="label">Assistance mécanique</div>
-        <div class="value" id="mechStations">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Ravitaillements</div>
-        <div class="value" id="aidStations">—</div>
+      <div>
+        <label class="lbl">Tours appliqués</label>
+        <input class="inp" id="lapsApplied" type="text" value="1" readonly />
+        <div class="muted2" id="lapsHint">—</div>
       </div>
     </div>
 
+    <!-- Scores -->
+    <div class="kpiGrid" style="margin-top:12px;">
+      <div class="kpi">
+        <div class="kpiLabel">Score Physique</div>
+        <div class="kpiValue"><span id="kpiPhys">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub" id="kpiPhysSub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpiLabel">Score Technique</div>
+        <div class="kpiValue"><span id="kpiTech">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub" id="kpiTechSub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpiLabel">Score Global</div>
+        <div class="kpiValue"><span id="kpiGlobal">—</span><span class="muted"> /100</span></div>
+        <div class="kpiSub" id="kpiGlobalSub">—</div>
+      </div>
+    </div>
+
+    <!-- Distance / D+ / Type voie (avec tours) -->
+    <div class="kpiGrid" style="margin-top:12px;">
+      <div class="kpi">
+        <div class="kpiLabel">Distance totale (auto)</div>
+        <div class="kpiValue"><span id="autoDist2">—</span></div>
+        <div class="kpiSub" id="autoDistSub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpiLabel">Dénivelé + total (auto)</div>
+        <div class="kpiValue"><span id="autoDplus2">—</span></div>
+        <div class="kpiSub" id="autoDplusSub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpiLabel">Type de voie</div>
+        <div class="kpiValue" style="font-size:14px" id="autoSurface2">—</div>
+        <div class="kpiSub">Estimation OSM si disponible</div>
+      </div>
+    </div>
+
+    <!-- Résumé auto (simple placeholder) -->
     <div class="item" style="margin-top:12px;">
-      <div class="label">Commentaire</div>
-      <div class="value" style="font-size:14px;font-weight:700;" id="raceComment">—</div>
+      <div class="label">Résumé</div>
+      <div class="muted2" id="summaryText">—</div>
     </div>
-  </section>
 
-  <!-- Événement -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Événement</h3>
-    <div id="meetingBlock" class="muted">—</div>
-  </section>
+    <!-- BLOC 3 : PROFIL & CARTE -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Bloc 3 — Profil & carte</h3>
 
-  <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-    <a class="linkBtn secondary" href="events.html">← Retour aux épreuves</a>
-    <a class="linkBtn" id="meetingLinkBtn" href="meetings.html" style="display:none">Voir l’événement</a>
-    <a class="linkBtn secondary" id="meetingUrlBtn" href="#" target="_blank" rel="noopener" style="display:none">Ouvrir le lien officiel</a>
+    <div id="gpxEmpty" class="empty" style="display:none;">
+      <b>Aucune trace GPX enregistrée</b> pour cette épreuve.
+    </div>
+
+    <div id="gpxWrap" class="grid2" style="display:none; margin-top:10px;">
+      <div class="item">
+        <div class="row" style="justify-content:space-between;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h3 style="margin:0;font-size:14px;">Carte</h3>
+          <span class="pill"><span class="dot"></span> GPX</span>
+        </div>
+        <div id="map"></div>
+        <div class="muted2" id="mapHint">—</div>
+      </div>
+
+      <div class="item">
+        <div class="row" style="justify-content:space-between;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h3 style="margin:0;font-size:14px;">Profil altimétrique</h3>
+          <span class="pill"><span class="dot"></span> GPX</span>
+        </div>
+        <canvas id="elevCanvas" width="900" height="360"
+          style="width:100%; height:360px; border-radius:16px; border:1px solid #e5e7eb; margin-top:10px;"></canvas>
+        <div class="muted2" id="elevHint">—</div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <h3 class="sectionTitle noPrint" style="margin-top:18px;">Actions</h3>
+    <div class="rowBtns noPrint">
+      <button class="btn" id="btnPrintBottom" type="button">🖨️ Imprimer / PDF</button>
+      <a class="btn" id="btnGoMeeting2" href="#" style="display:none;">Voir l’événement</a>
+      <a class="btn primary" id="btnCreateSibling2" href="#" style="display:none;">Créer une autre épreuve</a>
+    </div>
+
   </div>
-</div>
+</main>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/gpx.js"></script>
 
 <script>
 (function(){
-  const $ = (id)=>document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
-  const KEY_RACES = "mtb.races.v1";
-  const KEY_MEETINGS = "mtb.meetings.v1";
 
-  function setStatus(ok, t){
-    $("statusDot").style.background = ok ? "#16a34a" : "#94a3b8";
-    $("statusText").textContent = t || (ok ? "OK" : "—");
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
-
-  function loadJSON(key){
-    try{
-      const raw = localStorage.getItem(key);
-      const v = raw ? JSON.parse(raw) : [];
-      return Array.isArray(v) ? v : [];
-    }catch(_){ return []; }
-  }
-
-  function fmt1(n){ return (n==null) ? "—" : (Math.round(n*10)/10).toString().replace(".", ","); }
   function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
+  function fmt1(n){ return (n == null) ? "—" : String(Math.round(n * 10)/10); }
+  function fmt0(n){ return (n == null) ? "—" : String(Math.round(n)); }
+  function fmtDate(iso){ return iso ? esc(iso) : "—"; }
 
-  function diffLabelFromGlobal(g){
-    if (g == null) return { label:"—", hint:"Score global indisponible." };
-    if (g < 25) return { label:"Facile", hint:"Accessible à la majorité des pratiquants." };
-    if (g < 50) return { label:"Modéré", hint:"Relief / technicité intermédiaires." };
-    if (g < 75) return { label:"Difficile", hint:"Exigeant physiquement et/ou techniquement." };
-    return { label:"Très difficile", hint:"Très exigeant : préparation recommandée." };
+  function setAlert(html){
+    const box = $("alertBox");
+    if (!box) return;
+    box.style.display = html ? "block" : "none";
+    box.innerHTML = html || "";
   }
 
-  function surfaceToBars(s){
-    const road = Math.max(0, Math.min(100, Math.round(s?.roadPct ?? 0)));
-    const track = Math.max(0, Math.min(100, Math.round(s?.trackPct ?? 0)));
-    const single = Math.max(0, Math.min(100, Math.round(s?.singlePct ?? 0)));
-    const sum = road + track + single || 1;
-    return {
-      road: Math.round(road/sum*100),
-      track: Math.round(track/sum*100),
-      single: Math.max(0, 100 - Math.round(road/sum*100) - Math.round(track/sum*100))
-    };
+  // ---- Storage adapters
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    try {
+      const raw = localStorage.getItem("mtb.races.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+  function findRaceSafe(id){
+    if (!id) return null;
+    if (typeof window.findRace === "function") return window.findRace(id);
+    return listRacesSafe().find(r => r && r.id === id) || null;
+  }
+  function listMeetingsSafe(){
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    if (typeof window.getMeetings === "function") return window.getMeetings();
+    try {
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+  function findMeetingSafe(id){
+    if (!id) return null;
+    if (typeof window.findMeeting === "function") return window.findMeeting(id);
+    return listMeetingsSafe().find(m => m && m.id === id) || null;
   }
 
-  function summarize(race){
-    const dist = num(race.distanceKm);
-    const dplus = num(race.dplusM);
-    const g = num(race.globalScore);
-    const disc = race.disc || "VTT";
-    const lvl = race.level ? `(${race.level})` : "";
-    const parts = [];
-    parts.push(`${disc} ${lvl}`.trim());
-    if (dist!=null) parts.push(`${fmt1(dist)} km`);
-    if (dplus!=null) parts.push(`D+ ${Math.round(dplus)} m`);
-    if (g!=null) parts.push(`Global ${Math.round(g)}/100`);
-    return parts.join(" • ");
+  // ---- print buttons
+  function wirePrint(){
+    const go = ()=> window.print();
+    const t = $("btnPrintTop"); if (t) t.addEventListener("click", go);
+    const b = $("btnPrintBottom"); if (b) b.addEventListener("click", go);
   }
 
-  function drawProfile(points){
-    const canvas = $("profileCanvas");
+  // ---- Map + profile helpers (simple)
+  function extractPoints(race){
+    // On accepte plusieurs formes
+    const pts =
+      race?.gpx?.points ||
+      race?.analysis?.points ||
+      race?.analysis?.raw?.points ||
+      race?.analysis?.raw?.track?.points ||
+      race?.analysis?.raw?.track ||
+      null;
+    return Array.isArray(pts) ? pts : null;
+  }
+
+  function drawElev(points){
+    const canvas = $("elevCanvas");
+    const hint = $("elevHint");
+    if (!canvas || !points || points.length < 10){
+      if (hint) hint.textContent = "—";
+      return;
+    }
     const ctx = canvas.getContext("2d");
-    const w = canvas.width = canvas.clientWidth;
-    const h = canvas.height;
-
+    const w = canvas.width, h = canvas.height;
     ctx.clearRect(0,0,w,h);
-    if (!Array.isArray(points) || points.length < 10){
-      $("profileInfo").textContent = "Profil indisponible (points/altitude manquants).";
+
+    // take ele or alt
+    const elev = points.map(p => num(p.ele ?? p.alt ?? p.elevation ?? null)).filter(v => v != null);
+    if (elev.length < 10){
+      if (hint) hint.textContent = "Altitude indisponible dans le GPX.";
       return;
     }
-
-    const ele = points.map(p => Number(p.ele)).filter(v => Number.isFinite(v));
-    if (ele.length < 10){
-      $("profileInfo").textContent = "Profil indisponible (altitude manquante).";
-      return;
-    }
-
-    const minE = Math.min(...ele);
-    const maxE = Math.max(...ele);
+    const minE = Math.min(...elev);
+    const maxE = Math.max(...elev);
     const span = Math.max(1, maxE - minE);
 
-    ctx.strokeStyle = "#2563eb";
+    // use same length as points by sampling
+    const N = Math.min(points.length, 900);
+    function getEleAt(i){
+      const idx = Math.floor(i * (points.length-1) / (N-1));
+      return num(points[idx]?.ele ?? points[idx]?.alt ?? points[idx]?.elevation ?? null);
+    }
+
     ctx.lineWidth = 2;
     ctx.beginPath();
-    for (let i=0;i<points.length;i++){
-      const p = points[i];
-      const e = Number(p.ele);
-      if (!Number.isFinite(e)) continue;
-      const x = (i/(points.length-1)) * w;
-      const y = h - ((e - minE)/span) * (h-10) - 5;
-      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    for (let i=0;i<N;i++){
+      const e = getEleAt(i);
+      if (e == null) continue;
+      const x = (i/(N-1))*w;
+      const y = h - ((e - minE)/span) * (h*0.85) - (h*0.07);
+      if (i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
     }
     ctx.stroke();
 
-    $("profileInfo").textContent = `Altitude: ${Math.round(minE)}–${Math.round(maxE)} m`;
+    if (hint) hint.textContent = `Altitude: ${Math.round(minE)} m → ${Math.round(maxE)} m`;
   }
 
-  function drawMap(points){
-    const map = L.map("map");
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
-
-    if (!Array.isArray(points) || points.length < 2){
-      map.setView([46.5, 2.5], 5);
+  function renderMap(points){
+    const mapEl = $("map");
+    const hint = $("mapHint");
+    if (!mapEl || !points || points.length < 10){
+      if (hint) hint.textContent = "—";
       return;
     }
 
     const latlngs = points
-      .map(p => [Number(p.lat), Number(p.lon)])
-      .filter(a => Number.isFinite(a[0]) && Number.isFinite(a[1]));
+      .map(p => [num(p.lat ?? p.latitude ?? null), num(p.lon ?? p.lng ?? p.longitude ?? null)])
+      .filter(a => a[0] != null && a[1] != null);
 
-    if (latlngs.length < 2){
-      map.setView([46.5, 2.5], 5);
+    if (latlngs.length < 10){
+      if (hint) hint.textContent = "Coordonnées GPX indisponibles.";
       return;
     }
 
-    const poly = L.polyline(latlngs, { weight: 4 }).addTo(map);
-    map.fitBounds(poly.getBounds(), { padding:[20,20] });
+    const map = L.map("map", { scrollWheelZoom:false });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19, attribution: "&copy; OpenStreetMap"
+    }).addTo(map);
 
-    // markers start/end
-    L.circleMarker(latlngs[0], { radius:6, weight:2 }).addTo(map).bindPopup("Départ");
-    L.circleMarker(latlngs[latlngs.length-1], { radius:6, weight:2 }).addTo(map).bindPopup("Arrivée");
+    const line = L.polyline(latlngs, { weight: 4 }).addTo(map);
+    map.fitBounds(line.getBounds(), { padding:[20,20] });
+
+    if (hint) hint.textContent = `Trace: ${latlngs.length} points`;
   }
 
-  function main(){
+  // ---- Tours logic
+  function getLapsApplied(race, ageCat, sex){
+    // priority: lapsByCategorySex
+    const lbs = race?.lapsByCategorySex || null;
+    if (lbs && ageCat){
+      const entry = lbs[ageCat] || null;
+      const v = entry ? (entry[sex] ?? null) : null;
+      if (Number.isFinite(Number(v)) && Number(v) > 0) return Number(v);
+      // si existe mais pas renseigné pour ce sexe -> 1
+      return 1;
+    }
+    // fallback: race.laps
+    const l = num(race?.laps);
+    if (l != null && l > 0) return l;
+    return 1;
+  }
+
+  function fillAgeCatSelect(race){
+    const sel = $("selAgeCat");
+    if (!sel) return;
+
+    const lbs = race?.lapsByCategorySex || null;
+    if (!lbs || typeof lbs !== "object"){
+      // pas multi-tours: laisse juste "—"
+      sel.innerHTML = `<option value="">—</option>`;
+      sel.disabled = true;
+      $("selSex").disabled = true;
+      $("lapsHint").textContent = "Pas de multi-tours (lapsByCategorySex absent).";
+      return;
+    }
+
+    const keys = Object.keys(lbs).sort((a,b)=> a.localeCompare(b, "fr"));
+    sel.innerHTML = `<option value="">— Choisir —</option>` + keys.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join("");
+    sel.disabled = false;
+    $("selSex").disabled = false;
+    $("lapsHint").textContent = "Multi-tours activé : sélectionne catégorie + sexe.";
+  }
+
+  function updateTotals(race){
+    const ageCat = $("selAgeCat")?.value || "";
+    const sex = $("selSex")?.value || "M";
+
+    const laps = getLapsApplied(race, ageCat, sex);
+    $("lapsApplied").value = String(laps);
+
+    const baseDist = num(race?.distanceKm ?? race?.analysis?.distanceKm ?? null);
+    const baseDplus = num(race?.dplusM ?? race?.analysis?.dplusM ?? null);
+
+    const totDist = (baseDist == null) ? null : baseDist * laps;
+    const totDplus = (baseDplus == null) ? null : baseDplus * laps;
+
+    $("autoDist2").textContent = (totDist == null) ? "—" : `${fmt1(totDist)} km`;
+    $("autoDplus2").textContent = (totDplus == null) ? "—" : `+${fmt0(totDplus)} m`;
+
+    $("autoDistSub").textContent = (baseDist == null)
+      ? "Distance GPX indisponible"
+      : `Base: ${fmt1(baseDist)} km × ${laps} tour(s)`;
+    $("autoDplusSub").textContent = (baseDplus == null)
+      ? "D+ GPX indisponible"
+      : `Base: +${fmt0(baseDplus)} m × ${laps} tour(s)`;
+
+    const s2 = race?.surfaceEstimate || race?.analysis?.surfaceEstimate || null;
+    if (s2){
+      const road = Math.round(num(s2.roadPct) || 0);
+      const track = Math.round(num(s2.trackPct) || 0);
+      const single = Math.round(num(s2.singlePct) || 0);
+      $("autoSurface2").textContent = `Route ~${road}% • Piste ~${track}% • Single ~${single}%`;
+    } else {
+      $("autoSurface2").textContent = "—";
+    }
+
+    // mini résumé auto simple
+    const parts = [];
+    if (race?.disc) parts.push(String(race.disc));
+    if (totDist != null) parts.push(`${fmt1(totDist)} km`);
+    if (totDplus != null) parts.push(`+${fmt0(totDplus)} m`);
+    const g = num(race?.globalScore ?? race?.analysis?.globalScore ?? null);
+    if (g != null) parts.push(`Global ${fmt0(g)}/100`);
+    $("summaryText").textContent = parts.length ? parts.join(" • ") : "—";
+  }
+
+  // ---- render page
+  function render(){
     const id = params.get("id");
     if (!id){
-      setStatus(false, "ID manquant");
-      $("raceName").textContent = "Épreuve introuvable";
+      setAlert(`❌ ID d’épreuve manquant. Retourne à la liste des épreuves : <a href="races.html">races.html</a>`);
       return;
     }
 
-    const races = loadJSON(KEY_RACES);
-    const meetings = loadJSON(KEY_MEETINGS);
-    const race = races.find(r => r && r.id === id) || null;
-
+    const race = findRaceSafe(id);
     if (!race){
-      setStatus(false, "Épreuve introuvable");
-      $("raceName").textContent = "Épreuve introuvable";
+      setAlert(`❌ Épreuve introuvable (id: <code>${esc(id)}</code>).`);
       return;
     }
 
-    const meeting = race.meetingId ? (meetings.find(m => m && m.id === race.meetingId) || null) : null;
+    // Back button
+    $("btnBack").href = race.meetingId ? `meeting.html?id=${encodeURIComponent(race.meetingId)}` : "races.html";
+
+    // Header
+    $("raceName").textContent = race.name || "Épreuve";
+    const metaBits = [];
+    metaBits.push(`📅 ${fmtDate(race.date)}`);
+    if (race.time) metaBits.push(`🕒 ${esc(race.time)}`);
+    if (race.meetingName) metaBits.push(`🏁 ${esc(race.meetingName)}`);
+    $("raceMeta").textContent = metaBits.join(" • ") || "—";
+
+    if (race.comment){
+      $("raceComment").style.display = "block";
+      $("raceComment").textContent = race.comment;
+    }
+
+    // Meeting pill + actions
+    const meeting = race.meetingId ? findMeetingSafe(race.meetingId) : null;
+    if (meeting){
+      $("pillMeetingTxt").textContent = meeting.name || "Événement";
+      $("btnOpenMeeting").href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+      $("btnOpenMeeting").style.display = "inline-flex";
+      $("btnGoMeeting2").href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+      $("btnGoMeeting2").style.display = "inline-flex";
+      $("btnCreateSibling").href = `course-create.html?meetingId=${encodeURIComponent(meeting.id)}`;
+      $("btnCreateSibling").style.display = "inline-flex";
+      $("btnCreateSibling2").href = `course-create.html?meetingId=${encodeURIComponent(meeting.id)}`;
+      $("btnCreateSibling2").style.display = "inline-flex";
+    } else {
+      $("pillMeetingTxt").textContent = "Sans événement";
+    }
 
     // Bloc 1
-    $("raceName").textContent = race.name || "Épreuve";
-    $("raceDate").textContent = race.date || "—";
-    $("raceDisc").textContent = race.disc || "—";
-    $("raceLevel").textContent = race.level || "—";
+    $("infoMeeting").textContent = meeting?.name || race.meetingName || "—";
+    const md = meeting?.date || null;
+    const me = meeting?.endDate || null;
+    $("infoMeetingDates").textContent = md ? (me ? `📅 ${md} → ${me}` : `📅 ${md}`) : "—";
 
-    const dist = num(race.distanceKm);
-    const dplus = num(race.dplusM);
+    $("infoDateTime").textContent = race.date ? `${race.date}${race.time ? " • " + race.time : ""}` : "—";
+    $("infoCutoff").textContent = race.cutoffTime ? `⏱️ Barrière horaire: ${race.cutoffTime}` : "—";
 
-    $("raceDistance").textContent = dist==null ? "—" : `${fmt1(dist)} km`;
-    $("raceDistanceHint").textContent = race.lapsConfig ? "Distance = distance GPX (1 tour) × tours (selon catégorie/sex)." : "Distance calculée depuis GPX.";
-    $("raceDplus").textContent = dplus==null ? "—" : `+${Math.round(dplus)} m`;
-    $("raceElevInfo").textContent = race.gpx?.hasElevation ? "Altitude OK" : "Altitude incertaine (GPX)";
+    $("infoDisc").textContent = race.disc || "—";
+    $("infoEbike").textContent = (race.ebike === true) ? "🚴 Type: Assistance électrique" : "🚴 Type: Musculaire";
 
-    $("raceBike").textContent = race.ebike ? "Assistance électrique" : "Musculaire";
-    $("raceCutoff").textContent = race.cutoffTime || "—";
+    $("infoLevel").textContent = race.level || "—";
+    const misc = [];
+    if (race.bikeWash) misc.push(`Lavage: ${race.bikeWash}`);
+    if (race.mechAssist != null) misc.push(`Assistance méca: ${race.mechAssist}`);
+    if (race.feeds != null) misc.push(`Ravitos: ${race.feeds}`);
+    if (race.sexAllowed && race.sexAllowed !== "all") misc.push(`Sexe: ${race.sexAllowed}`);
+    $("infoMisc").textContent = misc.length ? misc.join(" • ") : "—";
 
-    // Bloc 2 scores
-    const phys = num(race.physScore);
-    const tech = num(race.techScore);
-    const global = num(race.globalScore);
+    // Scores
+    const phys = num(race.physScore ?? race.analysis?.physScore ?? null);
+    const tech = num(race.techScore ?? race.analysis?.techScore ?? null);
+    const global = num(race.globalScore ?? race.analysis?.globalScore ?? null);
 
-    $("scorePhysVal").textContent = phys==null ? "—" : String(Math.round(phys));
-    $("scoreTechVal").textContent = tech==null ? "—" : String(Math.round(tech));
-    $("scoreGlobalVal").textContent = global==null ? "—" : String(Math.round(global));
+    $("kpiPhys").textContent = phys == null ? "—" : fmt0(phys);
+    $("kpiTech").textContent = tech == null ? "—" : fmt0(tech);
+    $("kpiGlobal").textContent = global == null ? "—" : fmt0(global);
 
-    const d = diffLabelFromGlobal(global);
-    $("diffLabel").textContent = d.label;
-    $("diffHint").textContent = d.hint;
+    $("kpiPhysSub").textContent = phys == null ? "—" : "Effort (distance, D+, pentes)";
+    $("kpiTechSub").textContent = tech == null ? "—" : "Technicité (OSM + terrain)";
+    $("kpiGlobalSub").textContent = global == null ? "—" : "Synthèse";
 
-    const s = race.surfaceEstimate || null;
-    if (s){
-      $("surfaceText").textContent = `Route ~${Math.round(s.roadPct||0)}% • Piste ~${Math.round(s.trackPct||0)}% • Single ~${Math.round(s.singlePct||0)}%`;
-      const bars = surfaceToBars(s);
-      $("barRoad").style.width = bars.road + "%";
-      $("barTrack").style.width = bars.track + "%";
-      $("barSingle").style.width = bars.single + "%";
+    // Tours selectors
+    fillAgeCatSelect(race);
+    updateTotals(race);
+
+    const selAge = $("selAgeCat");
+    const selSex = $("selSex");
+    if (selAge) selAge.addEventListener("change", ()=> updateTotals(race));
+    if (selSex) selSex.addEventListener("change", ()=> updateTotals(race));
+
+    // GPX / map / elev
+    const pts = extractPoints(race);
+    if (!pts || pts.length < 10){
+      $("gpxEmpty").style.display = "block";
+      $("gpxWrap").style.display = "none";
     } else {
-      $("surfaceText").textContent = "—";
-      $("barRoad").style.width = "0%";
-      $("barTrack").style.width = "0%";
-      $("barSingle").style.width = "0%";
+      $("gpxEmpty").style.display = "none";
+      $("gpxWrap").style.display = "grid";
+      try{ renderMap(pts); } catch(e){ console.warn(e); }
+      try{ drawElev(pts); } catch(e){ console.warn(e); }
     }
-
-    $("autoSummary").textContent = summarize(race);
-
-    // Laps info
-    if (race.lapsConfig && race.lapsConfig.mode === "by_age_sex"){
-      const sel = Array.isArray(race.lapsConfig.selected) ? race.lapsConfig.selected : [];
-      $("lapsInfo").textContent = sel.length ? `Catégories: ${sel.join(", ")}` : "Multi-tours activé (catégories non précisées).";
-      $("lapsHint").textContent = "Les tours peuvent différer selon Homme/Femme et catégorie UCI.";
-    } else {
-      $("lapsInfo").textContent = "Non";
-      $("lapsHint").textContent = "Épreuve en une seule boucle (ou tours identiques).";
-    }
-
-    // Infos pratiques
-    $("bikeWash").textContent = race.bikeWash ? "Oui" : "Non";
-    $("mechStations").textContent = String(num(race.mechStations) ?? 0);
-    $("aidStations").textContent = String(num(race.aidStations) ?? 0);
-    $("raceComment").textContent = race.comment || "—";
-
-    // Meeting block
-    if (meeting){
-      const range = meeting.endDate ? `${meeting.date} → ${meeting.endDate}` : (meeting.date || "—");
-      const loc = meeting.location ? ` • 📍 ${meeting.location}` : "";
-      $("meetingBlock").innerHTML = `<b>${meeting.name}</b> • 📅 ${range}${loc}`;
-      $("meetingLinkBtn").style.display = "inline-flex";
-      $("meetingLinkBtn").href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
-
-      const url = meeting.url || race.meetingUrl || null;
-      if (url){
-        $("meetingUrlBtn").style.display = "inline-flex";
-        $("meetingUrlBtn").href = url;
-      }
-    } else {
-      $("meetingBlock").textContent = "Cette épreuve n’est rattachée à aucun événement.";
-    }
-
-    // Bloc 3 map/profile
-    // On essaie de normaliser les points (lat/lon/ele). Si ton analyzeGPX renvoie autre chose, on adaptera.
-    const ptsRaw = race.gpx?.points || race.gpx?.raw?.points || null;
-
-    // Normalisation flexible (on accepte {lat,lon,ele} ou {latitude,longitude,elevation})
-    const points = Array.isArray(ptsRaw) ? ptsRaw.map(p => ({
-      lat: p.lat ?? p.latitude,
-      lon: p.lon ?? p.lng ?? p.longitude,
-      ele: p.ele ?? p.alt ?? p.elevation
-    })) : null;
-
-    drawProfile(points);
-    drawMap(points);
-
-    setStatus(true, "Données chargées");
   }
 
-  try{ main(); }
-  catch(e){
-    console.error(e);
-    setStatus(false, "Erreur");
-  }
+  wirePrint();
+  render();
 })();
 </script>
+
 </body>
 </html>
