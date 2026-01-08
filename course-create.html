@@ -22,6 +22,9 @@
     .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
     .bar > div{height:100%;width:0%;background:#2563eb;border-radius:999px;transition:width .25s}
     .statusRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+    .toggleLine{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .toggleLine input{transform:translateY(1px)}
   </style>
 </head>
 
@@ -173,43 +176,64 @@
       <textarea id="comment" class="inp" rows="3" placeholder="Infos, consignes, parcours..."></textarea>
     </div>
 
-    <!-- MULTI-TOURS -->
-    <h3 class="sectionTitle" style="margin-top:18px;">Multi-tours par âge & sexe (optionnel)</h3>
-    <div class="ageBox">
-      <div class="muted2" style="margin-bottom:10px;">
-        Coche les catégories concernées et indique le <b>nombre de tours</b> pour Hommes/Femmes.
-        (Codes courts : U7, U9, …, U23, SEN, M1…M9)
-      </div>
+    <!-- MULTI-TOURS (AVEC TOGGLE) -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Multi-tours</h3>
 
-      <div class="ageHead">
-        <div>Catégorie</div>
-        <div>H (tours)</div>
-        <div>F (tours)</div>
-      </div>
+    <div class="toggleLine">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="enableMultiLaps" />
+        <span style="font-weight:900">Activer multi-tours par catégorie d’âge & sexe</span>
+      </label>
+      <span class="muted2">Coche pour afficher la grille U7…M9.</span>
+    </div>
 
-      <div id="ageRows"></div>
+    <div id="multiLapsWrap" style="display:none; margin-top:10px;">
+      <div class="ageBox">
+        <div class="muted2" style="margin-bottom:10px;">
+          Coche les catégories concernées et indique le <b>nombre de tours</b> pour Hommes/Femmes.
+          (Codes courts : U7, U9, …, U23, SEN, M1…M9)
+        </div>
 
-      <div class="muted2" style="margin-top:10px;">
-        Si tu ne coches rien : l’épreuve est considérée comme une seule distance “standard”.
+        <div class="ageHead">
+          <div>Catégorie</div>
+          <div>H (tours)</div>
+          <div>F (tours)</div>
+        </div>
+
+        <div id="ageRows"></div>
+
+        <div class="muted2" style="margin-top:10px;">
+          Si multi-tours activé mais aucune catégorie cochée : l’épreuve restera “standard” (1 tour).
+        </div>
       </div>
     </div>
 
-    <!-- BLOC 2 : ANALYSE GPX/OSM -->
-    <h3 class="sectionTitle" style="margin-top:18px;">Bloc 2 — Analyse GPX / OSM</h3>
+    <!-- BLOC 2 : ANALYSE GPX/OSM (OBLIGATOIRE) -->
+    <h3 class="sectionTitle" style="margin-top:18px;">Bloc 2 — Analyse GPX / OSM <span class="req">*</span></h3>
 
-    <div class="filters" style="grid-template-columns: 1.4fr 1fr 1fr; align-items:end;">
-      <div>
-        <label class="lbl">Trace GPX (optionnel)</label>
-        <input id="gpxFile" class="inp" type="file" accept=".gpx,application/gpx+xml" />
-        <div class="muted2">Si tu ajoutes un GPX : distance + D+ seront calculés automatiquement.</div>
-      </div>
-      <div>
-        <button class="btn" id="btnAnalyze" type="button">⚡ Lancer l’analyse</button>
-      </div>
-      <div>
-        <button class="btn ghost" id="btnClearGPX" type="button">Effacer GPX</button>
-      </div>
+    <div class="filters" style="grid-template-columns: 1.6fr 1fr; align-items:end;">
+  <div>
+    <label class="lbl">Trace GPX <span class="req">*</span></label>
+
+    <!-- input caché : on le déclenche via le bouton -->
+    <input id="gpxFile" class="inp" type="file"
+      accept=".gpx,application/gpx+xml"
+      style="display:none" />
+
+    <button class="btn" id="btnPickAnalyze" type="button">📂 Choisir un GPX & analyser</button>
+
+    <div class="muted2" style="margin-top:6px;">
+      Obligatoire : l’analyse démarre automatiquement après sélection du GPX.
     </div>
+
+    <div class="muted2" id="pickedFileName" style="margin-top:6px;"></div>
+  </div>
+
+  <div>
+    <button class="btn ghost" id="btnClearGPX" type="button">Effacer GPX</button>
+  </div>
+</div>
+
 
     <div id="statusBox" class="empty" style="display:none; margin-top:14px;">
       <div class="statusRow">
@@ -369,6 +393,25 @@
     if (end && dateEl.value && dateEl.value > end) dateEl.value = start || end;
   }
 
+  // -------- multi-laps toggle
+  function initMultiToggle(){
+    const chk = $("enableMultiLaps");
+    const wrap = $("multiLapsWrap");
+    if (!chk || !wrap) return;
+
+    function apply(){
+      wrap.style.display = chk.checked ? "block" : "none";
+
+      // si désactivé : on décoche tout et on disable
+      if (!chk.checked){
+        document.querySelectorAll(".catOn").forEach(c => c.checked = false);
+        document.querySelectorAll(".lapsM,.lapsF").forEach(inp => { inp.value = ""; inp.disabled = true; });
+      }
+    }
+    chk.addEventListener("change", apply);
+    apply();
+  }
+
   // -------- age rows (laps)
   function renderAgeRows(){
     const box = $("ageRows");
@@ -401,6 +444,9 @@
   }
 
   function collectLapsByCategorySex(){
+    // si multi-tours non activé => null
+    if (!$("enableMultiLaps")?.checked) return null;
+
     const box = $("ageRows");
     const out = {};
     box.querySelectorAll(".catOn").forEach(chk => {
@@ -416,7 +462,7 @@
         F: Number.isFinite(fVal) ? fVal : null
       };
     });
-    return Object.keys(out).length ? out : null;
+    return Object.keys(out).length ? out : {};
   }
 
   // -------- analysis cache
@@ -428,11 +474,27 @@
     showStatusBox(false);
     showMsg("");
   }
+function setAnalyzeBusy(on){
+  const btn = $("btnPickAnalyze");
+  if (!btn) return;
 
-  async function analyzeGpx(){
+  if (on){
+    btn.disabled = true;
+    btn.dataset.label = btn.textContent;
+    btn.textContent = "⏳ Analyse en cours…";
+    btn.classList.add("disabled");
+  } else {
+    btn.disabled = false;
+    btn.textContent = btn.dataset.label || "📂 Choisir un GPX & analyser";
+    btn.classList.remove("disabled");
+  }
+}
+
+  async function analyzeGpx(){setAnalyzeBusy(true);
+
     const f = $("gpxFile")?.files?.[0];
     if (!f){
-      showMsg("Ajoute un fichier GPX puis lance l’analyse.", false);
+      showMsg("GPX obligatoire : ajoute un fichier GPX puis lance l’analyse.", false);
       return;
     }
 
@@ -460,6 +522,7 @@
       si = (si+1) % steps.length;
       $("statusSub").textContent = steps[si];
     }, 900);
+setAnalyzeBusy(false);
 
     try{
       const ticker = setInterval(() => {
@@ -469,15 +532,12 @@
       }, 550);
 
       const work = (async () => {
-        // priorité: functions si tu les as dans gpx.js
         if (typeof window.analyzeGpxFile === "function"){
           return await window.analyzeGpxFile(f);
         }
-        // sinon: si ton gpx.js expose analyzeGPX(file, opts)
         if (typeof window.analyzeGPX === "function"){
           return await window.analyzeGPX(f, { keepPoints:true });
         }
-        // fallback: texte
         const txt = await f.text();
         if (typeof window.analyzeGpxText === "function"){
           return await window.analyzeGpxText(txt);
@@ -510,11 +570,13 @@
       clearInterval(anim);
 
       if (e?.message === "timeout"){
-        setStatus("Timeout", "Analyse trop longue.", null, "Tu peux réessayer (ou enregistrer sans GPX).");
+        setStatus("Timeout", "Analyse trop longue.", null, "Réessaie (GPX obligatoire).");
         showMsg("Timeout analyse GPX/OSM.", false);
       } else {
         setStatus("Erreur", "Analyse impossible.", null, "Vérifie le GPX ou le serveur.");
         showMsg("Erreur analyse GPX.", false);
+        setAnalyzeBusy(false);
+
       }
       console.warn(e);
       ANALYSIS = null;
@@ -564,6 +626,12 @@
     if (!$("meetingId").value) return "Événement obligatoire.";
     if (!normalizeDate($("date").value)) return "Date d’épreuve obligatoire.";
     if (!$("name").value.trim()) return "Nom d’épreuve obligatoire.";
+
+    // ✅ GPX + Analyse obligatoires
+    const f = $("gpxFile")?.files?.[0];
+    if (!f) return "GPX obligatoire : ajoute un fichier puis lance l’analyse.";
+    if (!ANALYSIS) return "Analyse GPX/OSM obligatoire : clique sur “Lancer l’analyse” avant d’enregistrer.";
+
     return null;
   }
 
@@ -587,18 +655,15 @@
       disc: $("disc").value || null,
 
       ebike: $("ebike").value === "1",
-      bikeWash: $("wash").value || null,      // Oui/Non/ null
-      mechAssist: $("mechanic").value || null, // "0"/"1"/"2"/null
-      feeds: $("feeds").value || null,         // "0"/"1"/"2"/null
+      bikeWash: $("wash").value || null,
+      mechAssist: $("mechanic").value || null,
+      feeds: $("feeds").value || null,
       sexAllowed: $("sexAllowed").value || "all",
 
       comment: $("comment").value.trim() || null,
-
-      // meeting URL (utile sur race.html)
       meetingUrl: meeting?.url || null,
 
-      // analyse (si faite) — stockée pour la fiche épreuve
-      analysis: ANALYSIS ? {
+      analysis: {
         fileName: ANALYSIS.fileName,
         distanceKm: ANALYSIS.distanceKm ?? null,
         dplusM: ANALYSIS.dplusM ?? null,
@@ -607,18 +672,18 @@
         techScore: ANALYSIS.techScore ?? null,
         globalScore: ANALYSIS.globalScore ?? null,
         points: ANALYSIS.points ?? null
-      } : null,
+      },
 
-      // champs directs utilisés par race.html
-      distanceKm: ANALYSIS?.distanceKm ?? null,
-      dplusM: ANALYSIS?.dplusM ?? null,
-      surfaceEstimate: ANALYSIS?.surfaceEstimate ?? null,
-      physScore: ANALYSIS?.physScore ?? null,
-      techScore: ANALYSIS?.techScore ?? null,
-      globalScore: ANALYSIS?.globalScore ?? null,
-      gpx: ANALYSIS ? { fileName: ANALYSIS.fileName, points: ANALYSIS.points ?? null } : null,
+      distanceKm: ANALYSIS.distanceKm ?? null,
+      dplusM: ANALYSIS.dplusM ?? null,
+      surfaceEstimate: ANALYSIS.surfaceEstimate ?? null,
+      physScore: ANALYSIS.physScore ?? null,
+      techScore: ANALYSIS.techScore ?? null,
+      globalScore: ANALYSIS.globalScore ?? null,
+      gpx: { fileName: ANALYSIS.fileName, points: ANALYSIS.points ?? null },
 
-      lapsByCategorySex, // { U15:{M:4,F:3}, M3:{M:5,F:4} } ou null
+      // ✅ multi-tours seulement si activé
+      lapsByCategorySex: (lapsByCategorySex && Object.keys(lapsByCategorySex).length) ? lapsByCategorySex : null,
 
       createdAt: Date.now(),
       isPublished: false
@@ -639,7 +704,9 @@
     $("ebike").value = "0";
     $("sexAllowed").value = "all";
 
-    // laps
+    // multi-tours off
+    $("enableMultiLaps").checked = false;
+    $("multiLapsWrap").style.display = "none";
     document.querySelectorAll(".catOn").forEach(chk => chk.checked = false);
     document.querySelectorAll(".lapsM,.lapsF").forEach(inp => { inp.value = ""; inp.disabled = true; });
 
@@ -679,10 +746,27 @@
   // -------- init
   initMeetingSelect();
   renderAgeRows();
+  initMultiToggle();
 
   // events
-  $("btnAnalyze").addEventListener("click", analyzeGpx);
-  $("btnClearGPX").addEventListener("click", clearGpx);
+// Bouton unique : ouvrir fichier + analyser
+$("btnPickAnalyze").addEventListener("click", () => {
+  showMsg("");
+  $("gpxFile").click();
+});
+
+// Quand un fichier est choisi => analyse auto
+$("gpxFile").addEventListener("change", async () => {
+  const f = $("gpxFile")?.files?.[0];
+  $("pickedFileName").textContent = f ? ("Fichier sélectionné : " + f.name) : "";
+  if (f) await analyzeGpx();
+});
+
+$("btnClearGPX").addEventListener("click", () => {
+  $("pickedFileName").textContent = "";
+  clearGpx();
+});
+
 
   $("btnSave").addEventListener("click", ()=> save(false));
   $("btnSaveAndNew").addEventListener("click", ()=> save(true));
