@@ -90,7 +90,8 @@
 
     <h3 class="sectionTitle" style="margin-top:18px;">Infos épreuve</h3>
 
-    <div class="filters" style="grid-template-columns: 1.4fr 1fr 1fr 1fr; align-items:end;">
+    <!-- ✅ On ajoute "Catégorie" (Local / Régional / National / International) -->
+    <div class="filters" style="grid-template-columns: 1.6fr 1fr 1fr 1fr; align-items:end;">
       <div class="spanAll" style="grid-column:1/3">
         <label for="name">Nom de l’épreuve *</label>
         <input id="name" type="text" placeholder="Ex: Spéciale 1 — Roc Noir / XC 45km / etc." />
@@ -106,6 +107,17 @@
           <option value="Gravel">Gravel</option>
           <option value="Marathon">Marathon</option>
           <option value="Ultra">Ultra</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="category">Catégorie</label>
+        <select id="category">
+          <option value="">—</option>
+          <option value="Local">Local</option>
+          <option value="Regional">Régional</option>
+          <option value="National">National</option>
+          <option value="International">International</option>
         </select>
       </div>
 
@@ -188,7 +200,7 @@
       <button class="btn ghost" id="btnReset" type="button">Réinitialiser</button>
     </div>
 
-    <!-- ✅ NOUVEAU : bouton après enregistrement -->
+    <!-- ✅ Bouton après enregistrement -->
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
       <a class="btn ok" id="btnViewRace" href="#" style="display:none;">
         👁️ Voir la fiche épreuve
@@ -314,7 +326,6 @@
   function upsertRaceSafe(race){
     if (!race || !race.id) return race;
     if (typeof window.addStoredEvent === "function") {
-      // ton storage.js peut déjà gérer
       window.addStoredEvent(race);
       return race;
     }
@@ -419,7 +430,6 @@
   }
 
   function updateScoreUI(gpxRes){
-    // gpx.js (frontend) renvoie physScore local + (optionnel) tech serveur
     const phys = gpxRes?.phys?.score ?? gpxRes?.physScore ?? gpxRes?.phys ?? null;
     const tech = gpxRes?.tech?.techScore ?? gpxRes?.techScore ?? null;
 
@@ -433,7 +443,6 @@
 
     setKpi("kpiGlobal", (global == null ? "—" : global));
 
-    // sub hints
     const ps = $("kpiPhysSub");
     const ts = $("kpiTechSub");
     const gs = $("kpiGlobalSub");
@@ -457,7 +466,6 @@
     try{
       const res = await window.analyzeGPX(file, { keepPoints: false });
 
-      // normalize
       const distanceKm = res?.distanceKm ?? res?.stats?.distanceKm ?? null;
       const dplusM = res?.dplusM ?? res?.stats?.dplusM ?? null;
       const hasElevation = (res?.hasElevation ?? res?.stats?.hasElevation) ? true : false;
@@ -465,13 +473,7 @@
       if (distanceKm != null) $("distanceKm").value = String(distanceKm);
       if (dplusM != null) $("dplusM").value = String(dplusM);
 
-      GPX_CACHE = {
-        fileName: file.name,
-        distanceKm,
-        dplusM,
-        hasElevation,
-        raw: res
-      };
+      GPX_CACHE = { fileName: file.name, distanceKm, dplusM, hasElevation, raw: res };
 
       updateScoreUI(res);
       showMsg(`GPX analysé : ${String(distanceKm ?? "—").replace(".", ",")} km • D+ ${dplusM ?? "—"} m`, true);
@@ -497,14 +499,13 @@
     showMsg("GPX effacé.", true);
   }
 
-  // Écoute l'UI status émise par gpx.js
   window.addEventListener("mtb:status", (e) => {
     const d = e?.detail || {};
     setStatusUI(d.phase || "—", d.message || "—", d.progress);
   });
 
   // -------------------- save logic --------------------
-  function getVal(id){ return ($ (id)?.value || "").trim(); }
+  function getVal(id){ return ($(id)?.value || "").trim(); }
   function getNum(id){
     const s = getVal(id);
     if (!s) return null;
@@ -529,13 +530,14 @@
 
     return {
       id,
-      meetingId,            // pour ta page meeting/race
-      eventGroupId: meetingId, // compat si tu utilises ce champ ailleurs
+      meetingId,
+      eventGroupId: meetingId, // compat
       date: getVal("date"),
       time: getVal("time") || null,
 
       name,
       disc: getVal("disc") || null,
+      category: getVal("category") || null, // ✅ Catégorie ajoutée
       ebike: (getVal("ebike") === "1"),
 
       distanceKm: getNum("distanceKm"),
@@ -548,7 +550,6 @@
         distanceKm: GPX_CACHE.distanceKm,
         dplusM: GPX_CACHE.dplusM,
         hasElevation: GPX_CACHE.hasElevation,
-        // tu peux stocker plus tard res.raw si tu veux (profil/carte)
       } : null,
 
       createdAt: Date.now()
@@ -569,6 +570,7 @@
 
     $("name").value = "";
     $("disc").value = "";
+    $("category").value = "";   // ✅ reset catégorie
     $("ebike").value = "0";
     $("distanceKm").value = "";
     $("dplusM").value = "";
@@ -597,11 +599,11 @@
     attachRaceToMeeting(race);
 
     showMsg(`Épreuve créée : <b>${esc(race.name)}</b>`, true);
-    showViewRaceBtn(race.id);
 
     if (thenNew){
-      // on garde meeting + date, on prépare pour une autre épreuve
       setTimeout(() => resetForm(true), 50);
+    } else {
+      showViewRaceBtn(race.id);
     }
   }
 
@@ -627,7 +629,6 @@
     const btnReset = $("btnReset");
     if (btnReset) btnReset.addEventListener("click", () => resetForm(true));
 
-    // meetingId depuis URL -> sélection + date bornée
     const mid = params.get("meetingId") || params.get("eventGroupId");
     if (mid && $("meetingId")){
       $("meetingId").value = mid;
@@ -641,3 +642,4 @@
 
 </body>
 </html>
+
