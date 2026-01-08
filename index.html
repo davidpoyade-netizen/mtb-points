@@ -10,6 +10,7 @@
       --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
       --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
       --r:16px;
+      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
@@ -69,8 +70,9 @@
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:12px 14px;border-radius:12px;text-decoration:none;
       border:1px solid var(--border);background:#fff;font-weight:900;color:var(--text);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
     .btn2.primary{background:var(--blue);border-color:var(--blue);color:#fff}
     .btn2.primary:hover{background:var(--blue2);border-color:var(--blue2)}
     .chip{
@@ -99,7 +101,7 @@
     footer{margin-top:18px;color:var(--muted);font-size:12px}
 
     /* ============================= */
-    /* NEW: Aperçus horizontaux      */
+    /* APERÇUS horizontaux           */
     /* ============================= */
     .previewRow{
       margin-top:14px;
@@ -160,7 +162,7 @@
     .medal{font-size:16px}
     .name{
       font-weight:900;font-size:13px;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-      max-width:260px;
+      max-width:320px;
     }
     .rightScore{font-weight:900;font-size:13px;color:#0f172a;white-space:nowrap}
     .mutedSmall{color:#64748b;font-size:12px}
@@ -189,6 +191,7 @@
 
   <nav>
     <a href="public-ranking.html">Classement</a>
+    <a href="public-clubs.html">Clubs</a>
     <a href="meetings.html">Événements</a>
     <a href="challengemtbpoints.html">Challenge</a>
     <a href="reglement.html">Règlement</a>
@@ -224,6 +227,7 @@
     <div class="heroActions">
       <a class="btn2 primary" href="login.html">Je suis organisateur</a>
       <a class="btn2" href="public-ranking.html">Voir le classement</a>
+      <a class="btn2" href="public-clubs.html">Voir les clubs</a>
       <a class="btn2" href="challengemtbpoints.html">Voir le challenge</a>
       <a class="btn2" href="contact.html">Nous contacter</a>
     </div>
@@ -244,7 +248,7 @@
     </div>
   </section>
 
-  <!-- NEW: APERÇUS -->
+  <!-- APERÇUS -->
   <section class="previewRow" aria-label="Aperçus">
     <!-- 1) Classement -->
     <div class="preview" id="previewRanking" role="link" tabindex="0" title="Ouvrir le classement">
@@ -316,6 +320,28 @@
 
       <div class="mutedSmall" id="meetingsHint" style="margin-top:10px">Source: Supabase</div>
     </div>
+
+    <!-- 4) NEW: Classement clubs (AJOUTÉ juste après “Événements à venir”) -->
+    <div class="preview" id="previewClubs" role="link" tabindex="0" title="Voir le classement des clubs">
+      <div class="previewTop">
+        <div>
+          <h3>Classement des clubs</h3>
+          <div class="sub">Top 3 clubs (aperçu)</div>
+        </div>
+        <span class="previewBadge">→ Voir le classement clubs</span>
+      </div>
+
+      <div class="previewBody" style="grid-template-columns:1fr;">
+        <div class="miniTable">
+          <div class="title">🏁 Top Clubs</div>
+          <ul class="miniList" id="clubsTop">
+            <li class="miniItem"><div class="left"><span class="medal">…</span><span class="name">Chargement…</span></div><span class="rightScore">—</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mutedSmall" id="clubsHint" style="margin-top:10px">Source: Supabase</div>
+    </div>
   </section>
 
   <!-- CONTENT -->
@@ -375,6 +401,7 @@
         <p>Consulter les épreuves, le classement public, et suivre les badges du challenge.</p>
         <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
           <a class="btn2" href="public-ranking.html">Classement</a>
+          <a class="btn2" href="public-clubs.html">Clubs</a>
           <a class="btn2" href="challengemtbpoints.html">Challenge</a>
         </div>
         <div class="muted" style="margin-top:8px;font-size:12px;">Accès public</div>
@@ -387,6 +414,7 @@
         <p class="muted" style="margin:0 0 10px 0;">Pages clés du projet</p>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
           <a class="btn2" href="meetings.html">Événements</a>
+          <a class="btn2" href="public-clubs.html">Clubs</a>
           <a class="btn2" href="reglement.html">Règlement</a>
           <a class="btn2" href="methodologie.html">Méthodologie</a>
           <a class="btn2" href="about.html">À propos</a>
@@ -398,7 +426,7 @@
   </div>
 </div>
 
-<!-- NEW: Chargement des aperçus depuis Supabase -->
+<!-- Chargement des aperçus depuis Supabase (+ fallback localStorage pour clubs si besoin) -->
 <script type="module">
   import { supabase } from "./js/supabaseClient.js";
 
@@ -418,8 +446,9 @@
   bindOpen($("previewRanking"), "public-ranking.html");
   bindOpen($("previewChallenge"), "challengemtbpoints.html");
   bindOpen($("previewMeetings"), "meetings.html");
+  bindOpen($("previewClubs"), "public-clubs.html");
 
-  function renderTopList(ul, rows, scoreKey="score"){
+  function renderTopList(ul, rows, scoreKey="score", nameKey="name"){
     if (!ul) return;
     if (!rows || !rows.length){
       ul.innerHTML = `<li class="miniItem"><div class="left"><span class="medal">—</span><span class="name">Aucune donnée</span></div><span class="rightScore">—</span></li>`;
@@ -429,7 +458,7 @@
       <li class="miniItem">
         <div class="left">
           <span class="medal">${medals[i] || "•"}</span>
-          <span class="name">${esc(r.name || "—")}</span>
+          <span class="name">${esc(r[nameKey] || "—")}</span>
         </div>
         <span class="rightScore">${Number.isFinite(Number(r[scoreKey])) ? Number(r[scoreKey]) : "—"}</span>
       </li>
@@ -475,12 +504,9 @@
     const ul = $("challengeTop");
     const hint = $("challengeHint");
 
-    // On tente une vue dédiée si tu l’ajoutes (idéal)
-    // Colonnes attendues possibles : name, points/score, etc.
     const tryViews = [
       { view: "v_public_challenge_ranking", scoreKey: "score" },
       { view: "v_public_challenge_ranking", scoreKey: "points" },
-      // fallback: on réutilise le score global si pas de vue challenge
       { view: "v_public_ranking", scoreKey: "score" }
     ];
 
@@ -507,7 +533,6 @@
       }
     }
 
-    // Si tout échoue
     renderTopList(ul, [], "score");
     if (hint) hint.textContent = "⚠️ Challenge indisponible (vue absente / RLS / config).";
   }
@@ -556,11 +581,132 @@
     }
   }
 
+  function safeJson(key){
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(_){ return null; }
+  }
+
+  async function loadClubsPreview(){
+    const ul = $("clubsTop");
+    const hint = $("clubsHint");
+
+    function renderEmpty(message){
+      if (!ul) return;
+      ul.innerHTML = `<li class="miniItem"><div class="left"><span class="medal">—</span><span class="name">${esc(message)}</span></div><span class="rightScore">—</span></li>`;
+    }
+
+    function normalizeClubName(v){
+      const s = String(v || "").trim();
+      return s || null;
+    }
+
+    function riderKey(r){
+      const email = String(r?.riderEmail ?? r?.email ?? "").trim().toLowerCase();
+      const id = String(r?.riderId ?? r?.rider_id ?? r?.athlete_id ?? "").trim();
+      const name = String(r?.riderName ?? r?.name ?? r?.nom ?? "").trim().toLowerCase();
+      return email ? `email:${email}` : (id ? `id:${id}` : (name ? `name:${name}` : null));
+    }
+
+    // 1) Tentative Supabase via v_public_results (le mieux)
+    try{
+      const { data, error } = await supabase
+        .from("v_public_results")
+        .select("*")
+        .limit(10000);
+
+      if (error) throw error;
+
+      const rows = data || [];
+      const map = new Map();
+
+      for (const r of rows){
+        const club = normalizeClubName(r.club ?? r.team ?? r.equipe ?? r["équipe"] ?? r.club_name ?? r.team_name);
+        if (!club) continue;
+
+        const pts = Number(r.points ?? r.score ?? r.mtbPoints ?? 0) || 0;
+        const key = club.toLowerCase();
+
+        if (!map.has(key)){
+          map.set(key, { club, points: 0, riders: new Set() });
+        }
+        const it = map.get(key);
+        it.points += pts;
+
+        const rk = riderKey(r);
+        if (rk) it.riders.add(rk);
+      }
+
+      const list = Array.from(map.values())
+        .map(x => ({ club: x.club, score: Math.round(x.points), riders: x.riders.size }))
+        .sort((a,b) => b.score - a.score)
+        .slice(0,3);
+
+      if (!list.length){
+        renderEmpty("Aucun club (champ club/team manquant dans les résultats)");
+        if (hint) hint.textContent = "Source: Supabase (v_public_results) — club absent";
+        return;
+      }
+
+      renderTopList(ul, list, "score", "club");
+      if (hint) hint.textContent = "Source: Supabase (v_public_results)";
+      return;
+    } catch(e){
+      // fallback local
+    }
+
+    // 2) Fallback localStorage mtb.results.v1
+    try{
+      const results = safeJson("mtb.results.v1");
+      if (!Array.isArray(results) || !results.length){
+        renderEmpty("Clubs indisponibles (pas de données)");
+        if (hint) hint.textContent = "Source: localStorage (mtb.results.v1) — vide";
+        return;
+      }
+
+      const map = new Map();
+      for (const r of results){
+        const club = normalizeClubName(r.club ?? r.team ?? r.equipe ?? r["équipe"]);
+        if (!club) continue;
+
+        const pts = Number(String(r.points ?? r.score ?? r.mtbPoints ?? 0).replace(",", ".")) || 0;
+        const key = club.toLowerCase();
+
+        if (!map.has(key)){
+          map.set(key, { club, points: 0, riders: new Set() });
+        }
+        const it = map.get(key);
+        it.points += pts;
+
+        const rk = riderKey(r);
+        if (rk) it.riders.add(rk);
+      }
+
+      const list = Array.from(map.values())
+        .map(x => ({ club: x.club, score: Math.round(x.points), riders: x.riders.size }))
+        .sort((a,b) => b.score - a.score)
+        .slice(0,3);
+
+      if (!list.length){
+        renderEmpty("Aucun club (ajoute le champ club/team dans les résultats)");
+        if (hint) hint.textContent = "Source: localStorage — club absent";
+        return;
+      }
+
+      renderTopList(ul, list, "score", "club");
+      if (hint) hint.textContent = "Source: localStorage (mtb.results.v1)";
+      return;
+    } catch(e){
+      console.warn("[index] clubs preview failed", e);
+      renderEmpty("Clubs indisponibles");
+      if (hint) hint.textContent = "⚠️ Clubs indisponibles (RLS/config/données).";
+    }
+  }
+
   await loadRankingPreview();
   await loadChallengePreview();
   await loadUpcomingMeetings();
+  await loadClubsPreview();
 </script>
 
 </body>
 </html>
- 
+
