@@ -292,6 +292,11 @@
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
+const { data: { session } } = await supabase.auth.getSession();
+console.log("SESSION?", session);
+console.log("ACCESS TOKEN?", session?.access_token?.slice(0, 25));
+
+
       // ✅ crée la ligne profiles si absente (sinon 403/role KO)
       await ensureProfile(data.user, "organizer");
 
