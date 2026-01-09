@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Organisateur — Événement | MTB Points</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .muted2{color:#64748b;font-size:12px}
+    .row2{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+    .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+    @media(max-width:900px){.list{grid-template-columns:1fr}}
+    .item{border:1px solid #e5e7eb;border-radius:16px;background:#fff;padding:14px}
+    .topline{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .title{font-weight:900;font-size:16px}
+    .meta{margin-top:8px;color:#64748b;font-size:13px;line-height:1.4}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e5e7eb;font-weight:900;font-size:12px}
+    .msg{margin-top:12px;padding:10px 12px;border-radius:14px;border:1px solid #e5e7eb;background:#fff;font-weight:900;display:none;line-height:1.45}
+    .msg.ok{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .msg.err{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+    .msg.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+    .empty{margin-top:14px;border:1px dashed #e5e7eb;border-radius:16px;padding:14px;color:#64748b;background:#fff}
+  </style>
+</head>
+
+<body>
+<header class="header">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Événement</h1>
+    <span class="pill" id="whoami"><span class="dot"></span> Chargement…</span>
+  </div>
+
+  <nav class="nav">
+    <a href="organizer-dashboard.html" class="active">Espace orga</a>
+    <a href="meetings.html">Événements</a>
+    <a href="race.html">Épreuves</a>
+    <a href="public-ranking.html">Classement</a>
+  </nav>
+
+  <div class="headerRight" style="display:flex;gap:10px;flex-wrap:wrap">
+    <a class="btn ghost" href="organizer-dashboard.html">← Mes événements</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+
+    <section class="hero">
+      <div class="row2">
+        <div style="min-width:260px;flex:1">
+          <h2 id="meetingName" style="margin:0">Chargement…</h2>
+          <div class="muted2" id="meetingMeta">—</div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn primary" id="btnAddRacePage" href="#">+ Créer une épreuve (page)</a>
+        </div>
+      </div>
+
+      <div id="msg" class="msg"></div>
+    </section>
+
+    <!-- Create race inline -->
+    <section style="margin-top:14px;">
+      <div class="row2">
+        <div class="badge">➕ Ajouter une épreuve (rapide)</div>
+        <div class="muted2">Import GPX = analyse auto (distance/D+ + scores)</div>
+      </div>
+
+      <!-- Status box driven by mtb:status -->
+      <div id="gpxStatus" class="msg warn" style="display:none">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="mtb-spinner" id="gpxSpinner"></div>
+          <div style="flex:1;min-width:220px">
+            <div id="gpxMsg" style="font-weight:900">Analyse…</div>
+            <div id="gpxSub" class="muted2" style="margin-top:2px">—</div>
+            <div class="mtb-progress" style="margin-top:8px"><div id="gpxBar"></div></div>
+          </div>
+          <span id="gpxBadge" class="mtb-badge">…</span>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:12px;">
+        <div>
+          <label for="raceName">Nom épreuve *</label>
+          <input id="raceName" placeholder="Ex : XC Elite / Marathon 60 km" />
+        </div>
+        <div>
+          <label for="raceDate">Date épreuve *</label>
+          <input id="raceDate" type="date" />
+        </div>
+
+        <div>
+          <label for="raceDisc">Discipline</label>
+          <select id="raceDisc">
+            <option value="">Auto</option>
+            <option>XC</option><option>Enduro</option><option>DH</option><option>Gravel</option><option>Marathon</option><option>Ultra</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="raceLevel">Niveau</label>
+          <select id="raceLevel">
+            <option value="">—</option>
+            <option>Local</option><option>Regional</option><option>National</option><option>International</option>
+          </select>
+        </div>
+
+        <div class="grid3" style="grid-column:1/-1">
+          <div>
+            <label for="raceGpxFile">Trace GPX *</label>
+            <input id="raceGpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml" />
+            <div class="muted2" style="margin-top:6px">L’analyse se lance automatiquement dès l’import.</div>
+          </div>
+
+          <div>
+            <label for="raceDist">Distance (km)</label>
+            <input id="raceDist" type="number" step="0.01" placeholder="Auto via GPX" />
+          </div>
+
+          <div>
+            <label for="raceDplus">D+ (m)</label>
+            <input id="raceDplus" type="number" step="1" placeholder="Auto via GPX" />
+          </div>
+        </div>
+
+        <div style="grid-column:1/-1">
+          <label>eBike</label>
+          <div style="margin-top:8px;display:flex;gap:10px;align-items:center">
+            <input id="raceEbike" type="checkbox" style="width:auto;margin:0;transform:scale(1.1)" />
+            <span class="muted2">Catégorie VTTAE</span>
+          </div>
+        </div>
+
+        <div style="grid-column:1/-1">
+          <label>Publié</label>
+          <div style="margin-top:8px;display:flex;gap:10px;align-items:center">
+            <input id="racePublished" type="checkbox" style="width:auto;margin:0;transform:scale(1.1)" />
+            <span class="muted2">Visible publiquement si publié</span>
+          </div>
+        </div>
+
+        <div style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" id="btnClearGPX" type="button">Effacer GPX</button>
+          <button class="btn primary" id="createRaceBtn" type="button">+ Ajouter l’épreuve</button>
+          <button class="btn" id="reloadBtn" type="button">↻ Recharger</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Races list -->
+    <section style="margin-top:14px;">
+      <div class="row2">
+        <div class="badge">Épreuves : <span id="count">0</span></div>
+        <div class="muted2">Clique sur une fiche pour gérer / importer les résultats.</div>
+      </div>
+
+      <div id="racesList" class="list"></div>
+      <div id="empty" class="empty" style="display:none">Aucune épreuve pour cet événement.</div>
+    </section>
+
+  </div>
+</main>
+
+<!-- deps -->
+<script src="js/gpx.js"></script>
+<script>
+  // active le CSS spinner si dispo
+  window.ensureMTBSpinnerCSS && window.ensureMTBSpinnerCSS();
+</script>
+
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
+
+  const $ = (id) => document.getElementById(id);
+
+  const whoami = $("whoami");
+  const msg = $("msg");
+  const meetingName = $("meetingName");
+  const meetingMeta = $("meetingMeta");
+
+  const racesList = $("racesList");
+  const empty = $("empty");
+  const count = $("count");
+
+  const raceName = $("raceName");
+  const raceDate = $("raceDate");
+  const raceDisc = $("raceDisc");
+  const raceLevel = $("raceLevel");
+  const raceDist = $("raceDist");
+  const raceDplus = $("raceDplus");
+  const raceEbike = $("raceEbike");
+  const racePublished = $("racePublished");
+  const raceGpxFile = $("raceGpxFile");
+
+  const createRaceBtn = $("createRaceBtn");
+  const reloadBtn = $("reloadBtn");
+  const btnClearGPX = $("btnClearGPX");
+  const btnAddRacePage = $("btnAddRacePage");
+
+  const params = new URLSearchParams(location.search);
+  const meetingId = params.get("id");
+
+  // GPX analysis state
+  let GPX_ANALYSIS = null;
+
+  function showMsg(text, kind="warn"){
+    msg.className = `msg ${kind}`;
+    msg.textContent = text || "";
+    msg.style.display = text ? "block" : "none";
+  }
+
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function slugId(name){
+    const base = String(name||"")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .trim()
+      .replace(/[^a-z0-9]+/g,"-")
+      .replace(/(^-|-$)/g,"")
+      .slice(0,60);
+    return `${base || "race"}-${Date.now()}`;
+  }
+
+  async function requireOrganizerOrRedirect(){
+    const { data: u, error: ue } = await supabase.auth.getUser();
+    if (ue) throw ue;
+
+    const user = u?.user;
+    if (!user) {
+      whoami.innerHTML = `<span class="dot err"></span> Non connecté`;
+      location.href = "login.html";
+      throw new Error("Non connecté");
+    }
+
+    const { data: p, error: pe } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (pe) throw pe;
+
+    const role = p?.role || "rider";
+    whoami.innerHTML = `<span class="dot ok"></span> ${esc(user.email)} • ${esc(role)}`;
+
+    if (!(role === "organizer" || role === "admin")) {
+      showMsg("Accès réservé aux organisateurs.", "err");
+      setTimeout(() => location.href = "login.html", 700);
+      throw new Error("Accès refusé");
+    }
+
+    return { user, role };
+  }
+
+  // ---- GPX status UI (listen gpx.js events) ----
+  function setGpxUI({ show=true, message="", sub="—", progress=null, phase="gpx", spinning=true }) {
+    const box = $("gpxStatus");
+    const msgEl = $("gpxMsg");
+    const subEl = $("gpxSub");
+    const barEl = $("gpxBar");
+    const badgeEl = $("gpxBadge");
+    const spinner = $("gpxSpinner");
+
+    if (box) box.style.display = show ? "block" : "none";
+    if (msgEl) msgEl.textContent = message || "";
+    if (subEl) subEl.textContent = sub || "—";
+
+    if (barEl) {
+      const pct = (typeof progress === "number") ? Math.round(Math.max(0, Math.min(1, progress)) * 100) : 0;
+      barEl.style.width = pct + "%";
+    }
+
+    if (badgeEl) {
+      badgeEl.textContent = String(phase || "…").toUpperCase();
+      badgeEl.classList.remove("ok","warn","err");
+      if (phase === "done") badgeEl.classList.add("ok");
+      else if (phase === "error") badgeEl.classList.add("err");
+      else badgeEl.classList.add("warn");
+    }
+
+    if (spinner) spinner.style.display = spinning ? "block" : "none";
+  }
+
+  window.addEventListener("mtb:status", (e) => {
+    const d = e.detail || {};
+    const niceSub =
+      d.phase === "gpx" ? "Analyse pente • effort • stats…" :
+      d.phase === "osm" ? "Analyse terrain OSM • technicité…" :
+      d.phase === "done" ? "Terminé" :
+      d.phase === "error" ? "Erreur" : "—";
+
+    setGpxUI({
+      show: true,
+      message: d.message || "Analyse…",
+      sub: niceSub,
+      progress: (typeof d.progress === "number") ? d.progress : null,
+      phase: d.phase || "gpx",
+      spinning: d.spinning !== false
+    });
+  });
+
+  async function runAutoAnalysis(file){
+    GPX_ANALYSIS = null;
+    if (!file) return;
+
+    if (typeof window.analyzeGPX !== "function") {
+      setGpxUI({ show:true, message:"Erreur: analyzeGPX introuvable (js/gpx.js non chargé).", phase:"error", spinning:false });
+      return;
+    }
+
+    try {
+      setGpxUI({ show:true, message:"Préparation de l’analyse…", sub:"Initialisation", phase:"gpx", progress:0.05, spinning:true });
+
+      const res = await window.analyzeGPX(file, { keepPoints: false });
+      GPX_ANALYSIS = res;
+
+      // auto-fill distance/d+
+      if (res?.distanceKm != null) raceDist.value = String(res.distanceKm);
+      if (res?.dplusM != null) raceDplus.value = String(res.dplusM);
+
+      // discipline auto si non choisi
+      if (!raceDisc.value && res?.discipline?.hint) raceDisc.value = res.discipline.hint;
+
+      setGpxUI({ show:true, message:"Distance et D+ renseignés ✅", sub:"Tu peux enregistrer l’épreuve", phase:"done", progress:1, spinning:false });
+    } catch (err) {
+      GPX_ANALYSIS = null;
+      setGpxUI({ show:true, message: err?.message || "Erreur analyse GPX", sub:"Vérifie le GPX / réseau", phase:"error", spinning:false });
+    }
+  }
+
+  function clearGPX(){
+    GPX
+
