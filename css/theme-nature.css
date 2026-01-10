@@ -1,6 +1,6 @@
 /* css/theme-nature.css
-   Surcouche "bois / nature / feuillage" pour MTB Points
-   -> Ne remplace pas ton design system, le "thématise".
+   Thème "bois / nature / feuillage + traces de pneu" pour MTB Points
+   Surcouche : garde ta structure et recolore / retexture.
 */
 
 body.theme-nature{
@@ -12,7 +12,7 @@ body.theme-nature{
   --muted2:#556a60;
   --border: rgba(40,60,40,.14);
 
-  --blue:#2f6f3e;         /* vert forêt (remplace le bleu) */
+  --blue:#2f6f3e;         /* vert forêt */
   --blue2:#255a31;
 
   --ok:#1b7a3a;
@@ -22,7 +22,6 @@ body.theme-nature{
   --shadow: 0 16px 40px rgba(15, 23, 42, .12);
   --shadow2: 0 22px 60px rgba(15, 23, 42, .14);
 
-  /* Fond global "bois + mousse" (sans images externes) */
   background:
     radial-gradient(1200px 480px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
     radial-gradient(900px 420px at 88% 12%, rgba(120,76,36,.18), transparent 62%),
@@ -30,7 +29,47 @@ body.theme-nature{
     var(--bg);
 }
 
-/* Header -> planche bois + feuillage */
+/* =========================
+   Overlay traces de pneu
+========================= */
+body.theme-nature{
+  position: relative;
+  overflow-x: hidden;
+}
+
+body.theme-nature::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background:
+    radial-gradient(1200px 520px at 18% 12%, rgba(120,76,36,.14), transparent 65%),
+    radial-gradient(900px 420px at 82% 8%, rgba(47,111,62,.12), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520'%3E%3Cg fill='none' stroke='%23331f10' stroke-opacity='.16' stroke-width='10'%3E%3Cpath d='M-60 120 C 60 40, 180 200, 300 120 S 540 200, 660 120'/%3E%3Cpath d='M-60 180 C 60 100, 180 260, 300 180 S 540 260, 660 180'/%3E%3C/g%3E%3Cg fill='none' stroke='%23331f10' stroke-opacity='.10' stroke-width='3'%3E%3Cpath d='M-60 120 C 60 40, 180 200, 300 120 S 540 200, 660 120' stroke-dasharray='10 16'/%3E%3Cpath d='M-60 180 C 60 100, 180 260, 300 180 S 540 260, 660 180' stroke-dasharray='10 16'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-size: cover, cover, 520px 520px;
+
+  opacity: .22;              /* règle ici si tu veux + visible : .28 */
+  mix-blend-mode: multiply;
+}
+
+/* Assure que tout le contenu passe au-dessus de l’overlay */
+body.theme-nature header,
+body.theme-nature main,
+body.theme-nature .wrap,
+body.theme-nature .card{
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================
+   Header / Nav
+========================= */
+
+/* Supporte header.header ET .header */
+body.theme-nature header.header,
 body.theme-nature .header{
   border-bottom: 1px solid rgba(40,60,40,.18);
   background:
@@ -40,7 +79,8 @@ body.theme-nature .header{
   box-shadow: 0 10px 26px rgba(15,23,42,.10);
 }
 
-/* Petit bandeau "bois" sous le header (optionnel, joli) */
+/* Petit bandeau bois sous header */
+body.theme-nature header.header::after,
 body.theme-nature .header::after{
   content:"";
   display:block;
@@ -48,36 +88,39 @@ body.theme-nature .header::after{
   height:10px;
   border-radius:999px;
   margin-top:8px;
-  background:
-    linear-gradient(90deg,
-      rgba(120,76,36,.40),
-      rgba(120,76,36,.18),
-      rgba(120,76,36,.32)
-    );
+  background: linear-gradient(90deg,
+    rgba(120,76,36,.40),
+    rgba(120,76,36,.18),
+    rgba(120,76,36,.32)
+  );
   opacity:.55;
 }
 
-/* Liens nav */
+/* Ton site utilise souvent <nav> directement, pas .nav */
+body.theme-nature nav a,
 body.theme-nature .nav a{
   color: var(--blue);
 }
+body.theme-nature nav a:hover,
 body.theme-nature .nav a:hover{
   background: rgba(47,111,62,.10);
 }
+body.theme-nature nav a.active,
 body.theme-nature .nav a.active{
   background: rgba(47,111,62,.12);
   color: var(--blue2);
 }
 
-/* Cartes : effet papier + bord naturel */
+/* =========================
+   Cartes / Hero / Pills
+========================= */
+
 body.theme-nature .card{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.80));
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.80));
   border: 1px solid rgba(40,60,40,.16);
   box-shadow: var(--shadow);
 }
 
-/* Hero : “clairière” */
 body.theme-nature .hero{
   background:
     radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
@@ -86,34 +129,42 @@ body.theme-nature .hero{
   border: 1px solid rgba(40,60,40,.18);
 }
 
-/* Pills : style “badge gravé” */
 body.theme-nature .pill,
 body.theme-nature .badge,
-body.theme-nature .miniPill{
+body.theme-nature .miniPill,
+body.theme-nature .chip{
   background: rgba(255,255,255,.75);
   border: 1px solid rgba(40,60,40,.18);
 }
 
-/* Boutons : vert forêt */
-body.theme-nature .btn.primary{
+/* =========================
+   Boutons (btn + btn2)
+========================= */
+
+body.theme-nature .btn.primary,
+body.theme-nature .btn2.primary{
   background: linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));
   border-color: rgba(37,90,49,1);
+  color: #fff;
 }
-body.theme-nature .btn.primary:hover{
+body.theme-nature .btn.primary:hover,
+body.theme-nature .btn2.primary:hover{
   background: linear-gradient(180deg, rgba(37,90,49,1), rgba(30,76,41,1));
   border-color: rgba(30,76,41,1);
 }
-body.theme-nature .btn:hover{
+
+body.theme-nature .btn:hover,
+body.theme-nature .btn2:hover{
   border-color: rgba(47,111,62,.25);
 }
 
-/* KPI cards : léger relief */
+/* KPI */
 body.theme-nature .kpi{
   background: rgba(255,255,255,.80);
   border: 1px solid rgba(40,60,40,.14);
 }
 
-/* Bar : plus “nature” */
+/* Bar */
 body.theme-nature .bar{
   background: rgba(47,111,62,.08);
   border: 1px solid rgba(40,60,40,.16);
@@ -122,17 +173,13 @@ body.theme-nature .bar > div{
   background: linear-gradient(90deg, rgba(47,111,62,.55), rgba(120,76,36,.55));
 }
 
-/* List items */
+/* Hover items */
 body.theme-nature .item:hover{
   border-color: rgba(47,111,62,.26);
 }
 
-/* Option : coins/logo en haut à gauche si tu mets une image */
-body.theme-nature .brandRow{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
+/* Logo coins (si tu utilises brandRow/brandLogo) */
+body.theme-nature .brandRow{display:flex;align-items:center;gap:10px}
 body.theme-nature .brandLogo{
   width:40px;height:40px;
   border-radius:12px;
@@ -141,8 +188,4 @@ body.theme-nature .brandLogo{
   background:#fff;
   overflow:hidden;
 }
-body.theme-nature .brandLogo img{
-  width:100%;height:100%;
-  object-fit:cover;
-  display:block;
-}
+body.theme-nature .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
