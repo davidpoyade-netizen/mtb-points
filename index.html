@@ -4,190 +4,177 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MTB Points</title>
+
+  <!-- Base + Thème (le thème DOIT être après) -->
   <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/theme-nature.css">
+  <link rel="stylesheet" href="css/theme-nature.css?v=3">
+
+  <!-- Mini CSS local (layout + logo + previews). Ne définit PAS les variables. -->
   <style>
-    :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
-      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:16px;
-      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
-    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
     a{color:inherit}
+    .wrap{max-width:1100px;margin:26px auto;padding:0 16px}
+    .muted{color:var(--muted)}
+    .grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:14px;margin-top:14px}
+    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
 
     /* Header */
     header.header{
       position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
       padding:14px 16px;
       display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
-    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
     nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     nav a{
       text-decoration:none;
       padding:8px 10px;
       border-radius:10px;
-      color:var(--blue);
-      font-weight:800;
+      font-weight:900;
       font-size:13px;
+      color: var(--blue);
     }
-    nav a:hover{background:#eff6ff}
-    nav a.active{background:#eff6ff;color:var(--blue2)}
-    .lang{display:flex;gap:8px;align-items:center}
-    .lang .btn{
-      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
-    }
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
 
-    /* Layout */
-    .wrap{max-width:1100px;margin:26px auto;padding:0 16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .muted{color:var(--muted)}
-    .grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:14px;margin-top:14px}
-    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
-
-    /* Hero */
-    .hero{
-      border-radius:22px;
-      padding:22px;
-      border:1px solid var(--border);
-      background:
-        radial-gradient(1000px 260px at 15% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 220px at 95% 10%, rgba(16,185,129,.14), transparent 60%),
-        #fff;
-      box-shadow:var(--shadow);
+    /* Logo coins */
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
     }
-    .hero h2{margin:0;font-size:28px;letter-spacing:-.4px}
-    .hero p{margin:10px 0 0 0;line-height:1.6;color:#334155}
-    .heroActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
 
-    /* Buttons */
-    .btn2{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:12px 14px;border-radius:12px;text-decoration:none;
-      border:1px solid var(--border);background:#fff;font-weight:900;color:var(--text);
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
-    .btn2.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn2.primary:hover{background:var(--blue2);border-color:var(--blue2)}
     .chip{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-size:12px;font-weight:900;color:#0f172a;
+      background:rgba(255,255,255,.75);
+      font-size:12px;font-weight:900;color:var(--text);
+      white-space:nowrap;
     }
+
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:rgba(255,255,255,.75);cursor:pointer;font-weight:900;font-size:12px;
+    }
+
+    /* Hero / Cards / Buttons */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+    .hero{
+      border-radius:22px;padding:22px;border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 260px at 96% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.80));
+      box-shadow:var(--shadow2);
+    }
+    .hero h2{margin:0;font-size:28px;letter-spacing:-.4px}
+    .hero p{margin:10px 0 0 0;line-height:1.6;color:#223024}
+    .heroTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+    .heroRight{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .heroCoins{
+      width:120px; height:120px; border-radius:22px; overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 18px 40px rgba(15,23,42,.18);
+      background:rgba(255,255,255,.75);
+    }
+    .heroCoins img{width:100%;height:100%;object-fit:cover;display:block}
+
+    .heroActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn2{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:12px 14px;border-radius:14px;text-decoration:none;
+      border:1px solid var(--border);background:rgba(255,255,255,.78);
+      font-weight:950;color:var(--text);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(15,23,42,.12);border-color:rgba(47,111,62,.25)}
+    .btn2.primary{background:linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));border-color:rgba(37,90,49,1);color:#fff}
+
     .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-    .kpi{border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff}
-    .kpi .big{font-size:18px;font-weight:900}
+    .kpi{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,.80)}
+    .kpi .big{font-size:18px;font-weight:950}
     .kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}
     @media(max-width:700px){ .kpis{grid-template-columns:1fr} }
 
-    /* Feature cards */
-    .miniCard{border:1px solid var(--border);border-radius:16px;padding:14px;background:#fff}
+    .miniCard{border:1px solid var(--border);border-radius:18px;padding:14px;background:rgba(255,255,255,.80)}
     .miniCard h3{margin:0 0 6px 0;font-size:16px}
-    .miniCard p{margin:0;color:#334155;line-height:1.55}
-    .miniCard .muted{margin-top:6px}
+    .miniCard p{margin:0;line-height:1.55;color:#223024}
 
-    /* List */
-    ul.clean{margin:10px 0 0 18px;color:#334155;line-height:1.6}
-    .note{margin-top:12px;border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:14px;padding:12px}
-
-    /* Footer */
+    ul.clean{margin:10px 0 0 18px;line-height:1.6;color:#223024}
+    .note{margin-top:12px;border:1px solid rgba(120,76,36,.25);background:rgba(255,247,237,.75);color:#7a3b12;border-radius:16px;padding:12px}
     footer{margin-top:18px;color:var(--muted);font-size:12px}
 
-    /* ============================= */
-    /* APERÇUS horizontaux           */
-    /* ============================= */
-    .previewRow{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-    }
+    /* Previews */
+    .previewRow{margin-top:14px;display:grid;grid-template-columns:1fr;gap:12px}
     .preview{
       border:1px solid var(--border);
       border-radius:18px;
-      background:#fff;
+      background:rgba(255,255,255,.80);
       padding:14px;
-      box-shadow:0 2px 10px rgba(0,0,0,.05);
+      box-shadow:0 10px 22px rgba(15,23,42,.08);
       cursor:pointer;
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
     .preview:hover{
       transform:translateY(-1px);
-      box-shadow:0 14px 26px rgba(2,6,23,.08);
-      border-color:#dbeafe;
+      box-shadow:0 18px 34px rgba(15,23,42,.12);
+      border-color:rgba(47,111,62,.25);
     }
-    .previewTop{
-      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;
-    }
+    .previewTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
     .previewTop h3{margin:0;font-size:16px;letter-spacing:-.2px}
-    .previewTop .sub{margin-top:4px;color:#64748b;font-size:12px}
+    .previewTop .sub{margin-top:4px;color:var(--muted2);font-size:12px}
     .previewBadge{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-size:12px;font-weight:900;color:#0f172a;
+      background:rgba(255,255,255,.75);font-size:12px;font-weight:950;color:var(--text);
       white-space:nowrap;
     }
-    .previewBody{
-      margin-top:12px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
+    .previewBody{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media(max-width:900px){ .previewBody{grid-template-columns:1fr} }
-
-    .miniTable{
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:12px;
-      background:#fff;
-    }
-    .miniTable .title{
-      font-weight:900;font-size:13px;margin:0 0 8px 0;color:#0f172a;
-      display:flex;align-items:center;gap:8px;
-    }
+    .miniTable{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,.72)}
+    .miniTable .title{font-weight:950;font-size:13px;margin:0 0 8px 0;color:var(--text);display:flex;align-items:center;gap:8px}
     .miniList{margin:0;padding:0;list-style:none;display:grid;gap:8px}
     .miniItem{
       display:flex;justify-content:space-between;gap:10px;align-items:center;
-      border:1px solid #eef2f7;border-radius:12px;padding:10px;
-      background:#fff;
+      border:1px solid rgba(40,60,40,.10);border-radius:14px;padding:10px;
+      background:rgba(255,255,255,.72);
     }
     .miniItem .left{display:flex;gap:10px;align-items:center;min-width:0}
     .medal{font-size:16px}
     .name{
-      font-weight:900;font-size:13px;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      font-weight:950;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
       max-width:320px;
     }
-    .rightScore{font-weight:900;font-size:13px;color:#0f172a;white-space:nowrap}
-    .mutedSmall{color:#64748b;font-size:12px}
-    .eventsGrid{
-      margin-top:12px;
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:10px;
-    }
+    .rightScore{font-weight:950;font-size:13px;color:var(--text);white-space:nowrap}
+    .mutedSmall{color:var(--muted2);font-size:12px}
+
+    .eventsGrid{margin-top:12px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
     @media(max-width:900px){ .eventsGrid{grid-template-columns:1fr 1fr} }
     @media(max-width:520px){ .eventsGrid{grid-template-columns:1fr} }
-    .eventCard{
-      border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff;
-    }
-    .eventCard .t{font-weight:900;font-size:13px;margin:0}
-    .eventCard .m{margin-top:6px;color:#64748b;font-size:12px;line-height:1.4}
+    .eventCard{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,.75)}
+    .eventCard .t{font-weight:950;font-size:13px;margin:0}
+    .eventCard .m{margin-top:6px;color:var(--muted2);font-size:12px;line-height:1.4}
   </style>
 </head>
-<body>
+
+<body class="theme-nature">
 
 <header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points</h1>
-    <span class="chip">Classement VTT multi-courses</span>
+  <div class="brandRow">
+    <!-- ⚠️ Mets ton logo coins ici : /img/mtbpoints-coins.png -->
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>MTB Points</h1>
+      <span class="chip">Classement VTT multi-courses</span>
+    </div>
   </div>
 
   <nav>
@@ -212,45 +199,56 @@
 
   <!-- HERO -->
   <section class="hero">
-    <h2>Un classement VTT comparable entre courses</h2>
-    <p>
-      <strong>MTB Points</strong> transforme chaque épreuve en un score objectif (physique + technique)
-      à partir de la trace <strong>GPX</strong> et de la cartographie <strong>OSM</strong>, puis attribue des points aux coureurs
-      pour construire un classement public sur <strong>24 mois glissants</strong>.
-    </p>
+    <div class="heroTop">
+      <div style="min-width:280px;flex:1">
+        <h2>Un classement VTT comparable entre courses</h2>
+        <p>
+          <strong>MTB Points</strong> transforme chaque épreuve en un score objectif (physique + technique)
+          à partir de la trace <strong>GPX</strong> et de la cartographie <strong>OSM</strong>, puis attribue des points aux coureurs
+          pour construire un classement public sur <strong>24 mois glissants</strong>.
+        </p>
 
-    <div class="chips">
-      <span class="chip">GPX → Distance & D+</span>
-      <span class="chip">ScoreTech V2 Hybrid (OSM + bonus capé)</span>
-      <span class="chip">Badges Challenge</span>
-    </div>
+        <div class="chips">
+          <span class="chip">GPX → Distance & D+</span>
+          <span class="chip">ScoreTech V2 Hybrid (OSM + bonus capé)</span>
+          <span class="chip">Badges Challenge</span>
+        </div>
 
-    <div class="heroActions">
-      <a class="btn2 primary" href="login.html">Je suis organisateur</a>
-      <a class="btn2" href="public-ranking.html">Voir le classement</a>
-      <a class="btn2" href="public-clubs.html">Voir les clubs</a>
-      <a class="btn2" href="challengemtbpoints.html">Voir le challenge</a>
-      <a class="btn2" href="contact.html">Nous contacter</a>
-    </div>
+        <div class="heroActions">
+          <a class="btn2 primary" href="login.html">Je suis organisateur</a>
+          <a class="btn2" href="public-ranking.html">Voir le classement</a>
+          <a class="btn2" href="public-clubs.html">Voir les clubs</a>
+          <a class="btn2" href="challengemtbpoints.html">Voir le challenge</a>
+          <a class="btn2" href="contact.html">Nous contacter</a>
+        </div>
 
-    <div class="kpis">
-      <div class="kpi">
-        <div class="big">24 mois</div>
-        <div class="sub">fenêtre glissante</div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="big">24 mois</div>
+            <div class="sub">fenêtre glissante</div>
+          </div>
+          <div class="kpi">
+            <div class="big">Physique + Technique</div>
+            <div class="sub">score d’épreuve (MRS)</div>
+          </div>
+          <div class="kpi">
+            <div class="big">XC • Enduro • DH</div>
+            <div class="sub">disciplines & catégories</div>
+          </div>
+        </div>
       </div>
-      <div class="kpi">
-        <div class="big">Physique + Technique</div>
-        <div class="sub">score d’épreuve (MRS)</div>
-      </div>
-      <div class="kpi">
-        <div class="big">XC • Enduro • DH</div>
-        <div class="sub">disciplines & catégories</div>
+
+      <div class="heroRight">
+        <div class="heroCoins" title="MTB Points coins">
+          <img src="img/mtbpoints-coins.png" alt="MTB Points coins">
+        </div>
       </div>
     </div>
   </section>
 
   <!-- APERÇUS -->
   <section class="previewRow" aria-label="Aperçus">
+
     <!-- 1) Classement -->
     <div class="preview" id="previewRanking" role="link" tabindex="0" title="Ouvrir le classement">
       <div class="previewTop">
@@ -322,7 +320,7 @@
       <div class="mutedSmall" id="meetingsHint" style="margin-top:10px">Source: Supabase</div>
     </div>
 
-    <!-- 4) NEW: Classement clubs (AJOUTÉ juste après “Événements à venir”) -->
+    <!-- 4) Clubs -->
     <div class="preview" id="previewClubs" role="link" tabindex="0" title="Voir le classement des clubs">
       <div class="previewTop">
         <div>
@@ -351,14 +349,14 @@
     <!-- LEFT -->
     <div class="card">
       <h3 style="margin:0;">Qu’est-ce que les points MTB ?</h3>
-      <p class="muted" style="margin:8px 0 0 0;line-height:1.6;color:#334155">
+      <p class="muted" style="margin:8px 0 0 0;line-height:1.6;">
         Les <strong>points MTB</strong> sont un système de classement pour les épreuves de VTT.
         L’objectif : comparer des performances sur des courses très différentes, avec un calcul basé sur des critères objectifs :
         <strong>distance</strong>, <strong>dénivelé</strong>, <strong>profil</strong> et <strong>terrain</strong>.
       </p>
 
       <h4 style="margin:14px 0 6px 0;">Pour les cyclistes</h4>
-      <p style="margin:0;color:#334155;line-height:1.6;">
+      <p style="margin:0;line-height:1.6;">
         Cumule des points selon tes résultats. Le classement utilise une <strong>fenêtre glissante de 24 mois</strong> et propose
         des filtres par <strong>âge</strong>, <strong>sexe</strong> et <strong>discipline</strong>.
       </p>
@@ -369,7 +367,7 @@
       </ul>
 
       <h4 style="margin:14px 0 6px 0;">Pour les organisateurs</h4>
-      <p style="margin:0;color:#334155;line-height:1.6;">
+      <p style="margin:0;line-height:1.6;">
         Analyse ton parcours via la trace <strong>GPX</strong> : distance, D+, profil, et ScoreTech V2 (OSM).
         Publie ensuite tes résultats et génère une fiche épreuve.
       </p>
@@ -379,8 +377,8 @@
       </div>
 
       <footer>
-        Astuce : commence par créer une épreuve et importer un fichier GPX. Le ScoreTech V2 est calculé côté serveur (OSM + cache).
-        • <a href="contact.html" style="color:#2563eb;font-weight:900;text-decoration:none;">Contact</a>
+        Astuce : commence par créer une épreuve et importer un fichier GPX.
+        • <a href="contact.html" style="color:var(--blue);font-weight:950;text-decoration:none;">Contact</a>
       </footer>
     </div>
 
@@ -427,7 +425,7 @@
   </div>
 </div>
 
-<!-- Chargement des aperçus depuis Supabase (+ fallback localStorage pour clubs si besoin) -->
+<!-- Préviews Supabase (+ fallback clubs localStorage) -->
 <script type="module">
   import { supabase } from "./js/supabaseClient.js";
 
@@ -607,7 +605,7 @@
       return email ? `email:${email}` : (id ? `id:${id}` : (name ? `name:${name}` : null));
     }
 
-    // 1) Tentative Supabase via v_public_results (le mieux)
+    // 1) Supabase via v_public_results
     try{
       const { data, error } = await supabase
         .from("v_public_results")
@@ -654,7 +652,7 @@
       // fallback local
     }
 
-    // 2) Fallback localStorage mtb.results.v1
+    // 2) Fallback localStorage
     try{
       const results = safeJson("mtb.results.v1");
       if (!Array.isArray(results) || !results.length){
@@ -694,7 +692,6 @@
 
       renderTopList(ul, list, "score", "club");
       if (hint) hint.textContent = "Source: localStorage (mtb.results.v1)";
-      return;
     } catch(e){
       console.warn("[index] clubs preview failed", e);
       renderEmpty("Clubs indisponibles");
@@ -710,5 +707,7 @@
 
 </body>
 </html>
+
+
 
 
