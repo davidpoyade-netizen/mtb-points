@@ -2,176 +2,138 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MTB Points — Règlement</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Challenge — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
-
   <style>
-    :root{
-      --bg:#f4f4f4;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#667085;
-      --muted2:#64748b;
-      --border:#e5e7eb;
-      --blue:#2563eb;
-      --blue2:#1d4ed8;
-      --ok:#16a34a;
-      --warn:#ea580c;
-      --shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:18px;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;}
-    a{color:inherit}
-
-    /* Header */
-    header.header{
-      position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    }
-    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
-    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    nav a{
-      text-decoration:none;
-      padding:8px 10px;border-radius:10px;
-      color:var(--blue);
-      font-weight:800;font-size:13px;
-    }
-    nav a:hover{background:#eff6ff}
-    nav a.active{background:#eff6ff;color:var(--blue2)}
-    .lang{display:flex;gap:8px;align-items:center}
-    .lang .btn{
-      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
-    }
-
-    /* Layout */
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{
-      background:var(--card);
+    /* Compléments légers (on garde le design system de css/style.css) */
+    .tabsRow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .tabBtn{
       border:1px solid var(--border);
-      border-radius:22px;
-      padding:18px;
-      box-shadow:var(--shadow);
-      margin:14px 0;
-    }
-
-    /* Hero */
-    .hero{
-      border-radius:22px;
-      padding:18px;
-      border:1px solid var(--border);
-      background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
-        #fff;
-    }
-    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
-    .hero .muted{margin-top:8px;line-height:1.55;color:#334155}
-
-    /* Content */
-    h2.section{margin:0 0 10px 0;font-size:18px;letter-spacing:-.15px}
-    h3{margin:14px 0 6px 0;font-size:15px}
-    p,li{font-size:14px;line-height:1.65}
-    ul{padding-left:18px;margin:8px 0}
-    .muted{color:var(--muted);font-size:13px}
-    code{
-      background:#f1f5f9;border:1px solid var(--border);border-radius:10px;
-      padding:2px 8px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      background:#fff;
+      border-radius:999px;
+      padding:8px 12px;
+      font-weight:1000;
       font-size:13px;
-      white-space:nowrap;
+      cursor:pointer;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
+    .tabBtn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .tabBtn.active{background:#eff6ff;border-color:#bfdbfe;color:var(--blue2)}
 
-    /* Pills / boxes */
-    .pill{
+    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:10px}
+    thead th{
+      text-align:left;
+      font-size:12px;
+      color:#475569;
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+      background:#fff;
+      position:sticky; top:0;
+      z-index:1;
+    }
+    tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      font-size:13px;
+      vertical-align:top;
+      background:#fff;
+    }
+    tbody tr:hover td{background:#fbfdff}
+    .rank{font-weight:1000}
+    .name{font-weight:1000}
+    .num{font-weight:1000;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+      overflow:hidden;
+    }
+    .panelHead{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;
+      background:#f8fafc;
+    }
+    .panelHead h3{margin:0;font-size:14px;letter-spacing:-.1px}
+    .panelBody{padding:0}
+    .rowBtn{cursor:pointer}
+    .rowBtn.selected td{outline:3px solid rgba(37,99,235,.22); outline-offset:-3px}
+
+    .badge{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;
       border:1px solid var(--border);
       background:#fff;
-      font-weight:900;font-size:12px;
+      font-weight:1000;
+      font-size:12px;
       white-space:nowrap;
     }
-    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .dot.ok{background:var(--ok)}
-    .dot.warn{background:var(--warn)}
+    .b-bronze{border-color:rgba(245,158,11,.35)}
+    .b-silver{border-color:rgba(148,163,184,.45)}
+    .b-gold{border-color:rgba(251,191,36,.45)}
+    .b-legend{border-color:rgba(168,85,247,.38)}
+    .b-lock{opacity:.5}
 
-    .box{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:14px;
-      margin:12px 0;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
-    }
-    .callout{
-      border-left:6px solid var(--blue);
-      background:#f8fafc;
-    }
-
-    /* TOC */
-    .tocGrid{
+    .grid2{
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin-top:10px;
-    }
-    @media(max-width:900px){.tocGrid{grid-template-columns:1fr}}
-    .tocLink{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:12px 12px;
-      border:1px solid var(--border);
-      border-radius:16px;
-      text-decoration:none;
-      background:#fff;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .tocLink:hover{
-      transform:translateY(-1px);
-      box-shadow:0 14px 22px rgba(2,6,23,.10);
-      border-color:#dbeafe;
-    }
-    .tocTitle{font-weight:900}
-    .tocHint{color:var(--muted);font-size:12px}
-
-    /* Small sticky side nav (optional) */
-    .twoCol{
-      display:grid;
-      grid-template-columns: 1fr 320px;
-      gap:14px;
+      grid-template-columns: 1.25fr .75fr;
+      gap:12px;
+      margin-top:12px;
       align-items:start;
     }
-    @media(max-width:980px){.twoCol{grid-template-columns:1fr}}
-    .side{
-      position:sticky;top:86px;
-    }
-    @media(max-width:980px){.side{position:relative;top:auto}}
+    @media(max-width:980px){ .grid2{grid-template-columns:1fr} }
 
-    .sideCard{
-      background:#fff;border:1px solid var(--border);border-radius:22px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.04);
-    }
-    .sideCard h3{margin:0 0 8px 0}
-    .sideCard a{
-      display:block;
-      text-decoration:none;
-      color:var(--blue);
-      font-weight:800;
-      padding:8px 10px;
-      border-radius:12px;
-    }
-    .sideCard a:hover{background:#eff6ff}
-    .badgePill{
-      display:inline-flex;align-items:center;gap:6px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px;
-    }
+    .sideSticky{position:sticky; top:86px}
+    @media(max-width:980px){ .sideSticky{position:relative; top:auto} }
 
-    footer{
-      padding:26px 16px;text-align:center;color:var(--muted);font-size:13px
+    .medalsRow{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;
+    }
+    .medalCard{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+      padding:12px;
+      min-width:220px;
+      flex:1;
+    }
+    .medalTitle{font-weight:1000}
+    .medalSub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.5}
+    .medalList{margin-top:10px;display:grid;gap:8px}
+    .medalItem{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      border:1px solid #eef2f7;border-radius:14px;padding:10px;background:#fff;
+    }
+    .medalLeft{display:flex;gap:10px;align-items:center;min-width:0}
+    .medalEmoji{font-size:18px}
+    .medalName{
+      font-weight:1000;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      max-width:260px;
+    }
+    .medalValue{font-weight:1000;font-size:13px;white-space:nowrap}
+
+    .detailLine{
+      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;
+      padding:10px 0;border-bottom:1px dashed var(--border);
+    }
+    .detailLine:last-child{border-bottom:0}
+    .detailRace{font-weight:1000}
+    .detailMeta{color:var(--muted);font-size:12px;margin-top:4px}
+    .detailPts{font-weight:1000;white-space:nowrap}
+    .miniNote{
+      margin-top:10px;
+      border:1px solid #dbeafe;
+      background:#eff6ff;
+      color:#1e3a8a;
+      border-radius:16px;
+      padding:12px;
+      line-height:1.55;
+      font-size:13px;
     }
   </style>
 </head>
@@ -179,369 +141,758 @@
 <body>
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Règlement</h1>
-    <span class="pill"><span class="dot ok"></span> Version publique</span>
+    <h1>MTB Points — Challenge</h1>
+    <span class="pill" id="challengePill"><span class="dot" id="pillDot"></span><span id="pillText">Chargement…</span></span>
   </div>
 
-  <nav>
+  <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
-    <a href="challengemtbpoints.html">Challenge</a>
-    <a href="reglement.html" class="active">Règlement</a>
+    <a href="challengemtbpoints.html" class="active">Challenge</a>
+    <a href="reglement.html">Règlement</a>
     <a href="methodologie.html">Méthodologie</a>
     <a href="about.html">À propos</a>
-    <a href="login.html">Connexion</a>
   </nav>
 
-  <div class="lang">
-    <button class="btn" id="btnFR" type="button">FR</button>
-    <button class="btn" id="btnEN" type="button">EN</button>
+  <div class="headerRight">
+    <a class="btn ghost" href="public-ranking.html">→ Voir le classement</a>
   </div>
 </header>
 
 <main class="wrap">
-  <section class="card hero">
-    <h2>Règlement officiel MTB Points</h2>
-    <div class="muted">
-      Objectif : définir les règles d’éligibilité, de calcul des points coureurs, des classements, du challenge et de la modération.
-      Les détails techniques (ScorePhys / ScoreTech, paramètres, formules détaillées) sont décrits dans
-      <a href="methodologie.html" style="color:var(--blue);font-weight:900;text-decoration:none">Méthodologie (calcul)</a>.
-    </div>
-  </section>
+  <div class="card">
 
-  <div class="twoCol">
-
-    <!-- Main column -->
-    <div>
-
-      <!-- SOMMAIRE -->
-      <section class="card" id="sommaire">
-        <h2 class="section">Sommaire</h2>
-        <div class="tocGrid">
-          <a class="tocLink" href="#objet"><span class="tocTitle">1. Objet</span><span class="tocHint">But & principe</span></a>
-          <a class="tocLink" href="#definitions"><span class="tocTitle">2. Définitions</span><span class="tocHint">Termes clés</span></a>
-          <a class="tocLink" href="#eligibilite"><span class="tocTitle">3. Éligibilité</span><span class="tocHint">Conditions</span></a>
-          <a class="tocLink" href="#mrs"><span class="tocTitle">4. Score Épreuve (MRS)</span><span class="tocHint">Difficulté</span></a>
-          <a class="tocLink" href="#points-coureur"><span class="tocTitle">5. Points Coureur</span><span class="tocHint">Attribution</span></a>
-          <a class="tocLink" href="#classements"><span class="tocTitle">6. Classements</span><span class="tocHint">24 mois / Année</span></a>
-          <a class="tocLink" href="#import"><span class="tocTitle">7. Résultats & Import</span><span class="tocHint">Format</span></a>
-          <a class="tocLink" href="#controle"><span class="tocTitle">8. Contrôle & Modération</span><span class="tocHint">Anti-abus</span></a>
-          <a class="tocLink" href="#litiges"><span class="tocTitle">9. Litiges</span><span class="tocHint">Procédure</span></a>
-          <a class="tocLink" href="#challenge-1000"><span class="tocTitle">10. Challenge</span><span class="tocHint">Badges</span></a>
-        </div>
-
-        <div class="box callout" style="margin-top:14px;">
-          <div style="font-weight:900;">À retenir</div>
-          <ul style="margin:8px 0 0 18px;">
-            <li>Une <b>épreuve</b> doit avoir une <b>date</b> et une <b>trace GPX</b> analysable.</li>
-            <li>Les classements sont <b>séparés</b> par discipline / sexe / âge / type de vélo.</li>
-            <li>Les non-finishers (DNF/DNS/OT/DSQ) reçoivent <b>0 point</b>.</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- OBJET -->
-      <section class="card" id="objet">
-        <h2 class="section">1. Objet</h2>
-        <p>
-          MTB Points est un système de points destiné à évaluer la difficulté d’une épreuve VTT et à classer les cyclistes
-          en fonction de leurs performances. Il s’inspire du principe des points ITRA (trail), en intégrant les spécificités
-          du VTT (pente, terrain, sinuosité, effort).
-        </p>
-        <div class="box callout">
-          <div style="font-weight:900;">Principe</div>
-          <p style="margin:8px 0 0 0;">
-            Une épreuve reçoit un score de difficulté (<b>MRS</b>).
-            Chaque participant reçoit des points selon sa performance (temps) et son statut.
-          </p>
-        </div>
-      </section>
-
-      <!-- DEFINITIONS -->
-      <section class="card" id="definitions">
-        <h2 class="section">2. Définitions</h2>
-        <ul>
-          <li><b>Épreuve (Race)</b> : course individuelle (distance/format) associée ou non à un événement (meeting).</li>
-          <li><b>Événement (Meeting)</b> : rassemblement pouvant contenir plusieurs épreuves (20 km, 30 km, 40 km…).</li>
-          <li><b>Trace GPX</b> : fichier de parcours servant aux calculs automatiques (distance, D+, profils, scores).</li>
-          <li><b>MRS</b> : <i>MTB Race Score</i>, score global de difficulté de l’épreuve, sur 100.</li>
-          <li><b>ScorePhys</b> : score physique (0–100) basé sur distance, D+ et sévérité des pentes (IPB).</li>
-          <li><b>ScoreTech</b> : score technique (0–100) basé sur sinuosité + terrain (voir méthodologie).</li>
-          <li><b>Statuts</b> :
-            <ul>
-              <li><code>FIN</code> : finisher (temps valide et dans la barrière horaire)</li>
-              <li><code>DNF</code> : abandon</li>
-              <li><code>DNS</code> : non-partant</li>
-              <li><code>OT</code> : hors barrière horaire</li>
-              <li><code>DSQ</code> : disqualifié</li>
-            </ul>
-          </li>
-        </ul>
-      </section>
-
-      <!-- ELIGIBILITE -->
-      <section class="card" id="eligibilite">
-        <h2 class="section">3. Éligibilité</h2>
-        <ul>
-          <li>Les points ne sont attribués que pour des épreuves disposant d’une <b>date</b> et d’une <b>trace GPX analysable</b>.</li>
-          <li>Les résultats doivent être importés par un organisateur (ou validés après modération).</li>
-          <li>Le classement est séparé par :
-            <ul>
-              <li>Discipline (XC, Enduro, DH, Gravel, etc.)</li>
-              <li>Sexe (Hommes / Femmes)</li>
-              <li>Catégorie d’âge (UCI)</li>
-              <li>Type de vélo : <b>Musculaire</b> vs <b>Assistance électrique</b></li>
-            </ul>
-          </li>
-        </ul>
-        <div class="box">
-          <span class="badgePill"><span class="dot warn"></span> Important</span>
-          <div class="muted" style="margin-top:8px;">
-            Si l’altitude du GPX est non exploitable, certains indicateurs peuvent être dégradés (voir méthodologie).
+    <!-- HERO -->
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2>Challenges & Badges</h2>
+          <div class="heroMeta">
+            Cette page agrège les résultats importés et attribue des <b>badges</b> sur 4 axes :
+            <b>Points</b>, <b>Engagement</b>, <b>Distance</b>, <b>Dénivelé</b>.
           </div>
-        </div>
-      </section>
-
-      <!-- MRS -->
-      <section class="card" id="mrs">
-        <h2 class="section">4. Score Épreuve (MRS)</h2>
-        <p>
-          Le score global de difficulté d’une épreuve (<b>MRS</b>) est calculé à partir d’un score physique et d’un score technique.
-          Les détails de calcul et paramètres sont dans <a href="methodologie.html" style="color:var(--blue);font-weight:900;text-decoration:none">Méthodologie (calcul)</a>.
-        </p>
-
-        <div class="box callout">
-          <div style="font-weight:900;">Niveau de l’épreuve</div>
-          <p style="margin:8px 0 0 0;">
-            L’organisateur déclare un niveau :
-            <span class="pill">Locale</span>
-            <span class="pill">Régionale</span>
-            <span class="pill">Nationale</span>
-            <span class="pill">Internationale</span>
-          </p>
-          <p class="muted" style="margin:8px 0 0 0;">
-            Ce niveau peut influencer la valeur maximale de points distribuée (section 5).
-          </p>
-        </div>
-      </section>
-
-      <!-- POINTS COUREUR -->
-      <section class="card" id="points-coureur">
-        <h2 class="section">5. Points Coureur</h2>
-        <p>
-          Chaque épreuve distribue une quantité maximale de points <b>P<sub>e</sub></b> (vainqueur) dérivée du MRS,
-          bornée entre 0 et 200.
-        </p>
-
-        <div class="box callout">
-          <div style="font-weight:900;">Valeur maximale (vainqueur)</div>
-          <p style="margin:10px 0 0 0;">
-            <code>P_e = clamp(round(200 × (MRS/100)^1.20) × M_level, 0, 200)</code>
-          </p>
-          <div class="muted" style="margin-top:10px;">
-            <b>M_level</b> (niveau) : Locale=0.8, Régionale=1.0, Nationale=1.2, Internationale=1.5.
+          <div class="heroDesc">
+            Astuce : distance/D+ proviennent soit des lignes de résultats, soit des infos de course (<code>mtb.races.v1</code>).
           </div>
         </div>
 
-        <h3>5.1 Règle finishers / abandons</h3>
-        <div class="box">
-          <p style="margin:0;">
-            <b>FIN :</b> minimum <b>5 points</b> par finisher.<br/>
-            <b>DNF / OT / DNS / DSQ :</b> <b>0 point</b>.
-          </p>
-        </div>
+        <div class="heroActions" style="min-width:280px;max-width:620px">
+          <div style="min-width:170px;flex:1">
+            <label for="season">Saison</label>
+            <select id="season">
+              <option value="all">Toutes</option>
+            </select>
+          </div>
 
-        <h3>5.2 Attribution par performance au temps</h3>
-        <p>
-          Pour un finisher <i>i</i> dans une catégorie donnée (discipline/sexe/âge/type vélo), on définit :
-          <code>t_i</code> = temps du coureur, et <code>t*</code> = meilleur temps (référence).
-        </p>
-
-        <div class="box callout">
-          <p style="margin:0 0 8px 0;">
-            <code>r = t_i / t*</code>
-          </p>
-          <p style="margin:0;">
-            <code>Points(i,e) = max(5, round(P_e' × r^(−k)))</code>
-          </p>
-          <div class="muted" style="margin-top:10px;">
-            <b>k = 3.0</b> (par défaut). <b>P_e'</b> peut intégrer un correctif de faible participation si activé.
+          <div style="min-width:170px;flex:1">
+            <label for="sort">Tri</label>
+            <select id="sort">
+              <option value="metric">Score du challenge (desc)</option>
+              <option value="races">Épreuves (desc)</option>
+              <option value="best">Meilleure épreuve (desc)</option>
+              <option value="name">Nom (A→Z)</option>
+            </select>
           </div>
         </div>
-      </section>
-
-      <!-- CLASSEMENTS -->
-      <section class="card" id="classements">
-        <h2 class="section">6. Classements</h2>
-        <p>Deux modes de classement sont proposés :</p>
-        <ul>
-          <li><b>Classement glissant 24 mois</b> (par défaut)</li>
-          <li><b>Classement par année civile</b> (ex. 2025, 2026…)</li>
-        </ul>
-
-        <h3>6.1 Fenêtre 24 mois (Top N)</h3>
-        <div class="box callout">
-          <code>MTB_Points(i,C) = somme des Top N résultats de i dans C sur 24 mois</code>
-          <div class="muted" style="margin-top:8px;">N=5 par défaut (paramétrable).</div>
-        </div>
-
-        <h3>6.2 Classement par année</h3>
-        <div class="box">
-          <code>MTB_Points_Year(i,C,Y) = somme des Top N résultats de i dans C sur l’année Y</code>
-        </div>
-
-        <p class="muted">
-          Les classements sont distincts pour <b>musculaire</b> et <b>assistance électrique</b>.
-        </p>
-      </section>
-
-      <!-- IMPORT -->
-      <section class="card" id="import">
-        <h2 class="section">7. Résultats &amp; Import</h2>
-        <p>
-          Les résultats sont importés par l’organisateur via un fichier (CSV, et à terme XLSX).
-          Colonnes recommandées :
-        </p>
-        <ul>
-          <li>Nom / Prénom (ou Nom complet)</li>
-          <li>Sexe</li>
-          <li>Catégorie âge</li>
-          <li>Nationalité</li>
-          <li>Team</li>
-          <li>Type vélo (musculaire / e-bike)</li>
-          <li>Temps (<code>HH:MM:SS</code>)</li>
-          <li>Statut (<code>FIN/DNF/DNS/OT/DSQ</code>)</li>
-        </ul>
-        <div class="box callout">
-          <b>Règle :</b> un temps valide implique <code>FIN</code> sauf indication contraire.
-          Tout statut non-finisher entraîne 0 point.
-        </div>
-      </section>
-
-      <!-- CONTROLE -->
-      <section class="card" id="controle">
-        <h2 class="section">8. Contrôle &amp; Modération</h2>
-        <ul>
-          <li>Un compte administrateur peut supprimer ou dépublier une épreuve en cas d’abus (fausse trace, faux résultats).</li>
-          <li>Les modifications majeures (GPX, distance, D+) peuvent être journalisées et nécessiter un recalcul.</li>
-          <li>Les épreuves “National/International” peuvent être soumises à validation (option).</li>
-          <li>Les classements musculaire et e-bike sont séparés ; toute incohérence peut entraîner une correction/modération.</li>
-        </ul>
-        <div class="box">
-          <div style="font-weight:900;">Traçabilité (recommandé)</div>
-          <div class="muted" style="margin-top:6px;">
-            Conserver l’empreinte du GPX (hash) + date d’import résultats + identité de l’organisateur.
-          </div>
-        </div>
-      </section>
-
-      <!-- LITIGES -->
-      <section class="card" id="litiges">
-        <h2 class="section">9. Litiges</h2>
-        <p>
-          Un litige peut être ouvert en cas d’erreur de résultat, de catégorie, de statut ou d’épreuve (GPX).
-        </p>
-        <div class="box callout">
-          <div style="font-weight:900;">Procédure</div>
-          <ul style="margin:8px 0 0 18px;">
-            <li>Demande motivée (preuve : lien officiel, capture, document organisateur).</li>
-            <li>Analyse par l’organisateur, puis par modération si nécessaire.</li>
-            <li>Décision : correction / maintien / suppression des points.</li>
-          </ul>
-        </div>
-        <p class="muted">En cas de fraude avérée : suppression des résultats concernés + éventuel bannissement.</p>
-      </section>
-
-      <!-- CHALLENGE -->
-      <section class="card" id="challenge-1000">
-        <h2 class="section">10. Challenge “MTB 1000”</h2>
-        <p>
-          Le challenge <b>MTB 1000</b> récompense la régularité et la performance sur une période glissante.
-        </p>
-
-        <div class="box callout">
-          <div style="font-weight:900;">Définition</div>
-          <p style="margin:8px 0 0 0;">
-            Un coureur valide <b>MTB 1000</b> lorsqu’il atteint <b>1000 points</b> sur une fenêtre de <b>24 mois</b>,
-            dans une <b>discipline</b> et un <b>type de vélo</b> donnés.
-          </p>
-        </div>
-
-        <h3>10.1 Périmètre</h3>
-        <ul>
-          <li>Challenge distinct par discipline (XC / Enduro / DH / Gravel…).</li>
-          <li>Challenge distinct par type de vélo : Musculaire / Assistance électrique.</li>
-          <li>Option : séparé par sexe et catégorie d’âge (comme les classements).</li>
-        </ul>
-
-        <h3>10.2 Calcul (fenêtre 24 mois — Top N)</h3>
-        <div class="box">
-          <code>ChallengePoints(i,C) = somme des Top N résultats de i dans C sur 24 mois</code><br/>
-          <span class="muted">N = 5 par défaut (paramétrable). C = catégorie (discipline / sexe / âge / type vélo).</span>
-        </div>
-
-        <h3>10.3 Condition anti-biais (minimum d’épreuves)</h3>
-        <div class="box">
-          Pour valider un statut, le coureur doit avoir participé à au moins <b>5 épreuves distinctes</b> sur la période (paramétrable).
-        </div>
-
-        <h3>10.4 Niveaux &amp; badges</h3>
-        <div class="box callout">
-          <ul style="margin:0 0 0 18px;">
-            <li><b>Bronze</b> : ≥ 300 points</li>
-            <li><b>Argent</b> : ≥ 600 points</li>
-            <li><b>MTB 1000</b> : ≥ 1000 points</li>
-            <li><b>Élite</b> : ≥ 1500 points</li>
-            <li><b>Légende</b> : ≥ 2000 points</li>
-          </ul>
-          <p class="muted" style="margin:10px 0 0 0;">
-            Les seuils peuvent évoluer après calibration (option : sans rétroactivité).
-          </p>
-        </div>
-
-        <h3>10.5 Affichage</h3>
-        <ul>
-          <li>Badge affiché sur le profil coureur et dans les classements.</li>
-          <li>Page “Hall of Fame” listant les coureurs ayant validé MTB 1000.</li>
-        </ul>
-      </section>
-
-    </div>
-
-    <!-- Side column -->
-    <aside class="side">
-      <div class="sideCard">
-        <h3>Accès rapide</h3>
-        <a href="#sommaire">Sommaire</a>
-        <a href="#points-coureur">Points coureur</a>
-        <a href="#classements">Classements</a>
-        <a href="#challenge-1000">Challenge</a>
-        <a href="methodologie.html">Méthodologie</a>
       </div>
 
-      <div class="sideCard" style="margin-top:12px;">
-        <h3>Raccourcis</h3>
-        <div class="muted" style="margin-top:8px;line-height:1.6">
-          • Besoin de modifier les formules ? Va dans <b>Méthodologie</b>.<br/>
-          • Besoin d’afficher les badges ? Va sur <b>Challenge</b>.
+      <!-- Tabs -->
+      <div class="tabsRow" id="tabsRow" aria-label="Challenges"></div>
+
+      <!-- KPIs -->
+      <div class="kpiGrid">
+        <div class="kpi">
+          <div class="kpiLabel">Coureurs classés</div>
+          <div class="kpiValue"><span id="kpiAthletes">—</span></div>
+          <div class="kpiSub">sur la saison sélectionnée</div>
+        </div>
+        <div class="kpi">
+          <div class="kpiLabel">Épreuves</div>
+          <div class="kpiValue"><span id="kpiRaces">—</span></div>
+          <div class="kpiSub">épreuves comptabilisées</div>
+        </div>
+        <div class="kpi">
+          <div class="kpiLabel">Top score</div>
+          <div class="kpiValue"><span id="kpiTop">—</span></div>
+          <div class="kpiSub" id="kpiTopSub">—</div>
         </div>
       </div>
-    </aside>
+
+      <!-- Physical medals -->
+      <div class="miniNote">
+        🏆 <b>Récompenses physiques</b> : à la fin de la saison, les <b>3 meilleurs</b> du challenge actif reçoivent une médaille
+        <b>Or</b> / <b>Argent</b> / <b>Bronze</b> (à définir avec un partenaire).
+      </div>
+
+      <div class="medalsRow" aria-label="Top 3 — médailles">
+        <div class="medalCard">
+          <div class="medalTitle">Top 3 — Médailles</div>
+          <div class="medalSub" id="medalSub">Selon le challenge sélectionné.</div>
+          <div class="medalList" id="medalList">
+            <div class="medalItem">
+              <div class="medalLeft"><span class="medalEmoji">🥇</span><span class="medalName">Chargement…</span></div>
+              <div class="medalValue">—</div>
+            </div>
+            <div class="medalItem">
+              <div class="medalLeft"><span class="medalEmoji">🥈</span><span class="medalName">Chargement…</span></div>
+              <div class="medalValue">—</div>
+            </div>
+            <div class="medalItem">
+              <div class="medalLeft"><span class="medalEmoji">🥉</span><span class="medalName">Chargement…</span></div>
+              <div class="medalValue">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid2">
+      <!-- LEFT: Leaderboard -->
+      <section class="panel">
+        <div class="panelHead">
+          <h3 id="boardTitle">Classement — Challenge</h3>
+          <span class="pill"><span class="dot"></span><span id="pillRows">0</span> résultats</span>
+        </div>
+        <div class="panelBody">
+          <div style="overflow:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:62px;">#</th>
+                  <th>Coureur</th>
+                  <th style="width:170px;" id="thMetric">Score</th>
+                  <th style="width:160px;">Badges</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBoard"></tbody>
+            </table>
+          </div>
+          <div class="empty" id="boardEmpty" style="display:none;">
+            Aucun résultat. Importe des résultats pour afficher les challenges.
+          </div>
+          <div class="hintRow">
+            <div class="muted">Clique sur une ligne pour voir le détail.</div>
+            <div class="muted">Export CSV dispo à droite.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Athlete detail -->
+      <aside class="sideSticky">
+        <div class="panel">
+          <div class="panelHead">
+            <h3>Détail coureur</h3>
+            <span class="pill"><span class="dot"></span><span id="detailPill">—</span></span>
+          </div>
+          <div class="panelBody" style="padding:14px;">
+            <div id="detailHint" class="muted" style="line-height:1.55">
+              Sélectionne un coureur dans le tableau pour afficher ses épreuves et son avancement.
+            </div>
+
+            <div id="detailBox" class="empty" style="margin-top:12px;">
+              Aucun coureur sélectionné.
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+              <button class="btn" id="exportBtn" type="button">Exporter CSV</button>
+              <button class="btn ghost" id="resetBtn" type="button">Réinitialiser (local)</button>
+            </div>
+
+            <div class="muted" style="font-size:12px; margin-top:10px;">
+              * “Réinitialiser” supprime uniquement les clés locales (pas Supabase).
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
 
   </div>
 </main>
 
-<footer>
-  MTB Points — Règlement • Dernière mise à jour : <span id="lastUpdate">—</span>
-</footer>
-
+<script src="js/storage.js"></script>
 <script>
-  // Petit confort : date "dernière mise à jour" côté client (optionnel)
-  document.getElementById("lastUpdate").textContent = new Date().toLocaleDateString("fr-FR");
+(function(){
+  // -----------------------------
+  // Config challenges & badges
+  // -----------------------------
+  const CHALLENGES = [
+    {
+      key: "points",
+      label: "MTB Points",
+      metricLabel: "Points",
+      metricUnit: "pts",
+      getMetric: (a) => a.totalPoints,
+      thresholds: [
+        { key:"bronze", label:"Bronze", min: 500,  cls:"b-bronze" },
+        { key:"silver", label:"Argent", min: 750,  cls:"b-silver" },
+        { key:"gold",   label:"Or",     min: 1000, cls:"b-gold" },
+        { key:"legend", label:"Legend", min: 2000, cls:"b-legend" },
+      ]
+    },
+    {
+      key: "engagement",
+      label: "Engagement",
+      metricLabel: "Courses terminées",
+      metricUnit: "",
+      getMetric: (a) => a.races,
+      thresholds: [
+        { key:"e5",  label:"Finisher x5",  min: 5,  cls:"b-bronze" },
+        { key:"e10", label:"Finisher x10", min: 10, cls:"b-silver" },
+        { key:"e20", label:"Finisher x20", min: 20, cls:"b-gold" },
+      ]
+    },
+    {
+      key: "distance",
+      label: "Endurance",
+      metricLabel: "Distance cumulée",
+      metricUnit: "km",
+      getMetric: (a) => a.totalDistanceKm,
+      thresholds: [
+        { key:"d500",  label:"500 km",  min: 500,  cls:"b-bronze" },
+        { key:"d1000", label:"1000 km", min: 1000, cls:"b-silver" },
+        { key:"d3000", label:"3000 km", min: 3000, cls:"b-gold" },
+      ]
+    },
+    {
+      key: "dplus",
+      label: "Dénivelé",
+      metricLabel: "D+ cumulé",
+      metricUnit: "m",
+      getMetric: (a) => a.totalDplusM,
+      thresholds: [
+        { key:"z10k",  label:"+10 000 m", min: 10000, cls:"b-bronze" },
+        { key:"z25k",  label:"+25 000 m", min: 25000, cls:"b-silver" },
+        { key:"z50k",  label:"+50 000 m", min: 50000, cls:"b-gold" },
+      ]
+    },
+  ];
 
-  // (Optionnel) boutons FR/EN : laisse tes handlers actuels si tu en as déjà.
-  // Ici on ne force rien pour ne pas casser ton existant.
+  let ACTIVE = "points";
+
+  // -----------------------------
+  // Helpers
+  // -----------------------------
+  const $ = (id) => document.getElementById(id);
+  const esc = (s)=>String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const num = (x)=>{ const n = Number(String(x ?? "").replace(",", ".").trim()); return Number.isFinite(n) ? n : null; };
+
+  function fmtMetric(v, unit){
+    const n = Number(v ?? 0);
+    if (!Number.isFinite(n)) return "—";
+    if (unit === "km") return `${(Math.round(n*10)/10).toString().replace(".", ",")} ${unit}`;
+    if (unit) return `${Math.round(n)} ${unit}`;
+    return `${Math.round(n)}`;
+  }
+
+  function setPill(text, ok=true){
+    const pillText = $("pillText");
+    const dot = $("pillDot");
+    if (pillText) pillText.textContent = text;
+    if (dot) dot.className = "dot " + (ok ? "ok" : "err");
+  }
+
+  function getYearFromDate(dateStr){
+    if(!dateStr) return null;
+    const y = String(dateStr).slice(0,4);
+    return /^\d{4}$/.test(y) ? y : null;
+  }
+
+  function getBestBadge(thresholds, metric){
+    const t = thresholds.slice().sort((a,b)=>a.min-b.min);
+    let best = null;
+    for (const b of t) if (metric >= b.min) best = b;
+    return best;
+  }
+
+  // -----------------------------
+  // Data acquisition (results + races)
+  // -----------------------------
+  function safeJson(key){
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(_){ return null; }
+  }
+
+  function listRacesSafe(){
+    // on tente d'abord fonctions storage.js si présentes
+    const fns = ["loadStoredEvents","listRaces","getRaces"];
+    for (const fn of fns){
+      if (typeof window[fn] === "function"){
+        try{
+          const out = window[fn]();
+          if (Array.isArray(out)) return out;
+        }catch(_){}
+      }
+    }
+    const arr = safeJson("mtb.races.v1");
+    return Array.isArray(arr) ? arr : [];
+  }
+
+  function loadAllResultEntries() {
+    const candidates = [
+      "loadResults",
+      "listResults",
+      "getResults",
+      "loadStoredResults",
+      "loadPublicResults",
+      "loadRaceResults",
+      "loadEventResults",
+    ];
+    for (const fn of candidates) {
+      if (typeof window[fn] === "function") {
+        try{
+          const out = window[fn]();
+          if (Array.isArray(out) && out.length) return out;
+        }catch(_){}
+      }
+    }
+    // fallback legacy keys
+    try {
+      const raw =
+        localStorage.getItem("mtb.results.v1") ||
+        localStorage.getItem("mtb_results") ||
+        localStorage.getItem("results") ||
+        localStorage.getItem("mtbPointsResults");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  const races = listRacesSafe();
+  const racesById = new Map((races || []).filter(Boolean).map(r => [String(r.id), r]));
+
+  function normalizeEntry(e, idx) {
+    const athleteId =
+      e.athleteId || e.riderId || e.userId || e.coureurId || e.idAthlete ||
+      e.riderEmail || e.email ||
+      ("ath_" + idx);
+
+    const athleteName =
+      e.athleteName || e.riderName || e.name || e.coureur || e.user ||
+      (e.riderEmail || e.email) ||
+      "Sans nom";
+
+    const date = e.date || e.raceDate || e.eventDate || e.when || null;
+    const season = getYearFromDate(date) || "—";
+
+    const raceId = e.raceId || e.eventId || e.epreuveId || e.idRace || e.idEvent || null;
+    const r = raceId ? racesById.get(String(raceId)) : null;
+
+    const raceName = e.raceName || e.eventName || e.epreuveName || e.nameRace || e.nameEvent || e.race || r?.name || "Épreuve";
+
+    const points = num(e.points ?? e.mtbPoints ?? e.score ?? e.totalPoints ?? 0) ?? 0;
+
+    // Distance / D+ :
+    // - si la ligne de résultat porte l'info -> prioritaire
+    // - sinon on récupère sur la course (mtb.races.v1)
+    const distanceKm =
+      num(e.distanceKm ?? e.distance_km ?? e.km ?? e.distance) ??
+      num(r?.distanceKm ?? r?.distance_km) ??
+      0;
+
+    const dplusM =
+      num(e.dplusM ?? e.dplus_m ?? e.dplus ?? e.denivele ?? e.dénivelé ?? e.denivelePositif) ??
+      num(r?.dplusM ?? r?.dplus_m) ??
+      0;
+
+    return {
+      athleteId: String(athleteId),
+      athleteName: String(athleteName),
+      date: date ? String(date) : null,
+      season,
+      raceId: raceId ? String(raceId) : null,
+      raceName: String(raceName),
+      points: Number.isFinite(points) ? points : 0,
+      distanceKm: Number.isFinite(distanceKm) ? distanceKm : 0,
+      dplusM: Number.isFinite(dplusM) ? dplusM : 0,
+      _raw: e
+    };
+  }
+
+  function buildSeasonOptions(entries) {
+    const sel = $("season");
+    if (!sel) return;
+    const years = Array.from(new Set(entries.map(x=>x.season).filter(x=>x && x !== "—"))).sort((a,b)=>b.localeCompare(a));
+    sel.innerHTML = `<option value="all">Toutes</option>` + years.map(y=>`<option value="${esc(y)}">${esc(y)}</option>`).join("");
+  }
+
+  // -----------------------------
+  // Aggregation
+  // -----------------------------
+  function aggregate(entries, seasonFilter) {
+    const filtered = (seasonFilter && seasonFilter !== "all")
+      ? entries.filter(e => e.season === seasonFilter)
+      : entries;
+
+    const byAthlete = new Map();
+    const uniqueRaceIds = new Set();
+
+    for (const e of filtered) {
+      if (e.raceId) uniqueRaceIds.add(e.raceId);
+
+      const key = e.athleteId;
+      if (!byAthlete.has(key)) {
+        byAthlete.set(key, {
+          athleteId: e.athleteId,
+          athleteName: e.athleteName,
+
+          totalPoints: 0,
+          races: 0,
+          bestPoints: 0,
+
+          totalDistanceKm: 0,
+          totalDplusM: 0,
+
+          entries: []
+        });
+      }
+      const a = byAthlete.get(key);
+
+      a.totalPoints += e.points;
+      a.races += 1;
+      a.bestPoints = Math.max(a.bestPoints, e.points);
+
+      a.totalDistanceKm += (e.distanceKm || 0);
+      a.totalDplusM += (e.dplusM || 0);
+
+      a.entries.push(e);
+    }
+
+    const list = Array.from(byAthlete.values()).map(a => {
+      // arrondis propres
+      a.totalPoints = Math.round(a.totalPoints * 100) / 100;
+      a.totalDistanceKm = Math.round(a.totalDistanceKm * 10) / 10;
+      a.totalDplusM = Math.round(a.totalDplusM);
+
+      // badge du challenge actif
+      const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
+      const metric = ch.getMetric(a) || 0;
+      const badge = getBestBadge(ch.thresholds, metric);
+
+      return { ...a, badge };
+    });
+
+    return {
+      athletes: list,
+      raceCount: uniqueRaceIds.size,
+      rawCount: filtered.length
+    };
+  }
+
+  function sortAthletes(list, sortKey) {
+    const arr = list.slice();
+    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
+
+    const metricOf = (a) => Number(ch.getMetric(a) ?? 0);
+
+    if (sortKey === "name") arr.sort((a,b)=>a.athleteName.localeCompare(b.athleteName));
+    else if (sortKey === "races") arr.sort((a,b)=>b.races-a.races || metricOf(b)-metricOf(a));
+    else if (sortKey === "best") arr.sort((a,b)=>b.bestPoints-a.bestPoints || metricOf(b)-metricOf(a));
+    else arr.sort((a,b)=>metricOf(b)-metricOf(a) || b.bestPoints-a.bestPoints);
+
+    return arr;
+  }
+
+  // -----------------------------
+  // UI: Tabs
+  // -----------------------------
+  function renderTabs(){
+    const root = $("tabsRow");
+    if (!root) return;
+    root.innerHTML = CHALLENGES.map(ch => `
+      <button class="tabBtn ${ch.key === ACTIVE ? "active" : ""}" type="button" data-tab="${esc(ch.key)}">
+        ${esc(ch.label)}
+      </button>
+    `).join("");
+
+    Array.from(root.querySelectorAll("button[data-tab]")).forEach(btn => {
+      btn.addEventListener("click", () => {
+        ACTIVE = btn.getAttribute("data-tab") || "points";
+        $("sort").value = "metric";
+        selectedAthleteId = null;
+        renderAll();
+      });
+    });
+  }
+
+  // -----------------------------
+  // Rendering: board + detail + medals
+  // -----------------------------
+  let currentEntries = [];
+  let currentAthletes = [];
+  let selectedAthleteId = null;
+
+  function badgesInline(a){
+    // badge du challenge actif
+    const main = a.badge
+      ? `<span class="badge ${a.badge.cls}">🏅 ${esc(a.badge.label)}</span>`
+      : `<span class="badge b-lock">🔒 Aucun</span>`;
+
+    // mini-aperçu des 4 axes (lockés ou gagnés)
+    const mini = CHALLENGES.map(ch => {
+      const metric = Number(ch.getMetric(a) ?? 0);
+      const b = getBestBadge(ch.thresholds, metric);
+      const isActive = (ch.key === ACTIVE);
+      const cls = b ? b.cls : "b-lock";
+      const icon =
+        ch.key === "points" ? "⭐" :
+        ch.key === "engagement" ? "🏁" :
+        ch.key === "distance" ? "🚴" :
+        "⛰️";
+
+      const txt = b ? b.label : "—";
+      return `<span class="badge ${cls}" title="${esc(ch.label)}">${icon} ${esc(txt)}${isActive ? " •" : ""}</span>`;
+    }).join(" ");
+
+    return `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${main}${mini}</div>`;
+  }
+
+  function renderBoard(athletes){
+    const tb = $("tbodyBoard");
+    const empty = $("boardEmpty");
+    const thMetric = $("thMetric");
+    const title = $("boardTitle");
+
+    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
+    if (thMetric) thMetric.textContent = ch.metricLabel;
+    if (title) title.textContent = `Classement — ${ch.label}`;
+
+    tb.innerHTML = "";
+
+    if (!athletes.length){
+      empty.style.display = "";
+      return;
+    }
+    empty.style.display = "none";
+
+    const rows = athletes.map((a, i) => {
+      const metric = ch.getMetric(a) || 0;
+      const metricTxt = fmtMetric(metric, ch.metricUnit);
+      const sub =
+        `Best: ${Math.round(a.bestPoints)} pts • Épreuves: ${a.races} • ${Math.round(a.totalDistanceKm)} km • +${Math.round(a.totalDplusM)} m`;
+
+      return `
+        <tr class="rowBtn ${a.athleteId === selectedAthleteId ? "selected" : ""}" data-ath="${esc(a.athleteId)}">
+          <td class="rank">${i+1}</td>
+          <td>
+            <div class="name">${esc(a.athleteName)}</div>
+            <div class="muted small">${esc(sub)}</div>
+          </td>
+          <td class="num">${esc(metricTxt)}</td>
+          <td>${badgesInline(a)}</td>
+        </tr>
+      `;
+    }).join("");
+
+    tb.innerHTML = rows;
+
+    Array.from(document.querySelectorAll("tr.rowBtn")).forEach(tr => {
+      tr.addEventListener("click", () => {
+        selectedAthleteId = tr.getAttribute("data-ath");
+        const a = athletes.find(x => x.athleteId === selectedAthleteId);
+        if (a) renderDetail(a);
+        Array.from(document.querySelectorAll("tr.rowBtn")).forEach(x => x.classList.remove("selected"));
+        tr.classList.add("selected");
+      });
+    });
+  }
+
+  function renderDetail(a){
+    const box = $("detailBox");
+    const pill = $("detailPill");
+    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
+
+    const metric = ch.getMetric(a) || 0;
+    if (pill) pill.textContent = `${ch.label}`;
+
+    const activeBadge = getBestBadge(ch.thresholds, metric);
+    const activeBadgeHtml = activeBadge
+      ? `<span class="badge ${activeBadge.cls}">🏅 ${esc(activeBadge.label)}</span>`
+      : `<span class="badge b-lock">🔒 Aucun badge</span>`;
+
+    const entries = a.entries.slice().sort((x,y)=>String(y.date||"").localeCompare(String(x.date||"")));
+
+    const lines = entries.map(e => `
+      <div class="detailLine">
+        <div>
+          <div class="detailRace">${esc(e.raceName)}</div>
+          <div class="detailMeta">${esc(e.date || "—")} • Saison ${esc(e.season || "—")} • ${fmtMetric(e.distanceKm, "km")} • +${Math.round(e.dplusM || 0)} m</div>
+        </div>
+        <div class="detailPts">${Math.round(e.points || 0)} pts</div>
+      </div>
+    `).join("");
+
+    box.className = "";
+    box.innerHTML = `
+      <div class="pill">
+        <span class="dot ok"></span>
+        <span><b>${esc(a.athleteName)}</b> — ${esc(ch.metricLabel)}: <b>${esc(fmtMetric(metric, ch.metricUnit))}</b></span>
+      </div>
+
+      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        ${activeBadgeHtml}
+        <span class="pill">⭐ ${Math.round(a.totalPoints)} pts</span>
+        <span class="pill">🏁 ${a.races} épreuve${a.races>1?"s":""}</span>
+        <span class="pill">🚴 ${fmtMetric(a.totalDistanceKm, "km")}</span>
+        <span class="pill">⛰️ +${Math.round(a.totalDplusM)} m</span>
+      </div>
+
+      <div class="hr"></div>
+      <div>${lines || `<div class="empty">Aucune épreuve.</div>`}</div>
+    `;
+  }
+
+  function renderTop3Medals(athletes){
+    const list = $("medalList");
+    const sub = $("medalSub");
+    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
+    const medals = ["🥇","🥈","🥉"];
+
+    if (sub) sub.textContent = `Top 3 calculé sur : ${ch.metricLabel} (${ch.label}).`;
+
+    const top3 = athletes.slice(0,3);
+    if (!top3.length){
+      list.innerHTML = `
+        <div class="medalItem"><div class="medalLeft"><span class="medalEmoji">🥇</span><span class="medalName">Aucun</span></div><div class="medalValue">—</div></div>
+        <div class="medalItem"><div class="medalLeft"><span class="medalEmoji">🥈</span><span class="medalName">Aucun</span></div><div class="medalValue">—</div></div>
+        <div class="medalItem"><div class="medalLeft"><span class="medalEmoji">🥉</span><span class="medalName">Aucun</span></div><div class="medalValue">—</div></div>
+      `;
+      return;
+    }
+
+    list.innerHTML = top3.map((a, i) => {
+      const metric = ch.getMetric(a) || 0;
+      return `
+        <div class="medalItem">
+          <div class="medalLeft">
+            <span class="medalEmoji">${medals[i] || "•"}</span>
+            <span class="medalName">${esc(a.athleteName || "—")}</span>
+          </div>
+          <div class="medalValue">${esc(fmtMetric(metric, ch.metricUnit))}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function updateKpis(agg){
+    const kpiAthletes = $("kpiAthletes");
+    const kpiRaces = $("kpiRaces");
+    const kpiTop = $("kpiTop");
+    const kpiTopSub = $("kpiTopSub");
+    const pillRows = $("pillRows");
+
+    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
+    const top = agg.athletes.slice().sort((a,b)=>Number(ch.getMetric(b)??0)-Number(ch.getMetric(a)??0))[0];
+
+    if (kpiAthletes) kpiAthletes.textContent = String(agg.athletes.length);
+    if (kpiRaces) kpiRaces.textContent = String(agg.raceCount);
+    if (kpiTop) kpiTop.textContent = top ? fmtMetric(ch.getMetric(top), ch.metricUnit) : "—";
+    if (kpiTopSub) kpiTopSub.textContent = top ? top.athleteName : "—";
+    if (pillRows) pillRows.textContent = String(agg.rawCount);
+  }
+
+  // -----------------------------
+  // Export / reset
+  // -----------------------------
+  function toCSV(rows){
+    const headers = ["athleteId","athleteName","date","season","raceId","raceName","points","distanceKm","dplusM"];
+    const lines = [headers.join(",")].concat(rows.map(r => headers.map(h => {
+      const v = r[h];
+      const s = (v == null) ? "" : String(v);
+      return '"' + s.replace(/"/g,'""') + '"';
+    }).join(",")));
+    return lines.join("\n");
+  }
+
+  function download(filename, text){
+    const blob = new Blob([text], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  $("exportBtn").addEventListener("click", () => {
+    if (!currentEntries.length) { alert("Aucun résultat à exporter."); return; }
+    download("mtbpoints_challenge.csv", toCSV(currentEntries));
+  });
+
+  $("resetBtn").addEventListener("click", () => {
+    if (!confirm("Réinitialiser les résultats locaux ?")) return;
+    ["mtb.results.v1","mtb_results","results","mtbPointsResults"].forEach(k => localStorage.removeItem(k));
+    setPill("Réinitialisé", true);
+    init();
+  });
+
+  // -----------------------------
+  // Render all
+  // -----------------------------
+  function renderAll(){
+    renderTabs();
+
+    const season = $("season").value;
+    const sort = $("sort").value;
+
+    const agg = aggregate(currentEntries, season);
+    updateKpis(agg);
+
+    const athletes = sortAthletes(agg.athletes, sort === "metric" ? "metric" : sort);
+    currentAthletes = athletes;
+
+    // board
+    renderBoard(athletes);
+
+    // medals top3
+    renderTop3Medals(athletes);
+
+    // reset detail if selection not in list
+    const exists = selectedAthleteId && athletes.some(x => x.athleteId === selectedAthleteId);
+    if (!exists){
+      selectedAthleteId = null;
+      $("detailPill").textContent = "—";
+      $("detailBox").className = "empty";
+      $("detailBox").textContent = "Aucun coureur sélectionné.";
+    } else {
+      const a = athletes.find(x => x.athleteId === selectedAthleteId);
+      if (a) renderDetail(a);
+    }
+
+    setPill(agg.rawCount ? `OK (${agg.rawCount} résultats)` : "Aucun résultat", !!agg.rawCount);
+
+    // update header metric label
+    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
+    $("sort").querySelector('option[value="metric"]').textContent = `${ch.metricLabel} (desc)`;
+  }
+
+  // -----------------------------
+  // Init
+  // -----------------------------
+  function init(){
+    setPill("Chargement…", true);
+
+    const raw = loadAllResultEntries();
+    currentEntries = raw.map(normalizeEntry);
+
+    buildSeasonOptions(currentEntries);
+
+    // default selects
+    $("season").value = "all";
+    $("sort").value = "metric";
+
+    renderAll();
+  }
+
+  $("season").addEventListener("change", () => { selectedAthleteId = null; renderAll(); });
+  $("sort").addEventListener("change", () => renderAll());
+
+  init();
+})();
 </script>
 
 </body>
