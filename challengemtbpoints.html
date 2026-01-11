@@ -3,149 +3,230 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Challenge — MTB Points</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>MTB Points — Challenge</title>
+
+  <!-- Base + thème (le thème DOIT être après) -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme-nature.css?v=7">
+
   <style>
-    /* Compléments légers (on garde le design system de css/style.css) */
-    .tabsRow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-    .tabBtn{
-      border:1px solid var(--border);
-      background:#fff;
-      border-radius:999px;
-      padding:8px 12px;
-      font-weight:1000;
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
+    a{color:inherit}
+    .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
+    .muted{color:var(--muted);line-height:1.6}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:10px;
+      font-weight:900;
       font-size:13px;
-      cursor:pointer;
+      color: var(--blue);
+    }
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
+    /* Brand */
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* Layout blocks */
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin:14px 0;
+    }
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2);
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .heroCoins{
+      width:112px;height:112px;border-radius:22px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 18px 38px rgba(15,23,42,.16);
+      background:rgba(255,255,255,.75);
+    }
+    .heroCoins img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* Buttons */
+    .btn2{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
+      cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;white-space:nowrap;
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .tabBtn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
-    .tabBtn.active{background:#eff6ff;border-color:#bfdbfe;color:var(--blue2)}
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(15,23,42,.10);border-color:rgba(47,111,62,.25)}
+    .btn2.primary{background:linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));border-color:rgba(37,90,49,1);color:#fff}
+    .btn2.primary:hover{background:linear-gradient(180deg, rgba(37,90,49,1), rgba(30,76,41,1));border-color:rgba(30,76,41,1)}
 
-    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:10px}
-    thead th{
-      text-align:left;
-      font-size:12px;
-      color:#475569;
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
-      white-space:nowrap;
-      background:#fff;
-      position:sticky; top:0;
-      z-index:1;
-    }
-    tbody td{
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
-      font-size:13px;
-      vertical-align:top;
-      background:#fff;
-    }
-    tbody tr:hover td{background:#fbfdff}
-    .rank{font-weight:1000}
-    .name{font-weight:1000}
-    .num{font-weight:1000;white-space:nowrap;font-variant-numeric:tabular-nums}
-
-    .panel{
-      border:1px solid var(--border);
-      border-radius:18px;
-      background:#fff;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
-      overflow:hidden;
-    }
-    .panelHead{
-      padding:12px 14px;
-      border-bottom:1px solid var(--border);
-      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;
-      background:#f8fafc;
-    }
-    .panelHead h3{margin:0;font-size:14px;letter-spacing:-.1px}
-    .panelBody{padding:0}
-    .rowBtn{cursor:pointer}
-    .rowBtn.selected td{outline:3px solid rgba(37,99,235,.22); outline-offset:-3px}
-
-    .badge{
+    /* Pills / badges */
+    .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;
       border:1px solid var(--border);
-      background:#fff;
-      font-weight:1000;
-      font-size:12px;
-      white-space:nowrap;
+      background:rgba(255,255,255,.75);
+      font-weight:1000;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+    /* Challenge cards */
+    .challengeGrid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+    @media(max-width:980px){.challengeGrid{grid-template-columns:1fr}}
+
+    .chCard{
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:14px;
+      background:rgba(255,255,255,.78);
+      box-shadow:0 2px 12px rgba(15,23,42,.06);
+    }
+    .chHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .chTitle{margin:0;font-size:16px;letter-spacing:-.15px;font-weight:1100}
+    .chDesc{margin:8px 0 0 0;color:#223024;line-height:1.6;font-size:14px}
+
+    .badges{
+      display:flex;flex-wrap:wrap;gap:8px;margin-top:10px
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:rgba(255,255,255,.75);
+      font-weight:1000;font-size:12px;white-space:nowrap;
     }
     .b-bronze{border-color:rgba(245,158,11,.35)}
     .b-silver{border-color:rgba(148,163,184,.45)}
     .b-gold{border-color:rgba(251,191,36,.45)}
     .b-legend{border-color:rgba(168,85,247,.38)}
-    .b-lock{opacity:.5}
+    .b-finish{border-color:rgba(34,197,94,.30)}
+    .b-miles{border-color:rgba(59,130,246,.25)}
+    .b-elev{border-color:rgba(239,68,68,.22)}
 
-    .grid2{
-      display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap:12px;
-      margin-top:12px;
-      align-items:start;
-    }
-    @media(max-width:980px){ .grid2{grid-template-columns:1fr} }
-
-    .sideSticky{position:sticky; top:86px}
-    @media(max-width:980px){ .sideSticky{position:relative; top:auto} }
-
-    .medalsRow{
-      display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;
-    }
-    .medalCard{
+    /* Leaderboard */
+    .panel{
       border:1px solid var(--border);
-      border-radius:18px;
-      background:#fff;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
-      padding:12px;
-      min-width:220px;
-      flex:1;
+      border-radius:22px;
+      background:rgba(255,255,255,.82);
+      box-shadow:0 10px 22px rgba(15,23,42,.08);
+      overflow:hidden;
+      position:sticky;
+      top:92px;
     }
-    .medalTitle{font-weight:1000}
-    .medalSub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.5}
-    .medalList{margin-top:10px;display:grid;gap:8px}
-    .medalItem{
-      display:flex;justify-content:space-between;gap:10px;align-items:center;
-      border:1px solid #eef2f7;border-radius:14px;padding:10px;background:#fff;
-    }
-    .medalLeft{display:flex;gap:10px;align-items:center;min-width:0}
-    .medalEmoji{font-size:18px}
-    .medalName{
-      font-weight:1000;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-      max-width:260px;
-    }
-    .medalValue{font-weight:1000;font-size:13px;white-space:nowrap}
+    @media(max-width:980px){.panel{position:relative;top:auto}}
 
-    .detailLine{
-      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;
-      padding:10px 0;border-bottom:1px dashed var(--border);
+    .panelHead{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;
+      background:rgba(255,255,255,.70);
     }
-    .detailLine:last-child{border-bottom:0}
-    .detailRace{font-weight:1000}
-    .detailMeta{color:var(--muted);font-size:12px;margin-top:4px}
-    .detailPts{font-weight:1000;white-space:nowrap}
-    .miniNote{
+    .panelHead h3{margin:0;font-size:14px}
+    .panelBody{padding:12px 14px}
+
+    .filters{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
       margin-top:10px;
-      border:1px solid #dbeafe;
-      background:#eff6ff;
-      color:#1e3a8a;
-      border-radius:16px;
-      padding:12px;
-      line-height:1.55;
-      font-size:13px;
     }
+    label{display:block;font-weight:1000;font-size:12px;color:var(--text)}
+    select, input{
+      width:100%;
+      padding:10px;margin-top:6px;
+      border:1px solid rgba(40,60,40,.20);
+      border-radius:12px;
+      background:rgba(255,255,255,.82);
+      font-size:14px;
+    }
+
+    .miniList{margin:10px 0 0 0;padding:0;list-style:none;display:grid;gap:8px}
+    .miniItem{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      border:1px solid rgba(40,60,40,.10);
+      border-radius:16px;
+      padding:10px;
+      background:rgba(255,255,255,.72);
+    }
+    .left{display:flex;gap:10px;align-items:center;min-width:0}
+    .medal{font-size:16px}
+    .name{font-weight:1000;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+    .rightScore{font-weight:1100;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .sub{font-size:12px;color:var(--muted);margin-top:8px}
+
+    .empty{
+      margin-top:10px;
+      border:1px dashed var(--border);
+      border-radius:16px;
+      padding:10px;
+      background:rgba(255,255,255,.70);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    footer{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
+    a:focus, button:focus, input:focus, select:focus{outline:3px solid rgba(47,111,62,.25);outline-offset:2px}
   </style>
 </head>
 
-<body>
+<body class="theme-nature">
+
 <header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Challenge</h1>
-    <span class="pill" id="challengePill"><span class="dot" id="pillDot"></span><span id="pillText">Chargement…</span></span>
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>MTB Points — Challenge</h1>
+      <span class="pill"><span class="dot ok"></span> Badges & classements</span>
+    </div>
   </div>
 
-  <nav class="nav">
+  <nav>
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
@@ -153,746 +234,318 @@
     <a href="reglement.html">Règlement</a>
     <a href="methodologie.html">Méthodologie</a>
     <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
   </nav>
-
-  <div class="headerRight">
-    <a class="btn ghost" href="public-ranking.html">→ Voir le classement</a>
-  </div>
 </header>
 
 <main class="wrap">
-  <div class="card">
 
-    <!-- HERO -->
-    <section class="hero">
-      <div class="heroTop">
-        <div style="min-width:280px;flex:1">
-          <h2>Challenges & Badges</h2>
-          <div class="heroMeta">
-            Cette page agrège les résultats importés et attribue des <b>badges</b> sur 4 axes :
-            <b>Points</b>, <b>Engagement</b>, <b>Distance</b>, <b>Dénivelé</b>.
-          </div>
-          <div class="heroDesc">
-            Astuce : distance/D+ proviennent soit des lignes de résultats, soit des infos de course (<code>mtb.races.v1</code>).
-          </div>
-        </div>
+  <section class="card hero">
+    <div class="heroTop">
+      <div style="min-width:280px;flex:1">
+        <h2>Badges MTB Points</h2>
+        <p class="muted" style="margin:10px 0 0 0;">
+          Le Challenge récompense la <b>performance</b> (points), la <b>régularité</b> (finishers),
+          l’<b>endurance</b> (km) et le <b>dénivelé</b> (D+). Les seuils sont visibles ci-dessous.
+        </p>
 
-        <div class="heroActions" style="min-width:280px;max-width:620px">
-          <div style="min-width:170px;flex:1">
-            <label for="season">Saison</label>
-            <select id="season">
-              <option value="all">Toutes</option>
-            </select>
-          </div>
-
-          <div style="min-width:170px;flex:1">
-            <label for="sort">Tri</label>
-            <select id="sort">
-              <option value="metric">Score du challenge (desc)</option>
-              <option value="races">Épreuves (desc)</option>
-              <option value="best">Meilleure épreuve (desc)</option>
-              <option value="name">Nom (A→Z)</option>
-            </select>
-          </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <a class="btn2 primary" href="public-ranking.html">Voir le classement</a>
+          <a class="btn2" href="reglement.html#challenges">Règles du Challenge</a>
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="tabsRow" id="tabsRow" aria-label="Challenges"></div>
+      <div class="heroCoins" aria-label="Logo coins">
+        <img src="img/mtbpoints-coins.png" alt="MTB Points coins">
+      </div>
+    </div>
+  </section>
 
-      <!-- KPIs -->
-      <div class="kpiGrid">
-        <div class="kpi">
-          <div class="kpiLabel">Coureurs classés</div>
-          <div class="kpiValue"><span id="kpiAthletes">—</span></div>
-          <div class="kpiSub">sur la saison sélectionnée</div>
+  <div class="grid">
+
+    <!-- LEFT: Challenges -->
+    <div class="card">
+      <h2 style="margin:0;font-size:18px;letter-spacing:-.15px">Les Challenges</h2>
+      <p class="muted" style="margin:8px 0 0 0;">
+        Tu peux afficher le leaderboard (à droite) selon une source de données :
+        <b>Supabase</b> si les vues existent, sinon <b>localStorage</b>.
+      </p>
+
+      <div class="challengeGrid">
+
+        <div class="chCard">
+          <div class="chHead">
+            <h3 class="chTitle">🔥 Challenge MTB Points</h3>
+            <span class="pill"><span class="dot"></span> Points</span>
+          </div>
+          <p class="chDesc">Objectif : cumuler des points MTB sur la période (ex: 24 mois glissants).</p>
+          <div class="badges">
+            <span class="badge b-bronze">🥉 500</span>
+            <span class="badge b-silver">🥈 750</span>
+            <span class="badge b-gold">🥇 1000</span>
+            <span class="badge b-legend">🟣 2000 Legend</span>
+          </div>
         </div>
-        <div class="kpi">
-          <div class="kpiLabel">Épreuves</div>
-          <div class="kpiValue"><span id="kpiRaces">—</span></div>
-          <div class="kpiSub">épreuves comptabilisées</div>
+
+        <div class="chCard">
+          <div class="chHead">
+            <h3 class="chTitle">🏁 Challenge Engagement</h3>
+            <span class="pill"><span class="dot"></span> Finishers</span>
+          </div>
+          <p class="chDesc">Objectif : terminer des courses (statut FIN). Valorise la régularité.</p>
+          <div class="badges">
+            <span class="badge b-finish">🏁 5</span>
+            <span class="badge b-finish">🏁 10</span>
+            <span class="badge b-finish">🏁 20</span>
+          </div>
         </div>
-        <div class="kpi">
-          <div class="kpiLabel">Top score</div>
-          <div class="kpiValue"><span id="kpiTop">—</span></div>
-          <div class="kpiSub" id="kpiTopSub">—</div>
+
+        <div class="chCard">
+          <div class="chHead">
+            <h3 class="chTitle">🚴 Challenge Endurance</h3>
+            <span class="pill"><span class="dot"></span> Distance</span>
+          </div>
+          <p class="chDesc">Objectif : cumuler une distance totale (km) sur la période.</p>
+          <div class="badges">
+            <span class="badge b-miles">🚴 500 km</span>
+            <span class="badge b-miles">🚴 1000 km</span>
+            <span class="badge b-miles">🚴 3000 km</span>
+          </div>
         </div>
+
+        <div class="chCard">
+          <div class="chHead">
+            <h3 class="chTitle">⛰️ Challenge Dénivelé</h3>
+            <span class="pill"><span class="dot"></span> D+</span>
+          </div>
+          <p class="chDesc">Objectif : cumuler un dénivelé positif total (m) sur la période.</p>
+          <div class="badges">
+            <span class="badge b-elev">⛰️ +10 000 m</span>
+            <span class="badge b-elev">⛰️ +25 000 m</span>
+            <span class="badge b-elev">⛰️ +50 000 m</span>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Physical medals -->
-      <div class="miniNote">
-        🏆 <b>Récompenses physiques</b> : à la fin de la saison, les <b>3 meilleurs</b> du challenge actif reçoivent une médaille
-        <b>Or</b> / <b>Argent</b> / <b>Bronze</b> (à définir avec un partenaire).
+      <div class="card" style="margin:12px 0 0 0;background:rgba(255,255,255,.78)">
+        <h3 style="margin:0;font-size:15px">🎖️ Récompenses (option)</h3>
+        <p class="muted" style="margin:8px 0 0 0;">
+          Les Top 3 d’un challenge sur une saison peuvent recevoir une médaille physique.
+          Conditions : résultats publiés, validés et anti-fraude appliqué.
+        </p>
       </div>
-
-      <div class="medalsRow" aria-label="Top 3 — médailles">
-        <div class="medalCard">
-          <div class="medalTitle">Top 3 — Médailles</div>
-          <div class="medalSub" id="medalSub">Selon le challenge sélectionné.</div>
-          <div class="medalList" id="medalList">
-            <div class="medalItem">
-              <div class="medalLeft"><span class="medalEmoji">🥇</span><span class="medalName">Chargement…</span></div>
-              <div class="medalValue">—</div>
-            </div>
-            <div class="medalItem">
-              <div class="medalLeft"><span class="medalEmoji">🥈</span><span class="medalName">Chargement…</span></div>
-              <div class="medalValue">—</div>
-            </div>
-            <div class="medalItem">
-              <div class="medalLeft"><span class="medalEmoji">🥉</span><span class="medalName">Chargement…</span></div>
-              <div class="medalValue">—</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="grid2">
-      <!-- LEFT: Leaderboard -->
-      <section class="panel">
-        <div class="panelHead">
-          <h3 id="boardTitle">Classement — Challenge</h3>
-          <span class="pill"><span class="dot"></span><span id="pillRows">0</span> résultats</span>
-        </div>
-        <div class="panelBody">
-          <div style="overflow:auto">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:62px;">#</th>
-                  <th>Coureur</th>
-                  <th style="width:170px;" id="thMetric">Score</th>
-                  <th style="width:160px;">Badges</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyBoard"></tbody>
-            </table>
-          </div>
-          <div class="empty" id="boardEmpty" style="display:none;">
-            Aucun résultat. Importe des résultats pour afficher les challenges.
-          </div>
-          <div class="hintRow">
-            <div class="muted">Clique sur une ligne pour voir le détail.</div>
-            <div class="muted">Export CSV dispo à droite.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- RIGHT: Athlete detail -->
-      <aside class="sideSticky">
-        <div class="panel">
-          <div class="panelHead">
-            <h3>Détail coureur</h3>
-            <span class="pill"><span class="dot"></span><span id="detailPill">—</span></span>
-          </div>
-          <div class="panelBody" style="padding:14px;">
-            <div id="detailHint" class="muted" style="line-height:1.55">
-              Sélectionne un coureur dans le tableau pour afficher ses épreuves et son avancement.
-            </div>
-
-            <div id="detailBox" class="empty" style="margin-top:12px;">
-              Aucun coureur sélectionné.
-            </div>
-
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
-              <button class="btn" id="exportBtn" type="button">Exporter CSV</button>
-              <button class="btn ghost" id="resetBtn" type="button">Réinitialiser (local)</button>
-            </div>
-
-            <div class="muted" style="font-size:12px; margin-top:10px;">
-              * “Réinitialiser” supprime uniquement les clés locales (pas Supabase).
-            </div>
-          </div>
-        </div>
-      </aside>
     </div>
 
+    <!-- RIGHT: Leaderboard -->
+    <aside class="panel">
+      <div class="panelHead">
+        <h3>🏆 Leaderboard (aperçu)</h3>
+        <span class="pill"><span class="dot warn"></span><span id="sourceLabel">—</span></span>
+      </div>
+
+      <div class="panelBody">
+        <div class="filters">
+          <div>
+            <label for="challengeType">Challenge</label>
+            <select id="challengeType">
+              <option value="points">MTB Points (points)</option>
+              <option value="finishers">Engagement (finishers)</option>
+              <option value="distance">Endurance (km)</option>
+              <option value="elevation">Dénivelé (D+)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="sex">Sexe</label>
+            <select id="sex">
+              <option value="">Tous</option>
+              <option value="M">Hommes</option>
+              <option value="F">Femmes</option>
+            </select>
+          </div>
+        </div>
+
+        <ul class="miniList" id="leaderList">
+          <li class="miniItem">
+            <div class="left"><span class="medal">…</span><span class="name">Chargement…</span></div>
+            <span class="rightScore">—</span>
+          </li>
+        </ul>
+
+        <div class="empty" id="emptyBox" style="display:none;">
+          Aucune donnée disponible pour cette vue.
+        </div>
+
+        <div class="sub" id="hint">
+          Source : —
+        </div>
+      </div>
+    </aside>
+
   </div>
+
 </main>
 
-<script src="js/storage.js"></script>
-<script>
-(function(){
-  // -----------------------------
-  // Config challenges & badges
-  // -----------------------------
-  const CHALLENGES = [
-    {
-      key: "points",
-      label: "MTB Points",
-      metricLabel: "Points",
-      metricUnit: "pts",
-      getMetric: (a) => a.totalPoints,
-      thresholds: [
-        { key:"bronze", label:"Bronze", min: 500,  cls:"b-bronze" },
-        { key:"silver", label:"Argent", min: 750,  cls:"b-silver" },
-        { key:"gold",   label:"Or",     min: 1000, cls:"b-gold" },
-        { key:"legend", label:"Legend", min: 2000, cls:"b-legend" },
-      ]
-    },
-    {
-      key: "engagement",
-      label: "Engagement",
-      metricLabel: "Courses terminées",
-      metricUnit: "",
-      getMetric: (a) => a.races,
-      thresholds: [
-        { key:"e5",  label:"Finisher x5",  min: 5,  cls:"b-bronze" },
-        { key:"e10", label:"Finisher x10", min: 10, cls:"b-silver" },
-        { key:"e20", label:"Finisher x20", min: 20, cls:"b-gold" },
-      ]
-    },
-    {
-      key: "distance",
-      label: "Endurance",
-      metricLabel: "Distance cumulée",
-      metricUnit: "km",
-      getMetric: (a) => a.totalDistanceKm,
-      thresholds: [
-        { key:"d500",  label:"500 km",  min: 500,  cls:"b-bronze" },
-        { key:"d1000", label:"1000 km", min: 1000, cls:"b-silver" },
-        { key:"d3000", label:"3000 km", min: 3000, cls:"b-gold" },
-      ]
-    },
-    {
-      key: "dplus",
-      label: "Dénivelé",
-      metricLabel: "D+ cumulé",
-      metricUnit: "m",
-      getMetric: (a) => a.totalDplusM,
-      thresholds: [
-        { key:"z10k",  label:"+10 000 m", min: 10000, cls:"b-bronze" },
-        { key:"z25k",  label:"+25 000 m", min: 25000, cls:"b-silver" },
-        { key:"z50k",  label:"+50 000 m", min: 50000, cls:"b-gold" },
-      ]
-    },
-  ];
+<footer>
+  MTB Points — Challenge • Dernière mise à jour : <span id="lastUpdate">—</span>
+</footer>
 
-  let ACTIVE = "points";
+<script type="module">
+  const $ = (id)=>document.getElementById(id);
+  const medals = ["🥇","🥈","🥉"];
+  const esc = (s)=>String(s??"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const num = (x)=>{ const n = Number(String(x??"").replace(",", ".").trim()); return Number.isFinite(n) ? n : null; };
 
-  // -----------------------------
-  // Helpers
-  // -----------------------------
-  const $ = (id) => document.getElementById(id);
-  const esc = (s)=>String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  const num = (x)=>{ const n = Number(String(x ?? "").replace(",", ".").trim()); return Number.isFinite(n) ? n : null; };
-
-  function fmtMetric(v, unit){
-    const n = Number(v ?? 0);
-    if (!Number.isFinite(n)) return "—";
-    if (unit === "km") return `${(Math.round(n*10)/10).toString().replace(".", ",")} ${unit}`;
-    if (unit) return `${Math.round(n)} ${unit}`;
-    return `${Math.round(n)}`;
-  }
-
-  function setPill(text, ok=true){
-    const pillText = $("pillText");
-    const dot = $("pillDot");
-    if (pillText) pillText.textContent = text;
-    if (dot) dot.className = "dot " + (ok ? "ok" : "err");
-  }
-
-  function getYearFromDate(dateStr){
-    if(!dateStr) return null;
-    const y = String(dateStr).slice(0,4);
-    return /^\d{4}$/.test(y) ? y : null;
-  }
-
-  function getBestBadge(thresholds, metric){
-    const t = thresholds.slice().sort((a,b)=>a.min-b.min);
-    let best = null;
-    for (const b of t) if (metric >= b.min) best = b;
-    return best;
-  }
-
-  // -----------------------------
-  // Data acquisition (results + races)
-  // -----------------------------
   function safeJson(key){
     try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(_){ return null; }
   }
 
-  function listRacesSafe(){
-    // on tente d'abord fonctions storage.js si présentes
-    const fns = ["loadStoredEvents","listRaces","getRaces"];
-    for (const fn of fns){
-      if (typeof window[fn] === "function"){
-        try{
-          const out = window[fn]();
-          if (Array.isArray(out)) return out;
-        }catch(_){}
-      }
-    }
-    const arr = safeJson("mtb.races.v1");
-    return Array.isArray(arr) ? arr : [];
+  function setSource(label, hint){
+    $("sourceLabel").textContent = label || "—";
+    $("hint").textContent = hint || "Source : —";
   }
 
-  function loadAllResultEntries() {
-    const candidates = [
-      "loadResults",
-      "listResults",
-      "getResults",
-      "loadStoredResults",
-      "loadPublicResults",
-      "loadRaceResults",
-      "loadEventResults",
-    ];
-    for (const fn of candidates) {
-      if (typeof window[fn] === "function") {
-        try{
-          const out = window[fn]();
-          if (Array.isArray(out) && out.length) return out;
-        }catch(_){}
-      }
-    }
-    // fallback legacy keys
-    try {
-      const raw =
-        localStorage.getItem("mtb.results.v1") ||
-        localStorage.getItem("mtb_results") ||
-        localStorage.getItem("results") ||
-        localStorage.getItem("mtbPointsResults");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed;
-      }
-    } catch (_) {}
-    return [];
-  }
+  function renderList(rows){
+    const ul = $("leaderList");
+    const empty = $("emptyBox");
 
-  const races = listRacesSafe();
-  const racesById = new Map((races || []).filter(Boolean).map(r => [String(r.id), r]));
-
-  function normalizeEntry(e, idx) {
-    const athleteId =
-      e.athleteId || e.riderId || e.userId || e.coureurId || e.idAthlete ||
-      e.riderEmail || e.email ||
-      ("ath_" + idx);
-
-    const athleteName =
-      e.athleteName || e.riderName || e.name || e.coureur || e.user ||
-      (e.riderEmail || e.email) ||
-      "Sans nom";
-
-    const date = e.date || e.raceDate || e.eventDate || e.when || null;
-    const season = getYearFromDate(date) || "—";
-
-    const raceId = e.raceId || e.eventId || e.epreuveId || e.idRace || e.idEvent || null;
-    const r = raceId ? racesById.get(String(raceId)) : null;
-
-    const raceName = e.raceName || e.eventName || e.epreuveName || e.nameRace || e.nameEvent || e.race || r?.name || "Épreuve";
-
-    const points = num(e.points ?? e.mtbPoints ?? e.score ?? e.totalPoints ?? 0) ?? 0;
-
-    // Distance / D+ :
-    // - si la ligne de résultat porte l'info -> prioritaire
-    // - sinon on récupère sur la course (mtb.races.v1)
-    const distanceKm =
-      num(e.distanceKm ?? e.distance_km ?? e.km ?? e.distance) ??
-      num(r?.distanceKm ?? r?.distance_km) ??
-      0;
-
-    const dplusM =
-      num(e.dplusM ?? e.dplus_m ?? e.dplus ?? e.denivele ?? e.dénivelé ?? e.denivelePositif) ??
-      num(r?.dplusM ?? r?.dplus_m) ??
-      0;
-
-    return {
-      athleteId: String(athleteId),
-      athleteName: String(athleteName),
-      date: date ? String(date) : null,
-      season,
-      raceId: raceId ? String(raceId) : null,
-      raceName: String(raceName),
-      points: Number.isFinite(points) ? points : 0,
-      distanceKm: Number.isFinite(distanceKm) ? distanceKm : 0,
-      dplusM: Number.isFinite(dplusM) ? dplusM : 0,
-      _raw: e
-    };
-  }
-
-  function buildSeasonOptions(entries) {
-    const sel = $("season");
-    if (!sel) return;
-    const years = Array.from(new Set(entries.map(x=>x.season).filter(x=>x && x !== "—"))).sort((a,b)=>b.localeCompare(a));
-    sel.innerHTML = `<option value="all">Toutes</option>` + years.map(y=>`<option value="${esc(y)}">${esc(y)}</option>`).join("");
-  }
-
-  // -----------------------------
-  // Aggregation
-  // -----------------------------
-  function aggregate(entries, seasonFilter) {
-    const filtered = (seasonFilter && seasonFilter !== "all")
-      ? entries.filter(e => e.season === seasonFilter)
-      : entries;
-
-    const byAthlete = new Map();
-    const uniqueRaceIds = new Set();
-
-    for (const e of filtered) {
-      if (e.raceId) uniqueRaceIds.add(e.raceId);
-
-      const key = e.athleteId;
-      if (!byAthlete.has(key)) {
-        byAthlete.set(key, {
-          athleteId: e.athleteId,
-          athleteName: e.athleteName,
-
-          totalPoints: 0,
-          races: 0,
-          bestPoints: 0,
-
-          totalDistanceKm: 0,
-          totalDplusM: 0,
-
-          entries: []
-        });
-      }
-      const a = byAthlete.get(key);
-
-      a.totalPoints += e.points;
-      a.races += 1;
-      a.bestPoints = Math.max(a.bestPoints, e.points);
-
-      a.totalDistanceKm += (e.distanceKm || 0);
-      a.totalDplusM += (e.dplusM || 0);
-
-      a.entries.push(e);
-    }
-
-    const list = Array.from(byAthlete.values()).map(a => {
-      // arrondis propres
-      a.totalPoints = Math.round(a.totalPoints * 100) / 100;
-      a.totalDistanceKm = Math.round(a.totalDistanceKm * 10) / 10;
-      a.totalDplusM = Math.round(a.totalDplusM);
-
-      // badge du challenge actif
-      const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
-      const metric = ch.getMetric(a) || 0;
-      const badge = getBestBadge(ch.thresholds, metric);
-
-      return { ...a, badge };
-    });
-
-    return {
-      athletes: list,
-      raceCount: uniqueRaceIds.size,
-      rawCount: filtered.length
-    };
-  }
-
-  function sortAthletes(list, sortKey) {
-    const arr = list.slice();
-    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
-
-    const metricOf = (a) => Number(ch.getMetric(a) ?? 0);
-
-    if (sortKey === "name") arr.sort((a,b)=>a.athleteName.localeCompare(b.athleteName));
-    else if (sortKey === "races") arr.sort((a,b)=>b.races-a.races || metricOf(b)-metricOf(a));
-    else if (sortKey === "best") arr.sort((a,b)=>b.bestPoints-a.bestPoints || metricOf(b)-metricOf(a));
-    else arr.sort((a,b)=>metricOf(b)-metricOf(a) || b.bestPoints-a.bestPoints);
-
-    return arr;
-  }
-
-  // -----------------------------
-  // UI: Tabs
-  // -----------------------------
-  function renderTabs(){
-    const root = $("tabsRow");
-    if (!root) return;
-    root.innerHTML = CHALLENGES.map(ch => `
-      <button class="tabBtn ${ch.key === ACTIVE ? "active" : ""}" type="button" data-tab="${esc(ch.key)}">
-        ${esc(ch.label)}
-      </button>
-    `).join("");
-
-    Array.from(root.querySelectorAll("button[data-tab]")).forEach(btn => {
-      btn.addEventListener("click", () => {
-        ACTIVE = btn.getAttribute("data-tab") || "points";
-        $("sort").value = "metric";
-        selectedAthleteId = null;
-        renderAll();
-      });
-    });
-  }
-
-  // -----------------------------
-  // Rendering: board + detail + medals
-  // -----------------------------
-  let currentEntries = [];
-  let currentAthletes = [];
-  let selectedAthleteId = null;
-
-  function badgesInline(a){
-    // badge du challenge actif
-    const main = a.badge
-      ? `<span class="badge ${a.badge.cls}">🏅 ${esc(a.badge.label)}</span>`
-      : `<span class="badge b-lock">🔒 Aucun</span>`;
-
-    // mini-aperçu des 4 axes (lockés ou gagnés)
-    const mini = CHALLENGES.map(ch => {
-      const metric = Number(ch.getMetric(a) ?? 0);
-      const b = getBestBadge(ch.thresholds, metric);
-      const isActive = (ch.key === ACTIVE);
-      const cls = b ? b.cls : "b-lock";
-      const icon =
-        ch.key === "points" ? "⭐" :
-        ch.key === "engagement" ? "🏁" :
-        ch.key === "distance" ? "🚴" :
-        "⛰️";
-
-      const txt = b ? b.label : "—";
-      return `<span class="badge ${cls}" title="${esc(ch.label)}">${icon} ${esc(txt)}${isActive ? " •" : ""}</span>`;
-    }).join(" ");
-
-    return `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${main}${mini}</div>`;
-  }
-
-  function renderBoard(athletes){
-    const tb = $("tbodyBoard");
-    const empty = $("boardEmpty");
-    const thMetric = $("thMetric");
-    const title = $("boardTitle");
-
-    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
-    if (thMetric) thMetric.textContent = ch.metricLabel;
-    if (title) title.textContent = `Classement — ${ch.label}`;
-
-    tb.innerHTML = "";
-
-    if (!athletes.length){
-      empty.style.display = "";
+    if (!rows || !rows.length){
+      ul.innerHTML = "";
+      empty.style.display = "block";
       return;
     }
     empty.style.display = "none";
 
-    const rows = athletes.map((a, i) => {
-      const metric = ch.getMetric(a) || 0;
-      const metricTxt = fmtMetric(metric, ch.metricUnit);
-      const sub =
-        `Best: ${Math.round(a.bestPoints)} pts • Épreuves: ${a.races} • ${Math.round(a.totalDistanceKm)} km • +${Math.round(a.totalDplusM)} m`;
-
-      return `
-        <tr class="rowBtn ${a.athleteId === selectedAthleteId ? "selected" : ""}" data-ath="${esc(a.athleteId)}">
-          <td class="rank">${i+1}</td>
-          <td>
-            <div class="name">${esc(a.athleteName)}</div>
-            <div class="muted small">${esc(sub)}</div>
-          </td>
-          <td class="num">${esc(metricTxt)}</td>
-          <td>${badgesInline(a)}</td>
-        </tr>
-      `;
-    }).join("");
-
-    tb.innerHTML = rows;
-
-    Array.from(document.querySelectorAll("tr.rowBtn")).forEach(tr => {
-      tr.addEventListener("click", () => {
-        selectedAthleteId = tr.getAttribute("data-ath");
-        const a = athletes.find(x => x.athleteId === selectedAthleteId);
-        if (a) renderDetail(a);
-        Array.from(document.querySelectorAll("tr.rowBtn")).forEach(x => x.classList.remove("selected"));
-        tr.classList.add("selected");
-      });
-    });
-  }
-
-  function renderDetail(a){
-    const box = $("detailBox");
-    const pill = $("detailPill");
-    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
-
-    const metric = ch.getMetric(a) || 0;
-    if (pill) pill.textContent = `${ch.label}`;
-
-    const activeBadge = getBestBadge(ch.thresholds, metric);
-    const activeBadgeHtml = activeBadge
-      ? `<span class="badge ${activeBadge.cls}">🏅 ${esc(activeBadge.label)}</span>`
-      : `<span class="badge b-lock">🔒 Aucun badge</span>`;
-
-    const entries = a.entries.slice().sort((x,y)=>String(y.date||"").localeCompare(String(x.date||"")));
-
-    const lines = entries.map(e => `
-      <div class="detailLine">
-        <div>
-          <div class="detailRace">${esc(e.raceName)}</div>
-          <div class="detailMeta">${esc(e.date || "—")} • Saison ${esc(e.season || "—")} • ${fmtMetric(e.distanceKm, "km")} • +${Math.round(e.dplusM || 0)} m</div>
+    ul.innerHTML = rows.slice(0, 10).map((r, i) => `
+      <li class="miniItem">
+        <div class="left">
+          <span class="medal">${medals[i] || "•"}</span>
+          <span class="name">${esc(r.name || "—")}</span>
         </div>
-        <div class="detailPts">${Math.round(e.points || 0)} pts</div>
-      </div>
+        <span class="rightScore">${esc(String(r.value ?? "—"))}</span>
+      </li>
     `).join("");
-
-    box.className = "";
-    box.innerHTML = `
-      <div class="pill">
-        <span class="dot ok"></span>
-        <span><b>${esc(a.athleteName)}</b> — ${esc(ch.metricLabel)}: <b>${esc(fmtMetric(metric, ch.metricUnit))}</b></span>
-      </div>
-
-      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        ${activeBadgeHtml}
-        <span class="pill">⭐ ${Math.round(a.totalPoints)} pts</span>
-        <span class="pill">🏁 ${a.races} épreuve${a.races>1?"s":""}</span>
-        <span class="pill">🚴 ${fmtMetric(a.totalDistanceKm, "km")}</span>
-        <span class="pill">⛰️ +${Math.round(a.totalDplusM)} m</span>
-      </div>
-
-      <div class="hr"></div>
-      <div>${lines || `<div class="empty">Aucune épreuve.</div>`}</div>
-    `;
   }
 
-  function renderTop3Medals(athletes){
-    const list = $("medalList");
-    const sub = $("medalSub");
-    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
-    const medals = ["🥇","🥈","🥉"];
+  async function loadFromSupabase(type, sex){
+    try{
+      const { supabase } = await import("./js/supabaseClient.js");
 
-    if (sub) sub.textContent = `Top 3 calculé sur : ${ch.metricLabel} (${ch.label}).`;
+      // Option 1: vue dédiée challenge (si tu l’ajoutes plus tard)
+      // v_public_challenge_ranking : columns idea -> name, sex, challenge_type, value
+      try{
+        const { data, error } = await supabase
+          .from("v_public_challenge_ranking")
+          .select("*")
+          .eq("challenge_type", type)
+          .limit(200);
 
-    const top3 = athletes.slice(0,3);
-    if (!top3.length){
-      list.innerHTML = `
-        <div class="medalItem"><div class="medalLeft"><span class="medalEmoji">🥇</span><span class="medalName">Aucun</span></div><div class="medalValue">—</div></div>
-        <div class="medalItem"><div class="medalLeft"><span class="medalEmoji">🥈</span><span class="medalName">Aucun</span></div><div class="medalValue">—</div></div>
-        <div class="medalItem"><div class="medalLeft"><span class="medalEmoji">🥉</span><span class="medalName">Aucun</span></div><div class="medalValue">—</div></div>
-      `;
+        if (error) throw error;
+
+        const rows = (data || [])
+          .filter(r => !sex || String(r.sex||"").toUpperCase() === sex)
+          .map(r => ({ name: r.name ?? r.rider_name, value: r.value ?? r.score ?? r.points }));
+
+        return { ok:true, rows: rows.sort((a,b)=>(Number(b.value)||0)-(Number(a.value)||0)), hint:"Source : Supabase (v_public_challenge_ranking)", label:"Supabase" };
+      } catch(_) {
+        // Option 2 fallback: utiliser v_public_ranking = points
+        if (type !== "points") throw new Error("No challenge view for this type");
+
+        const { data, error } = await supabase
+          .from("v_public_ranking")
+          .select("*")
+          .order("score", { ascending:false })
+          .limit(50);
+
+        if (error) throw error;
+
+        const rows = (data || [])
+          .filter(r => !sex || String(r.sex||"").toUpperCase() === sex)
+          .map(r => ({ name: r.name ?? `${r.last_name||""} ${r.first_name||""}`.trim(), value: Number(r.score ?? 0) }));
+
+        return { ok:true, rows, hint:"Source : Supabase (v_public_ranking) — points", label:"Supabase" };
+      }
+    } catch(e){
+      return { ok:false, rows:[], hint:"Source : Supabase indisponible", label:"Local" };
+    }
+  }
+
+  function loadFromLocal(type, sex){
+    // localStorage: mtb.results.v1 -> on agrège points + options distance/d+ si présents
+    const results = safeJson("mtb.results.v1");
+    if (!Array.isArray(results) || !results.length){
+      return { rows: [], hint:"Source : localStorage (mtb.results.v1) — vide", label:"Local" };
+    }
+
+    // tentative champs possibles
+    const map = new Map();
+    for (const r of results){
+      const s = String(r.sex ?? r.gender ?? r.sexe ?? "").trim().toUpperCase();
+      if (sex && s !== sex) continue;
+
+      const name = String(r.riderName ?? r.name ?? r.nom ?? r.athlete ?? "").trim() || "—";
+      if (name === "—") continue;
+
+      let val = 0;
+
+      if (type === "points"){
+        val = num(r.points ?? r.score ?? r.mtbPoints) ?? 0;
+      } else if (type === "finishers"){
+        // FIN => +1
+        const st = String(r.status ?? r.stat ?? r.etat ?? "").trim().toUpperCase();
+        const hasTime = String(r.time ?? r.temps ?? "").trim().length > 0;
+        const isFin = st ? (st === "FIN") : hasTime;
+        val = isFin ? 1 : 0;
+      } else if (type === "distance"){
+        val = num(r.distance_km ?? r.distance ?? r.km) ?? 0;
+      } else if (type === "elevation"){
+        val = num(r.elev_gain ?? r.dplus ?? r.d+ ?? r.denivele ?? r.denivele_plus) ?? 0;
+      }
+
+      if (!map.has(name)) map.set(name, 0);
+      map.set(name, map.get(name) + val);
+    }
+
+    const rows = Array.from(map.entries())
+      .map(([name, value]) => ({ name, value: Math.round(value) }))
+      .sort((a,b) => (Number(b.value)||0) - (Number(a.value)||0))
+      .slice(0, 10);
+
+    const hint =
+      type === "points" ? "Source : localStorage (mtb.results.v1) — points" :
+      type === "finishers" ? "Source : localStorage (mtb.results.v1) — finishers" :
+      type === "distance" ? "Source : localStorage (mtb.results.v1) — km (si présent)" :
+      "Source : localStorage (mtb.results.v1) — D+ (si présent)";
+
+    return { rows, hint, label:"Local" };
+  }
+
+  async function refresh(){
+    const type = $("challengeType").value;
+    const sex = $("sex").value;
+
+    // try Supabase first
+    const supa = await loadFromSupabase(type, sex);
+    if (supa.ok && supa.rows.length){
+      setSource(supa.label, supa.hint);
+      renderList(supa.rows);
       return;
     }
 
-    list.innerHTML = top3.map((a, i) => {
-      const metric = ch.getMetric(a) || 0;
-      return `
-        <div class="medalItem">
-          <div class="medalLeft">
-            <span class="medalEmoji">${medals[i] || "•"}</span>
-            <span class="medalName">${esc(a.athleteName || "—")}</span>
-          </div>
-          <div class="medalValue">${esc(fmtMetric(metric, ch.metricUnit))}</div>
-        </div>
-      `;
-    }).join("");
+    // fallback local
+    const local = loadFromLocal(type, sex);
+    setSource(local.label, local.hint);
+    renderList(local.rows);
   }
 
-  function updateKpis(agg){
-    const kpiAthletes = $("kpiAthletes");
-    const kpiRaces = $("kpiRaces");
-    const kpiTop = $("kpiTop");
-    const kpiTopSub = $("kpiTopSub");
-    const pillRows = $("pillRows");
+  $("challengeType").addEventListener("change", refresh);
+  $("sex").addEventListener("change", refresh);
 
-    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
-    const top = agg.athletes.slice().sort((a,b)=>Number(ch.getMetric(b)??0)-Number(ch.getMetric(a)??0))[0];
+  const d = new Date().toLocaleDateString("fr-FR");
+  $("lastUpdate").textContent = d;
 
-    if (kpiAthletes) kpiAthletes.textContent = String(agg.athletes.length);
-    if (kpiRaces) kpiRaces.textContent = String(agg.raceCount);
-    if (kpiTop) kpiTop.textContent = top ? fmtMetric(ch.getMetric(top), ch.metricUnit) : "—";
-    if (kpiTopSub) kpiTopSub.textContent = top ? top.athleteName : "—";
-    if (pillRows) pillRows.textContent = String(agg.rawCount);
-  }
-
-  // -----------------------------
-  // Export / reset
-  // -----------------------------
-  function toCSV(rows){
-    const headers = ["athleteId","athleteName","date","season","raceId","raceName","points","distanceKm","dplusM"];
-    const lines = [headers.join(",")].concat(rows.map(r => headers.map(h => {
-      const v = r[h];
-      const s = (v == null) ? "" : String(v);
-      return '"' + s.replace(/"/g,'""') + '"';
-    }).join(",")));
-    return lines.join("\n");
-  }
-
-  function download(filename, text){
-    const blob = new Blob([text], {type:"text/csv;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  $("exportBtn").addEventListener("click", () => {
-    if (!currentEntries.length) { alert("Aucun résultat à exporter."); return; }
-    download("mtbpoints_challenge.csv", toCSV(currentEntries));
-  });
-
-  $("resetBtn").addEventListener("click", () => {
-    if (!confirm("Réinitialiser les résultats locaux ?")) return;
-    ["mtb.results.v1","mtb_results","results","mtbPointsResults"].forEach(k => localStorage.removeItem(k));
-    setPill("Réinitialisé", true);
-    init();
-  });
-
-  // -----------------------------
-  // Render all
-  // -----------------------------
-  function renderAll(){
-    renderTabs();
-
-    const season = $("season").value;
-    const sort = $("sort").value;
-
-    const agg = aggregate(currentEntries, season);
-    updateKpis(agg);
-
-    const athletes = sortAthletes(agg.athletes, sort === "metric" ? "metric" : sort);
-    currentAthletes = athletes;
-
-    // board
-    renderBoard(athletes);
-
-    // medals top3
-    renderTop3Medals(athletes);
-
-    // reset detail if selection not in list
-    const exists = selectedAthleteId && athletes.some(x => x.athleteId === selectedAthleteId);
-    if (!exists){
-      selectedAthleteId = null;
-      $("detailPill").textContent = "—";
-      $("detailBox").className = "empty";
-      $("detailBox").textContent = "Aucun coureur sélectionné.";
-    } else {
-      const a = athletes.find(x => x.athleteId === selectedAthleteId);
-      if (a) renderDetail(a);
-    }
-
-    setPill(agg.rawCount ? `OK (${agg.rawCount} résultats)` : "Aucun résultat", !!agg.rawCount);
-
-    // update header metric label
-    const ch = CHALLENGES.find(x => x.key === ACTIVE) || CHALLENGES[0];
-    $("sort").querySelector('option[value="metric"]').textContent = `${ch.metricLabel} (desc)`;
-  }
-
-  // -----------------------------
-  // Init
-  // -----------------------------
-  function init(){
-    setPill("Chargement…", true);
-
-    const raw = loadAllResultEntries();
-    currentEntries = raw.map(normalizeEntry);
-
-    buildSeasonOptions(currentEntries);
-
-    // default selects
-    $("season").value = "all";
-    $("sort").value = "metric";
-
-    renderAll();
-  }
-
-  $("season").addEventListener("change", () => { selectedAthleteId = null; renderAll(); });
-  $("sort").addEventListener("change", () => renderAll());
-
-  init();
-})();
+  await refresh();
 </script>
 
 </body>
