@@ -4,77 +4,96 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MTB Points — Règlement</title>
+
+  <!-- Base + Thème nature (le thème DOIT être après) -->
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/theme-nature.css?v=7" />
+
   <style>
-    /* Compléments légers (on s’aligne sur style.css, sans tout réécrire) */
-    :root{
-      --bg:#f4f4f4; --card:#ffffff; --text:#0f172a; --muted:#667085; --border:#e5e7eb;
-      --blue:#2563eb; --blue2:#1d4ed8; --ok:#16a34a; --warn:#ea580c; --err:#dc2626;
-      --shadow:0 10px 30px rgba(2,6,23,.10); --r:22px;
-    }
+    /* Page-specific only: layout & components (NE PAS redéfinir :root ici) */
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
     a{color:inherit}
 
-    /* Header (proche des pages “nouveau design”) */
+    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
+
+    /* Header: compatible avec ton style + thème */
     header.header{
       position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
       padding:14px 16px;
       display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
     header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
-    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    nav a{text-decoration:none;padding:8px 10px;border-radius:10px;color:var(--blue);font-weight:900;font-size:13px}
-    nav a:hover{background:#eff6ff}
-    nav a.active{background:#eff6ff;color:var(--blue2)}
 
-    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
+    /* Logo coins */
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:10px;
+      font-weight:900;
+      font-size:13px;
+      color:var(--blue);
+    }
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
     .card{
       background:var(--card);
       border:1px solid var(--border);
-      border-radius:var(--r);
+      border-radius:22px;
       padding:18px;
       box-shadow:var(--shadow);
       margin:14px 0;
     }
 
     .hero{
-      border-radius:var(--r);
+      border-radius:22px;
       padding:18px;
       border:1px solid var(--border);
       background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
-        #fff;
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2);
     }
     .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
     .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
-    .hero .muted{margin-top:8px;line-height:1.6;color:#334155}
+    .muted{color:var(--muted);font-size:13px;line-height:1.6}
     .heroActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .btn{
+
+    .btn2{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
+      background:rgba(255,255,255,.78);
+      cursor:pointer;font-weight:1000;color:var(--text);
       text-decoration:none;white-space:nowrap;
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
-    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .btn.ghost{background:#f8fafc}
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(15,23,42,.10);border-color:rgba(47,111,62,.25)}
+    .btn2.primary{background:linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));border-color:rgba(37,90,49,1);color:#fff}
+    .btn2.primary:hover{background:linear-gradient(180deg, rgba(37,90,49,1), rgba(30,76,41,1));border-color:rgba(30,76,41,1)}
 
     h2.section{margin:0 0 10px 0;font-size:18px;letter-spacing:-.15px}
     h3{margin:14px 0 6px 0;font-size:15px}
     p,li{font-size:14px;line-height:1.65}
     ul{padding-left:18px;margin:8px 0}
-    .muted{color:var(--muted);font-size:13px}
 
     code{
-      background:#f1f5f9;border:1px solid var(--border);border-radius:10px;
-      padding:2px 8px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      background:rgba(255,255,255,.75);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:2px 8px;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
       font-size:13px;
       white-space:nowrap;
     }
@@ -83,7 +102,7 @@
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;
       border:1px solid var(--border);
-      background:#fff;
+      background:rgba(255,255,255,.75);
       font-weight:1000;font-size:12px;white-space:nowrap;
     }
     .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
@@ -92,20 +111,25 @@
     .dot.err{background:var(--err)}
 
     .box{
-      background:#fff;border:1px solid var(--border);border-radius:18px;
-      padding:14px;margin:12px 0;box-shadow:0 2px 10px rgba(0,0,0,.04);
+      background:rgba(255,255,255,.78);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      box-shadow:0 2px 10px rgba(15,23,42,.06);
     }
-    .callout{border-left:6px solid var(--blue);background:#f8fafc}
+    .callout{border-left:6px solid rgba(47,111,62,.65)}
 
     .tocGrid{display:grid;grid-template-columns: 1fr 1fr;gap:10px;margin-top:10px}
     @media(max-width:900px){.tocGrid{grid-template-columns:1fr}}
+
     .tocLink{
       display:flex;align-items:center;justify-content:space-between;gap:12px;
       padding:12px 12px;border:1px solid var(--border);border-radius:16px;
-      text-decoration:none;background:#fff;
+      text-decoration:none;background:rgba(255,255,255,.78);
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .tocLink:hover{transform:translateY(-1px);box-shadow:0 14px 22px rgba(2,6,23,.10);border-color:#dbeafe}
+    .tocLink:hover{transform:translateY(-1px);box-shadow:0 14px 22px rgba(15,23,42,.12);border-color:rgba(47,111,62,.25)}
     .tocTitle{font-weight:1000}
     .tocHint{color:var(--muted);font-size:12px}
 
@@ -113,22 +137,27 @@
     @media(max-width:980px){.twoCol{grid-template-columns:1fr}}
     .side{position:sticky;top:86px}
     @media(max-width:980px){.side{position:relative;top:auto}}
+
     .sideCard{
-      background:#fff;border:1px solid var(--border);border-radius:var(--r);
-      padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.04);
+      background:rgba(255,255,255,.78);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:14px;
+      box-shadow:0 2px 10px rgba(15,23,42,.06);
     }
     .sideCard h3{margin:0 0 8px 0}
     .sideCard a{
       display:block;text-decoration:none;color:var(--blue);font-weight:900;
       padding:8px 10px;border-radius:12px;
     }
-    .sideCard a:hover{background:#eff6ff}
+    .sideCard a:hover{background:rgba(47,111,62,.08)}
 
     .badgeRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .badge{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-weight:1000;font-size:12px;white-space:nowrap;
+      background:rgba(255,255,255,.75);
+      font-weight:1000;font-size:12px;white-space:nowrap;
     }
     .b-bronze{border-color:rgba(245,158,11,.35)}
     .b-silver{border-color:rgba(148,163,184,.45)}
@@ -139,11 +168,16 @@
   </style>
 </head>
 
-<body>
+<body class="theme-nature">
 <header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Règlement</h1>
-    <span class="pill"><span class="dot ok"></span> Version publique</span>
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>MTB Points — Règlement</h1>
+      <span class="pill"><span class="dot ok"></span> Version publique</span>
+    </div>
   </div>
 
   <nav>
@@ -179,8 +213,8 @@
 
       <div style="min-width:260px;">
         <div class="heroActions">
-          <a class="btn primary" href="challengemtbpoints.html">Voir les challenges</a>
-          <a class="btn ghost" href="public-ranking.html">Voir le classement</a>
+          <a class="btn2 primary" href="challengemtbpoints.html">Voir les challenges</a>
+          <a class="btn2" href="public-ranking.html">Voir le classement</a>
         </div>
         <div class="muted" style="margin-top:8px;font-size:12px;">
           Dernière mise à jour : <span id="lastUpdate">—</span>
@@ -215,7 +249,7 @@
             <li>Une <b>épreuve</b> doit avoir une <b>date</b> et une <b>trace GPX</b> analysable.</li>
             <li>Les classements sont <b>séparés</b> par discipline / sexe / âge / type de vélo.</li>
             <li>Les non-finishers (<code>DNF/DNS/OT/DSQ</code>) reçoivent <b>0 point</b>.</li>
-            <li>Les challenges récompensent aussi la <b>régularité</b> (participation) et l’<b>endurance</b> (km / D+).</li>
+            <li>Les challenges valorisent la <b>performance</b>, la <b>régularité</b> et l’<b>endurance</b>.</li>
           </ul>
         </div>
       </section>
@@ -279,7 +313,8 @@
         <h2 class="section">4. Score Épreuve (MRS)</h2>
         <p>
           Le score global de difficulté (<b>MRS</b>) est calculé à partir d’un score physique et d’un score technique.
-          Les détails de calcul et paramètres sont dans <a href="methodologie.html" style="color:var(--blue);font-weight:1000;text-decoration:none">Méthodologie</a>.
+          Les détails de calcul et paramètres sont dans
+          <a href="methodologie.html" style="color:var(--blue);font-weight:1000;text-decoration:none">Méthodologie</a>.
         </p>
         <div class="box callout">
           <div style="font-weight:1000;">Niveau de l’épreuve</div>
@@ -420,7 +455,7 @@
       <section class="card" id="challenges">
         <h2 class="section">10. Challenges & Badges</h2>
         <p>
-          MTB Points propose plusieurs challenges visant à valoriser la <b>performance</b>, la <b>régularité</b> et l’<b’endurance</b>.
+          MTB Points propose plusieurs challenges visant à valoriser la <b>performance</b>, la <b>régularité</b> et l’<b>endurance</b>.
           Les challenges peuvent être filtrés par discipline / type de vélo (musculaire / e-bike) et, en option, par sexe / âge.
         </p>
 
@@ -428,15 +463,12 @@
           <div style="font-weight:1000;">Fenêtre de calcul</div>
           <p style="margin:8px 0 0 0;">
             Par défaut, les challenges s’appliquent sur une fenêtre glissante de <b>24 mois</b> et utilisent les <b>Top N</b> résultats si applicable.
-            Les paramètres peuvent évoluer après calibration (option : sans rétroactivité).
           </p>
         </div>
 
         <h3>10.1 Challenge MTB Points (points)</h3>
         <div class="box">
-          <p style="margin:0;">
-            Objectif : cumuler des points MTB sur la période.
-          </p>
+          <p style="margin:0;">Objectif : cumuler des points MTB sur la période.</p>
           <div class="badgeRow" style="margin-top:10px">
             <span class="badge b-bronze">🥉 500 pts</span>
             <span class="badge b-silver">🥈 750 pts</span>
@@ -444,7 +476,7 @@
             <span class="badge b-legend">🟣 2000 pts</span>
           </div>
           <div class="muted" style="margin-top:10px;">
-            Variante possible (si tu veux) : minimum <b>5 épreuves distinctes</b> pour éviter un effet “1 course énorme”.
+            Variante possible : minimum <b>5 épreuves distinctes</b> pour éviter l’effet “1 course énorme”.
           </div>
         </div>
 
@@ -488,13 +520,10 @@
         <div class="box callout">
           <div style="font-weight:1000;">Principe</div>
           <ul style="margin:8px 0 0 18px;">
-            <li>À la fin d’une saison (ou période définie), les <b>3 meilleurs</b> d’un challenge reçoivent une médaille physique.</li>
-            <li>🥇 Or / 🥈 Argent / 🥉 Bronze — modèle à définir avec un partenaire.</li>
+            <li>À la fin d’une saison, les <b>3 meilleurs</b> d’un challenge reçoivent une médaille physique.</li>
+            <li>🥇 Or / 🥈 Argent / 🥉 Bronze — modèle à définir.</li>
             <li>Conditions : épreuves publiées, résultats validés, anti-fraude appliqué (section 8).</li>
           </ul>
-          <div class="muted" style="margin-top:10px;">
-            Remarque : tu peux choisir de réserver les médailles physiques au challenge “MTB Points” uniquement, et laisser les autres en badges numériques.
-          </div>
         </div>
       </section>
 
