@@ -1,8 +1,7 @@
 // js/race.js
 // Page publique: race.html?id=...
-// - Essaie Supabase d'abord (public si published, ou tout si connecté)
-// - Fallback localStorage "mtb.races.v1"
-// - Remplit les IDs si présents, sinon ne casse pas la page
+// Source actuelle: localStorage "mtb.races.v1" (fallback)
+// Plus tard: on branchera Supabase.
 
 (function () {
   const $ = (id) => document.getElementById(id);
@@ -12,7 +11,11 @@
 
   function esc(s) {
     return String(s ?? "").replace(/[&<>"']/g, (m) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
     }[m]));
   }
 
@@ -47,19 +50,13 @@
     return new URLSearchParams(location.search).get(name);
   }
 
-  function setStatus(ok, text) {
-    setText("statusText", text || "");
-    const dot = $("statusDot");
-    if (dot) dot.style.background = ok ? "#16a34a" : "#dc2626";
-  }
-
-  function findRaceByIdLocal(id) {
+  function findRaceById(id) {
     const races = loadJSON(KEY_RACES, []);
     if (!Array.isArray(races)) return null;
     return races.find((r) => r && r.id === id) || null;
   }
 
-  function findMeetingByIdLocal(id) {
+  function findMeetingById(id) {
     const meetings = loadJSON(KEY_MEETINGS, []);
     if (!Array.isArray(meetings)) return null;
     return meetings.find((m) => m && m.id === id) || null;
@@ -67,15 +64,22 @@
 
   function difficultyLabel(globalScore) {
     const g = num(globalScore);
-    if (g == null) return { label: "—", hint: "Score global indisponible" };
-    if (g < 25) return { label: "Facile", hint: "Accessible" };
-    if (g < 50) return { label: "Modéré", hint: "Exigeant" };
-    if (g < 75) return { label: "Difficile", hint: "Très exigeant" };
-    return { label: "Extrême", hint: "Réservé aux très entraînés" };
+    if (g == null) return { label: "—", hint: "Score global indisponible", level: "na" };
+    if (g < 25) return { label: "Facile", hint: "Accessible", level: "easy" };
+    if (g < 50) return { label: "Modéré", hint: "Exigeant", level: "mid" };
+    if (g < 75) return { label: "Difficile", hint: "Très exigeant", level: "hard" };
+    return { label: "Extrême", hint: "Réservé aux très entraînés", level: "extreme" };
   }
 
   function extractAnalysis(race) {
-    return race?.analysis || race?.analysis_json || race?.gpxAnalysis || null;
+    // Tu as plusieurs formats possibles selon tes versions.
+    // On prend le plus riche dispo.
+    return (
+      race?.analysis ||
+      race?.analysis_json ||
+      race?.gpxAnalysis ||
+      null
+    );
   }
 
   function extractPoints(analysis) {
@@ -88,92 +92,24 @@
     return Array.isArray(pts) ? pts : null;
   }
 
-  function normalizeRaceFromDb(row) {
-    if (!row) return null;
-    return {
-      id: row.id,
-      meetingId: row.meeting_id,
-      name: row.name,
-      date: row.date,
-      disc: row.discipline,
-      level: row.level,
-      ebike: row.ebike,
-
-      distanceKm: row.distance_km,
-      dplusM: row.dplus_m,
-
-      physScore: row.score_phys,
-      techScoreV2: row.score_tech,
-      globalScore: row.score_global,
-
-      analysis: row.analysis_json,
-      isPublished: row.is_published
-    };
-  }
-
-  async function getSupabase() {
-    try {
-      const mod = await import("./supabaseClient.js"); // doit être dans /js/
-      return mod?.supabase || null;
-    } catch (e) {
-      console.warn("[race] supabaseClient import failed:", e);
-      return null;
-    }
-  }
-
-  async function fetchRaceSupabase(id) {
-    const supabase = await getSupabase();
-    if (!supabase) return { race: null, mode: "none" };
-
-    // Si connecté -> on autorise la preview même si pas publié
-    let isAuthed = false;
-    try {
-      const { data: sess } = await supabase.auth.getSession();
-      isAuthed = !!sess?.session;
-    } catch (_) {}
-
-    try {
-      let q = supabase
-        .from("races")
-        .select("*")
-        .eq("id", id);
-
-      if (!isAuthed) q = q.eq("is_published", true);
-
-      const { data, error } = await q.maybeSingle();
-      if (error) {
-        console.warn("[race] supabase fetch error:", error);
-        return { race: null, mode: isAuthed ? "authed" : "public" };
-      }
-      return { race: normalizeRaceFromDb(data), mode: isAuthed ? "authed" : "public" };
-    } catch (e) {
-      console.warn("[race] supabase fetch exception:", e);
-      return { race: null, mode: isAuthed ? "authed" : "public" };
-    }
-  }
-
   function renderBasic(race) {
     setText("raceName", race?.name || "Épreuve");
     setText("raceDate", race?.date || "—");
-    setText("raceDisc", race?.disc || "—");
+    setText("raceDisc", race?.disc || race?.discipline || "—");
     setText("raceLevel", race?.level || "—");
 
-    const analysis = extractAnalysis(race);
-    const dist = num(race?.distanceKm ?? analysis?.distanceKm);
-    const dplus = num(race?.dplusM ?? analysis?.dplusM);
+    const dist = num(race?.distanceKm ?? extractAnalysis(race)?.distanceKm);
+    const dplus = num(race?.dplusM ?? extractAnalysis(race)?.dplusM);
 
     setText("raceDistance", dist == null ? "—" : `${dist.toFixed(2)} km`);
-    setText("raceDistanceHint", dist == null ? "—" : "Distance depuis analyse GPX");
     setText("raceDplus", dplus == null ? "—" : `${Math.round(dplus)} m`);
 
-    const hasElevation = analysis?.hasElevation;
-    setText("raceElevInfo", hasElevation === true ? "Altitude ✅" : (hasElevation === false ? "Altitude absente" : "—"));
-
-    // Meeting button (si présent)
-    if (race?.meetingId) {
-      const m = findMeetingByIdLocal(race.meetingId);
+    // si tu as un meetingId
+    const m = race?.meetingId ? findMeetingById(race.meetingId) : null;
+    if (m) {
+      // si tu as un bouton "btnOpenMeeting" par ex
       const btn = document.getElementById("btnOpenMeeting");
-      if (btn && m) {
+      if (btn) {
         btn.href = `meeting.html?id=${encodeURIComponent(m.id)}`;
         btn.style.display = "inline-flex";
       }
@@ -183,9 +119,32 @@
   function renderScores(race) {
     const analysis = extractAnalysis(race);
 
-    const phys = num(race?.physScore ?? analysis?.physScore ?? analysis?.phys?.score);
-    const tech = num(race?.techScoreV2 ?? analysis?.techScoreV2 ?? analysis?.techScore ?? analysis?.techV2?.techScoreV2);
-    const global = num(race?.globalScore ?? analysis?.globalScore ?? analysis?.mrs);
+    const phys = num(
+      race?.physScore ??
+      analysis?.physScore ??
+      analysis?.phys?.score ??
+      null
+    );
+
+    const tech = num(
+      race?.techScoreV2 ??
+      race?.techScore ??
+      analysis?.techScoreV2 ??
+      analysis?.techScore ??
+      analysis?.raw?.tech?.techScoreV2 ??
+      analysis?.raw?.tech?.techScore ??
+      analysis?.rawServer?.tech?.techScoreV2 ??
+      null
+    );
+
+    const global = num(
+      race?.globalScore ??
+      analysis?.globalScore ??
+      analysis?.mrs ??
+      analysis?.raw?.mrs ??
+      analysis?.rawServer?.mrs ??
+      null
+    );
 
     setText("scorePhysVal", phys == null ? "—" : Math.round(phys));
     setText("scorePhysVal2", phys == null ? "—" : Math.round(phys));
@@ -196,49 +155,44 @@
     setText("scoreGlobalVal", global == null ? "—" : Math.round(global));
     setText("scoreGlobalVal2", global == null ? "—" : Math.round(global));
 
-    // message OSM
-    const osmErr =
-      analysis?.techV2?.details?.error ||
-      analysis?.raw?.tech?.details?.error ||
-      analysis?.rawServer?.tech?.details?.error ||
-      null;
+    // Détails OSM
+    const osmOk = analysis?.raw?.tech?.osmOk ?? analysis?.rawServer?.tech?.osmOk ?? null;
+    const osmErr = analysis?.raw?.tech?.details?.error ?? analysis?.rawServer?.tech?.details?.error ?? null;
 
     if (tech == null) {
       setText("techInfo", osmErr ? `Tech indisponible (OSM): ${osmErr}` : "Tech indisponible (OSM/Overpass)");
     } else {
-      setText("techInfo", "TechScoreV2 (OSM hybrid) ✅");
+      setText("techInfo", "OSM + bonus GPX capé (ScoreTech V2 Hybrid)");
     }
+
+    // indicateurs optionnels
+    setText("techP75", analysis?.raw?.tech?.terrainScoreP75 ?? analysis?.rawServer?.tech?.terrainScoreP75 ?? "—");
+    setText("techP75Info", osmOk === false ? "OSM timeout / indisponible" : "—");
 
     // difficulté
     const d = difficultyLabel(global);
     setText("diffLabel", d.label);
     setText("diffHint", d.hint);
 
-    // résumé
+    // résumé auto
     const dist = num(race?.distanceKm ?? analysis?.distanceKm);
     const dplus = num(race?.dplusM ?? analysis?.dplusM);
-    setText("autoSummary",
+    const summary =
       (dist != null && dplus != null)
         ? `${dist.toFixed(1)} km • D+ ${Math.round(dplus)} m • ${d.label}`
-        : "—"
-    );
+        : `—`;
+    setText("autoSummary", summary);
 
-    // surface bar (si présent)
-    const surf =
-      analysis?.surfaceEstimate ||
-      analysis?.techV2?.surfaceEstimate ||
-      analysis?.raw?.tech?.surfaceEstimate ||
-      analysis?.rawServer?.tech?.surfaceEstimate ||
-      null;
-
+    // surface estimate (si présent)
+    const surf = analysis?.surfaceEstimate ?? analysis?.raw?.tech?.surfaceEstimate ?? analysis?.rawServer?.tech?.surfaceEstimate ?? null;
     setText("surfaceText", surf ? JSON.stringify(surf) : "—");
 
+    // bar route/piste/single (si tu as des ids barRoad/barTrack/barSingle)
     if (surf && typeof surf === "object") {
       const road = num(surf.road ?? surf.route ?? 0) ?? 0;
       const track = num(surf.track ?? surf.wideTrack ?? 0) ?? 0;
       const single = num(surf.single ?? surf.singletrack ?? 0) ?? 0;
       const sum = Math.max(0.0001, road + track + single);
-
       const wRoad = Math.round((road / sum) * 100);
       const wTrack = Math.round((track / sum) * 100);
       const wSingle = Math.max(0, 100 - wRoad - wTrack);
@@ -248,19 +202,15 @@
       if (bt) bt.style.width = `${wTrack}%`;
       if (bs) bs.style.width = `${wSingle}%`;
     }
-
-    // infos phys détaillées (si ids existent)
-    if ($("physInfo") && analysis?.phys) {
-      setText("physInfo", `Effort: ${analysis.phys.effort ?? "—"} • IPB: ${analysis.phys.ipbOverall ?? "—"}`);
-    }
   }
 
+  // Carte + profil (si ids existent)
   function renderMapAndProfile(race) {
     const analysis = extractAnalysis(race);
     const pts = extractPoints(analysis);
     if (!pts || pts.length < 2) return;
 
-    // Carte Leaflet
+    // carte si #map existe + Leaflet chargé
     const mapEl = $("map");
     if (mapEl && window.L) {
       const latlngs = pts
@@ -284,7 +234,7 @@
       }
     }
 
-    // Profil (simple)
+    // profil si canvas existe
     const canvas = $("profileCanvas");
     if (canvas) {
       const ctx = canvas.getContext("2d");
@@ -296,7 +246,8 @@
 
       const minE = Math.min(...eles);
       const maxE = Math.max(...eles);
-      const W = canvas.width, H = canvas.height;
+      const W = canvas.width;
+      const H = canvas.height;
 
       ctx.clearRect(0, 0, W, H);
 
@@ -305,12 +256,14 @@
       const h = H - pad * 2;
       const span = Math.max(1, maxE - minE);
 
+      // axes
       ctx.beginPath();
       ctx.moveTo(pad, pad);
       ctx.lineTo(pad, pad + h);
       ctx.lineTo(pad + w, pad + h);
       ctx.stroke();
 
+      // courbe
       ctx.beginPath();
       for (let i = 0; i < eles.length; i++) {
         const x = pad + (i / (eles.length - 1)) * w;
@@ -324,36 +277,34 @@
     }
   }
 
-  async function main() {
+  function setStatus(ok, text) {
+    // optionnel: si tu as statusDot/statusText dans ta race.html
+    setText("statusText", text || "");
+    const dot = $("statusDot");
+    if (dot) dot.style.background = ok ? "#16a34a" : "#dc2626";
+  }
+
+  function main() {
     const id = getParam("id");
     if (!id) {
       setStatus(false, "ID manquant");
-      setHTML("raceName", "Épreuve introuvable");
+      alert("ID manquant dans l’URL (race.html?id=...)");
       return;
     }
 
-    // 1) Supabase
-    const { race: supaRace, mode } = await fetchRaceSupabase(id);
-    if (supaRace) {
-      setStatus(true, mode === "authed" ? "OK (preview)" : "OK");
-      renderBasic(supaRace);
-      renderScores(supaRace);
-      renderMapAndProfile(supaRace);
-      return;
-    }
-
-    // 2) Fallback localStorage
-    const localRace = findRaceByIdLocal(id);
-    if (!localRace) {
+    const race = findRaceById(id);
+    if (!race) {
       setStatus(false, "Épreuve introuvable");
+      // Message utile (public)
       setHTML("raceName", "Épreuve introuvable");
       return;
     }
 
-    setStatus(true, "OK (local)");
-    renderBasic(localRace);
-    renderScores(localRace);
-    renderMapAndProfile(localRace);
+    setStatus(true, "OK");
+
+    renderBasic(race);
+    renderScores(race);
+    renderMapAndProfile(race);
   }
 
   main();
