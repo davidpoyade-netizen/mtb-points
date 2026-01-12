@@ -4,14 +4,160 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Événements — MTB Points</title>
+
+  <!-- Base + thème nature (le thème après la base) -->
   <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/theme-nature.css?v=10" />
+
+  <style>
+    /* Page-specific only (ne pas redefinir :root ici) */
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
+    a{color:inherit}
+    .wrap{max-width:1280px;margin:22px auto;padding:0 16px}
+    .muted{color:var(--muted)}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+
+    /* Nav (ton thème cible nav a, on sécurise ici aussi) */
+    nav.nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav.nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      font-weight:950;font-size:13px;color:var(--blue);
+    }
+    nav.nav a:hover{background:rgba(47,111,62,.10)}
+    nav.nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
+    /* CTA */
+    .headerRight{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+    /* Page cards */
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    /* Hero (look nature) */
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2);
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .heroMeta{margin-top:8px;color:#223024;line-height:1.6}
+    .heroDesc{margin-top:10px;color:var(--muted);line-height:1.55}
+    .heroActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+    /* Filters */
+    .sectionTitle{margin:18px 0 10px 0;font-size:14px;letter-spacing:-.05px}
+    .filters{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr 180px;
+      gap:10px;
+      align-items:end;
+    }
+    @media(max-width:1100px){
+      .filters{grid-template-columns:1fr 1fr}
+      .filters .spanAll{grid-column:1/-1 !important}
+    }
+    label{display:block;font-weight:1000;font-size:12px;color:var(--text)}
+    input,select{
+      width:100%;
+      padding:10px;margin-top:6px;
+      border:1px solid rgba(40,60,40,.20);
+      border-radius:12px;
+      background:rgba(255,255,255,.82);
+      font-size:14px;
+    }
+    input:focus,select:focus{outline:3px solid rgba(47,111,62,.20);outline-offset:2px}
+
+    .hintRow{
+      grid-column:1/-1;
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+      margin-top:2px;
+    }
+
+    /* List items */
+    .list{display:grid;gap:12px}
+    .item{
+      border:1px solid rgba(40,60,40,.14);
+      background:rgba(255,255,255,.82);
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 2px 12px rgba(15,23,42,.06);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .item:hover{
+      transform:translateY(-1px);
+      box-shadow:0 16px 26px rgba(15,23,42,.10);
+      border-color:rgba(47,111,62,.25);
+    }
+    .topline{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .title{font-weight:1100;font-size:16px;letter-spacing:-.15px}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.75);
+      font-weight:1000;font-size:12px;white-space:nowrap;
+    }
+    .metaLine{margin-top:8px;color:#223024;font-size:13px;line-height:1.5}
+    .miniRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+    /* Empty */
+    .empty{
+      margin-top:12px;
+      border:1px dashed var(--border);
+      background:rgba(255,255,255,.72);
+      border-radius:18px;
+      padding:12px;
+      color:var(--muted);
+    }
+
+    /* Make sure existing .btn variants look right even if style.css differs */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+  </style>
 </head>
 
-<body>
+<body class="theme-nature">
+
 <header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Événements</h1>
-    <span class="pill"><span class="dot"></span> <span id="countMeetings">0</span> événement(s)</span>
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>MTB Points — Événements</h1>
+      <span class="pill"><span class="dot"></span> <span id="countMeetings">0</span> événement(s)</span>
+    </div>
   </div>
 
   <nav class="nav">
@@ -22,7 +168,7 @@
     <a href="login.html">Connexion</a>
   </nav>
 
-  <div class="headerRight" style="display:flex;gap:8px;flex-wrap:wrap;">
+  <div class="headerRight">
     <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
   </div>
 </header>
@@ -40,6 +186,7 @@
           </div>
           <div class="heroDesc" id="hintBox" style="display:none;"></div>
         </div>
+
         <div class="heroActions">
           <span class="pill"><span class="dot ok"></span> Multi-jours</span>
           <span class="pill"><span class="dot"></span> Races rattachées</span>
@@ -47,9 +194,9 @@
       </div>
     </section>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">Filtres & tri</h3>
+    <h3 class="sectionTitle">Filtres & tri</h3>
 
-    <div class="filters" style="grid-template-columns: 1.6fr 1fr 1fr 1fr 180px; align-items:end;">
+    <div class="filters">
       <div class="spanAll" style="grid-column:1/2">
         <label for="q">Recherche</label>
         <input id="q" type="text" placeholder="Nom, lieu, commentaire…" />
@@ -79,13 +226,13 @@
         <button class="btn primary" id="btnReset" type="button">Réinitialiser</button>
       </div>
 
-      <div class="hintRow" style="grid-column:1/-1;">
+      <div class="hintRow">
         <div>Résultats : <strong id="countFiltered">0</strong></div>
         <div class="muted">Astuce : crée une épreuve depuis un événement (rattachement auto).</div>
       </div>
     </div>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">Liste des événements</h3>
+    <h3 class="sectionTitle">Liste des événements</h3>
 
     <div id="meetings" class="list" style="margin-top:12px;"></div>
     <div id="emptyBox" class="empty" style="display:none;">
@@ -286,4 +433,3 @@
 
 </body>
 </html>
-
