@@ -1,39 +1,30 @@
 // js/gpx.js
-// MTB Points — Frontend GPX analyzer
-// Expose: window.analyzeGPX(file, opts?) -> Promise<GPXAnalysis>
+// MTB Points — Frontend GPX analyzer (NORMALISÉ)
+// Expose: window.analyzeGPX(file, opts?) -> Promise<Analysis>
 //
-// Meilleure solution (OFFICIEL):
-// - Front: parse GPX + calcule ScorePhys local + stats + (optionnel) points pour profil altimétrique
-// - Serveur: calcule ScoreTech V2 Hybrid officiel (OSM socle + bonus GPX capé) + Discipline hint
+// Résultat NORMALISÉ (important):
+//   analysis.tech.techScoreV2  (number|null)
+//   analysis.mrs               (number|null)
+//   analysis.phys.score        (number)
+//   analysis.points            (optionnel selon keepPoints)
+//   analysis.rawServer         (réponse brute serveur)
 //
-// UI Indicateurs:
-// - Dispatch d'événements: "mtb:status" avec { phase, message, progress, spinning }
-//   => ton UI peut écouter et afficher "Analyse GPX..." puis "Analyse OSM..."
-// - Animation CSS simple conseillée (classe .spinner)
-//
-// Usage:
-//   window.addEventListener("mtb:status", (e)=> console.log(e.detail));
-//   const res = await window.analyzeGPX(file);
-//
-// Important:
-// - L'endpoint serveur attendu: POST /api/analyze-gpx (voir index.js adapté)
+// Émet: window.dispatchEvent(new CustomEvent("mtb:status",{detail:{phase,message,progress,sub}}))
 
 (function () {
   // -------------------------
   // Status helpers (UI)
   // -------------------------
   function emitStatus(detail) {
-    try {
-      window.dispatchEvent(new CustomEvent("mtb:status", { detail }));
-    } catch (_) { /* noop */ }
+    try { window.dispatchEvent(new CustomEvent("mtb:status", { detail })); } catch (_) {}
   }
 
   function setPhase(phase, message, opts = {}) {
     emitStatus({
       phase, // "idle" | "gpx" | "osm" | "done" | "error"
       message,
-      progress: typeof opts.progress === "number" ? opts.progress : null, // 0..1 or null
-      spinning: opts.spinning !== false,
+      progress: typeof opts.progress === "number" ? opts.progress : null,
+      sub: opts.sub || "",
       ts: Date.now()
     });
   }
@@ -46,7 +37,6 @@
   function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
   function toRad(deg) { return (deg * Math.PI) / 180; }
 
-  // Haversine distance (meters)
   function haversine(lat1, lon1, lat2, lon2) {
     const R = 6371000;
     const dLat = toRad(lat2 - lat1);
@@ -87,7 +77,6 @@
       const eleNode = p.querySelector("ele");
       const ele = eleNode ? Number(eleNode.textContent) : null;
 
-      // time (optionnel)
       const timeNode = p.querySelector("time");
       const time = timeNode ? String(timeNode.textContent || "").trim() : null;
 
@@ -160,8 +149,7 @@
   // Server call (ScoreTech V2 Hybrid officiel + Discipline)
   // -------------------------
   async function fetchServerAnalysis(gpxText) {
-    // Petit délai pour laisser l'UI afficher le spinner
-    await sleep(30);
+    await sleep(20);
 
     const res = await fetch("https://mtb-points.onrender.com/api/analyze-gpx", {
       method: "POST",
@@ -176,6 +164,7 @@
       const msg = data?.error || `Erreur serveur (${res.status}).`;
       throw new Error(msg);
     }
+
     return data; // { ok:true, tech, discipline, meta }
   }
 
@@ -184,10 +173,8 @@
   // -------------------------
   function friendlyErrorMessage(err) {
     const msg = (err && err.message) ? String(err.message) : String(err || "Erreur inconnue.");
-    // messages fréquents
     if (/Aucun point <trkpt>/i.test(msg)) return "Ce fichier GPX ne contient pas de trace exploitable (trkpt absent).";
-    if (/GPX invalide/i.test(msg) || /erreur XML/i.test(msg)) return "GPX invalide : le fichier est corrompu ou mal formé.";
-    if (/trop volumineux/i.test(msg)) return "GPX trop volumineux : essaye une trace plus légère.";
+    if (/GPX invalide/i.test(msg) || /erreur XML/i.test(msg)) return "GPX invalide : fichier corrompu ou mal formé.";
     if (/OSM coverage too low/i.test(msg)) return "Score technique non calculable automatiquement (données OSM insuffisantes).";
     if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) return "Impossible de contacter le serveur (réseau/CORS).";
     return msg;
@@ -198,34 +185,28 @@
   // -------------------------
   async function analyzeGPX(file, opts = {}) {
     const options = {
-      keepPoints: true,     // true => renvoie points pour profil altimétrique
+      keepPoints: true,
       ...opts
     };
 
     try {
-      setPhase("gpx", "Analyse GPX en cours…", { spinning: true });
+      setPhase("gpx", "Analyse GPX…", { progress: 0.05, sub: "Lecture du fichier" });
 
       if (!file) throw new Error("Aucun fichier GPX.");
-      if (!/\.gpx$/i.test(file.name || "") && file.type && !/xml|gpx/i.test(file.type)) {
-        // soft warning only
-      }
 
-      // 1) Lire le fichier GPX
       const gpxText = await readFileAsText(file);
 
-      // 2) Parser localement (stats + score physique)
-      // Simule un petit "progress" pour l'UI (sans vrai streaming)
-      setPhase("gpx", "Lecture et parsing du GPX…", { progress: 0.35, spinning: true });
-      await sleep(20);
+      setPhase("gpx", "Parsing GPX…", { progress: 0.25, sub: "Extraction des trkpt" });
+      await sleep(10);
 
       const points = parseGPXText(gpxText);
 
-      setPhase("gpx", "Calcul des statistiques…", { progress: 0.65, spinning: true });
-      await sleep(20);
+      setPhase("gpx", "Calcul stats…", { progress: 0.55, sub: "Distance / D+ / pentes" });
+      await sleep(10);
 
       const stats = computeStats(points);
 
-      // ---- ScorePhys local (0..100)
+      // PhysScore local (0..100)
       const D = Number(stats.distanceKm || 0);
       const H = Number(stats.dplusM || 0);
       const effort = Math.sqrt(Math.max(0, D)) + (H / 1000);
@@ -233,8 +214,8 @@
       let ipbOverall = 0;
       if (stats.hasElevation && D > 0) {
         const vm = H / Math.max(D, 0.01); // m/km
-        const p10 = Number(stats.steep?.p10 || 0); // 0..1
-        const p15 = Number(stats.steep?.p15 || 0); // 0..1
+        const p10 = Number(stats.steep?.p10 || 0);
+        const p15 = Number(stats.steep?.p15 || 0);
         ipbOverall = clamp(0.06 * vm + 30 * p10 + 45 * p15, 0, 120);
       }
 
@@ -242,83 +223,84 @@
       const ipbN = clamp(ipbOverall / 120, 0, 1);
       const physScore = Math.round(100 * clamp(0.70 * effortN + 0.30 * ipbN, 0, 1));
 
-      setPhase("gpx", "Analyse GPX terminée ✅", { progress: 1, spinning: false });
-      await sleep(60);
+      setPhase("gpx", "Analyse GPX OK ✅", { progress: 1, sub: `PhysScore=${physScore}` });
+      await sleep(40);
 
-      // 3) Appel serveur (OSM + TechScore officiel)
-      setPhase("osm", "Analyse OSM en cours… (calcul ScoreTech officiel)", { spinning: true });
+      // OSM / Server
+      setPhase("osm", "Analyse OSM…", { progress: null, sub: "ScoreTech V2 Hybrid" });
 
       const server = await fetchServerAnalysis(gpxText);
 
-      // 4) Résultats
-      const tech = server.tech || null;
+      // ✅ NORMALISATION ICI
+      const tech = server.tech || {};
       const discipline = server.discipline || null;
 
-      const mrs = (tech?.techScoreV2 == null)
-        ? null
-        : Math.round(0.55 * physScore + 0.45 * tech.techScoreV2);
+      const techScoreV2 =
+        (typeof tech.techScoreV2 === "number" ? tech.techScoreV2 : null);
 
-      setPhase("done", "Analyse terminée ✅", { spinning: false });
+      const mrs =
+        (techScoreV2 == null)
+          ? null
+          : Math.round(0.55 * physScore + 0.45 * techScoreV2);
+
+      setPhase("done", "Analyse terminée ✅", { sub: techScoreV2==null ? "Tech indisponible" : `Tech=${techScoreV2} • MRS=${mrs}` });
 
       return {
         fileName: file.name,
 
-        // stats GPX locales
+        // stats
         distanceKm: stats.distanceKm,
         dplusM: stats.dplusM,
         hasElevation: stats.hasElevation,
         steep: stats.steep,
 
-        // points seulement si besoin (profil altimétrique)
+        // points (option)
         points: options.keepPoints ? points : undefined,
 
-        // score physique local
+        // phys
         phys: {
           effort: Math.round(effort * 1000) / 1000,
           ipbOverall: Math.round(ipbOverall * 10) / 10,
           score: physScore
         },
 
-        // ScoreTech V2 Hybrid officiel (serveur) + Discipline
-        techV2: tech,
+        // ✅ tech normalisé
+        tech: {
+          techScoreV2,
+          osmOk: tech?.osmOk ?? null,
+          surfaceEstimate: tech?.surfaceEstimate ?? null,
+          coverage: tech?.coverage ?? null,
+          terrainScoreP75: tech?.terrainScoreP75 ?? null,
+          gpxTechP75: tech?.gpxTechP75 ?? null,
+          bonusApplied: tech?.bonusApplied ?? null,
+          details: tech?.details ?? null
+        },
+
         discipline,
 
-        // Score global
+        // global
         mrs,
 
-        // Infos serveur optionnelles
+        // brut (utile debug / race.html)
+        rawServer: server,
         serverMeta: server.meta || null
       };
     } catch (err) {
       const msg = friendlyErrorMessage(err);
-      setPhase("error", msg, { spinning: false });
-
-      // On relance une erreur "propre" pour ton UI si tu veux afficher un toast
+      setPhase("error", msg, { progress: null, sub: "Erreur analyse" });
       throw new Error(msg);
     }
   }
 
-  // -------------------------
-  // Inject minimal spinner CSS (optional helper)
-  // -------------------------
-  // Tu peux appeler window.ensureMTBSpinnerCSS() une fois dans ta page.
+  // optional helper CSS
   function ensureMTBSpinnerCSS() {
     const id = "mtb-spinner-css";
     if (document.getElementById(id)) return;
 
     const css = `
-/* MTB Points — status spinner (minimal) */
 .mtb-status{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
-.mtb-status .label{font-size:14px;color:#0f172a}
-.mtb-status .sub{font-size:12px;color:#64748b;margin-top:2px}
 .mtb-spinner{width:18px;height:18px;border-radius:999px;border:2px solid rgba(100,116,139,.35);border-top-color:rgba(37,99,235,.95);animation:mtbSpin .9s linear infinite}
 @keyframes mtbSpin{to{transform:rotate(360deg)}}
-.mtb-progress{height:6px;border-radius:999px;background:#e5e7eb;overflow:hidden}
-.mtb-progress > div{height:100%;width:0%;background:rgba(37,99,235,.95);transition:width .2s ease}
-.mtb-badge{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid #e5e7eb;color:#64748b}
-.mtb-badge.ok{color:#16a34a;border-color:rgba(22,163,74,.35)}
-.mtb-badge.warn{color:#ea580c;border-color:rgba(234,88,12,.35)}
-.mtb-badge.err{color:#dc2626;border-color:rgba(220,38,38,.35)}
     `.trim();
 
     const style = document.createElement("style");
