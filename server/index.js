@@ -1,8 +1,8 @@
 // server/index.js
-// MTB Points — API GPX/OSM
+// MTB Points — API GPX/OSM (Render)
 // - POST /api/analyze-gpx        => GPX + OSM (hybrid) avec timeout + fallback
 // - POST /api/analyze-gpx-lite   => GPX-only (debug/backup)
-// - Refuse les GPX sans altitude (<ele>) pour éviter les tracés "dessinés"
+// - Validation stricte: altitude obligatoire + distance mini 3 km
 
 import express from "express";
 import cors from "cors";
@@ -40,6 +40,81 @@ function isNetworkishError(msg) {
   );
 }
 
+function validateGpx(points, stats) {
+  // --- critères MTB Points (stricts) ---
+  const MIN_DISTANCE_KM = 3.0;      // ✅ demandé
+  const MIN_POINTS = 30;
+  const MIN_ELE_RATIO = 0.80;       // 80% des points doivent avoir <ele>
+  const MIN_PTS_PER_KM = 5;         // densité minimale
+  const MIN_DPLUS_M = 10;           // optionnel mais utile contre "plat"
+
+  if (!points || points.length < 2) {
+    return { ok: false, status: 400, error: "Aucun point <trkpt> exploitable." };
+  }
+
+  if (!stats?.hasElevation) {
+    return {
+      ok: false,
+      status: 400,
+      error:
+        "GPX sans altitude (<ele>) : refusé. Exporte un GPX avec élévation (baro/GPS), pas un tracé 'dessiné'.",
+    };
+  }
+
+  const totalPts = points.length;
+  const elePts = points.reduce((n, p) => (Number.isFinite(Number(p?.ele)) ? n + 1 : n), 0);
+  const eleRatio = totalPts ? elePts / totalPts : 0;
+
+  if (eleRatio < MIN_ELE_RATIO) {
+    return {
+      ok: false,
+      status: 400,
+      error: `Altitude insuffisante: ${Math.round(eleRatio * 100)}% de points avec <ele> (min ${Math.round(
+        MIN_ELE_RATIO * 100
+      )}%).`,
+    };
+  }
+
+  if (totalPts < MIN_POINTS) {
+    return {
+      ok: false,
+      status: 400,
+      error: `GPX trop court/peu précis: ${totalPts} points (min ${MIN_POINTS}).`,
+    };
+  }
+
+  const distKm = Number(stats?.distanceKm ?? 0);
+  if (!Number.isFinite(distKm) || distKm < MIN_DISTANCE_KM) {
+    return {
+      ok: false,
+      status: 400,
+      error: `Distance trop faible: ${distKm.toFixed(2)} km (min ${MIN_DISTANCE_KM.toFixed(1)} km).`,
+    };
+  }
+
+  // Densité de points (anti 10 km / 12 points)
+  const density = distKm > 0 ? totalPts / distKm : totalPts;
+  if (density < MIN_PTS_PER_KM) {
+    return {
+      ok: false,
+      status: 400,
+      error: `GPX trop peu échantillonné: ${density.toFixed(1)} pts/km (min ${MIN_PTS_PER_KM} pts/km).`,
+    };
+  }
+
+  // Optionnel mais recommandé: refuse les GPX "plats" suspects
+  const dplus = Number(stats?.dplusM ?? 0);
+  if (!Number.isFinite(dplus) || dplus < MIN_DPLUS_M) {
+    return {
+      ok: false,
+      status: 400,
+      error: `D+ trop faible: ${Math.round(dplus)} m (min ${MIN_DPLUS_M} m).`,
+    };
+  }
+
+  return { ok: true };
+}
+
 /* ------------------------------ CORS ------------------------------ */
 
 const ALLOWED_ORIGINS = new Set([
@@ -54,7 +129,6 @@ const ALLOWED_ORIGINS = new Set([
 app.use(
   cors({
     origin: (origin, cb) => {
-      // appels sans Origin (curl, server-to-server)
       if (!origin) return cb(null, true);
       if (ALLOWED_ORIGINS.has(origin)) return cb(null, true);
       return cb(new Error(`CORS blocked for origin: ${origin}`));
@@ -66,7 +140,6 @@ app.use(
   })
 );
 
-// Preflight
 app.options("*", cors());
 
 /* --------------------------- Body parser --------------------------- */
@@ -112,14 +185,8 @@ app.post("/api/analyze-gpx-lite", (req, res) => {
 
     const stats = computeStatsFromPoints(points);
 
-    // ✅ Refus GPX sans altitude (même en lite)
-    if (!stats.hasElevation) {
-      return res.status(400).json({
-        ok: false,
-        error:
-          "GPX sans altitude (<ele>) : refusé. Exporte un GPX avec élévation (baro/GPS), pas un tracé 'dessiné'.",
-      });
-    }
+    const v = validateGpx(points, stats);
+    if (!v.ok) return res.status(v.status).json({ ok: false, error: v.error });
 
     const discipline = inferDiscipline({
       distanceKm: stats.distanceKm,
@@ -173,16 +240,11 @@ app.post("/api/analyze-gpx", async (req, res) => {
 
     const stats = computeStatsFromPoints(points);
 
-    // ✅ Refus GPX sans altitude
-    if (!stats.hasElevation) {
-      return res.status(400).json({
-        ok: false,
-        error:
-          "GPX sans altitude (<ele>) : refusé. Exporte un GPX avec élévation (baro/GPS), pas un tracé 'dessiné'.",
-      });
-    }
+    // ✅ Validation stricte (distance >= 3 km + altitude + qualité)
+    const v = validateGpx(points, stats);
+    if (!v.ok) return res.status(v.status).json({ ok: false, error: v.error });
 
-    // ✅ Overpass/OSM optimisé (moins de requêtes + parallélisation limitée + cache)
+    // ✅ Overpass/OSM optimisé (moins de requêtes + parallélisation + cache)
     const OSM_TIMEOUT_MS = 25000;
 
     let tech = null;
@@ -204,13 +266,10 @@ app.post("/api/analyze-gpx", async (req, res) => {
       );
     } catch (e) {
       osmOk = false;
-      tech = {
-        techScoreV2: null,
-        details: { error: String(e?.message || e) },
-      };
+      tech = { techScoreV2: null, details: { error: String(e?.message || e) } };
     }
 
-    // surfaceEstimate : préfère celle du moteur (si présente), sinon fallback samples
+    // surfaceEstimate : préfère moteur (si présent), sinon fallback
     const surfaceEstimate =
       tech?.surfaceEstimate ??
       computeSurfaceEstimateFromOsmSamples(tech?.details?.osmSamples || []) ??
@@ -228,6 +287,7 @@ app.post("/api/analyze-gpx", async (req, res) => {
       ok: true,
       tech: {
         ...tech,
+        // osmOk = vrai seulement si Overpass a répondu ET techScoreV2 a été produit
         osmOk: osmOk && tech?.techScoreV2 != null,
         surfaceEstimate,
       },
@@ -258,5 +318,4 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`[mtb-points] GET  /api/health`);
   console.log(`[mtb-points] POST /api/analyze-gpx (Content-Type: application/gpx+xml)`);
   console.log(`[mtb-points] POST /api/analyze-gpx-lite (GPX only)`);
-  console.log(`[mtb-points] Allowed origins: ${Array.from(ALLOWED_ORIGINS).join(", ")}`);
 });
