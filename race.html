@@ -16,6 +16,20 @@
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media(max-width:900px){.row2{grid-template-columns:1fr}}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  
+    .levelBadge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:999px;
+      border:1px solid var(--border,#e5e7eb);
+      background:rgba(255,255,255,.85);
+      font-weight:800;font-size:12px;
+      backdrop-filter:saturate(120%) blur(6px);
+    }
+    .levelDot{width:10px;height:10px;border-radius:50%}
+    .legend{display:inline-flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--muted,#667085)}
+    .lgItem{display:inline-flex;gap:6px;align-items:center}
+    .lgSw{width:14px;height:6px;border-radius:999px}
+
   </style>
 </head>
 
@@ -46,6 +60,10 @@
       <div class="heroTop">
         <div style="min-width:280px;flex:1">
           <h2 id="raceName">Épreuve</h2>
+          <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <span id="raceLevelBadge" class="levelBadge" style="display:none"></span>
+            <span id="elevLegend" class="legend" style="display:none"></span>
+          </div>
           <div class="heroMeta" id="raceMeta">—</div>
           <div class="heroDesc" id="raceComment" style="display:none"></div>
         </div>
@@ -201,6 +219,29 @@
     $("kpiPhysSub").textContent = phys == null ? "—" : "Effort (distance, D+, pentes)";
     $("kpiTechSub").textContent = tech == null ? "ScoreTech indisponible (OSM/Overpass)" : "Technicité (ScoreTech V2 Hybrid)";
     $("kpiGlobalSub").textContent = global == null ? "—" : "Synthèse 0.55 Phys + 0.45 Tech";
+
+    // Niveau (Vert/Bleu/Rouge/Noir) — basé sur le score global (ou phys/tech)
+    const level = computeLevel(global, phys, tech);
+    const badge = $("raceLevelBadge");
+    if (badge && level){
+      badge.style.display = "inline-flex";
+      badge.innerHTML = `<span class="levelDot" style="background:${level.color}"></span> Niveau <b>${level.label}</b> <span class="muted">(${Math.round(level.score)})</span>`;
+    } else if (badge){
+      badge.style.display = "none";
+      badge.textContent = "";
+    }
+
+    const legend = $("elevLegend");
+    if (legend){
+      legend.style.display = "inline-flex";
+      legend.innerHTML = `
+        <span class="lgItem"><span class="lgSw" style="background:#16a34a"></span> <span>pente &lt; 3%</span></span>
+        <span class="lgItem"><span class="lgSw" style="background:#2563eb"></span> <span>3–6%</span></span>
+        <span class="lgItem"><span class="lgSw" style="background:#dc2626"></span> <span>6–10%</span></span>
+        <span class="lgItem"><span class="lgSw" style="background:#0b0f1a"></span> <span>&gt; 10%</span></span>
+      `;
+    }
+
   }
 
   function renderMeta(race){
@@ -274,19 +315,298 @@
     L.marker(b).addTo(map).bindPopup("Arrivée");
   }
 
-  function drawElev(points){
+  
+  // -----------------------------
+  // Profil altimétrique coloré + repères km + toponymes (pics/cols)
+  // - couleurs selon pente instantanée (Δalt / Δdist)
+  // - repères tous les 5 km
+  // - noms via Nominatim (OSM) avec cache localStorage + throttling 1 req/s
+  // -----------------------------
+
+  function haversineMeters(aLat,aLon,bLat,bLon){
+    const R = 6371000;
+    const toRad = (d)=>d*Math.PI/180;
+    const dLat = toRad(bLat-aLat);
+    const dLon = toRad(bLon-aLon);
+    const la1 = toRad(aLat), la2 = toRad(bLat);
+    const h = Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;
+    return 2*R*Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  function enrichDistances(points){
+    // returns array of {lat,lon,ele,dkm}
+    let d = 0;
+    let prev = null;
+    const out = [];
+    for (const p of points){
+      const lat = Number(p.lat ?? p.latitude);
+      const lon = Number(p.lon ?? p.lng ?? p.longitude);
+      const ele = Number(p.ele ?? p.elevation);
+      // cumulative distance possibly provided by backend
+      const dist_m =
+        Number(p.dist_m ?? p.distance_m ?? p.cumDist_m ?? p.cum_dist_m ?? p.d_m);
+      const dist_km =
+        Number(p.dist_km ?? p.distance_km ?? p.cumDist_km ?? p.cum_dist_km ?? p.d_km);
+
+      let dkm = null;
+      if (Number.isFinite(dist_km)) dkm = dist_km;
+      else if (Number.isFinite(dist_m)) dkm = dist_m/1000;
+      else {
+        if (prev && Number.isFinite(lat) && Number.isFinite(lon) && Number.isFinite(prev.lat) && Number.isFinite(prev.lon)){
+          d += haversineMeters(prev.lat, prev.lon, lat, lon);
+        }
+        dkm = d/1000;
+      }
+      const row = { lat, lon, ele, dkm };
+      if (Number.isFinite(ele) && Number.isFinite(dkm)) out.push(row);
+      prev = {lat,lon};
+    }
+    return out;
+  }
+
+  function downsample(arr, maxN=1600){
+    if (arr.length <= maxN) return arr;
+    const step = Math.ceil(arr.length / maxN);
+    const out = [];
+    for (let i=0;i<arr.length;i+=step) out.push(arr[i]);
+    if (out[out.length-1] !== arr[arr.length-1]) out.push(arr[arr.length-1]);
+    return out;
+  }
+
+  function gradeColor(grade){
+    // grade in %, positive uphill / negative downhill
+    const g = Math.abs(grade);
+    if (g < 3) return "#16a34a";        // vert
+    if (g < 6) return "#2563eb";        // bleu
+    if (g < 10) return "#dc2626";       // rouge
+    return "#0b0f1a";                   // noir
+  }
+
+  function computeLevel(globalScore, physScore, techScore){
+    // Heuristique simple (tu peux ajuster les seuils)
+    // priorité: globalScore (0-1000 environ), sinon pondération phys/tech
+    let g = num(globalScore);
+    if (g == null){
+      const p = num(physScore), t = num(techScore);
+      if (p!=null && t!=null) g = 0.55*p + 0.45*t;
+      else if (p!=null) g = p;
+      else if (t!=null) g = t;
+    }
+    if (g == null) return null;
+    let code="VERT", label="Vert", color="#16a34a";
+    if (g >= 650){ code="NOIR"; label="Noir"; color="#0b0f1a"; }
+    else if (g >= 480){ code="ROUGE"; label="Rouge"; color="#dc2626"; }
+    else if (g >= 320){ code="BLEU"; label="Bleu"; color="#2563eb"; }
+    return {code, label, color, score: g};
+  }
+
+  let _nominatimQueue = Promise.resolve();
+  function nominatimReverse(lat, lon){
+    const key = `mtbp:nominatim:${lat.toFixed(4)},${lon.toFixed(4)}`;
+    try{
+      const cached = localStorage.getItem(key);
+      if (cached) return Promise.resolve(JSON.parse(cached));
+    }catch(_){}
+
+    // throttle: 1 req/sec
+    _nominatimQueue = _nominatimQueue.then(async ()=>{
+      await new Promise(r=>setTimeout(r, 1050));
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=14&addressdetails=1`;
+      const res = await fetch(url, { headers: { "Accept-Language":"fr" } });
+      if (!res.ok) throw new Error(`Nominatim ${res.status}`);
+      const json = await res.json();
+      try{ localStorage.setItem(key, JSON.stringify(json)); }catch(_){}
+      return json;
+    });
+    return _nominatimQueue;
+  }
+
+  function pickName(json){
+    if (!json) return null;
+    if (json.name) return json.name;
+    const a = json.address || {};
+    return a.mountain_pass || a.peak || a.saddle || a.ridge || a.mountain || a.cliff || a.village || a.hamlet || a.locality || a.town || a.city || a.county || null;
+  }
+
+  function findPeaksAndCols(profile){
+    // profile: [{lat,lon,ele,dkm}]
+    if (profile.length < 80) return [];
+    const win = Math.max(10, Math.floor(profile.length/200)); // window size
+    const candidates = [];
+
+    for (let i=win;i<profile.length-win;i++){
+      const e = profile[i].ele;
+      let isMax=true, isMin=true;
+      for (let j=i-win;j<=i+win;j++){
+        if (profile[j].ele > e) isMax=false;
+        if (profile[j].ele < e) isMin=false;
+        if (!isMax && !isMin) break;
+      }
+      if (isMax || isMin){
+        candidates.push({ i, type: isMax ? "peak" : "col", ele: e, dkm: profile[i].dkm, lat: profile[i].lat, lon: profile[i].lon });
+      }
+    }
+
+    // keep spaced items (>=2km)
+    const spaced = (items)=>{
+      const out=[];
+      for (const it of items.sort((a,b)=>b.ele-a.ele)){
+        if (out.every(o=>Math.abs(o.dkm - it.dkm) >= 2)) out.push(it);
+        if (out.length>=4) break;
+      }
+      return out;
+    };
+    const peaks = spaced(candidates.filter(c=>c.type==="peak"));
+    const cols = spaced(candidates.filter(c=>c.type==="col").sort((a,b)=>a.ele-b.ele)).slice(0,3);
+
+    return [...peaks, ...cols].sort((a,b)=>a.dkm-b.dkm);
+  }
+
+  function drawElev(points, places=null){
     const c = $("elev");
     if (!c) return;
     const ctx = c.getContext("2d");
 
-    const pts = points
-      .map(p => ({ ele: (p.ele==null? null : Number(p.ele)) }))
-      .filter(p => Number.isFinite(p.ele));
-
-    if (pts.length < 5){
+    const raw = enrichDistances(points);
+    if (raw.length < 30){
       $("elevHint").textContent = "Altitude insuffisante pour tracer un profil.";
       return;
     }
+
+    const prof = downsample(raw, 1800);
+
+    const eles = prof.map(p=>p.ele);
+    const minE = Math.min(...eles);
+    const maxE = Math.max(...eles);
+    const totalKm = prof[prof.length-1].dkm;
+
+    const W = c.width, H = c.height;
+    ctx.clearRect(0,0,W,H);
+
+    const padL = 56, padR = 20, padT = 18, padB = 40;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+
+    const xOf = (dkm)=> padL + (dkm/Math.max(0.001,totalKm))*plotW;
+    const yOf = (ele)=> padT + (1 - (ele - minE)/Math.max(1,(maxE-minE)))*plotH;
+
+    // background
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.fillRect(0,0,W,H);
+
+    // grid Y (3 lines)
+    ctx.strokeStyle = "rgba(15,23,42,0.08)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let t=0;t<=3;t++){
+      const y = padT + (t/3)*plotH;
+      ctx.moveTo(padL, y);
+      ctx.lineTo(padL+plotW, y);
+    }
+    ctx.stroke();
+
+    // axes
+    ctx.strokeStyle = "rgba(15,23,42,0.18)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(padL, padT);
+    ctx.lineTo(padL, padT+plotH);
+    ctx.lineTo(padL+plotW, padT+plotH);
+    ctx.stroke();
+
+    // filled area
+    ctx.beginPath();
+    ctx.moveTo(xOf(prof[0].dkm), yOf(prof[0].ele));
+    for (let i=1;i<prof.length;i++) ctx.lineTo(xOf(prof[i].dkm), yOf(prof[i].ele));
+    ctx.lineTo(xOf(prof[prof.length-1].dkm), padT+plotH);
+    ctx.lineTo(xOf(prof[0].dkm), padT+plotH);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(34,197,94,0.06)";
+    ctx.fill();
+
+    // colored line by grade
+    ctx.lineWidth = 2.6;
+    for (let i=1;i<prof.length;i++){
+      const a = prof[i-1], b = prof[i];
+      const dd = (b.dkm - a.dkm) * 1000;
+      const de = (b.ele - a.ele);
+      const grade = dd>1 ? (de/dd)*100 : 0;
+      ctx.strokeStyle = gradeColor(grade);
+      ctx.beginPath();
+      ctx.moveTo(xOf(a.dkm), yOf(a.ele));
+      ctx.lineTo(xOf(b.dkm), yOf(b.ele));
+      ctx.stroke();
+    }
+
+    // Y labels
+    ctx.fillStyle = "rgba(15,23,42,0.72)";
+    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    const yVals = [minE, (minE+maxE)/2, maxE];
+    for (const v of yVals){
+      const y = yOf(v);
+      ctx.fillText(`${Math.round(v)} m`, padL-10, y);
+    }
+
+    // X ticks every 5 km
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+    ctx.fillStyle = "rgba(15,23,42,0.65)";
+    ctx.strokeStyle = "rgba(15,23,42,0.20)";
+    ctx.lineWidth = 1;
+    const step = 5;
+    const maxTick = Math.floor(totalKm/step)*step;
+    for (let km=0; km<=maxTick; km+=step){
+      const x = xOf(km);
+      // tick
+      ctx.beginPath();
+      ctx.moveTo(x, padT+plotH);
+      ctx.lineTo(x, padT+plotH+6);
+      ctx.stroke();
+      ctx.fillText(`${km} km`, x, padT+plotH+10);
+    }
+
+    // place markers
+    if (Array.isArray(places) && places.length){
+      ctx.textAlign = "left";
+      ctx.textBaseline = "bottom";
+      ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+      for (const pl of places){
+        const x = xOf(pl.dkm);
+        const y = yOf(pl.ele);
+        // pin
+        ctx.fillStyle = pl.type==="peak" ? "rgba(220,38,38,0.9)" : "rgba(37,99,235,0.9)";
+        ctx.beginPath();
+        ctx.arc(x, y, 3.2, 0, Math.PI*2);
+        ctx.fill();
+
+        const label = pl.label ? pl.label : (pl.type==="peak" ? "Pic" : "Col");
+        ctx.fillStyle = "rgba(15,23,42,0.78)";
+        const txt = `${label} • ${Math.round(pl.ele)} m`;
+        // avoid going outside
+        const lx = Math.min(padL+plotW-180, x+8);
+        const ly = Math.max(padT+14, y-8);
+        // small background
+        ctx.fillStyle = "rgba(255,255,255,0.78)";
+        ctx.strokeStyle = "rgba(15,23,42,0.10)";
+        ctx.lineWidth = 1;
+        const w = Math.min(175, ctx.measureText(txt).width + 10);
+        ctx.beginPath();
+        const rx = lx-4, ry = ly-16;
+        ctx.roundRect ? ctx.roundRect(rx, ry, w, 18, 6) : ctx.rect(rx, ry, w, 18);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(15,23,42,0.80)";
+        ctx.fillText(txt, lx, ly-3);
+      }
+    }
+
+    $("elevHint").textContent = `Profil altimétrique • ${totalKm.toFixed(1)} km • min ${Math.round(minE)} m • max ${Math.round(maxE)} m`;
+  }
+
 
     const eles = pts.map(p => p.ele);
     const minE = Math.min(...eles);
@@ -320,7 +640,7 @@
     $("btnPrint").addEventListener("click", () => window.print());
   }
 
-  function render(){
+  async function render(){
     const id = params.get("id");
     if (!id){
       setAlert("ID manquant.", false);
@@ -349,6 +669,18 @@
 
     try { renderMap(points); } catch(e){ console.warn(e); }
     try { drawElev(points); } catch(e){ console.warn(e); }
+    // Toponymes (pics/cols) — asynchrone
+    try {
+      const prof = enrichDistances(points);
+      const spots = findPeaksAndCols(prof);
+      if (spots && spots.length){
+        const named = await Promise.all(spots.map(async s=>{
+          try{ const j = await nominatimReverse(s.lat, s.lon); const label = pickName(j); return {...s, label}; }
+          catch(_){ return s; }
+        }));
+        drawElev(points, named);
+      }
+    } catch(e){ console.warn(e); }
   }
 
   render();
