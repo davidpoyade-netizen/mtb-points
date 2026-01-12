@@ -5,332 +5,303 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Créer une épreuve — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
-
-  <style>
-    /* =========================
-       THEME NATURE (override)
-       ========================= */
-    :root{
-      --bg:#f3f7f2;
-      --card:#ffffff;
-      --text:#0b1220;
-      --muted:#5b6b5f;
-      --border:#dbe6da;
-      --blue:#1f7a4d;
-      --blue2:#16623d;
-      --shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:16px;
-
-      --ok:#16a34a;
-      --warn:#ea580c;
-      --err:#dc2626;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Arial,Helvetica,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(900px 320px at 14% 0%, rgba(31,122,77,.14), transparent 60%),
-        radial-gradient(760px 280px at 92% 10%, rgba(34,197,94,.10), transparent 62%),
-        linear-gradient(180deg, rgba(255,255,255,.65), rgba(243,247,242,1) 38%),
-        var(--bg);
-    }
-    a{color:inherit}
-
-    header.header{
-      position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    }
-    header.header h1{margin:0;font-size:18px}
-    nav.nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    nav.nav a{
-      text-decoration:none;
-      padding:8px 10px;
-      border-radius:10px;
-      color:var(--blue);
-      font-weight:900;
-      font-size:13px;
-    }
-    nav.nav a:hover{background:rgba(31,122,77,.08)}
-    nav.nav a.active{background:rgba(31,122,77,.10);color:var(--blue2)}
-    .wrap{max-width:1100px;margin:26px auto;padding:0 16px}
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--r);
-      padding:18px;
-      box-shadow:0 2px 10px rgba(0,0,0,.05);
-    }
-
-    .hero{
-      border-radius:22px;
-      padding:22px;
-      border:1px solid var(--border);
-      background:
-        radial-gradient(1000px 260px at 15% 0%, rgba(31,122,77,.16), transparent 60%),
-        radial-gradient(700px 220px at 95% 10%, rgba(34,197,94,.12), transparent 60%),
-        #fff;
-      box-shadow:var(--shadow);
-    }
-    .hero h2{margin:0;font-size:26px;letter-spacing:-.4px}
-    .muted{color:var(--muted)}
-    .muted2{color:#5b6b5f;font-size:12px}
-    .sectionTitle{margin:18px 0 10px 0;font-size:14px;font-weight:900}
-
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    @media(max-width:900px){
-      .grid2,.grid3{grid-template-columns:1fr}
-    }
-
-    .lbl{display:block;font-weight:900;font-size:12px;margin-bottom:6px}
-    .inp{
-      width:100%;
-      padding:12px;
-      border:1px solid var(--border);
-      border-radius:12px;
-      background:#fff;
-      outline:none;
-      font-size:14px;
-    }
-    .inp:focus{border-color:#bcd7c0;box-shadow:0 0 0 4px rgba(34,197,94,.12)}
-    textarea.inp{min-height:90px;resize:vertical}
-
-    .btn2{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:12px 14px;
-      border-radius:12px;
-      text-decoration:none;
-      border:1px solid var(--border);
-      background:#fff;
-      font-weight:900;
-      color:var(--text);
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-      cursor:pointer;
-    }
-    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#cfe0d0}
-    .btn2.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn2.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .btn2:disabled{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none}
-
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-size:12px;font-weight:900;
-    }
-    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .dot.ok{background:var(--ok)}
-    .dot.warn{background:var(--warn)}
-    .dot.err{background:var(--err)}
-
-    .statusBox{
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:14px;
-      background:rgba(255,255,255,.92);
-      margin-top:14px;
-      display:none;
-    }
-    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:10px;display:none}
-    .bar > div{
-      height:100%;
-      width:0%;
-      background:linear-gradient(90deg, rgba(34,197,94,.25), rgba(31,122,77,.92));
-      border-radius:999px;
-      transition:width .25s;
-    }
-
-    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
-    @media(max-width:900px){.kpis{grid-template-columns:1fr}}
-    .kpi{border:1px solid var(--border);border-radius:16px;padding:12px;background:#fff}
-    .kpi b{font-size:22px}
-
-    .msg{
-      display:none;
-      margin-top:14px;
-      border:1px solid var(--border);
-      background:#fff;
-      border-radius:14px;
-      padding:12px;
-      line-height:1.55;
-    }
-    .req{color:var(--err);font-weight:900}
-  </style>
 </head>
 
 <body>
+
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points</h1>
-    <span class="pill"><span class="dot ok"></span> Créer une épreuve</span>
+    <h1>MTB Points — Créer une épreuve</h1>
+    <span class="pill"><span class="dot ok"></span> Épreuve rattachée</span>
   </div>
 
   <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
-    <a href="meetings.html" class="active">Événements</a>
-    <a href="events.html">Épreuves</a>
+    <a href="meetings.html">Événements</a>
+    <a href="races.html">Épreuves</a>
+    <a href="dashboard.html">Dashboard</a>
     <a href="login.html">Connexion</a>
   </nav>
 
   <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <a class="btn2" href="meetings.html">← Retour</a>
+    <a class="btn" id="btnBack" href="meetings.html">← Retour événement</a>
+    <a class="btn ok" id="btnViewRace" href="#" style="display:none;">👁️ Voir la fiche épreuve</a>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="card">
-    <section class="hero">
-      <h2>Nouvelle épreuve</h2>
-      <div class="muted" style="margin-top:8px">
-        GPX <b>obligatoire</b> • Altitude <b>obligatoire</b> • Distance min <b>3 km</b>
-      </div>
-      <div class="muted2" style="margin-top:6px">
-        L’enregistrement se fait sur <b>Supabase</b> (table <code>public.races</code>). La page <code>race.html</code> est publique.
-      </div>
-    </section>
 
-    <h3 class="sectionTitle">Rattachement</h3>
-    <div class="grid2">
-      <div>
-        <label class="lbl">Événement <span class="req">*</span></label>
-        <select id="eventGroupId" class="inp">
-          <option value="">Chargement…</option>
+  <!-- Intro / cahier des charges -->
+  <section class="card">
+    <h2 style="margin:0 0 8px 0">Information</h2>
+    <p class="muted" style="margin:0">
+      L’épreuve est rattachée à un événement. La date est pré-remplie et bornée selon la plage de l’événement.
+      Multi-tours âge/sexe • GPX/OSM obligatoire • Duplication Musculaire ↔ E-bike.
+    </p>
+  </section>
+
+  <!-- Bloc 1 — Informations course -->
+  <section class="card" style="margin-top:14px;">
+    <h3 style="margin:0 0 10px 0">1) Rattachement & date</h3>
+
+    <div class="grid" style="grid-template-columns:1.2fr 1fr; gap:12px;">
+      <!-- Meeting -->
+      <div class="field">
+        <label for="meetingId">Événement *</label>
+        <select id="meetingId" class="inp">
+          <option value="">— Choisir un événement —</option>
         </select>
-        <div class="muted2">Tu dois être connecté en organisateur pour lire/écrire sur Supabase.</div>
+        <div class="hint" id="meetingHint">Les épreuves créées ici seront rattachées automatiquement.</div>
       </div>
 
-      <div>
-        <label class="lbl">Nom de l’épreuve <span class="req">*</span></label>
-        <input id="courseName" class="inp" type="text" placeholder="Ex : 30 km / XCO Open..." />
+      <!-- Date -->
+      <div class="field">
+        <label for="date">Date de l’épreuve *</label>
+        <input id="date" class="inp" type="date" />
+        <div class="hint" id="dateHint">La date sera pré-remplie à partir de l’événement.</div>
       </div>
-    </div>
 
-    <h3 class="sectionTitle">Date & infos</h3>
-    <div class="grid3">
-      <div>
-        <label class="lbl">Date <span class="req">*</span></label>
-        <input id="courseDate" class="inp" type="date" />
+      <!-- Heure -->
+      <div class="field">
+        <label for="time">Heure de départ *</label>
+        <input id="time" class="inp" type="time" placeholder="09:00" />
+        <div class="hint">Format HH:MM</div>
       </div>
-      <div>
-        <label class="lbl">Heure (optionnel)</label>
-        <input id="startTime" class="inp" type="time" />
+
+      <!-- Nom -->
+      <div class="field">
+        <label for="name">Nom de l’épreuve *</label>
+        <input id="name" class="inp" type="text" placeholder="Ex: XCO 30 km" />
+        <div class="hint">Nom public de l’épreuve.</div>
       </div>
-      <div>
-        <label class="lbl">Discipline <span class="req">*</span></label>
+
+      <!-- Barrière horaire -->
+      <div class="field">
+        <label for="cutoffTime">Barrière horaire (optionnelle)</label>
+        <input id="cutoffTime" class="inp" type="text" placeholder="Ex: 03:30" />
+        <div class="hint">Ex: 03:30 (hh:mm) ou “3h30”.</div>
+      </div>
+
+      <!-- Catégorie -->
+      <div class="field">
+        <label for="category">Catégorie d’épreuve *</label>
+        <select id="category" class="inp">
+          <option value="">— Choisir —</option>
+          <option value="locale">Locale</option>
+          <option value="regionale">Régionale</option>
+          <option value="nationale">Nationale</option>
+          <option value="internationale">Internationale</option>
+        </select>
+        <div class="hint">Niveau de l’épreuve.</div>
+      </div>
+
+      <!-- Discipline -->
+      <div class="field">
+        <label for="disc">Discipline *</label>
         <select id="disc" class="inp">
-          <option value="">—</option>
-          <option value="XC">XC</option>
-          <option value="Marathon">Marathon</option>
-          <option value="Enduro">Enduro</option>
-          <option value="DH">DH</option>
-          <option value="Ultra">Ultra</option>
+          <option value="">— Choisir —</option>
           <option value="Gravel">Gravel</option>
+          <option value="DH">DH</option>
+          <option value="Enduro">Enduro</option>
+          <option value="XC">XC</option>
         </select>
+        <div class="hint">Tu peux laisser l’analyse proposer un “hint”, mais la discipline reste obligatoire.</div>
       </div>
-    </div>
 
-    <div class="grid3" style="margin-top:12px">
-      <div>
-        <label class="lbl">Niveau (optionnel)</label>
-        <select id="level" class="inp">
-          <option value="">—</option>
-          <option value="Amateur">Amateur</option>
-          <option value="Open">Open</option>
-          <option value="Elite">Elite</option>
-        </select>
-      </div>
-      <div>
-        <label class="lbl">E-bike ?</label>
+      <!-- Type vélo -->
+      <div class="field">
+        <label for="ebike">Type de vélo *</label>
         <select id="ebike" class="inp">
-          <option value="0">Non</option>
-          <option value="1">Oui</option>
+          <option value="0">Musculaire</option>
+          <option value="1">Électrique (E-bike)</option>
+        </select>
+        <div class="hint">Musculaire et E-bike peuvent partager le même parcours (classements séparés).</div>
+      </div>
+
+      <!-- Lavage -->
+      <div class="field">
+        <label for="bikeWash">Lavage vélos</label>
+        <select id="bikeWash" class="inp">
+          <option value="">—</option>
+          <option value="oui">Oui</option>
+          <option value="non">Non</option>
         </select>
       </div>
-      <div>
-        <label class="lbl">Participants (optionnel)</label>
-        <input id="participantsCount" class="inp" type="number" min="0" placeholder="Ex : 180" />
+
+      <!-- Assistance -->
+      <div class="field">
+        <label for="mechAssist">Assistance mécanique (0 → 3)</label>
+        <input id="mechAssist" class="inp" type="number" min="0" max="3" step="1" placeholder="0" />
+        <div class="hint">Un chiffre libre entre 0 et 3.</div>
+      </div>
+
+      <!-- Ravitos -->
+      <div class="field">
+        <label for="feeds">Ravitaillements (0 → 3)</label>
+        <input id="feeds" class="inp" type="number" min="0" max="3" step="1" placeholder="0" />
+        <div class="hint">Un chiffre libre entre 0 et 3.</div>
+      </div>
+
+      <!-- Sexe autorisé (optionnel) -->
+      <div class="field">
+        <label for="sexAllowed">Sexe (optionnel)</label>
+        <select id="sexAllowed" class="inp">
+          <option value="all">Tous (H/F)</option>
+          <option value="M">Hommes</option>
+          <option value="F">Femmes</option>
+        </select>
+        <div class="hint">Utile si épreuve dédiée.</div>
+      </div>
+
+      <!-- Commentaire -->
+      <div class="field" style="grid-column:1 / -1;">
+        <label for="comment">Commentaire libre</label>
+        <textarea id="comment" class="inp" rows="3" placeholder="Infos organisateur, consignes, etc."></textarea>
       </div>
     </div>
 
-    <h3 class="sectionTitle">GPX & Analyse <span class="req">*</span></h3>
-    <div class="grid2" style="align-items:end">
-      <div>
-        <label class="lbl">Fichier GPX <span class="req">*</span></label>
-        <input id="courseGpxFile" class="inp" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml" />
-        <div class="muted2">Le GPX doit contenir l’élévation (<code>&lt;ele&gt;</code>) et faire au moins 3 km.</div>
+    <!-- Duplication Musculaire ↔ E-bike -->
+    <div class="row" style="margin-top:12px;gap:10px;flex-wrap:wrap">
+      <button class="btn" id="btnDuplicateBike" type="button">↔ Dupliquer Musculaire / E-bike</button>
+      <div class="muted" style="font-size:12px">
+        Crée une seconde épreuve identique en changeant uniquement le type de vélo (classements séparés).
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
-        <button class="btn2" id="btnClearGPX" type="button">Effacer GPX</button>
+    </div>
+  </section>
+
+  <!-- Bloc Multi-tours -->
+  <section class="card" style="margin-top:14px;">
+    <h3 style="margin:0 0 10px 0">Multi-tours</h3>
+
+    <div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <label class="pill" style="cursor:pointer">
+        <input id="enableMultiLaps" type="checkbox" style="margin-right:8px" />
+        Activer multi-tours par catégorie d’âge & sexe
+      </label>
+      <div class="muted" style="font-size:12px">Coche pour afficher la grille U7…M9.</div>
+    </div>
+
+    <div id="lapsWrap" style="display:none; margin-top:12px;">
+      <div class="empty" style="margin-bottom:10px;">
+        <b>Grille des tours</b>
+        <div class="muted" style="margin-top:6px">
+          Renseigne le nombre de tours pour chaque catégorie (H/F). Laisse vide si non applicable.
+        </div>
+      </div>
+
+      <div style="overflow:auto;">
+        <table class="tbl" style="min-width:560px;">
+          <thead>
+            <tr>
+              <th>Catégorie</th>
+              <th>Hommes (M)</th>
+              <th>Femmes (F)</th>
+            </tr>
+          </thead>
+          <tbody id="lapsGrid">
+            <!-- rempli en JS (U7 … M9) -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bloc 2 — Analyse GPX/OSM obligatoire -->
+  <section class="card" style="margin-top:14px;">
+    <h3 style="margin:0 0 10px 0">2) Analyse GPX / OSM *</h3>
+
+    <div class="grid" style="grid-template-columns:1.2fr 1fr; gap:12px;">
+      <div class="field">
+        <label for="gpxFile">Trace GPX *</label>
+        <input id="gpxFile" class="inp" type="file" accept=".gpx,application/gpx+xml" />
+        <div class="hint">
+          Obligatoire : l’analyse démarre automatiquement après sélection du GPX.
+          (GPX avec altitude requis)
+        </div>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:10px;">
+          <button id="btnAnalyze" class="btn" type="button">Analyser maintenant</button>
+          <button id="btnClearGPX" class="btn" type="button">Effacer GPX</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>KPIs (issus de l’analyse)</label>
+        <div class="grid" style="grid-template-columns:1fr 1fr 1fr; gap:10px;">
+          <div class="kpi">
+            <div class="kpiTitle">Phys</div>
+            <div class="kpiVal" id="kpiPhys">—</div>
+            <div class="kpiSub" id="kpiPhysSub">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiTitle">Tech</div>
+            <div class="kpiVal" id="kpiTech">—</div>
+            <div class="kpiSub" id="kpiTechSub">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiTitle">Global</div>
+            <div class="kpiVal" id="kpiGlobal">—</div>
+            <div class="kpiSub" id="kpiGlobalSub">—</div>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+          <div class="field">
+            <label for="distanceKm">Distance (km)</label>
+            <input id="distanceKm" class="inp" type="text" placeholder="Auto" readonly />
+          </div>
+          <div class="field">
+            <label for="dplusM">D+ (m)</label>
+            <input id="dplusM" class="inp" type="text" placeholder="Auto" readonly />
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="kpis">
-      <div class="kpi">
-        <div class="muted2">Score Physique</div>
-        <b id="kpiPhys">—</b>
-        <div class="muted2" id="kpiPhysSub">—</div>
+    <!-- Status box (reprend tes IDs existants) -->
+    <div id="statusBox" class="empty" style="display:none; margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+        <div id="statusPhase" class="pill"><span class="dot"></span> Analyse</div>
+        <div id="statusMsg" class="muted">—</div>
       </div>
-      <div class="kpi">
-        <div class="muted2">Score Technique</div>
-        <b id="kpiTech">—</b>
-        <div class="muted2" id="kpiTechSub">—</div>
+
+      <div id="statusBarWrap" style="display:none; margin-top:10px;">
+        <div style="height:10px;border-radius:999px;background:#e5e7eb;overflow:hidden;">
+          <div id="statusBar" style="height:100%;width:0%;background:#2563eb;"></div>
+        </div>
       </div>
-      <div class="kpi">
-        <div class="muted2">Score Global</div>
-        <b id="kpiGlobal">—</b>
-        <div class="muted2" id="kpiGlobalSub">—</div>
-      </div>
+
+      <div id="statusSub" class="muted" style="margin-top:8px;font-size:12px">—</div>
     </div>
 
-    <div class="grid2" style="margin-top:12px">
-      <div>
-        <label class="lbl">Distance (km)</label>
-        <input id="distanceKm" class="inp" type="number" step="0.01" placeholder="Auto depuis GPX" />
+    <div id="msg" class="empty" style="display:none; margin-top:12px;"></div>
+  </section>
+
+  <!-- Actions -->
+  <section class="card" style="margin-top:14px;">
+    <div class="row" style="gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center">
+      <div class="muted" style="font-size:12px">
+        * Champs obligatoires : événement, date, heure, nom, catégorie, discipline, GPX analysé.
       </div>
-      <div>
-        <label class="lbl">D+ (m)</label>
-        <input id="dplusM" class="inp" type="number" step="1" placeholder="Auto depuis GPX" />
+
+      <div class="row" style="gap:10px;flex-wrap:wrap">
+        <button class="btn" id="btnSaveAndNew" type="button">💾 Enregistrer + nouvelle</button>
+        <button class="btn ok" id="btnSave" type="button">✅ Enregistrer l’épreuve</button>
       </div>
     </div>
+  </section>
 
-    <div id="statusBox" class="statusBox">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="pill" id="statusPhase"><span class="dot"></span> —</span>
-        <span id="statusMsg" class="muted">—</span>
-      </div>
-      <div class="bar" id="statusBarWrap"><div id="statusBar"></div></div>
-      <div class="muted2" id="statusSub" style="margin-top:8px;"></div>
-    </div>
-
-    <h3 class="sectionTitle">Commentaire (optionnel)</h3>
-    <textarea id="comment" class="inp" placeholder="Infos départ, catégorie, remarques organisateur…"></textarea>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
-      <button class="btn2 primary" id="saveCourseBtn" type="button">Enregistrer l’épreuve</button>
-      <a class="btn2" href="events.html">Voir les épreuves</a>
-    </div>
-
-    <div id="msg" class="msg"></div>
-  </div>
 </main>
 
-<!-- Dépendances existantes (si tu les utilises ailleurs) -->
+<!-- deps (conservés) -->
 <script src="js/data.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/gpx.js"></script>
 
-<!-- Logique page: Supabase write -->
-<script type="module" src="js/course-create.js"></script>
+<!-- logique dédiée (on la réécrit étape 2) -->
+<script src="js/course-create.js"></script>
 
 </body>
 </html>
+

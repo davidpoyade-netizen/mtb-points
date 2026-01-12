@@ -5,23 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Épreuves — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
-
   <style>
     :root{
-      --bg:#f3f7f2;--card:#fff;--text:#0b1220;--muted:#5b6b5f;--border:#dbe6da;
-      --blue:#1f7a4d;--blue2:#16623d;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
       --r:16px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);
-      background:
-        radial-gradient(900px 320px at 14% 0%, rgba(31,122,77,.14), transparent 60%),
-        radial-gradient(760px 280px at 92% 10%, rgba(34,197,94,.10), transparent 62%),
-        linear-gradient(180deg, rgba(255,255,255,.65), rgba(243,247,242,1) 38%),
-        var(--bg);
-    }
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
     a{color:inherit}
+
     header.header{
       position:sticky;top:0;z-index:20;
       background:rgba(255,255,255,.90);
@@ -30,111 +23,127 @@
       padding:14px 16px;
       display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
-    header.header h1{margin:0;font-size:18px}
-    nav.nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    nav.nav a{
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
       text-decoration:none;padding:8px 10px;border-radius:10px;
-      color:var(--blue);font-weight:900;font-size:13px;
+      color:var(--blue);font-weight:800;font-size:13px;
     }
-    nav.nav a:hover{background:rgba(31,122,77,.08)}
-    nav.nav a.active{background:rgba(31,122,77,.10);color:var(--blue2)}
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+    .headerRight{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
     .wrap{max-width:1100px;margin:26px auto;padding:0 16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
     .hero{
-      border-radius:22px;padding:18px;border:1px solid var(--border);
+      border-radius:22px;padding:22px;border:1px solid var(--border);
       background:
-        radial-gradient(1000px 260px at 15% 0%, rgba(31,122,77,.16), transparent 60%),
-        radial-gradient(700px 220px at 95% 10%, rgba(34,197,94,.12), transparent 60%),
+        radial-gradient(1000px 260px at 15% 0%, rgba(37,99,235,.16), transparent 60%),
+        radial-gradient(700px 220px at 95% 10%, rgba(16,185,129,.14), transparent 60%),
         #fff;
       box-shadow:var(--shadow);
     }
-    .hero h2{margin:0;font-size:24px;letter-spacing:-.4px}
+    .heroTop{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:26px;letter-spacing:-.4px}
     .muted{color:var(--muted)}
-    .muted2{color:#5b6b5f;font-size:12px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-    .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .inp{padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff;outline:none;font-size:14px;min-width:220px}
-    .btn{
+    .muted2{color:#64748b;font-size:12px}
+
+    .btn2{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff;
-      text-decoration:none;font-weight:900;cursor:pointer;
+      padding:12px 14px;border-radius:12px;text-decoration:none;
+      border:1px solid var(--border);background:#fff;font-weight:900;color:var(--text);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      cursor:pointer;
     }
-    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:900}
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn2.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn2.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-size:12px;font-weight:900;color:#0f172a;
+      white-space:nowrap;
+    }
     .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .dot.ok{background:var(--ok)}
-    .dot.warn{background:var(--warn)}
-    .dot.err{background:var(--err)}
+    .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.err{background:var(--err)}
+
+    .filters{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center}
+    .inp{
+      padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff;
+      outline:none;font-size:14px;min-width:240px
+    }
 
     .list{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
     @media(max-width:900px){.list{grid-template-columns:1fr}}
-    .raceCard{
-      border:1px solid var(--border);border-radius:16px;padding:14px;background:#fff;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .raceCard:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#cfe0d0}
-    .raceTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .raceCard{border:1px solid var(--border);border-radius:16px;padding:14px;background:#fff}
+    .raceTop{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .raceName{margin:0;font-size:16px;font-weight:1000}
-    .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .badge{font-size:12px;font-weight:900;border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:#fff;white-space:nowrap}
+    .badges{display:flex;gap:8px;flex-wrap:wrap}
+    .badge{font-size:12px;font-weight:900;border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:#fff}
     .badge.pub{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.10)}
     .badge.draft{border-color:rgba(234,88,12,.35);background:rgba(234,88,12,.10)}
     .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .kpi{border:1px solid var(--border);border-radius:14px;padding:10px;background:#fff;min-width:120px}
     .kpi .l{font-size:12px;color:var(--muted);font-weight:900}
     .kpi .v{font-size:18px;font-weight:1000}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .empty{padding:14px;border:1px dashed var(--border);border-radius:16px;background:rgba(255,255,255,.7);margin-top:12px}
+    .rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+    .empty{padding:14px;border:1px dashed var(--border);border-radius:16px;background:#fff;margin-top:12px}
   </style>
 </head>
 
 <body>
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Épreuves</h1>
+    <h1>MTB Points</h1>
     <span class="pill"><span class="dot" id="statusDot"></span> <span id="statusText">Chargement…</span></span>
   </div>
 
-  <nav class="nav">
+  <nav>
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
+    <a href="public-clubs.html">Clubs</a>
     <a href="meetings.html">Événements</a>
     <a href="races.html" class="active">Épreuves</a>
+    <a href="challengemtbpoints.html">Challenge</a>
     <a href="login.html">Connexion</a>
   </nav>
 
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <a class="btn primary" href="course-create.html">+ Créer une épreuve</a>
+  <div class="headerRight">
+    <a class="btn2 primary" href="course-create.html">+ Créer une épreuve</a>
   </div>
 </header>
 
 <main class="wrap">
   <section class="card hero">
-    <div class="row">
+    <div class="heroTop">
       <div style="min-width:280px;flex:1">
-        <h2>Épreuves publiées</h2>
-        <div class="muted" style="margin-top:6px">Page publique : seules les épreuves <b>publiées</b> sont visibles sans connexion.</div>
-        <div class="muted2" id="hintMeeting" style="margin-top:6px"></div>
+        <h2>Épreuves</h2>
+        <div class="muted">
+          Sans connexion : tu vois uniquement les épreuves <b>publiées</b>.
+          Connecté : tu vois aussi les <b>brouillons</b>.
+        </div>
+        <div class="muted2" id="hintMeeting" style="margin-top:6px;"></div>
+
+        <div class="filters">
+          <input id="q" class="inp" type="search" placeholder="Rechercher (nom, discipline, niveau…)" />
+          <button class="btn2" id="btnReset" type="button">Réinitialiser</button>
+        </div>
       </div>
 
-      <div class="filters">
-        <input id="q" class="inp" type="search" placeholder="Rechercher une épreuve…" />
-        <button class="btn" id="btnReset" type="button">Réinitialiser</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <span class="pill" id="modePill"><span class="dot ok"></span> —</span>
+        <span class="pill" id="countPill"><span class="dot ok"></span> —</span>
       </div>
     </div>
   </section>
 
   <section class="card" style="margin-top:14px;">
-    <div class="row">
-      <div class="muted2" id="countText">—</div>
-      <div class="muted2" id="modeText">—</div>
-    </div>
-
     <div id="list" class="list"></div>
     <div id="empty" class="empty" style="display:none;">
-      <b>Aucune épreuve</b>
-      <div class="muted" style="margin-top:6px">Crée une épreuve, puis publie-la pour qu’elle soit visible publiquement.</div>
+      <b>Aucune épreuve trouvée.</b>
+      <div class="muted" style="margin-top:6px;">Crée une épreuve, puis publie-la pour qu’elle soit visible publiquement.</div>
     </div>
   </section>
 </main>
@@ -144,22 +153,18 @@
   const $ = (id) => document.getElementById(id);
   const KEY_RACES = "mtb.races.v1";
 
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (m)=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+  const num = (x) => { const n = Number(x); return Number.isFinite(n) ? n : null; };
+  const getParam = (name) => new URLSearchParams(location.search).get(name);
+
   function setStatus(ok, text){
     const dot = $("statusDot");
     const t = $("statusText");
     if (dot) dot.style.background = ok ? "#16a34a" : "#dc2626";
     if (t) t.textContent = text || "";
   }
-
-  function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g, (m)=>({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[m]));
-  }
-
-  function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
-
-  function getParam(name){ return new URLSearchParams(location.search).get(name); }
 
   function loadLocal(){
     try{
@@ -187,16 +192,20 @@
       date: row.date,
       disc: row.discipline,
       level: row.level,
+      ebike: row.ebike,
+
       distanceKm: row.distance_km,
       dplusM: row.dplus_m,
+
       physScore: row.score_phys,
-      techScoreV2: row.score_tech,
+      techScore: row.score_tech,
       globalScore: row.score_global,
+
       isPublished: row.is_published
     };
   }
 
-  async function loadSupabase(){
+  async function loadSupabaseList(){
     const supabase = await getSupabase();
     if (!supabase) return { list: null, mode: "local" };
 
@@ -209,66 +218,74 @@
     try{
       const meetingId = getParam("meetingId");
 
-      let q = supabase.from("races").select("*").order("date", { ascending: false }).limit(2000);
+      let q = supabase
+        .from("races")
+        .select("id,meeting_id,name,date,discipline,level,ebike,distance_km,dplus_m,score_phys,score_tech,score_global,is_published")
+        .order("date", { ascending: false })
+        .limit(2000);
+
       if (meetingId) q = q.eq("meeting_id", meetingId);
       if (!isAuthed) q = q.eq("is_published", true);
 
       const { data, error } = await q;
       if (error) {
-        console.warn("[races] supabase error:", error);
+        console.warn("[races] supabase select error:", error);
         return { list: null, mode: isAuthed ? "authed" : "public" };
       }
 
       return { list: (data || []).map(normalizeRow), mode: isAuthed ? "authed" : "public" };
-    } catch(e){
+    }catch(e){
       console.warn("[races] supabase exception:", e);
       return { list: null, mode: "local" };
     }
   }
 
-  function render(list){
-    const q = String($("q")?.value || "").trim().toLowerCase();
+  function render(list, modeLabel){
     const meetingId = getParam("meetingId");
-    const hintMeeting = $("hintMeeting");
-    if (hintMeeting) hintMeeting.textContent = meetingId ? `Filtré par meetingId: ${meetingId}` : "";
+    $("hintMeeting").textContent = meetingId ? `Filtré par meetingId : ${meetingId}` : "";
+
+    const q = String($("q")?.value || "").trim().toLowerCase();
 
     const filtered = (list || []).filter(r => {
       if (!r) return false;
       if (!q) return true;
-      return String(r.name || "").toLowerCase().includes(q) ||
-             String(r.disc || "").toLowerCase().includes(q) ||
-             String(r.level || "").toLowerCase().includes(q);
+      return String(r.name||"").toLowerCase().includes(q)
+        || String(r.disc||"").toLowerCase().includes(q)
+        || String(r.level||"").toLowerCase().includes(q);
     });
 
+    $("modePill").innerHTML = `<span class="dot ok"></span> ${esc(modeLabel || "—")}`;
+    $("countPill").innerHTML = `<span class="dot ok"></span> ${filtered.length} épreuve(s)`;
+
     const listEl = $("list");
-    const emptyEl = $("empty");
     if (!listEl) return;
 
-    $("countText").textContent = `${filtered.length} épreuve(s)`;
-    if (filtered.length === 0) {
+    if (filtered.length === 0){
       listEl.innerHTML = "";
-      if (emptyEl) emptyEl.style.display = "block";
+      $("empty").style.display = "block";
       return;
     }
-    if (emptyEl) emptyEl.style.display = "none";
+    $("empty").style.display = "none";
 
     listEl.innerHTML = filtered.map(r => {
       const dist = num(r.distanceKm);
       const dplus = num(r.dplusM);
       const phys = num(r.physScore);
-      const tech = num(r.techScoreV2);
+      const tech = num(r.techScore);
       const glob = num(r.globalScore);
 
       const pub = r.isPublished === true;
+      const bike = (r.ebike === true || r.ebike === 1) ? "E-bike" : "Musculaire";
 
       return `
         <div class="raceCard">
           <div class="raceTop">
             <div>
               <h3 class="raceName">${esc(r.name || "Épreuve")}</h3>
-              <div class="muted2">${esc(r.date || "—")} • ${esc(r.disc || "—")} ${r.level ? "• " + esc(r.level) : ""}</div>
+              <div class="muted2">${esc(r.date || "—")} • ${esc(r.disc || "—")} ${r.level ? "• " + esc(r.level) : ""} • ${esc(bike)}</div>
               <div class="muted2">${dist != null ? dist.toFixed(1) + " km" : "—"} • ${dplus != null ? "D+ " + Math.round(dplus) + " m" : "D+ —"}</div>
             </div>
+
             <div class="badges">
               <span class="badge ${pub ? "pub" : "draft"}">${pub ? "Publié" : "Brouillon"}</span>
               ${r.meetingId ? `<span class="badge">Meeting: ${esc(r.meetingId)}</span>` : ""}
@@ -281,9 +298,9 @@
             <div class="kpi"><div class="l">Global</div><div class="v">${glob == null ? "—" : Math.round(glob)}</div></div>
           </div>
 
-          <div class="actions">
-            <a class="btn primary" href="race.html?id=${encodeURIComponent(r.id)}">Voir la fiche</a>
-            ${r.meetingId ? `<a class="btn" href="meetings.html">Événements</a>` : ""}
+          <div class="rowBtns">
+            <a class="btn2 primary" href="race.html?id=${encodeURIComponent(r.id)}">👁️ Voir la fiche</a>
+            ${r.meetingId ? `<a class="btn2" href="meeting.html?id=${encodeURIComponent(r.meetingId)}">Voir l’événement</a>` : ""}
           </div>
         </div>
       `;
@@ -293,19 +310,19 @@
   async function init(){
     setStatus(true, "Chargement…");
 
-    const { list, mode } = await loadSupabase();
+    const { list, mode } = await loadSupabaseList();
     const data = Array.isArray(list) ? list : loadLocal();
 
-    $("modeText").textContent =
+    const label =
       Array.isArray(list)
-        ? (mode === "authed" ? "Mode connecté (drafts visibles)" : "Mode public (publiés)")
+        ? (mode === "authed" ? "Connecté (drafts visibles)" : "Public (publiés)")
         : "Fallback localStorage";
 
     setStatus(true, Array.isArray(list) ? "OK (Supabase)" : "OK (local)");
-    render(data);
+    render(data, label);
 
-    $("q")?.addEventListener("input", () => render(data));
-    $("btnReset")?.addEventListener("click", () => { $("q").value = ""; render(data); });
+    $("q")?.addEventListener("input", ()=> render(data, label));
+    $("btnReset")?.addEventListener("click", ()=> { $("q").value = ""; render(data, label); });
   }
 
   init();
