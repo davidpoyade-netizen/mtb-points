@@ -1,7 +1,8 @@
 // server/index.js
-// API: POST /api/analyze-gpx
-// Body: raw GPX text (Content-Type: application/gpx+xml)
-// Response: { ok:true, tech, discipline, meta } or { ok:false, error }
+// MTB Points — API GPX/OSM
+// - POST /api/analyze-gpx        => GPX + OSM (hybrid) avec timeout + fallback
+// - POST /api/analyze-gpx-lite   => GPX-only (debug/backup)
+// - Refuse les GPX sans altitude (<ele>) pour éviter les tracés "dessinés"
 
 import express from "express";
 import cors from "cors";
@@ -11,7 +12,6 @@ import { computeStatsFromPoints } from "./lib/stats.js";
 import { inferDiscipline } from "./lib/discipline.js";
 import { computeSurfaceEstimateFromOsmSamples } from "./lib/surfaceEstimate.js";
 
-// ScoreTech V2 Hybrid (OSM / Overpass)
 import { computeScoreTechV2 } from "./scoretech_v2_osm.js";
 
 const app = express();
@@ -66,12 +66,11 @@ app.use(
   })
 );
 
-// Preflight pour toutes les routes
+// Preflight
 app.options("*", cors());
 
 /* --------------------------- Body parser --------------------------- */
 
-// IMPORTANT: évite d'accepter "* / *" ici (ça déclenche des cas surprenants).
 app.use(
   express.text({
     type: ["application/gpx+xml", "application/xml", "text/xml", "text/plain"],
@@ -86,19 +85,14 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
 
 /* ------------------------- Friendly GET --------------------------- */
 
-app.get("/api/analyze-gpx", (_, res) => {
-  res.status(405).json({
-    ok: false,
-    error: "Utilise POST avec un GPX en body (Content-Type: application/gpx+xml).",
+for (const p of ["/api/analyze-gpx", "/api/analyze-gpx-lite"]) {
+  app.get(p, (_, res) => {
+    res.status(405).json({
+      ok: false,
+      error: "Utilise POST avec un GPX en body (Content-Type: application/gpx+xml).",
+    });
   });
-});
-
-app.get("/api/analyze-gpx-lite", (_, res) => {
-  res.status(405).json({
-    ok: false,
-    error: "Utilise POST avec un GPX en body (Content-Type: application/gpx+xml).",
-  });
-});
+}
 
 /* ----------------------- GPX-only (instant) ----------------------- */
 
@@ -118,6 +112,15 @@ app.post("/api/analyze-gpx-lite", (req, res) => {
 
     const stats = computeStatsFromPoints(points);
 
+    // ✅ Refus GPX sans altitude (même en lite)
+    if (!stats.hasElevation) {
+      return res.status(400).json({
+        ok: false,
+        error:
+          "GPX sans altitude (<ele>) : refusé. Exporte un GPX avec élévation (baro/GPS), pas un tracé 'dessiné'.",
+      });
+    }
+
     const discipline = inferDiscipline({
       distanceKm: stats.distanceKm,
       dplusM: stats.dplusM,
@@ -131,7 +134,7 @@ app.post("/api/analyze-gpx-lite", (req, res) => {
       tech: {
         techScoreV2: null,
         osmOk: false,
-        surfaceEstimate: { road: null, track: null, single: null },
+        surfaceEstimate: null,
         details: { note: "lite: no OSM/Overpass" },
       },
       discipline,
@@ -159,32 +162,42 @@ app.post("/api/analyze-gpx", async (req, res) => {
 
   try {
     const gpxText = typeof req.body === "string" ? req.body : "";
-
     if (!gpxText || gpxText.length < 50) {
       return res.status(400).json({ ok: false, error: "GPX vide ou invalide." });
     }
 
-    // 1) Parse GPX (points lat/lon/ele)
     const points = parseGpxToPoints(gpxText);
     if (!points || points.length < 2) {
       return res.status(400).json({ ok: false, error: "Aucun point <trkpt> exploitable." });
     }
 
-    // 2) Stats (distance/d+/pentes)
     const stats = computeStatsFromPoints(points);
 
-    // 3) OSM/Overpass : timeout + fallback
-    const OSM_TIMEOUT_MS = 25000; // ajuste 20–30s
+    // ✅ Refus GPX sans altitude
+    if (!stats.hasElevation) {
+      return res.status(400).json({
+        ok: false,
+        error:
+          "GPX sans altitude (<ele>) : refusé. Exporte un GPX avec élévation (baro/GPS), pas un tracé 'dessiné'.",
+      });
+    }
+
+    // ✅ Overpass/OSM optimisé (moins de requêtes + parallélisation limitée + cache)
+    const OSM_TIMEOUT_MS = 25000;
+
     let tech = null;
     let osmOk = true;
 
     try {
       tech = await withTimeout(
         computeScoreTechV2(points, {
-          // osmSampleEveryM: 120,
-          // overpassRadiusM: 20,
-          // minCoverage: 0.30,
-          // cacheDir: ".cache/osm"
+          osmSampleEveryM: 300,
+          overpassRadiusM: 20,
+          minCoverage: 0.20,
+          overpassTimeoutSec: 12,
+          fetchTimeoutMs: 12000,
+          overpassConcurrency: 5,
+          cacheDir: ".cache/osm",
         }),
         OSM_TIMEOUT_MS,
         "Overpass/OSM"
@@ -197,12 +210,12 @@ app.post("/api/analyze-gpx", async (req, res) => {
       };
     }
 
-    // 4) Estimation "surface" depuis samples OSM (si dispo)
-    const surfaceEstimate = computeSurfaceEstimateFromOsmSamples(
-      tech?.details?.osmSamples || []
-    );
+    // surfaceEstimate : préfère celle du moteur (si présente), sinon fallback samples
+    const surfaceEstimate =
+      tech?.surfaceEstimate ??
+      computeSurfaceEstimateFromOsmSamples(tech?.details?.osmSamples || []) ??
+      null;
 
-    // 5) Discipline hint (même si osmOk=false)
     const discipline = inferDiscipline({
       distanceKm: stats.distanceKm,
       dplusM: stats.dplusM,
@@ -211,12 +224,11 @@ app.post("/api/analyze-gpx", async (req, res) => {
       techScoreV2: tech?.techScoreV2 ?? null,
     });
 
-    // 6) Réponse compatible front
     return res.json({
       ok: true,
       tech: {
         ...tech,
-        osmOk,
+        osmOk: osmOk && tech?.techScoreV2 != null,
         surfaceEstimate,
       },
       discipline,
@@ -246,4 +258,5 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`[mtb-points] GET  /api/health`);
   console.log(`[mtb-points] POST /api/analyze-gpx (Content-Type: application/gpx+xml)`);
   console.log(`[mtb-points] POST /api/analyze-gpx-lite (GPX only)`);
+  console.log(`[mtb-points] Allowed origins: ${Array.from(ALLOWED_ORIGINS).join(", ")}`);
 });
