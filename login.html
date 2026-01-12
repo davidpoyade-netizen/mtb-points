@@ -3,417 +3,481 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Connexion Organisateur — MTB Points</title>
+  <title>Organisateurs — Connexion / Inscription • MTB Points</title>
 
-  <!-- Garde ton style global -->
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/theme-nature.css">
+  <!-- Base + thème (le thème DOIT être après la base) -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme-nature.css?v=9">
 
   <style>
-    :root{
-      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
-      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 12px 34px rgba(2,6,23,.12);
-      --r:18px;
-      --ok:#16a34a;--warn:#ea580c;--err:#dc2626;
-    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
     a{color:inherit}
+    .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
+    .muted{color:var(--muted);line-height:1.6}
 
+    /* Header */
     header.header{
       position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.9);backdrop-filter:saturate(180%) blur(10px);
-      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
-    .header-inner{max-width:1100px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-    .logo{
-      width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--blue2));
-      box-shadow:0 10px 22px rgba(37,99,235,.25);
-      display:grid;place-items:center;color:#fff;font-weight:800;
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      font-weight:950;font-size:13px;color:var(--blue);
     }
-    nav.nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    nav.nav a{padding:8px 10px;border-radius:999px;text-decoration:none;color:var(--muted);border:1px solid transparent}
-    nav.nav a:hover{color:var(--text);border-color:var(--border);background:#fff}
-    nav.nav a.active{color:var(--blue);border-color:rgba(37,99,235,.25);background:rgba(37,99,235,.08)}
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
 
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
-    @media (max-width: 920px){ .grid{grid-template-columns:1fr} }
+    /* Brand */
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;text-decoration:none}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+
+    /* Layout */
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
 
     .card{
       background:var(--card);
       border:1px solid var(--border);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
+      border-radius:22px;
       padding:18px;
+      box-shadow:var(--shadow);
     }
-    .h1{font-size:22px;margin:0 0 6px 0}
-    .sub{margin:0 0 14px 0;color:var(--muted);line-height:1.4}
+
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2);
+      margin-bottom:14px;
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .heroCoins{
+      width:112px;height:112px;border-radius:22px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 18px 38px rgba(15,23,42,.16);
+      background:rgba(255,255,255,.75);
+    }
+    .heroCoins img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* Pills / msg */
     .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;
-      border:1px solid var(--border);background:#fff;color:var(--muted);
-      font-size:12px;
-    }
-    .dot{width:8px;height:8px;border-radius:999px;background:var(--warn)}
-    .dot.ok{background:var(--ok)}
-
-    .form{display:grid;gap:12px}
-    label{font-size:12px;color:var(--muted)}
-    .field{display:grid;gap:6px}
-    input{
-      width:100%;
-      padding:12px 12px;
       border:1px solid var(--border);
-      border-radius:12px;
-      outline:none;
-      background:#fff;
-      font-size:14px;
+      background:rgba(255,255,255,.75);
+      font-weight:1000;font-size:12px;white-space:nowrap;
     }
-    input:focus{border-color:rgba(37,99,235,.45);box-shadow:0 0 0 4px rgba(37,99,235,.12)}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:11px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;color:var(--text);cursor:pointer;font-weight:700;
-    }
-    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
 
     .msg{
       margin-top:12px;
-      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;
+      padding:10px 12px;border-radius:14px;border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
       display:none;
-      font-size:14px;
-      line-height:1.35;
+      font-size:14px;line-height:1.35;
     }
-    .msg.ok{display:block;border-color:rgba(22,163,74,.30);background:rgba(22,163,74,.08);color:#064e3b}
-    .msg.warn{display:block;border-color:rgba(234,88,12,.30);background:rgba(234,88,12,.10);color:#7c2d12}
-    .msg.err{display:block;border-color:rgba(220,38,38,.30);background:rgba(220,38,38,.10);color:#7f1d1d}
+    .msg.ok{display:block;border-color:rgba(22,163,74,.28);background:rgba(22,163,74,.10);color:#064e3b}
+    .msg.warn{display:block;border-color:rgba(234,88,12,.30);background:rgba(234,88,12,.12);color:#7c2d12}
+    .msg.err{display:block;border-color:rgba(220,38,38,.28);background:rgba(220,38,38,.10);color:#7f1d1d}
 
-    .help{color:var(--muted);font-size:13px;line-height:1.5}
-    .kpi{
-      display:grid;gap:10px;margin-top:10px
+    /* Form */
+    .form{display:grid;gap:12px;margin-top:10px}
+    .field{display:grid;gap:6px}
+    label{font-size:12px;color:var(--muted);font-weight:950}
+    input{
+      width:100%;
+      padding:12px 12px;
+      border:1px solid rgba(40,60,40,.20);
+      border-radius:14px;
+      outline:none;
+      background:rgba(255,255,255,.82);
+      font-size:14px;
     }
-    .kpi .item{
-      padding:12px;border-radius:14px;border:1px solid var(--border);background:#fff;
+    input:focus{border-color:rgba(47,111,62,.35);box-shadow:0 0 0 4px rgba(47,111,62,.12)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+    .btn2{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:11px 12px;border-radius:14px;border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
+      cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .item b{display:block;margin-bottom:2px}
-    .small{font-size:12px;color:var(--muted)}
-    footer{max-width:1100px;margin:18px auto 32px;padding:0 16px;color:var(--muted);font-size:12px}
-    code{background:#f1f5f9;padding:2px 6px;border-radius:8px}
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(15,23,42,.10);border-color:rgba(47,111,62,.25)}
+    .btn2.primary{background:linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));border-color:rgba(37,90,49,1);color:#fff}
+    .btn2.primary:hover{background:linear-gradient(180deg, rgba(37,90,49,1), rgba(30,76,41,1));border-color:rgba(30,76,41,1)}
+    .btn2:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+
+    /* Info blocks */
+    .list{margin:10px 0 0 18px;line-height:1.7;color:#223024}
+    .callout{
+      margin-top:12px;
+      border:1px solid rgba(40,60,40,.14);
+      background:rgba(255,255,255,.78);
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 2px 10px rgba(15,23,42,.06);
+    }
+    .callout strong{display:block;margin-bottom:6px}
+
+    footer{max-width:1200px;margin:18px auto 30px;padding:0 16px;color:var(--muted);font-size:12px}
+    code{background:rgba(255,255,255,.75);border:1px solid var(--border);padding:2px 8px;border-radius:10px}
   </style>
 </head>
 
-<body>
-  <body class="theme-nature">
-  <header class="header">
-    <div class="header-inner">
-      <a class="brand" href="index.html" aria-label="Accueil MTB Points">
-        <div class="logo">MTB</div>
-        <div>
-          <div style="font-weight:900;line-height:1">MTB Points</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.1">Espace organisateur</div>
-        </div>
-      </a>
+<body class="theme-nature">
 
-      <nav class="nav">
-        <a href="index.html">Accueil</a>
-        <a href="meetings.html">Événements</a>
-        <a href="public-ranking.html">Classement</a>
-        <a class="active" href="login-organizer.html">Connexion orga</a>
-      </nav>
+<header class="header">
+  <a class="brandRow" href="index.html" aria-label="Accueil MTB Points">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
     </div>
-  </header>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <h1>MTB Points</h1>
+      <div class="muted" style="font-size:12px;line-height:1.1">Espace organisateur</div>
+    </div>
+  </a>
 
-  <main class="wrap">
-    <div class="grid">
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="meetings.html">Événements</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="login.html" class="active">Organisateurs</a>
+  </nav>
+</header>
 
-      <!-- LEFT: Auth card -->
-      <section class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-          <div>
-            <h1 class="h1">Connexion Organisateur</h1>
-            <p class="sub">Connecte-toi pour publier tes événements, créer des épreuves et importer des résultats.</p>
-          </div>
-          <span class="pill" id="pillState"><span class="dot" id="dotState"></span><span id="pillText">Non connecté</span></span>
-        </div>
+<main class="wrap">
 
-        <form class="form" id="form" autocomplete="on">
-          <div class="field">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="organisateur@exemple.com" required />
-          </div>
-
-          <div class="field">
-            <label for="password">Mot de passe</label>
-            <input id="password" name="password" type="password" placeholder="••••••••" required minlength="6" />
-          </div>
-
-          <div class="row">
-            <button class="btn primary" type="submit" id="btnSignIn">Se connecter</button>
-            <button class="btn" type="button" id="btnSignUp">Créer un compte organisateur</button>
-            <button class="btn" type="button" id="btnSignOut" style="margin-left:auto;display:none">Se déconnecter</button>
-          </div>
-
-          <div id="msg" class="msg"></div>
-        </form>
-
-        <div style="margin-top:14px" class="help">
-          <div class="small">Astuce</div>
-          <div>
-            Si tu as activé la confirmation email dans Supabase, la création de compte demandera un clic de validation.
-            Ensuite reviens ici et connecte-toi.
-          </div>
-        </div>
-      </section>
-
-      <!-- RIGHT: info card -->
-      <aside class="card">
-        <h2 class="h1" style="font-size:18px">Après connexion</h2>
-        <p class="sub" style="margin-bottom:10px">
-          Tu seras redirigé vers le dashboard organisateur.
+  <section class="hero">
+    <div class="heroTop">
+      <div style="min-width:280px;flex:1">
+        <h2>Publiez vos courses. Valorisez vos parcours.</h2>
+        <p class="muted" style="margin:10px 0 0 0;">
+          Création de compte gratuite • Publication simple • Résultats centralisés • Classement mondial type ITRA (VTT).
         </p>
-
-        <div class="kpi">
-          <div class="item">
-            <b>Créer un événement</b>
-            <div class="small">Titre, date, lieu, publication…</div>
-          </div>
-          <div class="item">
-            <b>Créer des épreuves</b>
-            <div class="small">Distance, D+, GPX, score…</div>
-          </div>
-          <div class="item">
-            <b>Importer des résultats</b>
-            <div class="small">CSV/XLS, points, classement…</div>
-          </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <span class="pill" id="pillState"><span class="dot warn" id="dotState"></span><span id="pillText">Non connecté</span></span>
+          <span class="pill"><span class="dot"></span> GPX & Terrain</span>
+          <span class="pill"><span class="dot"></span> Points finishers</span>
         </div>
-
-        <hr style="border:none;border-top:1px solid var(--border);margin:14px 0">
-
-        <div class="help">
-          <div class="small">En cas d’erreur 403 sur <code>/profiles</code></div>
-          <div>
-            Ça veut dire que tes policies RLS sur <code>public.profiles</code> ne sont pas en place.
-            (On les corrige dans Supabase → SQL Editor.)
-          </div>
-        </div>
-      </aside>
+      </div>
+      <div class="heroCoins" aria-label="Logo MTB Points">
+        <img src="img/mtbpoints-coins.png" alt="Logo MTB Points coins">
+      </div>
     </div>
-  </main>
+  </section>
 
-  <footer>
-    MTB Points — Organisateur • <a href="contact.html">Contact</a>
-  </footer>
+  <div class="grid">
 
-  <script type="module">
-    import { supabase } from "./js/supabaseClient.js";
+    <!-- Auth -->
+    <section class="card">
+      <h3 style="margin:0;font-size:18px;letter-spacing:-.15px">Connexion / Création de compte</h3>
+      <p class="muted" style="margin:8px 0 0 0">
+        Connectez-vous pour créer un événement, publier des épreuves et importer vos résultats.
+      </p>
 
-    const $ = (id) => document.getElementById(id);
+      <form class="form" id="form" autocomplete="on">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="organisateur@exemple.com" required />
+        </div>
 
-    function setMsg(text, type="err") {
-      const el = $("msg");
-      if (!el) return;
-      el.className = "msg " + (text ? type : "");
-      el.style.display = text ? "block" : "none";
-      el.textContent = text ? String(text) : "";
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <input id="password" name="password" type="password" placeholder="••••••••" required minlength="6" />
+        </div>
+
+        <div class="row">
+          <button class="btn2 primary" type="submit" id="btnSignIn">Se connecter</button>
+          <button class="btn2" type="button" id="btnSignUp">Créer un compte organisateur</button>
+          <button class="btn2" type="button" id="btnSignOut" style="margin-left:auto;display:none">Se déconnecter</button>
+        </div>
+
+        <div id="msg" class="msg"></div>
+      </form>
+
+      <div class="callout">
+        <strong>Astuce (Supabase)</strong>
+        <div class="muted" style="font-size:13px">
+          Si la confirmation email est activée, vous devrez valider le lien reçu avant de pouvoir vous connecter.
+          En cas d’erreur <code>403</code> sur <code>/profiles</code>, c’est une histoire de RLS/policies (on peut les corriger côté SQL).
+        </div>
+      </div>
+    </section>
+
+    <!-- Pitch organisateur -->
+    <aside class="card">
+      <h3 style="margin:0;font-size:18px;letter-spacing:-.15px">Pourquoi MTB Points pour les organisateurs ?</h3>
+
+      <p class="muted" style="margin:10px 0 0 0">
+        Pour vous organisateur, MTB Points permet de :
+      </p>
+      <ul class="list">
+        <li>publier simplement vos épreuves et leurs résultats,</li>
+        <li>proposer aux coureurs un classement mondial clair et lisible, sur le modèle de ce que représente l’ITRA pour le trail,</li>
+        <li>valoriser chaque course grâce à un système de points fondé sur la difficulté réelle du parcours (distance, dénivelé, technicité issue de l’analyse GPX et du terrain),</li>
+        <li>encourager la participation et la fidélisation, avec une attribution de points également pour les finishers,</li>
+        <li>offrir des statistiques détaillées aux participants, leur permettant de suivre leurs performances et leur évolution,</li>
+        <li>assurer à vos événements une visibilité durable, bien au-delà du seul jour de la course.</li>
+      </ul>
+
+      <div class="callout">
+        <strong>Pour un organisateur, l’intérêt est double :</strong>
+        <div class="muted" style="font-size:14px">
+          👉 simplifier la diffusion et la centralisation des résultats,<br/>
+          👉 renforcer l’attractivité de vos épreuves, en permettant aux pratiquants de suivre leur progression et leur classement tout au long de la saison.
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top:12px">
+        <strong>Plus largement, MTB Points a pour objectif de :</strong>
+        <ul class="list" style="margin-top:8px">
+          <li>proposer un classement plus représentatif de la réalité du terrain,</li>
+          <li>valoriser les performances sur des formats très différents (XC, marathon, enduro, ultra…),</li>
+          <li>offrir aux riders un outil clair et structuré pour suivre leur progression, par catégorie d’âge et par niveau.</li>
+        </ul>
+        <p class="muted" style="margin:10px 0 0 0">
+          Contrairement aux classements uniquement chronométriques, MTB Points s’appuie sur une analyse fine des parcours (GPX, dénivelé, technicité)
+          afin de mieux refléter l’engagement réel demandé par chaque épreuve.
+        </p>
+      </div>
+
+      <div class="callout" style="margin-top:12px">
+        <strong>On vous accompagne</strong>
+        <p class="muted" style="margin:8px 0 0 0">
+          L’inscription et la publication sont simples, gratuites, et conçues par et pour des passionnés de VTT.
+          Je serais ravi de vous présenter la plateforme ou de vous accompagner dans la publication de vos premières courses.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+          <a class="btn2 primary" href="organizer-dashboard.html">Accéder au dashboard</a>
+          <a class="btn2" href="contact.html">Contact</a>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</main>
+
+<footer>
+  MTB Points — Organisateurs • <a href="contact.html" style="color:var(--blue);font-weight:950;text-decoration:none">Contact</a>
+</footer>
+
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
+
+  const $ = (id) => document.getElementById(id);
+
+  function setMsg(text, type="err") {
+    const el = $("msg");
+    if (!el) return;
+    el.className = "msg " + (text ? type : "");
+    el.style.display = text ? "block" : "none";
+    el.textContent = text ? String(text) : "";
+  }
+
+  function setPill(connected) {
+    const dot = $("dotState");
+    const txt = $("pillText");
+    if (!dot || !txt) return;
+    dot.classList.remove("ok","warn","err");
+    if (connected) {
+      dot.classList.add("ok");
+      txt.textContent = "Connecté";
+    } else {
+      dot.classList.add("warn");
+      txt.textContent = "Non connecté";
+    }
+  }
+
+  function redirectOrganizer() {
+    window.location.href = "organizer-dashboard.html";
+  }
+
+  async function ensureProfile(user, roleWanted = "organizer") {
+    if (!user) return;
+
+    const payload = {
+      id: user.id,
+      email: user.email ?? null,
+      role: roleWanted,
+      display_name: user.user_metadata?.display_name ?? (user.email ? user.email.split("@")[0] : null),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from("profiles")
+      .upsert(payload, { onConflict: "id" });
+
+    if (error) throw error;
+  }
+
+  async function fetchMyRole(userId) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data?.role ?? null;
+  }
+
+  function githubPagesRedirectUrl() {
+    // Si tu es sur https://davidpoyade-netizen.github.io/mtb-points/...
+    // location.pathname commence par /mtb-points/...
+    // On revient sur la page login (celle-ci)
+    const base = location.origin + location.pathname.replace(/\/[^\/]*$/, "/");
+    return base + "login.html";
+  }
+
+  async function renderState() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const connected = !!session?.user;
+
+    setPill(connected);
+    $("btnSignOut").style.display = connected ? "inline-flex" : "none";
+    $("btnSignIn").disabled = connected;
+    $("btnSignUp").disabled = connected;
+
+    if (connected) {
+      try { await ensureProfile(session.user, "organizer"); } catch (e) { console.warn("[login] ensureProfile failed", e); }
+    }
+  }
+
+  async function signInOrganizer(email, password) {
+    setMsg("Connexion…", "warn");
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+
+    await ensureProfile(data.user, "organizer");
+
+    const role = await fetchMyRole(data.user.id);
+    if (role !== "organizer" && role !== "admin") {
+      throw new Error("Ce compte n’est pas organisateur. (role=" + (role ?? "null") + ")");
     }
 
-    function setPill(connected) {
-      const dot = $("dotState");
-      const txt = $("pillText");
-      if (!dot || !txt) return;
-      if (connected) {
-        dot.classList.add("ok");
-        txt.textContent = "Connecté";
-      } else {
-        dot.classList.remove("ok");
-        txt.textContent = "Non connecté";
+    setMsg("Connecté ✅ Redirection…", "ok");
+    redirectOrganizer();
+  }
+
+  async function signUpOrganizer(email, password) {
+    setMsg("Création du compte organisateur…", "warn");
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { role: "organizer" },
+        emailRedirectTo: githubPagesRedirectUrl(),
       }
-    }
+    });
+    if (error) throw error;
 
-    function redirectOrganizer() {
-      // ta page dashboard organisateur
-      window.location.href = "organizer-dashboard.html";
-    }
-
-    async function ensureProfile(user, roleWanted = "organizer") {
-      if (!user) return;
-      const payload = {
-        id: user.id,
-        email: user.email ?? null,
-        role: roleWanted,
-        display_name: user.user_metadata?.display_name ?? (user.email ? user.email.split("@")[0] : null),
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error } = await supabase
-        .from("profiles")
-        .upsert(payload, { onConflict: "id" });
-
-      if (error) throw error;
-    }
-
-    async function fetchMyRole(userId) {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data?.role ?? null;
-    }
-
-    async function renderState() {
-      const { data: { session } } = await supabase.auth.getSession();
-      const connected = !!session?.user;
-
-      setPill(connected);
-      $("btnSignOut").style.display = connected ? "inline-flex" : "none";
-      $("btnSignIn").disabled = connected;
-      $("btnSignUp").disabled = connected;
-
-      if (connected) {
-        // On tente d'assurer le profile, mais on ne bloque pas l'UI si erreur
-        try {
-          await ensureProfile(session.user, "organizer");
-        } catch (e) {
-          console.warn("[login-organizer] ensureProfile failed", e);
-        }
-      }
-    }
-
-    async function signInOrganizer(email, password) {
-      setMsg("Connexion…", "warn");
-
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-
-const { data: { session } } = await supabase.auth.getSession();
-console.log("SESSION?", session);
-console.log("ACCESS TOKEN?", session?.access_token?.slice(0, 25));
-
-
-      // ✅ crée la ligne profiles si absente (sinon 403/role KO)
+    // Si confirmation email désactivée => session immédiate
+    if (data?.user && data?.session) {
       await ensureProfile(data.user, "organizer");
-
-      const role = await fetchMyRole(data.user.id);
-      if (role !== "organizer" && role !== "admin") {
-        throw new Error("Ce compte n’est pas organisateur. (role=" + (role ?? "null") + ")");
-      }
-
-      setMsg("Connecté ✅ Redirection…", "ok");
+      setMsg("Compte créé ✅ — Redirection…", "ok");
       redirectOrganizer();
+      return;
     }
 
-    async function signUpOrganizer(email, password) {
-      setMsg("Création du compte organisateur…", "warn");
+    setMsg("Compte créé ✅ Vérifie ton email pour confirmer, puis reviens te connecter.", "ok");
+  }
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { role: "organizer" },
-          // adapte si ton site est dans /mtb-points/
-          emailRedirectTo: `${location.origin}/mtb-points/login-organizer.html`
-        }
-      });
-      if (error) throw error;
-
-      // Si confirmation email désactivée => session immédiate => on peut créer profiles tout de suite
-      if (data?.user && data?.session) {
-        await ensureProfile(data.user, "organizer");
-        setMsg("Compte créé ✅ (confirmation email désactivée) — Redirection…", "ok");
-        redirectOrganizer();
-        return;
-      }
-
-      setMsg("Compte créé ✅ Vérifie ton email pour confirmer, puis reviens te connecter.", "ok");
-    }
-
-    async function signOut() {
-      setMsg("Déconnexion…", "warn");
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      setMsg("Déconnecté ✅", "ok");
-      await renderState();
-    }
-
-    // Events
-    $("form").addEventListener("submit", async (ev) => {
-      ev.preventDefault();
-      const email = ($("email").value || "").trim();
-      const password = $("password").value || "";
-
-      if (!email || !password) {
-        setMsg("Email et mot de passe requis.", "warn");
-        return;
-      }
-
-      $("btnSignIn").disabled = true;
-      $("btnSignUp").disabled = true;
-
-      try {
-        await signInOrganizer(email, password);
-      } catch (e) {
-        console.error("[login-organizer] signIn error", e);
-        setMsg(e?.message || "Erreur lors de la connexion.", "err");
-        await renderState();
-      } finally {
-        // si redirection, ce code ne s'exécute pas longtemps
-        $("btnSignIn").disabled = false;
-        $("btnSignUp").disabled = false;
-      }
-    });
-
-    $("btnSignUp").addEventListener("click", async () => {
-      const email = ($("email").value || "").trim();
-      const password = $("password").value || "";
-
-      if (!email || !password) {
-        setMsg("Email et mot de passe requis (min 6 caractères).", "warn");
-        return;
-      }
-
-      $("btnSignIn").disabled = true;
-      $("btnSignUp").disabled = true;
-
-      try {
-        await signUpOrganizer(email, password);
-        await renderState();
-      } catch (e) {
-        console.error("[login-organizer] signUp error", e);
-        setMsg(e?.message || "Erreur lors de la création du compte.", "err");
-        await renderState();
-      } finally {
-        $("btnSignIn").disabled = false;
-        $("btnSignUp").disabled = false;
-      }
-    });
-
-    $("btnSignOut").addEventListener("click", async () => {
-      try {
-        await signOut();
-      } catch (e) {
-        console.error("[login-organizer] signOut error", e);
-        setMsg(e?.message || "Erreur lors de la déconnexion.", "err");
-      }
-    });
-
-    // Init
+  async function signOut() {
+    setMsg("Déconnexion…", "warn");
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    setMsg("Déconnecté ✅", "ok");
     await renderState();
+  }
 
-    // Si changement de session (login ailleurs, refresh token etc.)
-    supabase.auth.onAuthStateChange(async () => {
+  // Events
+  $("form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const email = ($("email").value || "").trim();
+    const password = $("password").value || "";
+
+    if (!email || !password) {
+      setMsg("Email et mot de passe requis.", "warn");
+      return;
+    }
+
+    $("btnSignIn").disabled = true;
+    $("btnSignUp").disabled = true;
+
+    try {
+      await signInOrganizer(email, password);
+    } catch (e) {
+      console.error("[login] signIn error", e);
+      setMsg(e?.message || "Erreur lors de la connexion.", "err");
       await renderState();
-    });
-  </script>
+    } finally {
+      $("btnSignIn").disabled = false;
+      $("btnSignUp").disabled = false;
+    }
+  });
+
+  $("btnSignUp").addEventListener("click", async () => {
+    const email = ($("email").value || "").trim();
+    const password = $("password").value || "";
+
+    if (!email || !password) {
+      setMsg("Email et mot de passe requis (min 6 caractères).", "warn");
+      return;
+    }
+
+    $("btnSignIn").disabled = true;
+    $("btnSignUp").disabled = true;
+
+    try {
+      await signUpOrganizer(email, password);
+      await renderState();
+    } catch (e) {
+      console.error("[login] signUp error", e);
+      setMsg(e?.message || "Erreur lors de la création du compte.", "err");
+      await renderState();
+    } finally {
+      $("btnSignIn").disabled = false;
+      $("btnSignUp").disabled = false;
+    }
+  });
+
+  $("btnSignOut").addEventListener("click", async () => {
+    try {
+      await signOut();
+    } catch (e) {
+      console.error("[login] signOut error", e);
+      setMsg(e?.message || "Erreur lors de la déconnexion.", "err");
+    }
+  });
+
+  // Init
+  await renderState();
+  supabase.auth.onAuthStateChange(async () => { await renderState(); });
+</script>
+
 </body>
 </html>
-
-
