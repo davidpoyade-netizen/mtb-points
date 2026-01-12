@@ -153,8 +153,8 @@
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
       <a class="btn primary" id="btnCreateRaceBottom" href="#" style="display:none;">+ Créer une épreuve</a>
-      <a class="btn" id="btnAllRaces" href="#">Voir toutes les épreuves</a>
->Voir toutes les épreuves</a>
+      <!-- page optionnelle (si tu l’as) -->
+      <a class="btn" id="btnAllRaces" href="#" title="Optionnel : une page liste dédiée">Voir toutes les épreuves</a>
     </div>
 
     <div id="races" class="list" style="margin-top:12px;"></div>
@@ -175,7 +175,6 @@
     return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
   function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
-  function fmt(n){ return (n == null) ? "—" : String(n); }
   function fmt1(n){ return (n == null) ? "—" : String(Math.round(n * 10)/10); }
 
   function setAlert(html){
@@ -248,6 +247,10 @@
     el.style.display = "inline-flex";
   });
 
+  // "Voir toutes les épreuves" (optionnel si tu as une page dédiée)
+  const allBtn = $("btnAllRaces");
+  if (allBtn) allBtn.href = `races.html?meetingId=${encodeURIComponent(meetingId)}`;
+
   // ---- collect races belonging to meeting
   const allRaces = listRacesSafe();
 
@@ -271,7 +274,6 @@
   const sortEl = $("sortBy");
 
   function getRaceGlobal(r){
-    // accept several fields
     const g = num(r.globalScore);
     if (g != null) return g;
     const mrs = num(r.mrs);
@@ -313,11 +315,10 @@
 
     out = out.filter(r=>{
       const g = getRaceGlobal(r);
-      if (g == null) return true; // si pas de global, on ne filtre pas (ou mets false si tu veux strict)
+      if (g == null) return true; // si pas de global, on ne filtre pas
       return g >= minG;
     });
 
-    // sort
     const sortBy = sortEl.value || "date_desc";
     out.sort((a,b)=>{
       const da = (a.date || "");
@@ -349,11 +350,9 @@
     $("countFiltered").textContent = String(count);
     $("pillCountTxt").textContent = String(count);
 
-    // date range inside event
     const dates = filtered.map(r=>r.date).filter(Boolean).sort();
     $("kpiRange").textContent = dates.length ? `📅 ${dates[0]} → ${dates[dates.length-1]}` : "—";
 
-    // averages
     const globals = filtered.map(getRaceGlobal).filter(v=>v!=null);
     const phys = filtered.map(getRacePhys).filter(v=>v!=null);
     const tech = filtered.map(getRaceTech).filter(v=>v!=null);
@@ -374,7 +373,7 @@
     $("kpiTech").textContent = tAvg == null ? "—" : String(Math.round(tAvg));
     $("kpiParticipants").textContent = pSum == null ? "—" : String(Math.round(pSum));
 
-    // hardest
+    // hardest -> race.html (IMPORTANT)
     let hardest = null;
     for (const r of filtered){
       const g = getRaceGlobal(r);
@@ -418,7 +417,8 @@
 
       const a = document.createElement("a");
       a.className = "item";
-      a.href = `event.html?id=${encodeURIComponent(r.id)}`;
+      // IMPORTANT : on ouvre la fiche course -> race.html
+      a.href = `race.html?id=${encodeURIComponent(r.id)}`;
 
       a.innerHTML = `
         <div class="topline">
@@ -452,7 +452,6 @@
 
   syncMin();
   applyFilters();
-
 })();
 </script>
 
