@@ -61,7 +61,7 @@ app.use(
   })
 );
 
-// Healthchecks (Render ping souvent "/")
+// Healthchecks (Render ping souvent " / ")
 app.get("/", (_, res) => res.status(200).send("MTB Points API OK"));
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 
@@ -144,4 +144,5 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`[mtb-points] GET  /api/health`);
   console.log(`[mtb-points] POST /api/analyze-gpx (Content-Type: application/gpx+xml)`);
 });
+
 
