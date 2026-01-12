@@ -3,41 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Épreuve — MTB Points</title>
-  <link rel="stylesheet" href="./css/style.css" />
-  <style>
-    .kpiGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    @media(max-width:900px){.kpiGrid{grid-template-columns:1fr}}
-    .kpi{border:1px solid var(--border,#e5e7eb);border-radius:16px;padding:12px 14px;background:#fff}
-    .kpi .v{font-size:26px;font-weight:900}
-    .kpi .s{font-size:12px;color:var(--muted,#667085);margin-top:2px}
-    #map{height:340px;border-radius:16px;border:1px solid var(--border,#e5e7eb);overflow:hidden}
-    canvas{width:100%;height:220px;border-radius:16px;border:1px solid var(--border,#e5e7eb);background:#fff}
-    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:900px){.row2{grid-template-columns:1fr}}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-  
-    .levelBadge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
-      border:1px solid var(--border,#e5e7eb);
-      background:rgba(255,255,255,.85);
-      font-weight:800;font-size:12px;
-      backdrop-filter:saturate(120%) blur(6px);
-    }
-    .levelDot{width:10px;height:10px;border-radius:50%}
-    .legend{display:inline-flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--muted,#667085)}
-    .lgItem{display:inline-flex;gap:6px;align-items:center}
-    .lgSw{width:14px;height:6px;border-radius:999px}
+  <title>Fiche épreuve – MTB Points</title>
 
+  <!-- Leaflet (carte) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    /* Base (compatible avec ton style.css) */
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .blockTitle{font-weight:900;margin:0 0 10px 0}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .item{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:12px}
+    .label{color:#667085;font-size:12px;margin-bottom:6px}
+    .value{font-weight:900;font-size:18px;color:#0f172a}
+    .muted{color:#667085;font-size:12px;margin-top:6px}
+
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid #e5e7eb;background:#f8fafc;color:#0f172a}
+    .pillDot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
+
+    .scoreRow{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0 0}
+    .scoreBadge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:999px;border:1px solid #e5e7eb;background:#fff;
+      font-weight:900;font-size:12px;white-space:nowrap;
+    }
+    .scoreBadge b{font-size:13px}
+
+    .barWrap{margin-top:8px;background:#f1f5f9;border-radius:999px;overflow:hidden;border:1px solid #e5e7eb;height:16px}
+    .barSeg{height:16px;display:block;float:left}
+    .segRoad{background:#64748b}
+    .segTrack{background:#22c55e}
+    .segSingle{background:#ef4444}
+
+    #map{height:380px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
+    #profileWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
+    #profileCanvas{width:100%;display:block}
+
+    .legendRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 10px 0}
+    .legendItem{display:inline-flex;align-items:center;gap:6px}
+    .legendSwatch{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+    .linkBtn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:12px;background:#2563eb;color:#fff;
+      text-decoration:none;font-weight:900;border:1px solid #2563eb;
+    }
+    .linkBtn.secondary{background:#fff;color:#0f172a;border:1px solid #e5e7eb}
+
+    @media(max-width:900px){
+      .grid,.grid3,.twoCol{grid-template-columns:1fr}
+      #map{height:320px}
+    }
   </style>
 </head>
 
 <body>
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Épreuve</h1>
-    <span class="pill"><span class="dot ok"></span> Public</span>
+    <h1 style="margin:0;font-size:18px">MTB Points — Fiche épreuve</h1>
+    <span class="pill"><span class="pillDot" id="statusDot"></span> <span id="statusText">Chargement…</span></span>
   </div>
 
   <nav class="nav">
@@ -45,647 +75,246 @@
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
     <a href="events.html">Épreuves</a>
-    <a href="dashboard.html">Dashboard</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="login.html">Connexion</a>
   </nav>
 
-  <div class="headerRight">
-    <a class="btn ghost" id="btnBack" href="events.html">← Retour</a>
+  <div class="headerRight" style="display:flex;gap:10px;flex-wrap:wrap">
+    <a class="linkBtn secondary" href="events.html">← Épreuves</a>
   </div>
 </header>
 
-<main class="wrap">
-  <div class="card">
+<div class="wrap">
 
-    <section class="hero">
-      <div class="heroTop">
-        <div style="min-width:280px;flex:1">
-          <h2 id="raceName">Épreuve</h2>
-          <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-            <span id="raceLevelBadge" class="levelBadge" style="display:none"></span>
-            <span id="elevLegend" class="legend" style="display:none"></span>
+  <!-- 1) Identité -->
+  <section class="card">
+    <h2 class="blockTitle" id="raceName">—</h2>
+
+    <div class="grid3">
+      <div class="item">
+        <div class="label">Date</div>
+        <div class="value" id="raceDate">—</div>
+      </div>
+      <div class="item">
+        <div class="label">Discipline</div>
+        <div class="value" id="raceDisc">—</div>
+      </div>
+      <div class="item">
+        <div class="label">Niveau</div>
+        <div class="value" id="raceLevel">—</div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:12px;">
+      <div class="item">
+        <div class="label">Distance</div>
+        <div class="value" id="raceDistance">—</div>
+        <div class="muted" id="raceDistanceHint">—</div>
+      </div>
+      <div class="item">
+        <div class="label">Dénivelé</div>
+        <div class="value" id="raceDplus">—</div>
+        <div class="muted" id="raceElevInfo">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2) Scores -->
+  <section class="card" style="margin-top:14px;">
+    <h3 class="blockTitle">Scores & difficulté</h3>
+
+    <div class="scoreRow">
+      <span class="scoreBadge" id="scorePhysBadge">💪 Phys <b id="scorePhysVal">—</b>/100</span>
+      <span class="scoreBadge" id="scoreTechBadge">🪨 Tech <b id="scoreTechVal">—</b>/100</span>
+      <span class="scoreBadge" id="scoreGlobalBadge">🏁 Global <b id="scoreGlobalVal">—</b>/100</span>
+    </div>
+
+    <div class="grid3" style="margin-top:12px;">
+      <div class="item">
+        <div class="label">Score technique (officiel)</div>
+        <div class="value" id="scoreTechVal2">—</div>
+        <div class="muted" id="techInfo">OSM + bonus GPX capé (serveur Render)</div>
+      </div>
+      <div class="item">
+        <div class="label">Indicateur technique</div>
+        <div class="value" id="techP75">—</div>
+        <div class="muted" id="techP75Info">—</div>
+      </div>
+      <div class="item">
+        <div class="label">Score physique</div>
+        <div class="value" id="scorePhysVal2">—</div>
+        <div class="muted" id="physInfo">—</div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:12px;">
+      <div class="item">
+        <div class="label">Score global</div>
+        <div class="value" id="scoreGlobalVal2">—</div>
+        <div class="muted">Synthèse technique + physique</div>
+      </div>
+      <div class="item">
+        <div class="label">Niveau de difficulté</div>
+        <div class="pill" id="diffPill">
+          <span class="pillDot" id="diffDot"></span>
+          <span id="diffLabel">—</span>
+        </div>
+        <div class="muted" id="diffHint">—</div>
+      </div>
+    </div>
+
+    <div class="item" style="margin-top:12px;">
+      <div class="label">Résumé automatique</div>
+      <div class="value" id="autoSummary" style="font-size:14px;font-weight:800;">—</div>
+      <div class="muted">Synthèse depuis la trace / scores</div>
+    </div>
+
+    <div class="item" style="margin-top:12px;">
+      <div class="label">Type de voie (si disponible)</div>
+      <div class="value" id="surfaceText">—</div>
+
+      <div class="barWrap" aria-label="Route / Piste large / Single">
+        <span class="barSeg segRoad" id="barRoad" style="width:0%"></span>
+        <span class="barSeg segTrack" id="barTrack" style="width:0%"></span>
+        <span class="barSeg segSingle" id="barSingle" style="width:0%"></span>
+      </div>
+
+      <div class="muted">Route (gris) • Piste (vert) • Single (rouge)</div>
+    </div>
+  </section>
+
+  <!-- 3) Profil + carte -->
+  <section class="card" style="margin-top:14px;">
+    <h3 class="blockTitle">Profil & carte</h3>
+
+    <div class="twoCol">
+      <div id="profileWrap">
+        <div class="label">Profil altimétrique</div>
+
+        <div class="legendRow muted">
+          <span class="legendItem"><span class="legendSwatch" style="background:#22c55e;"></span> Facile</span>
+          <span class="legendItem"><span class="legendSwatch" style="background:#3b82f6;"></span> Modéré</span>
+          <span class="legendItem"><span class="legendSwatch" style="background:#ef4444;"></span> Difficile</span>
+          <span class="legendItem"><span class="legendSwatch" style="background:#111827;"></span> Très difficile</span>
+          <span class="muted" style="margin-left:auto;">Survole</span>
+        </div>
+
+        <div style="position:relative;">
+          <canvas id="profileCanvas" height="220"></canvas>
+          <div id="profileTooltip"
+               style="position:absolute;display:none;pointer-events:none;
+                      background:#0f172a;color:#fff;padding:8px 10px;border-radius:10px;
+                      font-size:12px;line-height:1.35;box-shadow:0 10px 30px rgba(0,0,0,.25);">
           </div>
-          <div class="heroMeta" id="raceMeta">—</div>
-          <div class="heroDesc" id="raceComment" style="display:none"></div>
         </div>
-        <div class="heroActions">
-          <a class="btn ghost" id="btnOpenMeeting" href="#" style="display:none;">Voir l’événement</a>
-          <a class="btn" id="btnCreateSibling" href="#" style="display:none;">Créer une autre épreuve</a>
-          <button class="btn" id="btnPrint" type="button">🖨️ Imprimer / PDF</button>
+
+        <div class="muted" id="profileInfo">—</div>
+      </div>
+
+      <div>
+        <div class="label">Carte du tracé</div>
+
+        <div class="legendRow muted">
+          <span class="legendItem"><span class="legendSwatch" style="background:#22c55e;"></span> Facile</span>
+          <span class="legendItem"><span class="legendSwatch" style="background:#3b82f6;"></span> Modéré</span>
+          <span class="legendItem"><span class="legendSwatch" style="background:#ef4444;"></span> Difficile</span>
+          <span class="legendItem"><span class="legendSwatch" style="background:#111827;"></span> Très difficile</span>
         </div>
-      </div>
-    </section>
 
-    <div id="alertBox" class="msg" style="display:none;margin-top:12px;"></div>
+        <div id="map"></div>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">Scores</h3>
-    <div class="kpiGrid">
-      <div class="kpi">
-        <div class="v" id="kpiPhys">—</div>
-        <div class="s" id="kpiPhysSub">—</div>
+        <div class="muted">Départ / Arrivée affichés si le script les détecte</div>
       </div>
-      <div class="kpi">
-        <div class="v" id="kpiTech">—</div>
-        <div class="s" id="kpiTechSub">—</div>
+    </div>
+  </section>
+
+  <!-- 4) Infos pratiques -->
+  <section class="card" style="margin-top:14px;">
+    <h3 class="blockTitle">Informations pratiques</h3>
+
+    <div class="grid">
+      <div class="item">
+        <div class="label">Départ</div>
+        <div class="value" id="startPlace">—</div>
       </div>
-      <div class="kpi">
-        <div class="v" id="kpiGlobal">—</div>
-        <div class="s" id="kpiGlobalSub">—</div>
+      <div class="item">
+        <div class="label">Arrivée</div>
+        <div class="value" id="finishPlace">—</div>
       </div>
     </div>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">Détails</h3>
-    <div class="row2">
-      <div class="card" style="box-shadow:none">
-        <div class="muted">Événement</div>
-        <div style="font-weight:900" id="infoMeeting">—</div>
-        <div class="muted" id="infoMeetingDates">—</div>
-        <div style="margin-top:10px" class="muted">Date / heure</div>
-        <div id="infoDateTime">—</div>
-        <div class="muted" id="infoDisc">—</div>
-        <div class="muted" id="infoEbike">—</div>
+    <div class="grid3" style="margin-top:12px;">
+      <div class="item">
+        <div class="label">Heure de départ</div>
+        <div class="value" id="startTime">—</div>
       </div>
-      <div class="card" style="box-shadow:none">
-        <div class="muted">Parcours</div>
-        <div>Distance : <b id="infoDist">—</b> km</div>
-        <div>D+ : <b id="infoDplus">—</b> m</div>
-        <div style="margin-top:8px" class="muted">Surface (estimation)</div>
-        <div id="infoSurface">—</div>
-        <div style="margin-top:8px" class="muted">OSM/Overpass</div>
-        <div id="infoOsm">—</div>
+      <div class="item">
+        <div class="label">Ravitaillements</div>
+        <div class="value" id="aidStations">—</div>
+      </div>
+      <div class="item">
+        <div class="label">Assistance mécanique</div>
+        <div class="value" id="mechStations">—</div>
       </div>
     </div>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">Carte & profil altimétrique</h3>
-
-    <div id="gpxEmpty" class="empty" style="display:none;margin-top:10px;">
-      Aucun point GPX enregistré pour cette épreuve.
-    </div>
-
-    <div id="gpxWrap" style="display:none;margin-top:10px;">
-      <div id="map"></div>
-      <div style="margin-top:12px;">
-        <canvas id="elev" width="1200" height="260"></canvas>
-        <div class="muted" id="elevHint" style="margin-top:8px;">—</div>
+    <div class="grid3" style="margin-top:12px;">
+      <div class="item">
+        <div class="label">Lavage vélos</div>
+        <div class="value" id="bikeWash">—</div>
+      </div>
+      <div class="item">
+        <div class="label">Barrière horaire</div>
+        <div class="value" id="cutoffTime">—</div>
+      </div>
+      <div class="item">
+        <div class="label">Catégories d’âge</div>
+        <div class="value" id="ageCategories">—</div>
+        <div class="muted" id="ageHint">—</div>
       </div>
     </div>
 
+    <div class="item" style="margin-top:12px;">
+      <div class="label">Commentaire</div>
+      <div class="value" style="font-size:14px;font-weight:700;" id="raceComment">—</div>
+    </div>
+  </section>
+
+  <!-- 5) Lien événement -->
+  <section class="card" style="margin-top:14px;">
+    <h3 class="blockTitle">Événement</h3>
+    <div id="meetingBlock">
+      <div class="muted">Cette épreuve n’est rattachée à aucun événement.</div>
+    </div>
+  </section>
+
+  <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+    <a class="linkBtn secondary" href="events.html">← Retour aux épreuves</a>
+    <a class="linkBtn" id="meetingLinkBtn" href="meetings.html" style="display:none">Voir l’événement</a>
   </div>
-</main>
 
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-  crossorigin=""
-/>
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-  crossorigin=""
-></script>
+</div>
 
-<script src="js/data.js"></script>
+<!-- Scripts projet -->
 <script src="js/storage.js"></script>
-<script src="js/gpx.js"></script>
+
+<!-- Important : ton event-detail.js doit maintenant remplir les IDs de race.html -->
+<script src="js/event-detail.js"></script>
 
 <script>
-(function(){
-  const $ = (id) => document.getElementById(id);
-  const params = new URLSearchParams(location.search);
-
-  function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-  function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
-  function fmt0(n){ return n==null ? "—" : String(Math.round(n)); }
-  function fmt1(n){ return n==null ? "—" : String(Math.round(n*10)/10); }
-
-  function setAlert(html, ok=false){
-    const box = $("alertBox");
-    if (!box) return;
-    box.style.display = html ? "block" : "none";
-    box.className = "msg " + (ok ? "ok" : "err");
-    box.innerHTML = html || "";
-  }
-
-  function listRacesSafe(){
-    if (typeof window.listRaces === "function") return window.listRaces();
-    try {
-      const raw = localStorage.getItem("mtb.races.v1");
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch(_){ return []; }
-  }
-
-  function listMeetingsSafe(){
-    if (typeof window.listMeetings === "function") return window.listMeetings();
-    try {
-      const raw = localStorage.getItem("mtb.meetings.v1");
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch(_){ return []; }
-  }
-
-  function findMeetingSafe(id){
-    const all = listMeetingsSafe();
-    return all.find(m => m && m.id === id) || null;
-  }
-
-  function extractPoints(race){
-    // ✅ priorité à l’analyse persistée (course-create.html stocke analysis.points)
-    const p =
-      race?.analysis?.points ||
-      race?.analysis?.raw?.points ||
-      race?.analysis?.raw?.track ||
-      null;
-    return Array.isArray(p) ? p : null;
-  }
-
-  function renderScores(race){
-    const phys = num(race?.physScore ?? race?.analysis?.physScore ?? race?.analysis?.raw?.phys?.score ?? null);
-
-    // ✅ TechScore V2 (ne jamais lire "techScore" dans raw server)
-    const tech =
-      num(race?.techScoreV2 ?? race?.analysis?.techScoreV2 ?? null) ??
-      num(race?.techScore ?? race?.analysis?.raw?.tech?.techScoreV2 ?? null);
-
-    const global =
-      num(race?.globalScore ?? race?.analysis?.globalScore ?? race?.analysis?.raw?.mrs ?? null);
-
-    $("kpiPhys").textContent = fmt0(phys);
-    $("kpiTech").textContent = (tech == null ? "—" : fmt0(tech));
-    $("kpiGlobal").textContent = fmt0(global);
-
-    $("kpiPhysSub").textContent = phys == null ? "—" : "Effort (distance, D+, pentes)";
-    $("kpiTechSub").textContent = tech == null ? "ScoreTech indisponible (OSM/Overpass)" : "Technicité (ScoreTech V2 Hybrid)";
-    $("kpiGlobalSub").textContent = global == null ? "—" : "Synthèse 0.55 Phys + 0.45 Tech";
-
-    // Niveau (Vert/Bleu/Rouge/Noir) — basé sur le score global (ou phys/tech)
-    const level = computeLevel(global, phys, tech);
-    const badge = $("raceLevelBadge");
-    if (badge && level){
-      badge.style.display = "inline-flex";
-      badge.innerHTML = `<span class="levelDot" style="background:${level.color}"></span> Niveau <b>${level.label}</b> <span class="muted">(${Math.round(level.score)})</span>`;
-    } else if (badge){
-      badge.style.display = "none";
-      badge.textContent = "";
+  // Petits helpers visuels de statut (optionnel)
+  (function(){
+    const dot = document.getElementById("statusDot");
+    const txt = document.getElementById("statusText");
+    function set(ok, t){
+      if (!dot || !txt) return;
+      dot.style.background = ok ? "#16a34a" : "#94a3b8";
+      txt.textContent = t || (ok ? "OK" : "—");
     }
-
-    const legend = $("elevLegend");
-    if (legend){
-      legend.style.display = "inline-flex";
-      legend.innerHTML = `
-        <span class="lgItem"><span class="lgSw" style="background:#16a34a"></span> <span>pente &lt; 3%</span></span>
-        <span class="lgItem"><span class="lgSw" style="background:#2563eb"></span> <span>3–6%</span></span>
-        <span class="lgItem"><span class="lgSw" style="background:#dc2626"></span> <span>6–10%</span></span>
-        <span class="lgItem"><span class="lgSw" style="background:#0b0f1a"></span> <span>&gt; 10%</span></span>
-      `;
-    }
-
-  }
-
-  function renderMeta(race){
-    $("raceName").textContent = race?.name || "Épreuve";
-    const metaBits = [];
-    if (race?.date) metaBits.push(`📅 ${esc(race.date)}`);
-    if (race?.time) metaBits.push(`🕒 ${esc(race.time)}`);
-    if (race?.meetingName) metaBits.push(`🏁 ${esc(race.meetingName)}`);
-    $("raceMeta").textContent = metaBits.join(" • ") || "—";
-
-    if (race?.comment){
-      $("raceComment").style.display = "block";
-      $("raceComment").textContent = race.comment;
-    }
-
-    const meeting = race?.meetingId ? findMeetingSafe(race.meetingId) : null;
-
-    $("infoMeeting").textContent = meeting?.name || race?.meetingName || "—";
-    const md = meeting?.date || null;
-    const me = meeting?.endDate || null;
-    $("infoMeetingDates").textContent = md ? (me ? `📅 ${md} → ${me}` : `📅 ${md}`) : "—";
-
-    $("infoDateTime").textContent = race?.date ? `${race.date}${race.time ? " • " + race.time : ""}` : "—";
-    $("infoDisc").textContent = race?.disc ? `🏁 Discipline: ${race.disc}` : "🏁 Discipline: —";
-    $("infoEbike").textContent = (race?.ebike === true) ? "🚴 Type: Assistance électrique" : "🚴 Type: Musculaire";
-
-    $("infoDist").textContent = fmt1(num(race?.distanceKm ?? race?.analysis?.distanceKm ?? null));
-    $("infoDplus").textContent = fmt0(num(race?.dplusM ?? race?.analysis?.dplusM ?? null));
-
-    const surface = race?.analysis?.surfaceEstimate || race?.analysis?.raw?.tech?.surfaceEstimate || null;
-    $("infoSurface").textContent = surface ? JSON.stringify(surface) : "—";
-
-    // OSM status / error
-    const osmOk = race?.analysis?.raw?.tech?.osmOk;
-    const osmErr = race?.analysis?.raw?.tech?.details?.error;
-    if (osmOk === false && osmErr){
-      $("infoOsm").textContent = `⚠️ ${osmErr}`;
-      setAlert(`⚠️ Score technique indisponible (OSM/Overpass) : <span class="mono">${esc(osmErr)}</span>`, false);
-    } else {
-      $("infoOsm").textContent = (osmOk === true) ? "✅ OK" : "—";
-    }
-
-    // meeting buttons
-    if (meeting){
-      $("btnOpenMeeting").href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
-      $("btnOpenMeeting").style.display = "inline-flex";
-      $("btnCreateSibling").href = `course-create.html?meetingId=${encodeURIComponent(meeting.id)}`;
-      $("btnCreateSibling").style.display = "inline-flex";
-      $("btnBack").href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
-    }
-  }
-
-  function renderMap(points){
-    const mapEl = $("map");
-    if (!mapEl) return;
-
-    const latlngs = points.map(p => [Number(p.lat), Number(p.lon)]).filter(a => Number.isFinite(a[0]) && Number.isFinite(a[1]));
-    if (latlngs.length < 2) throw new Error("pas assez de points");
-
-    const map = L.map(mapEl, { scrollWheelZoom: false });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution: "&copy; OpenStreetMap"
-    }).addTo(map);
-
-    const poly = L.polyline(latlngs, { weight: 4 }).addTo(map);
-    map.fitBounds(poly.getBounds(), { padding: [18, 18] });
-
-    const a = latlngs[0], b = latlngs[latlngs.length-1];
-    L.marker(a).addTo(map).bindPopup("Départ");
-    L.marker(b).addTo(map).bindPopup("Arrivée");
-  }
-
-  
-  // -----------------------------
-  // Profil altimétrique coloré + repères km + toponymes (pics/cols)
-  // - couleurs selon pente instantanée (Δalt / Δdist)
-  // - repères tous les 5 km
-  // - noms via Nominatim (OSM) avec cache localStorage + throttling 1 req/s
-  // -----------------------------
-
-  function haversineMeters(aLat,aLon,bLat,bLon){
-    const R = 6371000;
-    const toRad = (d)=>d*Math.PI/180;
-    const dLat = toRad(bLat-aLat);
-    const dLon = toRad(bLon-aLon);
-    const la1 = toRad(aLat), la2 = toRad(bLat);
-    const h = Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;
-    return 2*R*Math.asin(Math.min(1, Math.sqrt(h)));
-  }
-
-  function enrichDistances(points){
-    // returns array of {lat,lon,ele,dkm}
-    let d = 0;
-    let prev = null;
-    const out = [];
-    for (const p of points){
-      const lat = Number(p.lat ?? p.latitude);
-      const lon = Number(p.lon ?? p.lng ?? p.longitude);
-      const ele = Number(p.ele ?? p.elevation);
-      // cumulative distance possibly provided by backend
-      const dist_m =
-        Number(p.dist_m ?? p.distance_m ?? p.cumDist_m ?? p.cum_dist_m ?? p.d_m);
-      const dist_km =
-        Number(p.dist_km ?? p.distance_km ?? p.cumDist_km ?? p.cum_dist_km ?? p.d_km);
-
-      let dkm = null;
-      if (Number.isFinite(dist_km)) dkm = dist_km;
-      else if (Number.isFinite(dist_m)) dkm = dist_m/1000;
-      else {
-        if (prev && Number.isFinite(lat) && Number.isFinite(lon) && Number.isFinite(prev.lat) && Number.isFinite(prev.lon)){
-          d += haversineMeters(prev.lat, prev.lon, lat, lon);
-        }
-        dkm = d/1000;
-      }
-      const row = { lat, lon, ele, dkm };
-      if (Number.isFinite(ele) && Number.isFinite(dkm)) out.push(row);
-      prev = {lat,lon};
-    }
-    return out;
-  }
-
-  function downsample(arr, maxN=1600){
-    if (arr.length <= maxN) return arr;
-    const step = Math.ceil(arr.length / maxN);
-    const out = [];
-    for (let i=0;i<arr.length;i+=step) out.push(arr[i]);
-    if (out[out.length-1] !== arr[arr.length-1]) out.push(arr[arr.length-1]);
-    return out;
-  }
-
-  function gradeColor(grade){
-    // grade in %, positive uphill / negative downhill
-    const g = Math.abs(grade);
-    if (g < 3) return "#16a34a";        // vert
-    if (g < 6) return "#2563eb";        // bleu
-    if (g < 10) return "#dc2626";       // rouge
-    return "#0b0f1a";                   // noir
-  }
-
-  function computeLevel(globalScore, physScore, techScore){
-    // Heuristique simple (tu peux ajuster les seuils)
-    // priorité: globalScore (0-1000 environ), sinon pondération phys/tech
-    let g = num(globalScore);
-    if (g == null){
-      const p = num(physScore), t = num(techScore);
-      if (p!=null && t!=null) g = 0.55*p + 0.45*t;
-      else if (p!=null) g = p;
-      else if (t!=null) g = t;
-    }
-    if (g == null) return null;
-    let code="VERT", label="Vert", color="#16a34a";
-    if (g >= 650){ code="NOIR"; label="Noir"; color="#0b0f1a"; }
-    else if (g >= 480){ code="ROUGE"; label="Rouge"; color="#dc2626"; }
-    else if (g >= 320){ code="BLEU"; label="Bleu"; color="#2563eb"; }
-    return {code, label, color, score: g};
-  }
-
-  let _nominatimQueue = Promise.resolve();
-  function nominatimReverse(lat, lon){
-    const key = `mtbp:nominatim:${lat.toFixed(4)},${lon.toFixed(4)}`;
-    try{
-      const cached = localStorage.getItem(key);
-      if (cached) return Promise.resolve(JSON.parse(cached));
-    }catch(_){}
-
-    // throttle: 1 req/sec
-    _nominatimQueue = _nominatimQueue.then(async ()=>{
-      await new Promise(r=>setTimeout(r, 1050));
-      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=14&addressdetails=1`;
-      const res = await fetch(url, { headers: { "Accept-Language":"fr" } });
-      if (!res.ok) throw new Error(`Nominatim ${res.status}`);
-      const json = await res.json();
-      try{ localStorage.setItem(key, JSON.stringify(json)); }catch(_){}
-      return json;
-    });
-    return _nominatimQueue;
-  }
-
-  function pickName(json){
-    if (!json) return null;
-    if (json.name) return json.name;
-    const a = json.address || {};
-    return a.mountain_pass || a.peak || a.saddle || a.ridge || a.mountain || a.cliff || a.village || a.hamlet || a.locality || a.town || a.city || a.county || null;
-  }
-
-  function findPeaksAndCols(profile){
-    // profile: [{lat,lon,ele,dkm}]
-    if (profile.length < 80) return [];
-    const win = Math.max(10, Math.floor(profile.length/200)); // window size
-    const candidates = [];
-
-    for (let i=win;i<profile.length-win;i++){
-      const e = profile[i].ele;
-      let isMax=true, isMin=true;
-      for (let j=i-win;j<=i+win;j++){
-        if (profile[j].ele > e) isMax=false;
-        if (profile[j].ele < e) isMin=false;
-        if (!isMax && !isMin) break;
-      }
-      if (isMax || isMin){
-        candidates.push({ i, type: isMax ? "peak" : "col", ele: e, dkm: profile[i].dkm, lat: profile[i].lat, lon: profile[i].lon });
-      }
-    }
-
-    // keep spaced items (>=2km)
-    const spaced = (items)=>{
-      const out=[];
-      for (const it of items.sort((a,b)=>b.ele-a.ele)){
-        if (out.every(o=>Math.abs(o.dkm - it.dkm) >= 2)) out.push(it);
-        if (out.length>=4) break;
-      }
-      return out;
-    };
-    const peaks = spaced(candidates.filter(c=>c.type==="peak"));
-    const cols = spaced(candidates.filter(c=>c.type==="col").sort((a,b)=>a.ele-b.ele)).slice(0,3);
-
-    return [...peaks, ...cols].sort((a,b)=>a.dkm-b.dkm);
-  }
-
-  function drawElev(points, places=null){
-    const c = $("elev");
-    if (!c) return;
-    const ctx = c.getContext("2d");
-
-    const raw = enrichDistances(points);
-    if (raw.length < 30){
-      $("elevHint").textContent = "Altitude insuffisante pour tracer un profil.";
-      return;
-    }
-
-    const prof = downsample(raw, 1800);
-
-    const eles = prof.map(p=>p.ele);
-    const minE = Math.min(...eles);
-    const maxE = Math.max(...eles);
-    const totalKm = prof[prof.length-1].dkm;
-
-    const W = c.width, H = c.height;
-    ctx.clearRect(0,0,W,H);
-
-    const padL = 56, padR = 20, padT = 18, padB = 40;
-    const plotW = W - padL - padR;
-    const plotH = H - padT - padB;
-
-    const xOf = (dkm)=> padL + (dkm/Math.max(0.001,totalKm))*plotW;
-    const yOf = (ele)=> padT + (1 - (ele - minE)/Math.max(1,(maxE-minE)))*plotH;
-
-    // background
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.fillRect(0,0,W,H);
-
-    // grid Y (3 lines)
-    ctx.strokeStyle = "rgba(15,23,42,0.08)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (let t=0;t<=3;t++){
-      const y = padT + (t/3)*plotH;
-      ctx.moveTo(padL, y);
-      ctx.lineTo(padL+plotW, y);
-    }
-    ctx.stroke();
-
-    // axes
-    ctx.strokeStyle = "rgba(15,23,42,0.18)";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(padL, padT);
-    ctx.lineTo(padL, padT+plotH);
-    ctx.lineTo(padL+plotW, padT+plotH);
-    ctx.stroke();
-
-    // filled area
-    ctx.beginPath();
-    ctx.moveTo(xOf(prof[0].dkm), yOf(prof[0].ele));
-    for (let i=1;i<prof.length;i++) ctx.lineTo(xOf(prof[i].dkm), yOf(prof[i].ele));
-    ctx.lineTo(xOf(prof[prof.length-1].dkm), padT+plotH);
-    ctx.lineTo(xOf(prof[0].dkm), padT+plotH);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(34,197,94,0.06)";
-    ctx.fill();
-
-    // colored line by grade
-    ctx.lineWidth = 2.6;
-    for (let i=1;i<prof.length;i++){
-      const a = prof[i-1], b = prof[i];
-      const dd = (b.dkm - a.dkm) * 1000;
-      const de = (b.ele - a.ele);
-      const grade = dd>1 ? (de/dd)*100 : 0;
-      ctx.strokeStyle = gradeColor(grade);
-      ctx.beginPath();
-      ctx.moveTo(xOf(a.dkm), yOf(a.ele));
-      ctx.lineTo(xOf(b.dkm), yOf(b.ele));
-      ctx.stroke();
-    }
-
-    // Y labels
-    ctx.fillStyle = "rgba(15,23,42,0.72)";
-    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
-    ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
-    const yVals = [minE, (minE+maxE)/2, maxE];
-    for (const v of yVals){
-      const y = yOf(v);
-      ctx.fillText(`${Math.round(v)} m`, padL-10, y);
-    }
-
-    // X ticks every 5 km
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
-    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
-    ctx.fillStyle = "rgba(15,23,42,0.65)";
-    ctx.strokeStyle = "rgba(15,23,42,0.20)";
-    ctx.lineWidth = 1;
-    const step = 5;
-    const maxTick = Math.floor(totalKm/step)*step;
-    for (let km=0; km<=maxTick; km+=step){
-      const x = xOf(km);
-      // tick
-      ctx.beginPath();
-      ctx.moveTo(x, padT+plotH);
-      ctx.lineTo(x, padT+plotH+6);
-      ctx.stroke();
-      ctx.fillText(`${km} km`, x, padT+plotH+10);
-    }
-
-    // place markers
-    if (Array.isArray(places) && places.length){
-      ctx.textAlign = "left";
-      ctx.textBaseline = "bottom";
-      ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-      for (const pl of places){
-        const x = xOf(pl.dkm);
-        const y = yOf(pl.ele);
-        // pin
-        ctx.fillStyle = pl.type==="peak" ? "rgba(220,38,38,0.9)" : "rgba(37,99,235,0.9)";
-        ctx.beginPath();
-        ctx.arc(x, y, 3.2, 0, Math.PI*2);
-        ctx.fill();
-
-        const label = pl.label ? pl.label : (pl.type==="peak" ? "Pic" : "Col");
-        ctx.fillStyle = "rgba(15,23,42,0.78)";
-        const txt = `${label} • ${Math.round(pl.ele)} m`;
-        // avoid going outside
-        const lx = Math.min(padL+plotW-180, x+8);
-        const ly = Math.max(padT+14, y-8);
-        // small background
-        ctx.fillStyle = "rgba(255,255,255,0.78)";
-        ctx.strokeStyle = "rgba(15,23,42,0.10)";
-        ctx.lineWidth = 1;
-        const w = Math.min(175, ctx.measureText(txt).width + 10);
-        ctx.beginPath();
-        const rx = lx-4, ry = ly-16;
-        ctx.roundRect ? ctx.roundRect(rx, ry, w, 18, 6) : ctx.rect(rx, ry, w, 18);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "rgba(15,23,42,0.80)";
-        ctx.fillText(txt, lx, ly-3);
-      }
-    }
-
-    $("elevHint").textContent = `Profil altimétrique • ${totalKm.toFixed(1)} km • min ${Math.round(minE)} m • max ${Math.round(maxE)} m`;
-  }
-
-
-    const eles = pts.map(p => p.ele);
-    const minE = Math.min(...eles);
-    const maxE = Math.max(...eles);
-
-    ctx.clearRect(0,0,c.width,c.height);
-
-    // axes (simple)
-    const pad = 24;
-    const W = c.width - pad*2;
-    const H = c.height - pad*2;
-
-    ctx.beginPath();
-    ctx.moveTo(pad, pad);
-    ctx.lineTo(pad, pad+H);
-    ctx.lineTo(pad+W, pad+H);
-    ctx.stroke();
-
-    ctx.beginPath();
-    for (let i=0;i<pts.length;i++){
-      const x = pad + (i/(pts.length-1))*W;
-      const y = pad + (1 - (pts[i].ele - minE) / Math.max(1,(maxE-minE)) )*H;
-      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    }
-    ctx.stroke();
-
-    $("elevHint").textContent = `Altitude: min ${Math.round(minE)} m • max ${Math.round(maxE)} m`;
-  }
-
-  function wirePrint(){
-    $("btnPrint").addEventListener("click", () => window.print());
-  }
-
-  async function render(){
-    const id = params.get("id");
-    if (!id){
-      setAlert("ID manquant.", false);
-      return;
-    }
-
-    const race = listRacesSafe().find(r => r && r.id === id);
-    if (!race){
-      setAlert("Épreuve introuvable (localStorage).", false);
-      return;
-    }
-
-    renderMeta(race);
-    renderScores(race);
-    wirePrint();
-
-    const points = extractPoints(race);
-    if (!points || points.length < 10){
-      $("gpxEmpty").style.display = "block";
-      $("gpxWrap").style.display = "none";
-      return;
-    }
-
-    $("gpxEmpty").style.display = "none";
-    $("gpxWrap").style.display = "block";
-
-    try { renderMap(points); } catch(e){ console.warn(e); }
-    try { drawElev(points); } catch(e){ console.warn(e); }
-    // Toponymes (pics/cols) — asynchrone
-    try {
-      const prof = enrichDistances(points);
-      const spots = findPeaksAndCols(prof);
-      if (spots && spots.length){
-        const named = await Promise.all(spots.map(async s=>{
-          try{ const j = await nominatimReverse(s.lat, s.lon); const label = pickName(j); return {...s, label}; }
-          catch(_){ return s; }
-        }));
-        drawElev(points, named);
-      }
-    } catch(e){ console.warn(e); }
-  }
-
-  render();
-})();
+    set(false, "Chargement…");
+    window.addEventListener("mtb:raceLoaded", () => set(true, "Données chargées"));
+    window.addEventListener("mtb:raceError", (e) => set(false, (e.detail && e.detail.message) ? e.detail.message : "Erreur"));
+  })();
 </script>
-
 </body>
 </html>
