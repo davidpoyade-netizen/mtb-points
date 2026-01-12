@@ -7,7 +7,7 @@
 // - GPXTech : 0..1 (P75 pondéré par longueur segment), calculé depuis GPX:
 //      slopeTech (p10/p16/gP90) + turnNorm + sinuNorm (anti-bruit)
 // - ScoreTech (0..100):
-//      tech01 = clamp(0.80*TerrainScore_OSM + min(0.20*GPXTech, BONUS_CAP), 0, 1)
+//      tech01 = clamp(W_OSM*TerrainScore_OSM + min(W_GPX*GPXTech, BONUS_CAP), 0, 1)
 //      ScoreTech = round(100*tech01)
 //
 // Si couverture OSM insuffisante => techScoreV2 = null (à valider)
@@ -19,6 +19,19 @@ import path from "node:path";
 
 function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
 function toRad(deg) { return (deg * Math.PI) / 180; }
+
+function safeReadJson(fp) {
+  try { return JSON.parse(fs.readFileSync(fp, "utf8")); } catch { return null; }
+}
+function safeWriteJson(fp, obj) {
+  try { fs.writeFileSync(fp, JSON.stringify(obj, null, 2), "utf8"); } catch { /* ignore */ }
+}
+function ensureDir(dir) { fs.mkdirSync(dir, { recursive: true }); }
+
+function cacheKey(lat, lon, r) {
+  // précision suffisante pour cache + éviter explosion fichiers
+  return `${lat.toFixed(5)}_${lon.toFixed(5)}_r${r}`;
+}
 
 // Haversine distance (meters)
 function haversine(lat1, lon1, lat2, lon2) {
@@ -72,17 +85,21 @@ function weightedPercentile(values, weights, p) {
 // -------------------------------
 const DEFAULTS = {
   // OSM sampling along track
-  osmSampleEveryM: 120,
+  osmSampleEveryM: 300,         // ✅ moins agressif que 120
   overpassRadiusM: 20,
   osmPercentile: 0.75,
-  minCoverage: 0.30,         // OSM coverage minimum
+  minCoverage: 0.20,            // ✅ plus tolérant (tu peux remonter ensuite)
+
+  // Overpass perf
+  overpassTimeoutSec: 12,       // ✅ [timeout:12]
+  fetchTimeoutMs: 12000,        // ✅ AbortController
+  overpassConcurrency: 5,       // ✅ parallélisation limitée
 
   // GPX segmentation for bonus
   gpxSegmentLenM: 200,
   gpxPercentile: 0.75,
 
   // Bonus cap (absolute, in 0..1 space)
-  // Example: 0.15 => max +15 pts on 0..100 scale
   BONUS_CAP: 0.15,
 
   // Hybrid weights
@@ -90,7 +107,6 @@ const DEFAULTS = {
   W_GPX: 0.20,
 
   // GPXTech internal weights (0..1)
-  // (pilotage + pente + sinuosité) => 0..1
   gpxW_slope: 0.45,
   gpxW_turn: 0.35,
   gpxW_sinu: 0.20,
@@ -106,24 +122,35 @@ const DEFAULTS = {
   userAgent: "MTBPoints/1.0 (ScoreTechV2-Hybrid-Official)",
 };
 
-function ensureDir(dir) { fs.mkdirSync(dir, { recursive: true }); }
-function cacheKey(lat, lon, r) { return `${lat.toFixed(5)}_${lon.toFixed(5)}_r${r}`; }
-
 // -------------------------------
 // OSM (Overpass)
 // -------------------------------
 async function overpassFetch(query, opts) {
   const url = "https://overpass-api.de/api/interpreter";
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
-      "user-agent": opts.userAgent,
-    },
-    body: `data=${encodeURIComponent(query)}`,
-  });
-  if (!res.ok) throw new Error(`Overpass HTTP ${res.status}`);
-  return res.json();
+
+  // Timeout réseau (AbortController)
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), opts.fetchTimeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+        "user-agent": opts.userAgent,
+      },
+      body: `data=${encodeURIComponent(query)}`,
+      signal: ctrl.signal,
+    });
+
+    if (!res.ok) throw new Error(`Overpass HTTP ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    if (e?.name === "AbortError") throw new Error(`Overpass fetch timeout (${opts.fetchTimeoutMs}ms)`);
+    throw e;
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 function pickBestTags(osmJson) {
@@ -131,8 +158,27 @@ function pickBestTags(osmJson) {
   for (const el of els) {
     if (el.type !== "way") continue;
     const t = el.tags || {};
+    // highway est quasi obligatoire ici ; on garde aussi surface/smoothness/tracktype/mtb:scale
     if (t.highway || t.surface || t.smoothness || t.tracktype || t["mtb:scale"] || t.sac_scale) return t;
   }
+  return null;
+}
+
+function normalizeSurfaceBucket(tags) {
+  // Pour un petit "surfaceEstimate" (road/track/single)
+  const hw = tags?.highway ? String(tags.highway).toLowerCase() : "";
+  const surface = tags?.surface ? String(tags.surface).toLowerCase() : "";
+  const tracktype = tags?.tracktype ? String(tags.tracktype).toLowerCase() : "";
+
+  const roadish = ["motorway","trunk","primary","secondary","tertiary","unclassified","residential","service","living_street","cycleway"];
+  if (roadish.includes(hw) || surface === "asphalt" || surface === "paved") return "road";
+
+  if (hw === "track") return "track";
+  if (["path","footway","bridleway","singletrack"].includes(hw)) return "single";
+
+  // fallback via tracktype
+  if (tracktype && hw === "track") return "track";
+
   return null;
 }
 
@@ -197,30 +243,35 @@ async function terrainScoreAtPoint(lat, lon, opts) {
   const key = cacheKey(lat, lon, opts.overpassRadiusM);
   const fp = path.join(opts.cacheDir, `${key}.json`);
 
-  if (fs.existsSync(fp)) {
-    try {
-      const c = JSON.parse(fs.readFileSync(fp, "utf8"));
-      return c?.terrainScore ?? null;
-    } catch { /* ignore */ }
+  const cached = fs.existsSync(fp) ? safeReadJson(fp) : null;
+  if (cached && Object.prototype.hasOwnProperty.call(cached, "terrainScore")) {
+    return {
+      terrainScore: cached.terrainScore ?? null,
+      tags: cached.tags ?? null,
+      surfaceBucket: cached.surfaceBucket ?? null,
+      cached: true,
+    };
   }
 
   const q = `
-  [out:json][timeout:25];
-  (
-    way(around:${opts.overpassRadiusM},${lat},${lon})["highway"];
-  );
-  out tags 10;
-  `;
+[out:json][timeout:${opts.overpassTimeoutSec}];
+(
+  way(around:${opts.overpassRadiusM},${lat},${lon})["highway"];
+);
+out tags 10;
+`;
 
   try {
     const json = await overpassFetch(q, opts);
     const tags = pickBestTags(json);
-    const ts = terrainScoreFromTags(tags);
-    fs.writeFileSync(fp, JSON.stringify({ terrainScore: ts, tags }, null, 2), "utf8");
-    return ts;
+    const terrainScore = terrainScoreFromTags(tags);
+    const surfaceBucket = tags ? normalizeSurfaceBucket(tags) : null;
+
+    safeWriteJson(fp, { terrainScore, tags, surfaceBucket });
+    return { terrainScore, tags, surfaceBucket, cached: false };
   } catch (e) {
-    fs.writeFileSync(fp, JSON.stringify({ terrainScore: null, error: String(e) }, null, 2), "utf8");
-    return null;
+    safeWriteJson(fp, { terrainScore: null, error: String(e?.message || e) });
+    return { terrainScore: null, tags: null, surfaceBucket: null, cached: false };
   }
 }
 
@@ -242,14 +293,31 @@ function samplePointsEveryMeters(points, stepM) {
       acc = 0;
     }
   }
+
   const last = points[points.length - 1];
   const prev = sampled[sampled.length - 1];
-  if (!prev || prev.lat !== last.lat || prev.lon !== last.lon) sampled.push({ ...last, _w: Math.max(1, acc) });
+  if (!prev || prev.lat !== last.lat || prev.lon !== last.lon) {
+    sampled.push({ ...last, _w: Math.max(1, acc) });
+  }
 
-  // weight for first sample
   if (sampled.length) sampled[0]._w = stepM / 2;
-
   return sampled;
+}
+
+// petit pool de promesses (concurrency limitée)
+async function mapLimit(items, limit, mapper) {
+  const results = new Array(items.length);
+  let i = 0;
+
+  const workers = new Array(Math.max(1, limit)).fill(0).map(async () => {
+    while (i < items.length) {
+      const idx = i++;
+      results[idx] = await mapper(items[idx], idx);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
 }
 
 async function computeTerrainScoreOSM(points, opts) {
@@ -261,29 +329,60 @@ async function computeTerrainScoreOSM(points, opts) {
 
   let matched = 0;
 
-  for (let i = 0; i < samples.length; i++) {
-    const s = samples[i];
-    const ts = await terrainScoreAtPoint(s.lat, s.lon, opts);
-    const w = Math.max(1, s._w || opts.osmSampleEveryM);
+  // Parallélisation limitée (énorme gain vs await séquentiel)
+  const out = await mapLimit(
+    samples,
+    opts.overpassConcurrency,
+    async (s, idx) => {
+      const r = await terrainScoreAtPoint(s.lat, s.lon, opts);
+      const w = Math.max(1, s._w || opts.osmSampleEveryM);
+      return { idx, s, w, ...r };
+    }
+  );
 
-    const matchedBool = ts != null;
+  // surface estimate simple
+  const surfaceCounts = { road: 0, track: 0, single: 0 };
+  let surfaceN = 0;
+
+  for (const item of out) {
+    const { idx, s, w, terrainScore, surfaceBucket } = item;
+
+    const matchedBool = terrainScore != null;
     if (matchedBool) {
       matched++;
-      vals.push(ts);
+      vals.push(terrainScore);
       weights.push(w);
     }
 
+    if (surfaceBucket && surfaceCounts[surfaceBucket] != null) {
+      surfaceCounts[surfaceBucket] += 1;
+      surfaceN += 1;
+    }
+
     debug.push({
-      idx: i,
+      idx,
       lat: Number(s.lat.toFixed(6)),
       lon: Number(s.lon.toFixed(6)),
       weightM: Math.round(w),
-      terrainScore: ts == null ? null : Number(ts.toFixed(3)),
+      terrainScore: terrainScore == null ? null : Number(terrainScore.toFixed(3)),
       matched: matchedBool,
+      surface: surfaceBucket || null,
+      cached: !!item.cached,
     });
   }
 
   const coverage = samples.length ? (matched / samples.length) : 0;
+
+  let surfaceEstimate = null;
+  if (surfaceN > 0) {
+    surfaceEstimate = {
+      road: Number((surfaceCounts.road / surfaceN).toFixed(3)),
+      track: Number((surfaceCounts.track / surfaceN).toFixed(3)),
+      single: Number((surfaceCounts.single / surfaceN).toFixed(3)),
+      n: surfaceN,
+    };
+  }
+
   if (coverage < opts.minCoverage || vals.length < 3) {
     return {
       ok: false,
@@ -291,6 +390,7 @@ async function computeTerrainScoreOSM(points, opts) {
       terrainScoreP: null,
       reason: "OSM coverage too low",
       samples: debug,
+      surfaceEstimate,
     };
   }
 
@@ -303,6 +403,7 @@ async function computeTerrainScoreOSM(points, opts) {
     terrainScoreP: terrainScoreP == null ? null : Number(terrainScoreP.toFixed(3)),
     reason: null,
     samples: debug,
+    surfaceEstimate,
   };
 }
 
@@ -341,7 +442,6 @@ function computeSinuNorm(segPts) {
 }
 
 function computeSlopeTech(segPts, opts) {
-  // Tech-sensitive slope metrics (anti-noise filtered)
   const absGrades = [];
   let n = 0, c10 = 0, c16 = 0;
 
@@ -414,7 +514,6 @@ function computeTurnNorm(segPts, distReal, opts) {
   const km = distReal / 1000;
   const turnPerKm = km > 0 ? (turn / km) : 0;
 
-  // Tech-sensitive normalization
   const turnNorm = clamp((turnPerKm - 120) / 500, 0, 1);
 
   return {
@@ -442,7 +541,6 @@ function computeGPXBonus(points, opts) {
     const slope = computeSlopeTech(segPts, opts);
     const turn = computeTurnNorm(segPts, distReal, opts);
 
-    // GPXTech segment 0..1
     const gpxTechSeg = clamp(
       opts.gpxW_slope * slope.slopeTech +
       opts.gpxW_turn * turn.turnNorm +
@@ -516,6 +614,8 @@ export async function computeScoreTechV2(points, options = {}) {
         osmSamples: osm.samples,
         gpxSegments: [],
       },
+      // surface estimate (si dispo)
+      surfaceEstimate: osm.surfaceEstimate ?? null,
       meta: {
         mode: "HYBRID_OFFICIAL",
         osm: {
@@ -524,6 +624,9 @@ export async function computeScoreTechV2(points, options = {}) {
           percentile: opts.osmPercentile,
           minCoverage: opts.minCoverage,
           cacheDir: opts.cacheDir,
+          overpassTimeoutSec: opts.overpassTimeoutSec,
+          fetchTimeoutMs: opts.fetchTimeoutMs,
+          concurrency: opts.overpassConcurrency,
         },
         gpxBonus: {
           segmentLenM: opts.gpxSegmentLenM,
@@ -566,9 +669,10 @@ export async function computeScoreTechV2(points, options = {}) {
     bonusApplied: Number(bonusApplied.toFixed(3)),
     tech01: Number(tech01.toFixed(3)),
     details: {
-      osmSamples: osm.samples,      // debug samples
-      gpxSegments: gpx.segments,    // debug segments
+      osmSamples: osm.samples,
+      gpxSegments: gpx.segments,
     },
+    surfaceEstimate: osm.surfaceEstimate ?? null,
     meta: {
       mode: "HYBRID_OFFICIAL",
       osm: {
@@ -577,6 +681,9 @@ export async function computeScoreTechV2(points, options = {}) {
         percentile: opts.osmPercentile,
         minCoverage: opts.minCoverage,
         cacheDir: opts.cacheDir,
+        overpassTimeoutSec: opts.overpassTimeoutSec,
+        fetchTimeoutMs: opts.fetchTimeoutMs,
+        concurrency: opts.overpassConcurrency,
       },
       gpxBonus: {
         segmentLenM: opts.gpxSegmentLenM,
@@ -601,5 +708,3 @@ export async function computeScoreTechV2(points, options = {}) {
     },
   };
 }
-
-
