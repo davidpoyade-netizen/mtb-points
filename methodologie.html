@@ -5,58 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MTB Points — Méthodologie (Calcul)</title>
 
+  <!-- Base + thème (le thème DOIT être après la base) -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/theme-nature.css?v=11" />
+
   <style>
-    :root{
-      --bg:#f4f4f4;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#667085;
-      --muted2:#64748b;
-      --border:#e5e7eb;
-      --blue:#2563eb;
-      --blue2:#1d4ed8;
-      --ok:#16a34a;
-      --warn:#ea580c;
-      --err:#dc2626;
-      --shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:18px;
-    }
+    /* Page-specific only — ne PAS redéfinir :root ici (sinon ça casse theme-nature.css) */
     *{box-sizing:border-box}
     body{
       margin:0;
-      background:var(--bg);
-      color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+      color:var(--text);
     }
     a{color:inherit}
 
     /* Header */
     header.header{
       position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
       padding:14px 16px;
       display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
     header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+
     nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     nav a{
       text-decoration:none;
       padding:8px 10px;border-radius:10px;
       color:var(--blue);
-      font-weight:800;font-size:13px;
+      font-weight:950;font-size:13px;
     }
-    nav a:hover{background:#eff6ff}
-    nav a.active{background:#eff6ff;color:var(--blue2)}
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
     .lang{display:flex;gap:8px;align-items:center}
     .lang .btn{
-      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+      padding:8px 10px;border-radius:12px;border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
+      cursor:pointer;font-weight:1000;font-size:12px;
     }
+    .lang .btn:hover{box-shadow:0 10px 18px rgba(15,23,42,.10);transform:translateY(-1px)}
 
     /* Layout */
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
     .card{
       background:var(--card);
       border:1px solid var(--border);
@@ -72,19 +71,21 @@
       padding:18px;
       border:1px solid var(--border);
       background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
-        #fff;
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2);
     }
     .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
     .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
-    .hero .muted{margin-top:8px;line-height:1.55;color:#334155}
+    .hero .mutedIntro{margin-top:8px;line-height:1.55;color:#223024}
+
     .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;
       border:1px solid var(--border);
-      background:#fff;
-      font-weight:900;font-size:12px;
+      background:rgba(255,255,255,.78);
+      font-weight:1000;font-size:12px;
       white-space:nowrap;
     }
     .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
@@ -97,39 +98,43 @@
     h3{margin:16px 0 8px 0;font-size:15px}
     p,li{font-size:14px;line-height:1.65}
     ul{padding-left:18px;margin:8px 0}
-    .muted{color:var(--muted);font-size:13px}
+    .muted{color:var(--muted);font-size:13px;line-height:1.55}
 
     /* Code blocks */
     code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
     pre{
       margin:10px 0 0 0;
-      background:#0b1220;
+      background:rgba(10,16,24,.96);
       color:#e5e7eb;
       padding:14px;
       border-radius:16px;
       overflow:auto;
-      border:1px solid #111827;
-      box-shadow:0 8px 18px rgba(2,6,23,.20);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 10px 22px rgba(15,23,42,.22);
     }
     code.inline{
-      background:#f1f5f9;border:1px solid var(--border);
-      border-radius:10px;padding:2px 8px;font-size:13px;color:#0f172a;
+      background:rgba(255,255,255,.78);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:2px 8px;
+      font-size:13px;
+      color:var(--text);
       white-space:nowrap;
     }
 
     /* Boxes */
     .box{
-      background:#fff;
+      background:rgba(255,255,255,.78);
       border:1px solid var(--border);
       border-radius:18px;
       padding:14px;
       margin:12px 0;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
+      box-shadow:0 2px 10px rgba(15,23,42,.06);
     }
-    .callout{background:#f8fafc;border-left:6px solid var(--blue)}
-    .warnBox{background:#fff7ed;border-left:6px solid var(--warn)}
-    .errBox{background:#fff1f2;border-left:6px solid var(--err)}
-    .boxTitle{font-weight:900}
+    .callout{border-left:6px solid rgba(47,111,62,.70)}
+    .warnBox{border-left:6px solid var(--warn)}
+    .errBox{border-left:6px solid var(--err)}
+    .boxTitle{font-weight:1100}
     .box .muted{margin-top:6px}
 
     /* TOC */
@@ -146,15 +151,15 @@
       border:1px solid var(--border);
       border-radius:16px;
       text-decoration:none;
-      background:#fff;
+      background:rgba(255,255,255,.78);
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
     .tocLink:hover{
       transform:translateY(-1px);
-      box-shadow:0 14px 22px rgba(2,6,23,.10);
-      border-color:#dbeafe;
+      box-shadow:0 14px 22px rgba(15,23,42,.12);
+      border-color:rgba(47,111,62,.25);
     }
-    .tocTitle{font-weight:900}
+    .tocTitle{font-weight:1100}
     .tocHint{color:var(--muted);font-size:12px}
 
     /* 2 columns */
@@ -169,40 +174,47 @@
     @media(max-width:980px){.side{position:relative;top:auto}}
 
     .sideCard{
-      background:#fff;border:1px solid var(--border);
-      border-radius:22px;padding:14px;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
+      background:rgba(255,255,255,.82);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:14px;
+      box-shadow:0 2px 10px rgba(15,23,42,.06);
     }
     .sideCard h3{margin:0 0 10px 0}
     .sideCard a{
       display:block;
       text-decoration:none;
       color:var(--blue);
-      font-weight:800;
+      font-weight:950;
       padding:8px 10px;
       border-radius:12px;
     }
-    .sideCard a:hover{background:#eff6ff}
+    .sideCard a:hover{background:rgba(47,111,62,.08)}
     .smallList{margin:6px 0 0 0;padding-left:18px}
     .badgePill{
       display:inline-flex;align-items:center;gap:6px;
       padding:6px 10px;border-radius:999px;
-      border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
+      font-weight:1100;font-size:12px;
     }
 
-    footer{
-      padding:26px 16px;text-align:center;color:var(--muted);font-size:13px
-    }
+    footer{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
   </style>
 </head>
 
-<body>
+<body class="theme-nature">
 <header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Méthodologie</h1>
-    <span class="pill"><span class="dot ok"></span> OFFICIEL</span>
-    <span class="pill"><span class="dot warn"></span> Hybrid</span>
-    <span class="pill"><span class="dot"></span> OSM + GPX</span>
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>MTB Points — Méthodologie</h1>
+      <span class="pill"><span class="dot ok"></span> OFFICIEL</span>
+      <span class="pill"><span class="dot warn"></span> Hybrid</span>
+      <span class="pill"><span class="dot"></span> OSM + GPX</span>
+    </div>
   </div>
 
   <nav>
@@ -227,10 +239,10 @@
     <div class="heroTop">
       <div style="min-width:260px;flex:1">
         <h2>Calculs & formules — version publique</h2>
-        <div class="muted">
+        <div class="mutedIntro">
           Cette page décrit les formules de calcul (MRS, ScorePhys, ScoreTech V2 Hybrid).
           Pour l’éligibilité, import, contrôle et litiges : voir
-          <a href="reglement.html" style="color:var(--blue);font-weight:900;text-decoration:none">Règlement</a>.
+          <a href="reglement.html" style="color:var(--blue);font-weight:1100;text-decoration:none">Règlement</a>.
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
@@ -248,7 +260,6 @@
   </section>
 
   <div class="twoCol">
-
     <!-- Main -->
     <div>
 
@@ -456,8 +467,8 @@ MRS = round(0.55 × ScorePhys + 0.45 × ScoreTech)</code></pre>
       <div class="sideCard" style="margin-top:12px;">
         <h3>Raccourcis</h3>
         <ul class="smallList">
-          <li><a href="reglement.html" style="color:var(--blue);font-weight:900;text-decoration:none">Règlement</a> : éligibilité, import, litiges</li>
-          <li><a href="challengemtbpoints.html" style="color:var(--blue);font-weight:900;text-decoration:none">Challenge</a> : badges & Hall of Fame</li>
+          <li><a href="reglement.html" style="color:var(--blue);font-weight:1100;text-decoration:none">Règlement</a> : éligibilité, import, litiges</li>
+          <li><a href="challengemtbpoints.html" style="color:var(--blue);font-weight:1100;text-decoration:none">Challenge</a> : badges & Hall of Fame</li>
         </ul>
       </div>
     </aside>
@@ -474,4 +485,3 @@ MRS = round(0.55 × ScorePhys + 0.45 × ScoreTech)</code></pre>
 </script>
 </body>
 </html>
-
