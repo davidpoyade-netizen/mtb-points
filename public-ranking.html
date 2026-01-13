@@ -1,15 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Classement public — MTB Points</title>
-
-  <link rel="stylesheet" href="./css/style.css" />
-  <!-- thème nature (si tu l’as déjà dans ton projet) -->
-  <link rel="stylesheet" href="./css/theme-nature.css" />
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Classement public — MTB Points</title>
+<link href="./css/style.css" rel="stylesheet"/>
+<!-- thème nature (si tu l’as déjà dans ton projet) -->
+<link href="./css/theme-nature.css" rel="stylesheet"/>
+<style>
     .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
     .tab{
       border:1px solid var(--border);
@@ -22,7 +21,7 @@
       transition:transform .12s ease, box-shadow .12s ease;
     }
     .tab:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
-    .tab.active{background:#fff;border-color:#bfdbfe;box-shadow:var(--shadow)}
+    .tab.active{background:#fff;border-color:rgba(47,111,62,.35);box-shadow:var(--shadow)}
 
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
     @media(max-width:980px){.grid2{grid-template-columns:1fr}}
@@ -61,92 +60,76 @@
     .empty{padding:14px;border-top:1px dashed var(--border);color:var(--muted)}
   </style>
 </head>
-
-<body>
+<body class="theme-nature">
 <header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Classement public</h1>
-    <span class="pill"><span class="dot ok"></span><span id="pillCount">0</span> affichés</span>
-  </div>
-
-  <nav class="nav">
-    <a href="index.html">Accueil</a>
-    <a href="public-ranking.html" class="active">Classement</a>
-    <a href="meetings.html">Événements</a>
-    <a href="challengemtbpoints.html">Challenge</a>
-  </nav>
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+<h1>MTB Points — Classement public</h1>
+<span class="pill"><span class="dot ok"></span><span id="pillCount">0</span> affichés</span>
+</div>
+<nav class="nav">
+<a href="index.html">Accueil</a>
+<a class="active" href="public-ranking.html">Classement</a>
+<a href="meetings.html">Événements</a>
+<a href="challengemtbpoints.html">Challenge</a>
+</nav>
 </header>
-
 <main class="wrap">
-  <div class="card">
-
-    <section class="hero">
-      <div class="heroTop">
-        <div style="min-width:260px;flex:1">
-          <h2>Global / Disciplines / Clubs</h2>
-          <p class="muted" style="margin:6px 0 0 0;">
-            Données : <code>v_public_results_enriched</code> (riders) & <code>v_public_clubs_ranking</code> (clubs).
+<div class="card">
+<section class="hero">
+<div class="heroTop">
+<div style="min-width:260px;flex:1">
+<h2>Global / Disciplines / Clubs</h2>
+<p class="muted" style="margin:6px 0 0 0;">
+            Données : <code>v_public_results_enriched</code> (riders) &amp; <code>v_public_clubs_ranking</code> (clubs).
           </p>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <span class="pill"><span class="dot"></span><span id="pillMode">Global</span></span>
-          <span class="pill"><span class="dot"></span><span id="pillRows">0</span> lignes</span>
-        </div>
-      </div>
-
-      <div class="tabs" id="tabs"></div>
-    </section>
-
-    <div class="filters">
-      <div class="spanAll">
-        <label for="q">Recherche</label>
-        <input id="q" type="text" placeholder="Nom rider / club…" />
-      </div>
-
-      <div>
-        <label for="nat">Pays</label>
-        <select id="nat"><option value="">Tous</option></select>
-      </div>
-
-      <div>
-        <label for="cat">Catégorie d’âge</label>
-        <select id="cat"><option value="">Toutes</option></select>
-      </div>
-
-      <div>
-        <label for="ageMin">Âge min</label>
-        <input id="ageMin" type="number" min="0" placeholder="ex: 18" />
-      </div>
-
-      <div>
-        <label for="ageMax">Âge max</label>
-        <input id="ageMax" type="number" min="0" placeholder="ex: 49" />
-      </div>
-
-      <div>
-        <label for="minPts">Points min</label>
-        <input id="minPts" type="number" min="0" placeholder="ex: 500" />
-      </div>
-
-      <div>
-        <label for="sortBy">Tri</label>
-        <select id="sortBy">
-          <option value="points_desc">Points ↓</option>
-          <option value="points_asc">Points ↑</option>
-          <option value="name_asc">Nom A→Z</option>
-        </select>
-      </div>
-
-      <div style="display:flex;align-items:flex-end">
-        <button class="btn" id="btnReset" type="button" style="width:100%">Réinitialiser</button>
-      </div>
-    </div>
-
-    <div id="content"></div>
-
-  </div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+<span class="pill"><span class="dot"></span><span id="pillMode">Global</span></span>
+<span class="pill"><span class="dot"></span><span id="pillRows">0</span> lignes</span>
+</div>
+</div>
+<div class="tabs" id="tabs"></div>
+</section>
+<div class="filters">
+<div class="spanAll">
+<label for="q">Recherche</label>
+<input id="q" placeholder="Nom rider / club…" type="text"/>
+</div>
+<div>
+<label for="nat">Pays</label>
+<select id="nat"><option value="">Tous</option></select>
+</div>
+<div>
+<label for="cat">Catégorie d’âge</label>
+<select id="cat"><option value="">Toutes</option></select>
+</div>
+<div>
+<label for="ageMin">Âge min</label>
+<input id="ageMin" min="0" placeholder="ex: 18" type="number"/>
+</div>
+<div>
+<label for="ageMax">Âge max</label>
+<input id="ageMax" min="0" placeholder="ex: 49" type="number"/>
+</div>
+<div>
+<label for="minPts">Points min</label>
+<input id="minPts" min="0" placeholder="ex: 500" type="number"/>
+</div>
+<div>
+<label for="sortBy">Tri</label>
+<select id="sortBy">
+<option value="points_desc">Points ↓</option>
+<option value="points_asc">Points ↑</option>
+<option value="name_asc">Nom A→Z</option>
+</select>
+</div>
+<div style="display:flex;align-items:flex-end">
+<button class="btn" id="btnReset" style="width:100%" type="button">Réinitialiser</button>
+</div>
+</div>
+<div id="content"></div>
+</div>
 </main>
-
 <script type="module">
 import { supabase } from "./js/supabaseClient.js";
 
@@ -236,10 +219,10 @@ import { supabase } from "./js/supabaseClient.js";
       }
       const it = map.get(k);
       it.points += (num(r.points) ?? 0);
-      it.sex = it.sex || normSex(r.sex);
+      it.sex = (it.sex ?? null) ?? normSex(r.sex);
       it.age = (it.age == null ? (num(r.age_on_year ?? r.age) ?? null) : it.age);
-      it.category = it.category || (r.age_category ?? r.category ?? null);
-      it.nationality = it.nationality || (r.nationality ?? r.nat ?? r.country ?? null);
+      it.category = (it.category ?? null) ?? (r.age_category ?? r.category ?? null);
+      it.nationality = (it.nationality ?? null) ?? (r.nationality ?? r.nat ?? r.country ?? null);
     }
 
     return Array.from(map.values()).map(x=>({ ...x, points: Math.round(x.points) }));
@@ -536,7 +519,5 @@ import { supabase } from "./js/supabaseClient.js";
 
 })();
 </script>
-
 </body>
 </html>
-
