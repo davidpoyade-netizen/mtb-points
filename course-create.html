@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Créer une épreuve — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/theme-nature.css" />
   <style>
     :root{
       --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
@@ -448,6 +449,21 @@
       wrap.style.display = "block";
       bar.style.width = `${Math.max(0, Math.min(100, prog))}%`;
     }
+
+  // Écoute les statuts émis par js/gpx.js (si dispo) pour un affichage plus fiable que le timer.
+  window.addEventListener("mtb:status", (e) => {
+    const d = e?.detail || {};
+    // d.progress est souvent 0..1
+    const prog = (typeof d.progress === "number") ? Math.round(d.progress * 100) : null;
+    const phaseLabel =
+      d.phase === "gpx" ? "GPX" :
+      d.phase === "osm" ? "OSM" :
+      d.phase === "done" ? "Terminé" :
+      d.phase === "error" ? "Erreur" :
+      (d.phase || "Analyse");
+
+    setStatus(phaseLabel, d.message || "Analyse en cours…", prog, $("statusSub")?.textContent || "");
+  });
   }
 
   // -------- meeting helpers (compat storage.js)
@@ -623,7 +639,7 @@
     showMsg("");
     setStatus("Préparation", "Lecture du fichier…", 8, "Démarrage…");
 
-    const TIMEOUT_MS = 25000;
+    const TIMEOUT_MS = 120000; // Render/Overpass peut être lent (cold start)
     const started = Date.now();
 
     let timeoutHandle = null;
@@ -691,7 +707,7 @@
 
       if (e?.message === "timeout"){
         setStatus("Timeout", "Analyse trop longue.", null, "Réessaie (GPX obligatoire).");
-        showMsg("Timeout analyse GPX/OSM.", false);
+        showMsg("Timeout analyse GPX/OSM. Astuce: si le serveur Render est en veille, la 1ère analyse peut prendre 1–2 minutes. Réessaie.", false);
       } else {
         setStatus("Erreur", "Analyse impossible.", null, "Vérifie le GPX ou le serveur.");
         showMsg("Erreur analyse GPX.", false);
