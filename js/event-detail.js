@@ -4,6 +4,7 @@
 (function () {
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
+  let _currentRace = null;
 
   function esc(s) {
     return String(s ?? "").replace(/[&<>"']/g, (m) =>
@@ -133,6 +134,7 @@
     }
 
     const race = findRaceSafe(id);
+    _currentRace = race;
     if (!race) {
       setAlert(`❌ Épreuve introuvable. (id: <code>${esc(id)}</code>)`);
       setPillMeeting("Introuvable", "err");
@@ -227,11 +229,9 @@
         ? `course-create.html?meetingId=${encodeURIComponent(meetingId)}`
         : "meetings.html";
     }
-  }// À la fin de render(), après avoir trouvé/chargé race :
-setupPdfButtons(() => race);
+  }
 
-
-  render();
+render();
   // ---- PDF (print to PDF)
 function buildPdfTitle(race) {
   const safe = (s) => String(s || "").trim().replace(/[\\/:*?"<>|]+/g, "-");
@@ -264,7 +264,39 @@ function setupPdfButtons(getRaceFn) {
   if (btnBottom) btnBottom.addEventListener("click", handler);
 }
 
+
+  // ---- PDF (print to PDF)
+  function buildPdfTitle(race) {
+    const safe = (s) => String(s || "").trim().replace(/[\\/:*?"<>|]+/g, "-");
+    const name = safe(race?.name || "epreuve");
+    const date = safe(race?.date || "");
+    return `MTB-Points_Fiche-epreuve_${name}${date ? "_" + date : ""}`;
+  }
+
+  function setupPdfButtons(getRaceFn) {
+    const btnTop = document.getElementById("btnPdfTop");
+    const btnBottom = document.getElementById("btnPdfBottom");
+
+    const handler = () => {
+      const race = typeof getRaceFn === "function" ? getRaceFn() : null;
+
+      const title = buildPdfTitle(race);
+      const prevTitle = document.title;
+      document.title = title;
+
+      // Petit délai : laisse Leaflet/canvas finir de peindre
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => { document.title = prevTitle; }, 250);
+      }, 250);
+    };
+
+    if (btnTop) btnTop.addEventListener("click", handler);
+    if (btnBottom) btnBottom.addEventListener("click", handler);
+  }
+
+  // wire PDF buttons once; race will be filled by render()
+  setupPdfButtons(() => _currentRace);
+
+  render();
 })();
-
-
-
