@@ -4,36 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>À propos — MTB Points</title>
+
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/theme-nature.css?v=20" />
 
   <style>
-    :root{
-      --bg:#f4f4f4;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#667085;
-      --muted2:#64748b;
-      --border:#e5e7eb;
-      --blue:#2563eb;
-      --blue2:#1d4ed8;
-      --shadow:0 10px 30px rgba(2,6,23,.10);
-      --r:22px;
-    }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
     a{color:inherit}
 
-    /* Header */
     header.header{
       position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
       padding:14px 16px;
       display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
@@ -43,50 +24,60 @@
       text-decoration:none;
       padding:8px 10px;border-radius:10px;
       color:var(--blue);
-      font-weight:800;font-size:13px;
+      font-weight:950;font-size:13px;
     }
-    nav a:hover{background:#eff6ff}
-    nav a.active{background:#eff6ff;color:var(--blue2)}
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+
     .lang{display:flex;gap:8px;align-items:center}
     .lang .btn{
-      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;font-size:12px;
+      padding:8px 10px;border-radius:12px;border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
+      cursor:pointer;font-weight:1000;font-size:12px;
     }
 
-    /* Layout */
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
     .card{
       background:var(--card);
       border:1px solid var(--border);
-      border-radius:var(--r);
+      border-radius:22px;
       padding:18px;
       box-shadow:var(--shadow);
     }
 
-    /* Hero */
     .hero{
       border-radius:22px;
       padding:18px;
       border:1px solid var(--border);
       background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.16), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.12), transparent 60%),
-        #fff;
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2);
     }
     .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
     .hero h2{margin:0;font-size:26px;letter-spacing:-.35px}
-    .hero p{margin:10px 0 0 0;color:#334155;line-height:1.65}
+    .lead{font-size:14px;line-height:1.7;color:#223024;margin:10px 0 0 0}
+
     .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;
       border:1px solid var(--border);
-      background:#fff;
-      font-weight:900;font-size:12px;
+      background:rgba(255,255,255,.78);
+      font-weight:1000;font-size:12px;
       white-space:nowrap;
     }
-    .dot{width:10px;height:10px;border-radius:999px;background:#93c5fd;display:inline-block}
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
 
-    /* Content */
     .grid{
       display:grid;
       grid-template-columns: 1.25fr .75fr;
@@ -96,95 +87,69 @@
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
 
     .panel{
-      border:1px solid var(--border);
-      border-radius:18px;
-      background:#fff;
+      border:1px solid rgba(40,60,40,.14);
+      border-radius:20px;
+      background:rgba(255,255,255,.82);
       padding:16px;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
+      box-shadow:0 2px 12px rgba(15,23,42,.06);
     }
 
     h3{margin:0 0 8px 0;font-size:16px;letter-spacing:-.15px}
-    .muted{color:var(--muted2)}
-    .lead{font-size:14px;line-height:1.7;color:#334155;margin:0}
+    .muted{color:var(--muted)}
     .sep{border-top:1px dashed var(--border);margin:14px 0}
 
     .callout{
-      border:1px solid var(--border);
-      border-left:5px solid var(--blue);
+      border:1px solid rgba(40,60,40,.14);
+      border-left:6px solid rgba(47,111,62,.70);
       border-radius:16px;
       padding:12px;
-      background:#eff6ff;
-      color:#0f172a;
+      background:rgba(255,255,255,.78);
+      color:var(--text);
     }
-    .callout p{margin:0;color:#0f172a;line-height:1.6}
+    .callout p{margin:0;line-height:1.6}
     .small{font-size:12px;color:var(--muted);line-height:1.6}
 
-    ul{
-      margin:10px 0 0 18px;
-      padding:0;
-      color:#334155;
-      line-height:1.65;
-      font-size:14px;
-    }
+    ul{margin:10px 0 0 18px;padding:0;line-height:1.65;font-size:14px}
     li{margin:6px 0}
 
-    .kpis{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin-top:10px;
-    }
+    .kpis{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
     .kpi{
-      border:1px solid var(--border);
+      border:1px solid rgba(40,60,40,.14);
       border-radius:16px;
       padding:12px;
-      background:#fff;
+      background:rgba(255,255,255,.78);
     }
-    .kpi .label{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:.02em;
-    }
-    .kpi .value{
-      margin-top:6px;
-      font-size:14px;
-      font-weight:1000;
-      color:#0f172a;
-      line-height:1.35;
-    }
+    .kpi .label{font-size:12px;color:var(--muted);font-weight:1000;text-transform:uppercase;letter-spacing:.02em}
+    .kpi .value{margin-top:6px;font-size:14px;font-weight:1100;color:var(--text);line-height:1.35}
 
     .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     .btnLink{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
+      background:rgba(255,255,255,.78);
+      cursor:pointer;font-weight:1000;color:var(--text);
       text-decoration:none;
       transition:transform .12s ease, box-shadow .12s ease;
     }
-    .btnLink:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
-    .btnLink.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btnLink.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-
-    footer{
-      margin-top:14px;
-      text-align:center;
-      color:var(--muted);
-      font-size:12px;
+    .btnLink:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(15,23,42,.10)}
+    .btnLink.primary{
+      background:linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));
+      border-color:rgba(37,90,49,1);
+      color:#fff;
     }
 
-    /* Accessibility focus */
-    a:focus, button:focus{
-      outline:3px solid rgba(37,99,235,.25);
-      outline-offset:2px;
-    }
+    footer{margin-top:14px;text-align:center;color:var(--muted);font-size:12px}
   </style>
 </head>
 
-<body>
+<body class="theme-nature">
 <header class="header">
-  <h1>MTB Points — À propos</h1>
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+    <h1>MTB Points — À propos</h1>
+  </div>
 
   <nav>
     <a href="index.html">Accueil</a>
@@ -206,7 +171,6 @@
 <main class="wrap">
   <div class="card">
 
-    <!-- HERO -->
     <section class="hero">
       <div class="heroTop">
         <div style="min-width:260px;flex:1">
@@ -226,7 +190,6 @@
 
     <div class="grid">
 
-      <!-- LEFT: Story + Method -->
       <section class="panel">
         <h3>Pourquoi ce projet ?</h3>
         <p class="lead">
@@ -261,8 +224,8 @@
         </p>
 
         <p class="small" style="margin-top:10px;">
-          Pour tous les détails de calcul : <a href="methodologie.html" style="color:var(--blue);font-weight:900;text-decoration:none;">Méthodologie (calcul)</a>.
-          Pour l’éligibilité, l’import, la modération : <a href="reglement.html" style="color:var(--blue);font-weight:900;text-decoration:none;">Règlement</a>.
+          Pour tous les détails de calcul : <a href="methodologie.html" style="color:var(--blue);font-weight:1000;text-decoration:none;">Méthodologie (calcul)</a>.
+          Pour l’éligibilité, l’import, la modération : <a href="reglement.html" style="color:var(--blue);font-weight:1000;text-decoration:none;">Règlement</a>.
         </p>
 
         <div class="btnRow">
@@ -272,7 +235,6 @@
         </div>
       </section>
 
-      <!-- RIGHT: Features -->
       <aside class="panel">
         <h3 data-i18n="about.features">Fonctionnalités</h3>
         <ul>
@@ -323,7 +285,6 @@
 
 <script src="js/i18n.js"></script>
 <script>
-  // Si ton i18n.js expose bien ces fonctions, on garde le comportement existant.
   if (typeof bindLangButtons === "function") bindLangButtons();
   if (typeof applyI18n === "function") applyI18n();
 </script>
