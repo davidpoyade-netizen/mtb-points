@@ -2,196 +2,820 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Classement public — MTB Points</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Base design system -->
+  <link rel="stylesheet" href="./css/style.css" />
+  <!-- Theme nature (si tu l’as) -->
+  <link rel="stylesheet" href="./css/theme-nature.css" />
 
   <style>
-    .tabs { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px }
-    .tab {
-      padding:8px 14px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#fff;
-      font-weight:900;
-      cursor:pointer;
+    /* Petites compléments layout (reste compatible style.css) */
+    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .tab{
+      border:1px solid var(--border); background:rgba(255,255,255,.75);
+      padding:10px 12px; border-radius:999px; cursor:pointer; font-weight:900;
     }
-    .tab.active { background:#eff6ff; color:var(--blue2); border-color:#bfdbfe }
+    .tab.active{background:#fff; box-shadow:var(--shadow); border-color:#d1d5db}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .grid4{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    @media(max-width:980px){ .grid2,.grid4{grid-template-columns:1fr} }
 
-    .rankingGrid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin-top:14px;
-    }
-    @media(max-width:900px){ .rankingGrid{grid-template-columns:1fr} }
-
-    .panel {
+    .panel{
       border:1px solid var(--border);
       border-radius:18px;
       background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
       overflow:hidden;
     }
-    .panelHead {
+    .panelHead{
       padding:12px 14px;
-      font-weight:1000;
-      background:#f8fafc;
       border-bottom:1px solid var(--border);
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;
+      background:rgba(255,255,255,.65);
     }
-    table { width:100%; border-collapse:collapse }
-    th, td {
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
-      font-size:13px;
-      text-align:left;
+    .panelHead h3{margin:0;font-size:14px;letter-spacing:-.1px}
+    .panelBody{padding:0}
+
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    thead th{
+      position:sticky;top:0;background:#fff;z-index:1;
+      text-align:left;font-size:12px;color:#475569;
+      padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap;
     }
-    th { font-size:12px; color:#475569 }
-    .rank { font-weight:1000 }
-    .points { font-weight:1000 }
+    tbody td{
+      padding:10px 12px;border-bottom:1px solid var(--border);
+      font-size:13px;vertical-align:top;
+    }
+    tbody tr:hover td{background:#fbfdff}
+    tbody tr:last-child td{border-bottom:0}
+    .rank{font-weight:1000}
+    .name{font-weight:1000}
+    .small{font-size:12px;color:var(--muted)}
+    .points{font-weight:1000;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+    .empty{padding:14px;border-top:1px dashed var(--border);color:var(--muted)}
+
+    .sourceBox{
+      margin-top:14px;
+      padding:12px 14px;
+      border:1px dashed var(--border);
+      border-radius:14px;
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+      font-size:12px;
+      background:rgba(255,255,255,.55);
+    }
+    .sourceBox b{color:var(--text)}
   </style>
 </head>
 
 <body>
 <header class="header">
-  <h1>MTB Points — Classement public</h1>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Classement public</h1>
+    <span class="pill"><span class="dot ok"></span><span id="pillCount">0</span></span>
+  </div>
+
   <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html" class="active">Classement</a>
     <a href="meetings.html">Événements</a>
+    <a href="events.html">Épreuves</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="about.html">À propos</a>
   </nav>
 </header>
 
 <main class="wrap">
   <div class="card">
 
-    <!-- TABS -->
-    <div class="tabs" id="tabs"></div>
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2>Classements — Riders & Clubs</h2>
+          <div class="heroMeta">
+            Onglets par discipline (XCC / XCO / XCM / Gravel / DH / Enduro) + Clubs.
+          </div>
+          <div class="heroDesc">
+            Source idéale : <code>v_public_results</code> (pour discipline + ebike). Fallback possible si vue absente.
+          </div>
+        </div>
 
-    <!-- FILTERS -->
-    <div class="filters">
-      <div>
-        <label>Recherche</label>
-        <input id="q" placeholder="Nom rider, club…" />
+        <div class="heroActions">
+          <span class="pill"><span class="dot"></span><span id="pillMode">Global</span></span>
+          <span class="pill"><span class="dot"></span><span id="pillRows">0</span> lignes</span>
+          <span class="pill"><span class="dot warn"></span><span id="pillSource">—</span></span>
+        </div>
       </div>
+
+      <div class="tabs" id="tabs"></div>
+    </section>
+
+    <!-- Filters (toujours visibles comme demandé) -->
+    <div class="filters" style="margin-top:14px;">
+      <div class="spanAll">
+        <label for="q">Recherche</label>
+        <input id="q" type="text" placeholder="Nom rider / club…" />
+      </div>
+
       <div>
-        <label>Pays</label>
+        <label for="nat">Pays</label>
         <select id="nat"><option value="">Tous</option></select>
       </div>
+
       <div>
-        <label>Catégorie âge</label>
+        <label for="cat">Catégorie d’âge</label>
         <select id="cat"><option value="">Toutes</option></select>
+      </div>
+
+      <div>
+        <label for="ageMin">Âge min</label>
+        <input id="ageMin" type="number" min="0" placeholder="ex: 18" />
+      </div>
+
+      <div>
+        <label for="ageMax">Âge max</label>
+        <input id="ageMax" type="number" min="0" placeholder="ex: 49" />
+      </div>
+
+      <div>
+        <label for="minPts">Points min</label>
+        <input id="minPts" type="number" min="0" placeholder="ex: 500" />
+      </div>
+
+      <div>
+        <label for="sortBy">Tri</label>
+        <select id="sortBy">
+          <option value="points_desc">Points ↓</option>
+          <option value="points_asc">Points ↑</option>
+          <option value="name_asc">Nom A→Z</option>
+        </select>
+      </div>
+
+      <div style="display:flex;align-items:flex-end">
+        <button class="btn" id="btnReset" type="button" style="width:100%">Réinitialiser</button>
       </div>
     </div>
 
     <!-- CONTENT -->
     <div id="content"></div>
 
+    <div class="sourceBox">
+      <div><b>Source:</b> <span id="sourceLabel">—</span></div>
+      <div id="sourceHint" class="muted">—</div>
+    </div>
+
   </div>
 </main>
 
-<script>
-/* ===========================
-   CONFIGURATION DES ONGLES
-=========================== */
-const TABS = [
-  { key:"global", label:"Global" },
-  { key:"xcc", label:"XCC" },
-  { key:"xco", label:"XCO" },
-  { key:"xcm", label:"XCM" },
-  { key:"gravel", label:"Gravel" },
-  { key:"dh", label:"DH" },
-  { key:"enduro", label:"Enduro" },
-  { key:"club", label:"Clubs" },
-];
+<!-- deps locales (fallback localStorage) -->
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
 
-let ACTIVE_TAB = "global";
+<script type="module">
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const esc = (s)=>String(s??"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const num = (x)=>{ const n = Number(String(x??"").replace(",", ".").trim()); return Number.isFinite(n) ? n : null; };
 
-/* ===========================
-   INIT TABS
-=========================== */
-const tabsEl = document.getElementById("tabs");
-TABS.forEach(t => {
-  const b = document.createElement("button");
-  b.className = "tab";
-  b.textContent = t.label;
-  b.onclick = () => {
-    ACTIVE_TAB = t.key;
-    render();
-  };
-  tabsEl.appendChild(b);
-});
+  function setSource(kind, hint){
+    $("pillSource").textContent = kind || "—";
+    $("sourceLabel").textContent = kind || "—";
+    $("sourceHint").textContent = hint || "—";
+    const dot = $("pillSource")?.closest(".pill")?.querySelector(".dot");
+    if (dot){
+      dot.classList.remove("ok","warn","err");
+      dot.classList.add(kind === "Supabase" ? "ok" : "warn");
+    }
+  }
 
-/* ===========================
-   RENDER
-=========================== */
-function render(){
-  document.querySelectorAll(".tab").forEach(t=>{
-    t.classList.toggle("active", t.textContent.toLowerCase() === ACTIVE_TAB);
+  // -------- normalization helpers (mêmes idées que tes pages existantes)
+  function pick(obj, keys){
+    for (const k of keys){
+      if (obj && obj[k] != null && String(obj[k]).trim() !== "") return obj[k];
+    }
+    return null;
+  }
+  function normSex(v){
+    const s = String(v||"").trim().toLowerCase();
+    if (!s) return null;
+    if (["m","h","homme","male","masculin"].includes(s)) return "M";
+    if (["f","femme","female","feminin","féminin"].includes(s)) return "F";
+    return null;
+  }
+  function normDisc(v){ return (String(v||"").trim()) || ""; }
+  function isEbike(v){
+    if (v == null) return null;
+    const s = String(v).trim().toLowerCase();
+    if (s === "1" || s === "true" || s === "yes") return true;
+    if (s === "0" || s === "false" || s === "no") return false;
+    return null;
+  }
+
+  // -------- Tabs demandés
+  const TABS = [
+    { key:"global", label:"Global", disc:null, grid:"2" },
+
+    { key:"xcc", label:"XCC", disc:"XCC", grid:"4" },
+    { key:"xco", label:"XCO", disc:"XCO", grid:"4" },
+    { key:"xcm", label:"XCM", disc:"XCM", grid:"4" },
+
+    { key:"gravel", label:"Gravel", disc:"Gravel", grid:"4" },
+    { key:"dh", label:"DH", disc:"DH", grid:"4" },
+    { key:"enduro", label:"Enduro", disc:"Enduro", grid:"4" },
+
+    { key:"club", label:"Club", disc:null, grid:"club" },
+  ];
+
+  let ACTIVE_TAB = "global";
+
+  function buildTabs(){
+    const root = $("tabs");
+    root.innerHTML = "";
+    for (const t of TABS){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = `tab ${t.key === ACTIVE_TAB ? "active" : ""}`;
+      b.textContent = t.label;
+      b.addEventListener("click", ()=>{
+        ACTIVE_TAB = t.key;
+        buildTabs();
+        renderAll();
+      });
+      root.appendChild(b);
+    }
+  }
+
+  // -------- Data sources (Supabase -> localStorage)
+  let SOURCE_MODE = "Local";
+  let rows = [];
+  let racesById = new Map();
+
+  function safeJson(key){
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(_){ return null; }
+  }
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    const arr = safeJson("mtb.races.v1");
+    return Array.isArray(arr) ? arr : [];
+  }
+  function listResultsSafe(){
+    if (typeof window.listResults === "function") return window.listResults();
+    if (typeof window.getResults === "function") return window.getResults();
+    const arr = safeJson("mtb.results.v1");
+    return Array.isArray(arr) ? arr : [];
+  }
+
+  function normalizeLocalRace(r){
+    return {
+      id: r?.id ?? null,
+      disc: normDisc(r?.disc ?? r?.discipline),
+      ebike: (r?.ebike ?? r?.isEbike ?? r?.eBike ?? null),
+    };
+  }
+
+  function normalizeRow(r){
+    return {
+      raceId: r?.raceId ?? r?.race_id ?? r?.eventId ?? null,
+      points: num(r?.points ?? r?.score ?? r?.mtbPoints) ?? 0,
+
+      riderId: pick(r, ["riderId","rider_id","athlete_id","id"]) || null,
+      riderEmail: (pick(r, ["riderEmail","email","mail","e-mail"]) || "").toString().trim().toLowerCase() || null,
+      riderName: (pick(r, ["riderName","name","nom","prenom","prénom","athlete","coureur"]) || "").toString().trim() || null,
+
+      sex: normSex(pick(r, ["sex","gender","sexe"])),
+      age: num(pick(r, ["age","âge","age_on_year"])),
+
+      category: (pick(r, ["age_category","ageCat","category","cat","categorie","catégorie"]) || "").toString().trim() || null,
+      nationality: (pick(r, ["nationality","nation","country","pays","nat"]) || "").toString().trim() || null,
+
+      club: (pick(r, ["club","team","equipe","équipe","club_name","team_name"]) || "").toString().trim() || null,
+
+      // discipline / ebike (si v_public_results les donne)
+      disc: normDisc(pick(r, ["disc","discipline"])),
+      ebike: (pick(r, ["ebike","isEbike","eBike"]) ?? null),
+    };
+  }
+
+  async function tryLoadFromSupabase(){
+    try{
+      const { supabase } = await import("./js/supabaseClient.js");
+
+      // 1) v_public_results (idéal)
+      try{
+        const { data, error } = await supabase
+          .from("v_public_results")
+          .select("*")
+          .limit(20000);
+
+        if (error) throw error;
+
+        rows = (data || []).map(normalizeRow).filter(x => x.riderEmail || x.riderName);
+        SOURCE_MODE = "Supabase";
+        setSource("Supabase", "Source: v_public_results (disciplines + ebike + clubs possibles).");
+        return true;
+      } catch(_){
+        // 2) fallback v_public_ranking (agrégé)
+        const { data, error } = await supabase
+          .from("v_public_ranking")
+          .select("*")
+          .order("score", { ascending: false })
+          .limit(20000);
+
+        if (error) throw error;
+
+        rows = (data || []).map(r => normalizeRow({
+          score: r.score ?? r.points,
+          nationality: r.nationality ?? r.nat,
+          age_on_year: r.age_on_year ?? r.age,
+          age_category: r.age_category ?? r.category,
+          sex: r.sex,
+          name: r.name ?? `${r.last_name || ""} ${r.first_name || ""}`.trim(),
+          // pas de disc/ebike/club fiables dans ce fallback
+        })).filter(x => x.riderName);
+
+        SOURCE_MODE = "Supabase";
+        setSource("Supabase", "Source: v_public_ranking (agrégé : onglets discipline/club limités).");
+        return true;
+      }
+    } catch(e){
+      return false;
+    }
+  }
+
+  function loadFromLocal(){
+    const races = listRacesSafe().map(normalizeLocalRace);
+    racesById = new Map(races.filter(r => r.id).map(r => [r.id, r]));
+    rows = listResultsSafe().map(normalizeRow).filter(x => x.riderEmail || x.riderName);
+    SOURCE_MODE = "Local";
+    setSource("Local", "Source: localStorage (mtb.results.v1 + mtb.races.v1).");
+  }
+
+  // -------- tab filter (discipline + ebike)
+  function tabDef(){ return TABS.find(t => t.key === ACTIVE_TAB) || TABS[0]; }
+
+  function rowDisc(row){
+    // priorité à row.disc, sinon via race
+    return (row.disc || racesById.get(row.raceId)?.disc || "").toString();
+  }
+  function rowEbike(row){
+    const v = (row.ebike ?? racesById.get(row.raceId)?.ebike);
+    return isEbike(v);
+  }
+
+  function passesTab(row, wantDisc, wantEbike){
+    if (wantDisc){
+      const d = rowDisc(row).toLowerCase();
+      if (d !== String(wantDisc).toLowerCase()) return false;
+    }
+    if (wantEbike !== null){
+      const e = rowEbike(row);
+      if (e === null) return false;
+      if (e !== wantEbike) return false;
+    }
+    return true;
+  }
+
+  // -------- aggregate riders (par tab + (option) ebike)
+  function riderKey(r){
+    return r.riderEmail ? `email:${r.riderEmail}` :
+           r.riderId ? `id:${r.riderId}` :
+           `name:${(r.riderName||"").toLowerCase()}`;
+  }
+
+  function aggregateRiders({disc=null, ebike=null}){
+    const map = new Map();
+
+    for (const r of rows){
+      if (!passesTab(r, disc, ebike)) continue;
+
+      const key = riderKey(r);
+      if (!key || key.endsWith(":")) continue;
+
+      if (!map.has(key)){
+        map.set(key, {
+          key,
+          name: r.riderName || (r.riderEmail || "Rider"),
+          email: r.riderEmail,
+          sex: r.sex || null,
+          age: r.age ?? null,
+          category: r.category || null,
+          nationality: r.nationality || null,
+          points: 0,
+          rows: 0
+        });
+      }
+      const it = map.get(key);
+
+      it.name = it.name || r.riderName || it.email || "Rider";
+      it.sex = it.sex || r.sex || null;
+      it.age = (it.age == null && r.age != null) ? r.age : it.age;
+      it.category = it.category || r.category || null;
+      it.nationality = it.nationality || r.nationality || null;
+
+      it.points += (num(r.points) ?? 0);
+      it.rows += 1;
+    }
+
+    return Array.from(map.values()).map(x => ({
+      ...x,
+      points: Math.round(x.points)
+    }));
+  }
+
+  // -------- aggregate clubs (tab disc + ebike)
+  function aggregateClubs({disc=null, ebike=null}){
+    const map = new Map();
+
+    for (const r of rows){
+      if (!passesTab(r, disc, ebike)) continue;
+      if (!r.club) continue;
+
+      const key = r.club.trim().toLowerCase();
+      if (!key) continue;
+
+      if (!map.has(key)){
+        map.set(key, {
+          club: r.club,
+          nationality: r.nationality || null,
+          points: 0,
+          results: 0,
+          ridersSet: new Set()
+        });
+      }
+      const it = map.get(key);
+
+      it.points += (num(r.points) ?? 0);
+      it.results += 1;
+
+      const rk = r.riderEmail ? `email:${r.riderEmail}` :
+                r.riderId ? `id:${r.riderId}` :
+                r.riderName ? `name:${r.riderName.toLowerCase()}` : null;
+      if (rk) it.ridersSet.add(rk);
+
+      it.nationality = it.nationality || r.nationality || null;
+    }
+
+    return Array.from(map.values()).map(x => ({
+      club: x.club,
+      nationality: x.nationality,
+      points: Math.round(x.points),
+      results: x.results,
+      riders: x.ridersSet.size
+    }));
+  }
+
+  // -------- filters
+  function fillFilterOptions(riders){
+    const nats = Array.from(new Set(riders.map(r=> (r.nationality||"").trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+    const cats = Array.from(new Set(riders.map(r=> (r.category||"").trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+
+    const natSel = $("nat");
+    const catSel = $("cat");
+
+    const keepNat = natSel.value;
+    const keepCat = catSel.value;
+
+    natSel.innerHTML = `<option value="">Tous</option>` + nats.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+    catSel.innerHTML = `<option value="">Toutes</option>` + cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+
+    if (keepNat) natSel.value = keepNat;
+    if (keepCat) catSel.value = keepCat;
+  }
+
+  function applyRiderFilters(riders){
+    const q = ($("q").value || "").trim().toLowerCase();
+    const nat = ($("nat").value || "").trim();
+    const cat = ($("cat").value || "").trim();
+    const ageMin = num($("ageMin").value);
+    const ageMax = num($("ageMax").value);
+    const minPts = num($("minPts").value) ?? 0;
+
+    return riders.filter(r=>{
+      if (q){
+        const hay = `${r.name||""} ${r.email||""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (nat && (r.nationality||"") !== nat) return false;
+      if (cat && (r.category||"") !== cat) return false;
+      if (ageMin != null && (r.age == null || r.age < ageMin)) return false;
+      if (ageMax != null && (r.age == null || r.age > ageMax)) return false;
+      if ((r.points ?? 0) < minPts) return false;
+      return true;
+    });
+  }
+
+  function applyClubFilters(clubs){
+    const q = ($("q").value || "").trim().toLowerCase();
+    const nat = ($("nat").value || "").trim();
+    const minPts = num($("minPts").value) ?? 0;
+
+    return clubs.filter(c=>{
+      if (q && !String(c.club||"").toLowerCase().includes(q)) return false;
+      if (nat && (c.nationality||"") !== nat) return false;
+      if ((c.points ?? 0) < minPts) return false;
+      return true;
+    });
+  }
+
+  function sortRiders(arr){
+    const s = $("sortBy").value || "points_desc";
+    const a = arr.slice();
+    a.sort((x,y)=>{
+      if (s === "points_desc") return (y.points||0) - (x.points||0);
+      if (s === "points_asc") return (x.points||0) - (y.points||0);
+      if (s === "name_asc") return String(x.name||"").toLowerCase().localeCompare(String(y.name||"").toLowerCase());
+      return 0;
+    });
+    return a;
+  }
+
+  function sortClubs(arr){
+    const s = $("sortBy").value || "points_desc";
+    const a = arr.slice();
+    a.sort((x,y)=>{
+      if (s === "points_desc") return (y.points||0) - (y.points||0) + ((y.points||0)-(x.points||0)); // safe
+      if (s === "points_asc") return (x.points||0) - (y.points||0);
+      if (s === "name_asc") return String(x.club||"").toLowerCase().localeCompare(String(y.club||"").toLowerCase());
+      return (y.points||0) - (x.points||0);
+    });
+    return a;
+  }
+
+  // -------- rendering
+  function renderRiderTable(tbodyId, emptyId, list){
+    const tb = $(tbodyId);
+    const empty = $(emptyId);
+    tb.innerHTML = "";
+
+    if (!list.length){
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    list.forEach((r, idx)=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="rank">${idx + 1}</td>
+        <td>
+          <div class="name">${esc(r.name || "Rider")}</div>
+          <div class="small">${r.email ? esc(r.email) : "—"}</div>
+        </td>
+        <td>
+          <div><b>${esc(r.category || "—")}</b></div>
+          <div class="small">Âge : ${r.age != null ? esc(String(r.age)) : "—"}</div>
+        </td>
+        <td>${esc(r.nationality || "—")}</td>
+        <td class="points">${esc(String(r.points ?? 0))} pts</td>
+      `;
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderClubTable(tbodyId, emptyId, list){
+    const tb = $(tbodyId);
+    const empty = $(emptyId);
+    tb.innerHTML = "";
+
+    if (!list.length){
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    list.forEach((c, idx)=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="rank">${idx + 1}</td>
+        <td>
+          <div class="name">${esc(c.club || "—")}</div>
+          <div class="small">${esc(c.nationality || "—")}</div>
+        </td>
+        <td style="width:120px;">${esc(String(c.riders ?? 0))}</td>
+        <td style="width:120px;">${esc(String(c.results ?? 0))}</td>
+        <td class="points" style="width:120px;">${esc(String(c.points ?? 0))} pts</td>
+      `;
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderLayoutGlobal(men, women){
+    $("content").innerHTML = `
+      <div class="grid2">
+        <section class="panel">
+          <div class="panelHead">
+            <h3>👨 Hommes</h3>
+            <span class="pill"><span class="dot"></span><span id="countM">0</span></span>
+          </div>
+          <div class="panelBody">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:56px;">#</th>
+                  <th>Rider</th>
+                  <th style="width:150px;">Cat / Âge</th>
+                  <th style="width:120px;">Nation</th>
+                  <th style="width:110px;">Points</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyM"></tbody>
+            </table>
+            <div id="emptyM" class="empty" style="display:none;">Aucun rider homme avec ces filtres.</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panelHead">
+            <h3>👩 Femmes</h3>
+            <span class="pill"><span class="dot"></span><span id="countF">0</span></span>
+          </div>
+          <div class="panelBody">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:56px;">#</th>
+                  <th>Rider</th>
+                  <th style="width:150px;">Cat / Âge</th>
+                  <th style="width:120px;">Nation</th>
+                  <th style="width:110px;">Points</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyF"></tbody>
+            </table>
+            <div id="emptyF" class="empty" style="display:none;">Aucune rider femme avec ces filtres.</div>
+          </div>
+        </section>
+      </div>
+    `;
+
+    $("countM").textContent = String(men.length);
+    $("countF").textContent = String(women.length);
+
+    renderRiderTable("tbodyM","emptyM", men);
+    renderRiderTable("tbodyF","emptyF", women);
+  }
+
+  function renderLayout4(panels){
+    $("content").innerHTML = `
+      <div class="grid4">
+        ${panels.map(p=>`
+          <section class="panel">
+            <div class="panelHead">
+              <h3>${esc(p.title)}</h3>
+              <span class="pill"><span class="dot"></span><span id="${esc(p.countId)}">0</span></span>
+            </div>
+            <div class="panelBody">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:56px;">#</th>
+                    <th>Rider</th>
+                    <th style="width:150px;">Cat / Âge</th>
+                    <th style="width:120px;">Nation</th>
+                    <th style="width:110px;">Points</th>
+                  </tr>
+                </thead>
+                <tbody id="${esc(p.tbodyId)}"></tbody>
+              </table>
+              <div id="${esc(p.emptyId)}" class="empty" style="display:none;">Aucun résultat.</div>
+            </div>
+          </section>
+        `).join("")}
+      </div>
+    `;
+
+    for (const p of panels){
+      $(p.countId).textContent = String(p.data.length);
+      renderRiderTable(p.tbodyId, p.emptyId, p.data);
+    }
+  }
+
+  function renderLayoutClubs(list){
+    $("content").innerHTML = `
+      <section class="panel" style="margin-top:12px;">
+        <div class="panelHead">
+          <h3>🏁 Classement Clubs</h3>
+          <span class="pill"><span class="dot"></span><span id="countClubs">0</span></span>
+        </div>
+        <div class="panelBody">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:56px;">#</th>
+                <th>Club</th>
+                <th>Riders</th>
+                <th>Résultats</th>
+                <th>Points</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyClubs"></tbody>
+          </table>
+          <div id="emptyClubs" class="empty" style="display:none;">Aucun club avec ces filtres.</div>
+        </div>
+      </section>
+    `;
+
+    $("countClubs").textContent = String(list.length);
+    renderClubTable("tbodyClubs","emptyClubs", list);
+  }
+
+  function renderAll(){
+    const t = tabDef();
+    $("pillMode").textContent = t.label;
+    $("pillRows").textContent = String(rows.length);
+
+    // Pour les listes déroulantes, on se base sur un agrégat "global riders"
+    // afin d’avoir des options stables même quand on change d’onglet.
+    const optsBase = aggregateRiders({disc:null, ebike:null});
+    fillFilterOptions(optsBase);
+
+    // UX: en onglet "Club", la catégorie d’âge/âge min/max ne sert pas.
+    const isClub = (t.key === "club");
+    $("cat").disabled = isClub;
+    $("ageMin").disabled = isClub;
+    $("ageMax").disabled = isClub;
+
+    if (isClub){
+      const clubsAgg = aggregateClubs({disc:null, ebike:null});
+      let clubs = applyClubFilters(clubsAgg);
+      clubs = sortClubs(clubs);
+      $("pillCount").textContent = String(clubs.length);
+      renderLayoutClubs(clubs);
+      return;
+    }
+
+    if (t.key === "global"){
+      let riders = aggregateRiders({disc:null, ebike:null});
+      riders = applyRiderFilters(riders);
+      riders = sortRiders(riders);
+
+      const men = riders.filter(r=>r.sex==="M");
+      const women = riders.filter(r=>r.sex==="F");
+
+      $("pillCount").textContent = String(riders.length);
+      renderLayoutGlobal(men, women);
+      return;
+    }
+
+    // disciplines en 2x2 : (Musculaire H/F) + (E-bike H/F)
+    const disc = t.disc;
+
+    let mMen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="M");
+    let mWomen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="F");
+    let eMen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="M");
+    let eWomen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="F");
+
+    mMen = sortRiders(applyRiderFilters(mMen));
+    mWomen = sortRiders(applyRiderFilters(mWomen));
+    eMen = sortRiders(applyRiderFilters(eMen));
+    eWomen = sortRiders(applyRiderFilters(eWomen));
+
+    const totalShown = mMen.length + mWomen.length + eMen.length + eWomen.length;
+    $("pillCount").textContent = String(totalShown);
+
+    renderLayout4([
+      { title:"💪 Musculaire — Hommes", data:mMen, countId:"c1", tbodyId:"tb1", emptyId:"e1" },
+      { title:"💪 Musculaire — Femmes", data:mWomen, countId:"c2", tbodyId:"tb2", emptyId:"e2" },
+      { title:"⚡ E-bike — Hommes", data:eMen, countId:"c3", tbodyId:"tb3", emptyId:"e3" },
+      { title:"⚡ E-bike — Femmes", data:eWomen, countId:"c4", tbodyId:"tb4", emptyId:"e4" },
+    ]);
+  }
+
+  // events
+  $("btnReset").addEventListener("click", ()=>{
+    $("q").value = "";
+    $("nat").value = "";
+    $("cat").value = "";
+    $("ageMin").value = "";
+    $("ageMax").value = "";
+    $("minPts").value = "";
+    $("sortBy").value = "points_desc";
+    renderAll();
   });
 
-  const root = document.getElementById("content");
-  root.innerHTML = "";
+  ["q","nat","cat","ageMin","ageMax","minPts","sortBy"].forEach(id=>{
+    $(id).addEventListener("input", renderAll);
+    $(id).addEventListener("change", renderAll);
+  });
 
-  if (ACTIVE_TAB === "club") {
-    root.innerHTML = `<p class="muted">Classement clubs (à venir)</p>`;
-    return;
-  }
+  (async function init(){
+    buildTabs();
 
-  // Global → 2 colonnes
-  if (ACTIVE_TAB === "global") {
-    root.appendChild(buildTwoCols("Hommes","Femmes"));
-    return;
-  }
+    const ok = await tryLoadFromSupabase();
+    if (!ok) loadFromLocal();
 
-  // Disciplines → 2x2
-  root.appendChild(buildFourCols());
-}
+    // racesById utile si localStorage (disc/ebike au niveau race)
+    const races = listRacesSafe().map(normalizeLocalRace);
+    racesById = new Map(races.filter(r => r.id).map(r => [r.id, r]));
 
-/* ===========================
-   BUILDERS
-=========================== */
-function buildTwoCols(labelM, labelF){
-  const grid = document.createElement("div");
-  grid.className = "rankingGrid";
-  grid.appendChild(panel(labelM));
-  grid.appendChild(panel(labelF));
-  return grid;
-}
+    renderAll();
+  })();
 
-function buildFourCols(){
-  const grid = document.createElement("div");
-  grid.className = "rankingGrid";
-  grid.appendChild(panel("Hommes – Musculaire"));
-  grid.appendChild(panel("Femmes – Musculaire"));
-  grid.appendChild(panel("Hommes – E-bike"));
-  grid.appendChild(panel("Femmes – E-bike"));
-  return grid;
-}
-
-function panel(title){
-  const p = document.createElement("div");
-  p.className = "panel";
-  p.innerHTML = `
-    <div class="panelHead">${title}</div>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Rider</th>
-          <th>Cat</th>
-          <th>Pays</th>
-          <th>Pts</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td colspan="5" class="muted">Chargement…</td></tr>
-      </tbody>
-    </table>
-  `;
-  return p;
-}
-
-render();
+})();
 </script>
+
 </body>
 </html>
