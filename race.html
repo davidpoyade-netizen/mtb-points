@@ -10,6 +10,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/theme-nature.css" />
 
   <style>
     /* Base (compatible avec ton style.css) */
@@ -63,7 +64,7 @@
   </style>
 </head>
 
-<body>
+<body class="theme-nature">
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1 style="margin:0;font-size:18px">MTB Points — Fiche épreuve</h1>
@@ -296,10 +297,7 @@
 </div>
 
 <!-- Scripts projet -->
-<script src="js/storage.js"></script>
-
-<!-- Important : ton event-detail.js doit maintenant remplir les IDs de race.html -->
-<script src="js/event-detail.js"></script>
+<script type="module" src="js/race.js"></script>
 
 <script>
   // Petits helpers visuels de statut (optionnel)
