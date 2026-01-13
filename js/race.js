@@ -28,6 +28,11 @@
     el.textContent = (v === null || v === undefined || v === "") ? "—" : String(v);
   };
 
+
+  const setTextMulti = (ids, v) => {
+    (Array.isArray(ids) ? ids : [ids]).forEach((id) => setText(id, v));
+  };
+
   const setHTML = (id, html) => {
     const el = $(id);
     if (!el) return;
@@ -68,7 +73,7 @@
     return race?.analysis || race?.analysis_json || race?.raw || null;
   }
 
-  function extractPoints(analysis) {
+  function extractPoints(analysis, race) {
     const pts =
       analysis?.points ||
       analysis?.raw?.points ||
@@ -76,7 +81,9 @@
       analysis?.meta?.points ||
       analysis?.rawServer?.meta?.points ||
       null;
-    return Array.isArray(pts) ? pts : null;
+        if (Array.isArray(pts)) return pts;
+    const alt = race?.gpx?.points || race?.gpx?.track || null;
+    return Array.isArray(alt) ? alt : null;
   }
 
   function normalizeDbRow(row) {
@@ -158,31 +165,50 @@
     return { label: "Extrême", hint: "Réservé aux très entraînés" };
   }
 
-  function renderHeader(race, sourceLabel) {
+    function renderHeader(race, sourceLabel) {
     setText("raceName", race?.name || "Épreuve");
     setText("raceDate", race?.date || "—");
-    setText("raceTime", race?.time || "—");
+    setTextMulti(["raceTime", "startTime"], race?.time || "—");
     setText("raceDisc", race?.disc || "—");
     setText("raceLevel", race?.level || "—");
-    setText("raceEbike", race?.ebike === true || race?.ebike === 1 ? "E-bike" : "Musculaire");
-    setText("raceCutoff", race?.cutoffTime || "—");
-    setText("raceWash", race?.wash || "—");
-    setText("raceMechanic", race?.mechanic || "—");
-    setText("raceFeeds", race?.feeds || "—");
-    setText("raceSexAllowed", race?.sexAllowed || "all");
+
+    // Champs "infos pratiques" (IDs différents selon versions)
+    setTextMulti(["cutoffTime", "raceCutoff"], race?.cutoffTime || "—");
+    setTextMulti(["bikeWash", "raceWash"], race?.wash || "—");
+    setTextMulti(["mechStations", "raceMechanic"], race?.mechanic || "—");
+    setTextMulti(["aidStations", "raceFeeds"], race?.feeds || "—");
+    setTextMulti(["raceSexAllowed"], race?.sexAllowed || "all");
+
     setText("raceComment", race?.comment || "—");
     setText("dataSource", sourceLabel || "—");
 
-    // bouton meeting si présent dans le DOM
-    const btn = $("btnOpenMeeting");
-    if (btn && race?.meetingId) {
-      btn.href = `meeting.html?id=${encodeURIComponent(race.meetingId)}`;
-      btn.style.display = "inline-flex";
+    // Lien événement (IDs: btnOpenMeeting OU meetingLinkBtn)
+    const meetingId = race?.meetingId;
+    const btnA = $("btnOpenMeeting");
+    const btnB = $("meetingLinkBtn");
+    if (meetingId) {
+      const href = `meeting.html?id=${encodeURIComponent(meetingId)}`;
+      if (btnA) { btnA.href = href; btnA.style.display = "inline-flex"; }
+      if (btnB) { btnB.href = href; btnB.style.display = "inline-flex"; }
     }
 
-    // meetingName si local dispo
-    const m = race?.meetingId ? findMeetingLocal(race.meetingId) : null;
-    if (m) setText("meetingName", m.name || "—");
+    // Affiche le bloc événement si présent
+    const meetingBlock = $("meetingBlock");
+    const m = meetingId ? findMeetingLocal(meetingId) : null;
+    if (meetingBlock && meetingId) {
+      const name = m?.name || race?.meetingName || "Événement";
+      meetingBlock.innerHTML = `
+        <div class="item" style="border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#fff">
+          <div class="label">Événement</div>
+          <div class="value" id="meetingName">${esc(name)}</div>
+          <div style="margin-top:10px">
+            <a class="linkBtn" href="meeting.html?id=${encodeURIComponent(meetingId)}">Voir l’événement</a>
+          </div>
+        </div>
+      `;
+    } else if (m) {
+      setText("meetingName", m.name || "—");
+    }
   }
 
   function renderMetrics(race) {
@@ -270,7 +296,7 @@
 
   function renderMapAndProfile(race) {
     const a = extractAnalysis(race);
-    const pts = extractPoints(a);
+    const pts = extractPoints(a, race);
     if (!pts || pts.length < 2) return;
 
     // Carte Leaflet si présente
