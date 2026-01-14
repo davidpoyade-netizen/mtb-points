@@ -1,13 +1,4 @@
-// js/gpx.js
-// MTB Points — analyse GPX/OSM via API Render (POST /api/analyze-gpx)
-// Expose: window.analyzeGPX(file, opts)
-// opts:
-//   - keepPoints: boolean (default false) -> conserve un échantillon de points si l'API en renvoie
-//   - apiBase: string (default https://mtb-points.onrender.com)
-//   - timeoutMs: number (default 45000)
-//
-// Emits CustomEvent: "mtb:status" { phase, message, progress }
-
+// js/gpx.js — FIX: renvoie les points si opts.keepPoints=true
 (function () {
   const DEFAULT_API_BASE = "https://mtb-points.onrender.com";
 
@@ -22,21 +13,23 @@
           },
         })
       );
-    } catch (_) {
-      // ignore
-    }
+    } catch (_) {}
   }
 
   async function readFileText(file) {
     if (!file) return "";
     if (typeof file.text === "function") return await file.text();
-    // fallback FileReader
     return await new Promise((resolve, reject) => {
       const fr = new FileReader();
       fr.onerror = () => reject(fr.error || new Error("FileReader error"));
       fr.onload = () => resolve(String(fr.result || ""));
       fr.readAsText(file);
     });
+  }
+
+  function pickPoints(json){
+    const pts = json?.points || json?.meta?.points || null;
+    return Array.isArray(pts) ? pts : null;
   }
 
   async function analyzeGPX(file, opts = {}) {
@@ -58,9 +51,7 @@
     try {
       resp = await fetch(`${apiBase}/api/analyze-gpx`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/gpx+xml",
-        },
+        headers: { "Content-Type": "application/gpx+xml" },
         body: gpxText,
         signal: ctrl.signal,
       });
@@ -77,7 +68,7 @@
     try {
       json = await resp.json();
     } catch (_) {
-      throw new Error("Réponse API invalide (JSON)." );
+      throw new Error("Réponse API invalide (JSON).");
     }
 
     if (!resp.ok || !json || json.ok === false) {
@@ -94,27 +85,18 @@
       distanceKm: stats.distanceKm ?? null,
       dplusM: stats.dplusM ?? null,
       hasElevation: stats.hasElevation ?? null,
-      steep: stats.steep ?? null,
       discipline: json?.discipline ?? null,
-
-      // TechScore V2 officiel (hybride)
       techV2: {
         techScoreV2: tech.techScoreV2 ?? null,
         tech01: tech.tech01 ?? null,
         details: tech.details ?? null,
         surfaceEstimate: tech.surfaceEstimate ?? null,
       },
-
-      // petit socle "phys" local, si besoin dans le futur
-      phys: {
-        score: null,
-        effort: null,
-        ipbOverall: null,
-      },
-
-      // score global (si tu le calcules ailleurs, tu peux le remplacer)
-      mrs: null,
+      phys: json?.phys ?? { score: null, effort: null, ipbOverall: null },
+      mrs: (typeof json?.mrs === "number") ? json.mrs : null,
     };
+
+    if (opts.keepPoints) out.points = pickPoints(json);
 
     emitStatus("done", "Analyse terminée.", 1);
     return out;

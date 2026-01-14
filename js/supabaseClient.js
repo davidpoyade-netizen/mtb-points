@@ -1,6 +1,5 @@
-// js/supabaseClient.js (ESM)
-// Client Supabase — MTB Points
-
+// js/supabaseClient.js (clean)
+// ⚠️ Remplace ton fichier actuel (il est dupliqué et casse l'import ESM)
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 export const SUPABASE_URL = "https://pqtjvvvemypuhhvsoyrc.supabase.co";
