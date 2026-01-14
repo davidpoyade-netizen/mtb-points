@@ -158,7 +158,7 @@
       </div>
       <div>
         <label class="lbl">Heure de départ</label>
-        <input id="time" class="inp" type="time" />
+        <input id="time" class="inp" type="time"  value="08:30"/>
       </div>
     </div>
 
@@ -177,10 +177,9 @@
       </div>
 
       <div>
-        <label class="lbl">Catégorie d’épreuve</label>
-        <select id="level" class="inp">
-          <option value="">—</option>
-          <option value="Locale">Locale</option>
+        <label class="lbl">Catégorie d’épreuve <span class="req">*</span></label>
+        <select id="level" class="inp" required>
+          <option value="Locale" selected>Locale</option>
           <option value="Régionale">Régionale</option>
           <option value="Nationale">Nationale</option>
           <option value="Internationale">Internationale</option>
@@ -190,24 +189,27 @@
 
     <div class="grid2" style="margin-top:12px;">
       <div>
-        <label class="lbl">Discipline</label>
-        <select id="disc" class="inp">
-          <option value="">—</option>
-          <option value="XC">XC</option>
-          <option value="Enduro">Enduro</option>
+        <label class="lbl">Discipline <span class="req">*</span></label>
+        <select id="disc" class="inp" required>
+          <option value="" disabled selected>Choisir…</option>
           <option value="DH">DH</option>
-          <option value="Marathon">Marathon</option>
-          <option value="Ultra">Ultra</option>
+          <option value="Enduro">Enduro</option>
+          <option value="XCC">XCC</option>
+          <option value="XCM (raid, marathon)">XCM (raid, marathon)</option>
+          <option value="XCM (ultra)">XCM (ultra)</option>
+          <option value="XCO">XCO</option>
           <option value="Gravel">Gravel</option>
         </select>
       </div>
       <div>
-        <label class="lbl">Type de vélo</label>
-        <select id="ebike" class="inp">
+        <label class="lbl">Type de vélo <span class="req">*</span></label>
+        <select id="ebike" class="inp" required>
+          <option value="" disabled selected>Choisir…</option>
           <option value="0">Musculaire</option>
           <option value="1">Assistance électrique</option>
         </select>
         <div class="muted2">Musculaire et E-bike peuvent partager le même parcours (classements séparés).</div>
+      </div>
       </div>
     </div>
 
@@ -221,21 +223,23 @@
         </select>
       </div>
       <div>
-        <label class="lbl">Assistance mécanique</label>
+        <label class="lbl">Assistance mécanique (0–4)</label>
         <select id="mechanic" class="inp">
-          <option value="">—</option>
-          <option value="0">0</option>
+          <option value="0" selected>0</option>
           <option value="1">1</option>
           <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
         </select>
       </div>
       <div>
-        <label class="lbl">Ravitaillements</label>
+        <label class="lbl">Ravitaillements (0–4)</label>
         <select id="feeds" class="inp">
-          <option value="">—</option>
-          <option value="0">0</option>
+          <option value="0" selected>0</option>
           <option value="1">1</option>
           <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
         </select>
       </div>
       <div>
