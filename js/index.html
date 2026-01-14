@@ -424,7 +424,7 @@
   </div>
 </div>
 
-<!-- Préviews Supabase (+ fallback clubs localStorage) -->
+<!-- Préviews Supabase -->
 <script type="module">
   import { supabase } from "./js/supabaseClient.js";
 
@@ -503,9 +503,9 @@
     const hint = $("challengeHint");
 
     const tryViews = [
+      { view: "v_public_ranking", scoreKey: "score" },
       { view: "v_public_challenge_ranking", scoreKey: "score" },
-      { view: "v_public_challenge_ranking", scoreKey: "points" },
-      { view: "v_public_ranking", scoreKey: "score" }
+      { view: "v_public_challenge_ranking", scoreKey: "points" }
     ];
 
     for (const t of tryViews){
@@ -579,10 +579,6 @@
     }
   }
 
-  function safeJson(key){
-    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(_){ return null; }
-  }
-
   async function loadClubsPreview(){
     const ul = $("clubsTop");
     const hint = $("clubsHint");
@@ -604,7 +600,6 @@
       return email ? `email:${email}` : (id ? `id:${id}` : (name ? `name:${name}` : null));
     }
 
-    // 1) Supabase via v_public_results
     try{
       const { data, error } = await supabase
         .from("v_public_results")
@@ -646,57 +641,13 @@
 
       renderTopList(ul, list, "score", "club");
       if (hint) hint.textContent = "Source: Supabase (v_public_results)";
-      return;
-    } catch(e){
-      // fallback local
-    }
-
-    // 2) Fallback localStorage
-    try{
-      const results = safeJson("mtb.results.v1");
-      if (!Array.isArray(results) || !results.length){
-        renderEmpty("Clubs indisponibles (pas de données)");
-        if (hint) hint.textContent = "Source: localStorage (mtb.results.v1) — vide";
-        return;
-      }
-
-      const map = new Map();
-      for (const r of results){
-        const club = normalizeClubName(r.club ?? r.team ?? r.equipe ?? r["équipe"]);
-        if (!club) continue;
-
-        const pts = Number(String(r.points ?? r.score ?? r.mtbPoints ?? 0).replace(",", ".")) || 0;
-        const key = club.toLowerCase();
-
-        if (!map.has(key)){
-          map.set(key, { club, points: 0, riders: new Set() });
-        }
-        const it = map.get(key);
-        it.points += pts;
-
-        const rk = riderKey(r);
-        if (rk) it.riders.add(rk);
-      }
-
-      const list = Array.from(map.values())
-        .map(x => ({ club: x.club, score: Math.round(x.points), riders: x.riders.size }))
-        .sort((a,b) => b.score - a.score)
-        .slice(0,3);
-
-      if (!list.length){
-        renderEmpty("Aucun club (ajoute le champ club/team dans les résultats)");
-        if (hint) hint.textContent = "Source: localStorage — club absent";
-        return;
-      }
-
-      renderTopList(ul, list, "score", "club");
-      if (hint) hint.textContent = "Source: localStorage (mtb.results.v1)";
     } catch(e){
       console.warn("[index] clubs preview failed", e);
       renderEmpty("Clubs indisponibles");
       if (hint) hint.textContent = "⚠️ Clubs indisponibles (RLS/config/données).";
     }
   }
+
 
   await loadRankingPreview();
   await loadChallengePreview();
