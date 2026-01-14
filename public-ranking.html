@@ -79,8 +79,8 @@
 <div class="heroTop">
 <div style="min-width:260px;flex:1">
 <h2>Global / Disciplines / Clubs</h2>
-<p class="muted" style="margin:6px 0 0 0;">
-            Données : <code>v_public_results_enriched</code> (riders) &amp; <code>v_public_clubs_ranking</code> (clubs).
+          <p class="muted" style="margin:6px 0 0 0;">
+            Données : <code>v_public_results</code> (riders). Les clubs sont calculés côté client (groupés par <code>team</code>).
           </p>
 </div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -138,46 +138,22 @@ import { supabase } from "./js/supabaseClient.js";
   const esc = (s)=>String(s??"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const num = (x)=>{ const n = Number(String(x??"").replace(",", ".").trim()); return Number.isFinite(n) ? n : null; };
 
-    const TABS = [
-    { key:"global", label:"Global", disc:null, layout:"2" },
-
-    { key:"dh", label:"DH (Descente)", disc:"DH", layout:"2" },
-    { key:"enduro", label:"Enduro", disc:"Enduro", layout:"2" },
-
-    // XC : dédoublé Musculaire / E-bike
-    { key:"xco", label:"XCO (Olympique)", disc:"XCO", layout:"4" },
-    { key:"xcc", label:"XCC (Short Track)", disc:"XCC", layout:"4" },
-    { key:"xcm_marathon", label:"XCM (raid, marathon)", disc:"XCM_marathon", layout:"4" },
-    { key:"xcm_ultra", label:"XCM (ultra)", disc:"XCM_ultra", layout:"4" },
-
-    { key:"gravel", label:"Gravel", disc:"Gravel", layout:"2" },
-
-    { key:"club", label:"Clubs", disc:null, layout:"club" },
+  const TABS = [
+    { key:"global", label:"Global", disc:null, grid:"2" },
+    { key:"xcc", label:"XCC", disc:"XCC", grid:"4" },
+    { key:"xco", label:"XCO", disc:"XCO", grid:"4" },
+    { key:"xcm", label:"XCM", disc:"XCM", grid:"4" },
+    { key:"gravel", label:"Gravel", disc:"Gravel", grid:"4" },
+    { key:"dh", label:"DH", disc:"DH", grid:"4" },
+    { key:"enduro", label:"Enduro", disc:"Enduro", grid:"4" },
+    { key:"club", label:"Club", disc:null, grid:"club" },
   ];
-
 
   let ACTIVE = "global";
   let rows = [];   // lignes résultats enrichies
   let clubs = [];  // lignes clubs
 
   function norm(s){ return String(s||"").trim().toLowerCase(); }
-
-  function discKey(d){
-    const s = String(d || "").trim().toLowerCase();
-    if (!s) return null;
-    // Harmonise quelques variantes possibles venant de la DB / UI
-    if (s === "dh" || s.includes("descente")) return "DH";
-    if (s === "enduro") return "Enduro";
-    if (s === "xcc" || s.includes("short")) return "XCC";
-    if (s === "xco" || s.includes("olymp")) return "XCO";
-    if (s === "gravel") return "Gravel";
-    if (s === "xcm_ultra" || (s.includes("xcm") && s.includes("ultra"))) return "XCM_ultra";
-    if (s === "xcm_marathon" || s === "xcm" || s.includes("marathon") || s.includes("raid")) return "XCM_marathon";
-    return String(d);
-  }
-
-  const XC_SET = new Set(["XCO","XCC","XCM_marathon","XCM_ultra"]);
-
   function normSex(v){
     const s = norm(v);
     if (["m","h","homme","male","masculin"].includes(s)) return "M";
@@ -220,8 +196,8 @@ import { supabase } from "./js/supabaseClient.js";
     const map = new Map();
 
     for (const r of rows){
-      const d0 = discKey(r.disc);
-      if (disc && discKey(disc) !== discKey(d0)) continue;
+      const d = String(r.disc || "").trim();
+      if (disc && norm(d) !== norm(disc)) continue;
 
       if (ebike !== null){
         const e = isEbike(r.ebike);
@@ -457,69 +433,80 @@ import { supabase } from "./js/supabaseClient.js";
     }
 
     const disc = t.disc;
+    let mMen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="M");
+    let mWomen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="F");
+    let eMen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="M");
+    let eWomen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="F");
 
-    // XC : 4 tableaux (Musculaire/E-bike x Hommes/Femmes)
-    if (XC_SET.has(discKey(disc))) {
-      let mMen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="M");
-      let mWomen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="F");
-      let eMen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="M");
-      let eWomen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="F");
+    mMen = sortRiders(applyRiderFilters(mMen));
+    mWomen = sortRiders(applyRiderFilters(mWomen));
+    eMen = sortRiders(applyRiderFilters(eMen));
+    eWomen = sortRiders(applyRiderFilters(eWomen));
 
-      mMen = sortRiders(applyRiderFilters(mMen));
-      mWomen = sortRiders(applyRiderFilters(mWomen));
-      eMen = sortRiders(applyRiderFilters(eMen));
-      eWomen = sortRiders(applyRiderFilters(eWomen));
+    $("pillCount").textContent = String(mMen.length + mWomen.length + eMen.length + eWomen.length);
 
-      $("pillCount").textContent = String(mMen.length + mWomen.length + eMen.length + eWomen.length);
-
-      render4([
-        { title:"💪 Musculaire — Hommes", data:mMen, tb:"tb1", empty:"e1" },
-        { title:"💪 Musculaire — Femmes", data:mWomen, tb:"tb2", empty:"e2" },
-        { title:"⚡ E-bike — Hommes", data:eMen, tb:"tb3", empty:"e3" },
-        { title:"⚡ E-bike — Femmes", data:eWomen, tb:"tb4", empty:"e4" },
-      ]);
-      return;
-    }
-
-    // Autres disciplines : 2 tableaux (Hommes/Femmes) sans split E-bike
-    let riders = aggregateRiders({disc, ebike:null});
-    riders = sortRiders(applyRiderFilters(riders));
-    const men = riders.filter(r=>r.sex==="M");
-    const women = riders.filter(r=>r.sex==="F");
-    $("pillCount").textContent = String(men.length + women.length);
-    renderGlobal(men, women);
+    render4([
+      { title:"💪 Musculaire — Hommes", data:mMen, tb:"tb1", empty:"e1" },
+      { title:"💪 Musculaire — Femmes", data:mWomen, tb:"tb2", empty:"e2" },
+      { title:"⚡ E-bike — Hommes", data:eMen, tb:"tb3", empty:"e3" },
+      { title:"⚡ E-bike — Femmes", data:eWomen, tb:"tb4", empty:"e4" },
+    ]);
   }
 
   async function load(){
-    // riders
+    // Source unique: v_public_results (public, meeting publié)
+    // -> on reconstruit les champs attendus par l'UI (disc/ebike/age/category)
     const { data: d1, error: e1 } = await supabase
-      .from("v_public_results_enriched")
+      .from("v_public_results")
       .select("*")
       .limit(20000);
     if (e1) throw e1;
-    rows = (d1||[]).map(r=>({
-      ...r,
-      rider_name: r.rider_name ?? r.name ?? "Rider",
-      sex: r.sex ?? null,
-      points: num(r.points) ?? 0,
-      disc: discKey(r.disc ?? null),
-      ebike: r.ebike ?? null,
-      nationality: r.nationality ?? null
-    }));
 
-    // clubs
-    const { data: d2, error: e2 } = await supabase
-      .from("v_public_clubs_ranking")
-      .select("*")
-      .limit(20000);
-    if (!e2) clubs = (d2||[]).map(x=>({
-      club: x.club,
-      nationality: x.nationality ?? null,
-      disc: x.disc ?? null,
-      ebike: x.ebike ?? null,
-      points: num(x.points) ?? 0,
-      results: num(x.results) ?? null,
-      riders: num(x.riders) ?? null
+    const year = new Date().getFullYear();
+    rows = (d1||[]).map(r=>{
+      const by = num(r.birth_year);
+      const age = by != null ? (year - by) : null;
+      // catégorie simple (tu pourras brancher compute_age_category plus tard)
+      const cat = age == null ? null : (age < 23 ? "U23" : "Open");
+      return {
+        ...r,
+        rider_name: r.rider_name ?? r.name ?? "Rider",
+        sex: r.sex ?? null,
+        points: num(r.points) ?? 0,
+        disc: r.race_disc ?? r.disc ?? null,
+        ebike: (r.race_ebike ?? r.ebike) ?? null,
+        nationality: r.nationality ?? null,
+        age_on_year: age,
+        age_category: r.age_category ?? cat,
+        team: r.team ?? null,
+      };
+    });
+
+    // Clubs: calculés côté client (group by team)
+    const map = new Map();
+    for (const r of rows){
+      const club = String(r.team || "").trim();
+      if (!club) continue;
+      if (!map.has(club)){
+        map.set(club, {
+          club,
+          nationality: null,
+          points: 0,
+          results: 0,
+          ridersSet: new Set(),
+        });
+      }
+      const c = map.get(club);
+      c.points += (num(r.points) ?? 0);
+      c.results += 1;
+      c.ridersSet.add(String(r.rider_id || r.rider_name || ""));
+    }
+    clubs = Array.from(map.values()).map(c=>({
+      club: c.club,
+      nationality: c.nationality,
+      points: c.points,
+      results: c.results,
+      riders: c.ridersSet.size,
     }));
   }
 
