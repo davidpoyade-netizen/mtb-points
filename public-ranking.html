@@ -138,22 +138,46 @@ import { supabase } from "./js/supabaseClient.js";
   const esc = (s)=>String(s??"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const num = (x)=>{ const n = Number(String(x??"").replace(",", ".").trim()); return Number.isFinite(n) ? n : null; };
 
-  const TABS = [
-    { key:"global", label:"Global", disc:null, grid:"2" },
-    { key:"xcc", label:"XCC", disc:"XCC", grid:"4" },
-    { key:"xco", label:"XCO", disc:"XCO", grid:"4" },
-    { key:"xcm", label:"XCM", disc:"XCM", grid:"4" },
-    { key:"gravel", label:"Gravel", disc:"Gravel", grid:"4" },
-    { key:"dh", label:"DH", disc:"DH", grid:"4" },
-    { key:"enduro", label:"Enduro", disc:"Enduro", grid:"4" },
-    { key:"club", label:"Club", disc:null, grid:"club" },
+    const TABS = [
+    { key:"global", label:"Global", disc:null, layout:"2" },
+
+    { key:"dh", label:"DH (Descente)", disc:"DH", layout:"2" },
+    { key:"enduro", label:"Enduro", disc:"Enduro", layout:"2" },
+
+    // XC : dédoublé Musculaire / E-bike
+    { key:"xco", label:"XCO (Olympique)", disc:"XCO", layout:"4" },
+    { key:"xcc", label:"XCC (Short Track)", disc:"XCC", layout:"4" },
+    { key:"xcm_marathon", label:"XCM (raid, marathon)", disc:"XCM_marathon", layout:"4" },
+    { key:"xcm_ultra", label:"XCM (ultra)", disc:"XCM_ultra", layout:"4" },
+
+    { key:"gravel", label:"Gravel", disc:"Gravel", layout:"2" },
+
+    { key:"club", label:"Clubs", disc:null, layout:"club" },
   ];
+
 
   let ACTIVE = "global";
   let rows = [];   // lignes résultats enrichies
   let clubs = [];  // lignes clubs
 
   function norm(s){ return String(s||"").trim().toLowerCase(); }
+
+  function discKey(d){
+    const s = String(d || "").trim().toLowerCase();
+    if (!s) return null;
+    // Harmonise quelques variantes possibles venant de la DB / UI
+    if (s === "dh" || s.includes("descente")) return "DH";
+    if (s === "enduro") return "Enduro";
+    if (s === "xcc" || s.includes("short")) return "XCC";
+    if (s === "xco" || s.includes("olymp")) return "XCO";
+    if (s === "gravel") return "Gravel";
+    if (s === "xcm_ultra" || (s.includes("xcm") && s.includes("ultra"))) return "XCM_ultra";
+    if (s === "xcm_marathon" || s === "xcm" || s.includes("marathon") || s.includes("raid")) return "XCM_marathon";
+    return String(d);
+  }
+
+  const XC_SET = new Set(["XCO","XCC","XCM_marathon","XCM_ultra"]);
+
   function normSex(v){
     const s = norm(v);
     if (["m","h","homme","male","masculin"].includes(s)) return "M";
@@ -196,8 +220,8 @@ import { supabase } from "./js/supabaseClient.js";
     const map = new Map();
 
     for (const r of rows){
-      const d = String(r.disc || "").trim();
-      if (disc && norm(d) !== norm(disc)) continue;
+      const d0 = discKey(r.disc);
+      if (disc && discKey(disc) !== discKey(d0)) continue;
 
       if (ebike !== null){
         const e = isEbike(r.ebike);
@@ -433,24 +457,37 @@ import { supabase } from "./js/supabaseClient.js";
     }
 
     const disc = t.disc;
-    let mMen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="M");
-    let mWomen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="F");
-    let eMen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="M");
-    let eWomen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="F");
 
-    mMen = sortRiders(applyRiderFilters(mMen));
-    mWomen = sortRiders(applyRiderFilters(mWomen));
-    eMen = sortRiders(applyRiderFilters(eMen));
-    eWomen = sortRiders(applyRiderFilters(eWomen));
+    // XC : 4 tableaux (Musculaire/E-bike x Hommes/Femmes)
+    if (XC_SET.has(discKey(disc))) {
+      let mMen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="M");
+      let mWomen = aggregateRiders({disc, ebike:false}).filter(r=>r.sex==="F");
+      let eMen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="M");
+      let eWomen = aggregateRiders({disc, ebike:true}).filter(r=>r.sex==="F");
 
-    $("pillCount").textContent = String(mMen.length + mWomen.length + eMen.length + eWomen.length);
+      mMen = sortRiders(applyRiderFilters(mMen));
+      mWomen = sortRiders(applyRiderFilters(mWomen));
+      eMen = sortRiders(applyRiderFilters(eMen));
+      eWomen = sortRiders(applyRiderFilters(eWomen));
 
-    render4([
-      { title:"💪 Musculaire — Hommes", data:mMen, tb:"tb1", empty:"e1" },
-      { title:"💪 Musculaire — Femmes", data:mWomen, tb:"tb2", empty:"e2" },
-      { title:"⚡ E-bike — Hommes", data:eMen, tb:"tb3", empty:"e3" },
-      { title:"⚡ E-bike — Femmes", data:eWomen, tb:"tb4", empty:"e4" },
-    ]);
+      $("pillCount").textContent = String(mMen.length + mWomen.length + eMen.length + eWomen.length);
+
+      render4([
+        { title:"💪 Musculaire — Hommes", data:mMen, tb:"tb1", empty:"e1" },
+        { title:"💪 Musculaire — Femmes", data:mWomen, tb:"tb2", empty:"e2" },
+        { title:"⚡ E-bike — Hommes", data:eMen, tb:"tb3", empty:"e3" },
+        { title:"⚡ E-bike — Femmes", data:eWomen, tb:"tb4", empty:"e4" },
+      ]);
+      return;
+    }
+
+    // Autres disciplines : 2 tableaux (Hommes/Femmes) sans split E-bike
+    let riders = aggregateRiders({disc, ebike:null});
+    riders = sortRiders(applyRiderFilters(riders));
+    const men = riders.filter(r=>r.sex==="M");
+    const women = riders.filter(r=>r.sex==="F");
+    $("pillCount").textContent = String(men.length + women.length);
+    renderGlobal(men, women);
   }
 
   async function load(){
@@ -465,7 +502,7 @@ import { supabase } from "./js/supabaseClient.js";
       rider_name: r.rider_name ?? r.name ?? "Rider",
       sex: r.sex ?? null,
       points: num(r.points) ?? 0,
-      disc: r.disc ?? null,
+      disc: discKey(r.disc ?? null),
       ebike: r.ebike ?? null,
       nationality: r.nationality ?? null
     }));
