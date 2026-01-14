@@ -680,10 +680,12 @@ function resetForm(keepMeeting = true) {
   });
 
 $("btnPickAnalyze")?.addEventListener("click", () => {
-    showMsg("");
-    const inp = $("gpxFile");
-    if (inp) inp.value = ""; // force change
-  });
+  showMsg("");
+  const inp = $("gpxFile");
+  if (!inp) return;
+  inp.value = "";     // permet de re-sélectionner le même fichier
+  inp.click();        // ✅ ouvre le picker GPX
+});
 
   $("gpxFile")?.addEventListener("change", async () => {
     const f = $("gpxFile")?.files?.[0];
