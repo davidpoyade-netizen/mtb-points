@@ -257,8 +257,12 @@ function renderAgeRows() {
           </div>
         </label>
       </div>
+
       <div><input type="number" min="0" step="1" placeholder="—" class="lapsM" data-cat="${esc(cat.id)}" disabled></div>
+      <div><input type="time" class="startM" data-cat="${esc(cat.id)}" disabled></div>
+
       <div><input type="number" min="0" step="1" placeholder="—" class="lapsF" data-cat="${esc(cat.id)}" disabled></div>
+      <div><input type="time" class="startF" data-cat="${esc(cat.id)}" disabled></div>
     </div>
   `).join("");
 
@@ -267,12 +271,18 @@ function renderAgeRows() {
       const id = chk.getAttribute("data-cat");
       const m = box.querySelector(`.lapsM[data-cat="${CSS.escape(id)}"]`);
       const f = box.querySelector(`.lapsF[data-cat="${CSS.escape(id)}"]`);
+      const tm = box.querySelector(`.startM[data-cat="${CSS.escape(id)}"]`);
+      const tf = box.querySelector(`.startF[data-cat="${CSS.escape(id)}"]`);
       const on = chk.checked;
+
       if (m) { m.disabled = !on; if (!on) m.value = ""; }
       if (f) { f.disabled = !on; if (!on) f.value = ""; }
+      if (tm) { tm.disabled = !on; if (!on) tm.value = ""; }
+      if (tf) { tf.disabled = !on; if (!on) tf.value = ""; }
     });
   });
 }
+
 
 function initMultiToggle() {
   const chk = $("enableMultiLaps");
@@ -283,7 +293,7 @@ function initMultiToggle() {
     wrap.style.display = chk.checked ? "block" : "none";
     if (!chk.checked) {
       document.querySelectorAll(".catOn").forEach((c) => (c.checked = false));
-      document.querySelectorAll(".lapsM,.lapsF").forEach((i) => { i.value = ""; i.disabled = true; });
+      document.querySelectorAll(".lapsM,.lapsF,.startM,.startF").forEach((i) => { i.value = ""; i.disabled = true; });
     }
   };
 
@@ -302,13 +312,24 @@ function collectLapsByCategorySex() {
     const id = chk.getAttribute("data-cat");
     const m = box.querySelector(`.lapsM[data-cat="${CSS.escape(id)}"]`);
     const f = box.querySelector(`.lapsF[data-cat="${CSS.escape(id)}"]`);
+    const tm = box.querySelector(`.startM[data-cat="${CSS.escape(id)}"]`);
+    const tf = box.querySelector(`.startF[data-cat="${CSS.escape(id)}"]`);
 
     const mVal = m && m.value !== "" ? Number(m.value) : null;
     const fVal = f && f.value !== "" ? Number(f.value) : null;
 
+    const mTime = tm && tm.value ? String(tm.value) : null;
+    const fTime = tf && tf.value ? String(tf.value) : null;
+
     out[id] = {
-      M: Number.isFinite(mVal) ? mVal : null,
-      F: Number.isFinite(fVal) ? fVal : null,
+      M: {
+        laps: Number.isFinite(mVal) ? mVal : null,
+        start: mTime,
+      },
+      F: {
+        laps: Number.isFinite(fVal) ? fVal : null,
+        start: fTime,
+      },
     };
   });
 
@@ -649,7 +670,16 @@ function resetForm(keepMeeting = true) {
   // - Sur certains navigateurs, inp.click() sur un <input type="file"> caché peut être bloqué.
   // - Recommandé côté HTML: utiliser <label for="gpxFile" id="btnPickAnalyze">…</label>
   // Ici on se contente de reset la valeur pour permettre de re-sélectionner le même fichier.
-  $("btnPickAnalyze")?.addEventListener("click", () => {
+    const pickLbl = $("btnPickAnalyze");
+  // accessibilité: Enter/Espace sur le label ouvre le picker
+  pickLbl?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      $("gpxFile")?.click();
+    }
+  });
+
+$("btnPickAnalyze")?.addEventListener("click", () => {
     showMsg("");
     const inp = $("gpxFile");
     if (inp) inp.value = ""; // force change
