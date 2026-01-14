@@ -142,6 +142,13 @@ async function initMeetings() {
   });
 }
 
+// defaults (si page ouverte sans meeting sélectionné)
+const timeEl0 = $("time");
+if (timeEl0 && !timeEl0.value) timeEl0.value = "08:30";
+const lvl0 = $("level");
+if (lvl0 && !lvl0.value) lvl0.value = "Locale";
+
+
 async function applyMeetingDefaults(meetingId) {
   const hint = $("meetingHint");
   if (!meetingId) {
@@ -182,6 +189,9 @@ async function applyMeetingDefaults(meetingId) {
     if (start && dateEl.value && dateEl.value < start) dateEl.value = start;
     if (end && dateEl.value && dateEl.value > end) dateEl.value = start || end;
   }
+
+  const timeEl = $("time");
+  if (timeEl && !timeEl.value) timeEl.value = "08:30";
 }
 
 // ---------- Multi-tours (NE PAS SUPPRIMER)
@@ -351,15 +361,29 @@ async function analyzeGpx() {
 
 // ---------- Save
 function validate() {
-  if (ANALYZE_BUSY) return "Analyse en cours : attends la fin.";
-  if (!$("meetingId")?.value) return "Événement obligatoire.";
-  if (!normalizeISODate($("date")?.value)) return "Date d’épreuve obligatoire.";
-  if (!$("name")?.value?.trim()) return "Nom d’épreuve obligatoire.";
+  const meetingId = ($("meetingId")?.value || "").trim();
+  const date = ($("date")?.value || "").trim();
+  const name = ($("name")?.value || "").trim();
 
-  const f = $("gpxFile")?.files?.[0];
-  if (!f) return "GPX obligatoire : sélectionne un fichier GPX.";
-  if (!ANALYSIS) return "Analyse GPX/OSM obligatoire : choisis un GPX et laisse l’analyse se terminer.";
+  const level = ($("level")?.value || "").trim();
+  const disc = ($("disc")?.value || "").trim();
+  const ebike = ($("ebike")?.value || "").trim();
 
+  if (!meetingId) return "Événement obligatoire.";
+  if (!date) return "Date obligatoire.";
+  if (!name) return "Nom de l’épreuve obligatoire.";
+
+  if (!level) return "Catégorie obligatoire (par défaut : Locale).";
+  if (!disc) return "Discipline obligatoire.";
+  if (ebike !== "0" && ebike !== "1") return "Choisis Musculaire ou Électrique.";
+
+  // Force 0..4 (au cas où)
+  const mech = Math.max(0, Math.min(4, Number(($("mechanic")?.value ?? 0))));
+  const feeds = Math.max(0, Math.min(4, Number(($("feeds")?.value ?? 0))));
+  if ($("mechanic")) $("mechanic").value = String(mech);
+  if ($("feeds")) $("feeds").value = String(feeds);
+
+  if (!ANALYSIS) return "GPX/OSM obligatoire : importe un GPX et lance l’analyse.";
   return null;
 }
 
