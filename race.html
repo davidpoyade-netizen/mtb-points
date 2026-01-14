@@ -5,16 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fiche épreuve — MTB Points</title>
 
-  <!-- Base + thème nature -->
+  <!-- CSS -->
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/theme-nature.css" />
 
   <!-- Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin=""
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
   <!-- QR Code -->
   <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -25,25 +21,69 @@
       border:1px solid var(--border);
       border-radius:18px;
       padding:12px;
-      box-shadow:0 10px 26px rgba(2,6,23,.06);
+      box-shadow: 0 10px 26px rgba(2,6,23,.06);
     }
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap}
+
     .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
     @media(max-width:900px){.kpis{grid-template-columns:1fr}}
     .kpi{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,0.82)}
     .kpi .big{font-size:22px;font-weight:1000}
-    .kpi .sub{font-size:12px;color:var(--muted)}
-    #map,#elevCanvas{height:360px;border-radius:16px;border:1px solid var(--border);background:#fff}
+    .kpi .sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+    .pill2{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.75);
+      font-weight:1000;font-size:12px
+    }
+    .pill2 .dot{width:8px;height:8px;border-radius:999px;background:var(--ok)}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;text-decoration:none;
+      border:1px solid var(--border);background:#fff;
+      font-weight:1000;color:var(--text);cursor:pointer
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(2,6,23,.10)}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
+
+    #map{height:360px;border-radius:16px;border:1px solid var(--border);background:#fff}
+    #elevCanvas{width:100%;height:360px;border-radius:16px;border:1px solid var(--border);background:#fff}
+
     footer.siteFooter{
       margin-top:18px;padding:14px;border-radius:18px;border:1px solid var(--border);
       background:rgba(255,255,255,0.72);
       display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap
     }
-    footer.siteFooter img{width:48px;height:48px;border-radius:12px}
+    footer.siteFooter .brand{display:flex;align-items:center;gap:10px}
+    footer.siteFooter img{
+      width:44px;height:44px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;object-fit:cover
+    }
+    #qr{
+      width:96px;height:96px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      padding:6px;
+      display:flex;align-items:center;justify-content:center;
+    }
+
     @media print{
-      .noPrint{display:none}
+      .noPrint{display:none !important}
+      .wrap{max-width:100%;margin:0;padding:0}
+      .card{box-shadow:none}
       body{background:#fff}
+      a{color:#000;text-decoration:none}
     }
   </style>
 </head>
@@ -51,47 +91,105 @@
 <body class="theme-nature">
 
 <header class="header noPrint">
-  <h1>MTB Points — Fiche épreuve</h1>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Fiche épreuve</h1>
+    <span class="pill2">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Chargement…</span>
+    </span>
+    <span class="pill2" title="Source des données">
+      <span class="dot" style="background:rgba(15,23,42,1)"></span>
+      <span id="dataSource">—</span>
+    </span>
+  </div>
+
   <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
+    <a href="organizer-dashboard.html">Organisateur</a>
   </nav>
 </header>
 
 <main class="wrap">
   <div class="card">
 
-    <h2 id="raceName">—</h2>
-    <p class="muted" id="raceMeta">—</p>
+    <section class="hero">
+      <div class="row">
+        <div style="min-width:260px;flex:1">
+          <h2 id="raceName" style="margin:0 0 6px 0;">—</h2>
+          <div class="muted" id="raceMeta">—</div>
+          <p class="muted" id="raceComment" style="display:none;margin:10px 0 0 0;line-height:1.55"></p>
+        </div>
 
-    <div class="kpis">
-      <div class="kpi"><div class="big" id="kpiGlobal">—</div><div class="sub">Score global</div></div>
-      <div class="kpi"><div class="big" id="kpiPhys">—</div><div class="sub">Score physique</div></div>
-      <div class="kpi"><div class="big" id="kpiTech">—</div><div class="sub">Score TechScore</div></div>
+        <div class="btnRow noPrint">
+          <a class="btn" id="btnBack" href="meetings.html">← Retour</a>
+          <button class="btn primary" id="btnPdfTop" type="button">📄 PDF / impression</button>
+          <button class="btn" id="btnPublish" type="button" style="display:none">✅ Publier l’épreuve</button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="big" id="kpiGlobal">—</div>
+          <div class="sub">Score global</div>
+        </div>
+        <div class="kpi">
+          <div class="big" id="kpiPhys">—</div>
+          <div class="sub">Score physique</div>
+        </div>
+        <div class="kpi">
+          <div class="big" id="kpiTech">—</div>
+          <div class="sub">Score TechScore V2</div>
+        </div>
+      </div>
+
+      <div class="muted small" id="publishMsg" style="margin-top:10px;"></div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
+        <span class="pill2"><span class="dot" style="background:rgba(47,111,62,1)"></span><span id="kpiDisc">—</span></span>
+        <span class="pill2"><span class="dot" style="background:rgba(120,76,36,1)"></span><span id="kpiBike">—</span></span>
+        <span class="pill2"><span class="dot" style="background:rgba(15,23,42,1)"></span><span id="kpiDist">—</span></span>
+        <span class="pill2"><span class="dot" style="background:rgba(234,88,12,1)"></span><span id="kpiDplus">—</span></span>
+        <span class="pill2"><span class="dot" style="background:rgba(148,163,184,1)"></span><span id="kpiPublish">—</span></span>
+      </div>
+    </section>
+
+    <h3 class="sectionTitle" style="margin-top:18px;">Parcours</h3>
+    <div class="grid2">
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;">
+          <h3 style="margin:0;font-size:14px;">Carte</h3>
+          <span class="pill2"><span class="dot" style="background:rgba(47,111,62,1)"></span><span>GPX</span></span>
+        </div>
+        <div id="map" style="margin-top:10px;"></div>
+        <div class="muted small" style="margin-top:8px;" id="mapHint">—</div>
+      </div>
+
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;">
+          <h3 style="margin:0;font-size:14px;">Profil altimétrique</h3>
+          <span class="pill2"><span class="dot" style="background:rgba(120,76,36,1)"></span><span>D+</span></span>
+        </div>
+        <canvas id="elevCanvas" width="900" height="360" style="margin-top:10px;"></canvas>
+        <div class="muted small" style="margin-top:8px;" id="elevHint">—</div>
+      </div>
     </div>
 
-    <div class="grid2" style="margin-top:16px">
-      <div class="panel">
-        <h3>Carte du parcours</h3>
-        <div id="map"></div>
-      </div>
-      <div class="panel">
-        <h3>Profil altimétrique</h3>
-        <canvas id="elevCanvas" width="900" height="360"></canvas>
-      </div>
-    </div>
-
-    <div class="noPrint" style="margin-top:16px">
-      <button onclick="window.print()" class="btn primary">📄 PDF / impression</button>
+    <h3 class="sectionTitle" style="margin-top:18px;">Actions</h3>
+    <div class="btnRow noPrint">
+      <a class="btn" id="btnOpenMeeting" href="#" style="display:none;">Voir l’événement</a>
+      <a class="btn" id="btnCreateSibling" href="#" style="display:none;">Créer une autre épreuve</a>
+      <button class="btn" id="btnPdfBottom" type="button">📄 PDF / impression</button>
     </div>
 
     <footer class="siteFooter">
-      <div style="display:flex;align-items:center;gap:12px">
-        <img src="img/mtbpoints-logo.png" alt="MTB Points"/>
+      <div class="brand">
+        <img src="img/mtbpoints-logo.png" alt="MTB Points" onerror="this.style.display='none'"/>
         <div>
-          <strong>Retrouvez vos résultats sur www.mtbpoint.fr</strong><br/>
-          <span class="muted small">Scannez pour ouvrir cette fiche</span>
+          <div style="font-weight:1000">Retrouvez vos résultats sur www.mtbpoint.fr</div>
+          <div class="muted small">Scannez pour ouvrir cette fiche</div>
+          <div class="muted small" id="qrUrlText">—</div>
         </div>
       </div>
       <div id="qr"></div>
@@ -100,68 +198,393 @@
   </div>
 </main>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
 <script type="module">
   import { supabase } from "./js/supabaseClient.js";
 
+  const $ = (id) => document.getElementById(id);
   const raceId = new URLSearchParams(location.search).get("id");
-  let map, poly;
+  let CURRENT_RACE = null;
 
-  async function loadRace(){
+  function setStatus(ok, text){
+    $("statusText").textContent = text || "";
+    const dot = $("statusDot");
+    if (dot) dot.style.background = ok ? "var(--ok)" : "var(--err)";
+  }
+
+  function fmtKm(n){
+    const v = Number(n);
+    return Number.isFinite(v) ? (Math.round(v*10)/10) + " km" : "—";
+  }
+  function fmtM(n){
+    const v = Number(n);
+    return Number.isFinite(v) ? Math.round(v) + " m" : "—";
+  }
+
+  function buildPdfTitle(race){
+    const safe = (s) => String(s || "").trim().replace(/[\\/:*?"<>|]+/g, "-");
+    const name = safe(race?.name || "epreuve");
+    const date = safe(race?.date || "");
+    return `MTB-Points_Fiche-epreuve_${name}${date ? "_" + date : ""}`;
+  }
+
+  function setupPdfButtons(getRaceFn){
+    const btnTop = $("btnPdfTop");
+    const btnBottom = $("btnPdfBottom");
+    const handler = () => {
+      const race = typeof getRaceFn === "function" ? getRaceFn() : null;
+      const prevTitle = document.title;
+      document.title = buildPdfTitle(race);
+      setTimeout(() => {
+        window.print();
+        setTimeout(()=>{ document.title = prevTitle; }, 250);
+      }, 250);
+    };
+    btnTop?.addEventListener("click", handler);
+    btnBottom?.addEventListener("click", handler);
+  }
+
+  async function isAuthed(){
+    try{
+      const { data } = await supabase.auth.getSession();
+      return !!data?.session;
+    }catch{
+      return false;
+    }
+  }
+
+  async function fetchRaceProper(id){
+    // 1) Si connecté -> table races (preview même si non publiée)
+    const authed = await isAuthed();
+    if (authed){
+      const { data, error } = await supabase.from("races").select("*").eq("id", id).maybeSingle();
+      if (!error && data) return { row: data, source: "races (preview organisateur)", authed: true };
+    }
+
+    // 2) Public -> vue v_public_races si elle existe
+    try{
+      const { data, error } = await supabase.from("v_public_races").select("*").eq("id", id).maybeSingle();
+      if (!error && data) return { row: data, source: "v_public_races (public)", authed: false };
+    }catch(_){}
+
+    // 3) Fallback public -> table races filtrée publiée
     const { data, error } = await supabase
-      .from("v_public_races")
+      .from("races")
       .select("*")
-      .eq("id", raceId)
-      .single();
+      .eq("id", id)
+      .eq("is_published", true)
+      .maybeSingle();
+    if (!error && data) return { row: data, source: "races (public publié)", authed: false };
 
-    if(error) return alert("Épreuve introuvable");
-
-    document.getElementById("raceName").textContent = data.name;
-    document.getElementById("raceMeta").textContent = data.date + " — " + data.discipline;
-
-    document.getElementById("kpiGlobal").textContent = Math.round(data.score_global || 0);
-    document.getElementById("kpiPhys").textContent = Math.round(data.score_phys || 0);
-    document.getElementById("kpiTech").textContent = Math.round(data.score_tech || 0);
-
-    drawMap(data.gpx?.points || []);
-    drawProfile(data.gpx?.points || []);
-
-    // QR vers le domaine officiel
-    new QRCode(document.getElementById("qr"), {
-      text: "https://www.mtbpoint.fr/race.html?id=" + encodeURIComponent(raceId),
-      width: 96,
-      height: 96
-    });
+    return { row: null, source: authed ? "races (preview)" : "public", authed };
   }
 
-  function drawMap(points){
-    map = L.map("map");
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-    const latlngs = points.map(p=>[p.lat,p.lng]).filter(p=>p[0]&&p[1]);
-    poly = L.polyline(latlngs).addTo(map);
-    map.fitBounds(poly.getBounds());
+  function extractPoints(row){
+    const pts = row?.gpx?.points || row?.analysis_json?.points || null;
+    return Array.isArray(pts) ? pts : null;
   }
 
-  function drawProfile(points){
-    const c = document.getElementById("elevCanvas");
-    const ctx = c.getContext("2d");
-    ctx.clearRect(0,0,c.width,c.height);
-    const els = points.map(p=>p.ele).filter(e=>e!=null);
-    if(!els.length) return;
-    const min=Math.min(...els), max=Math.max(...els);
+  // Leaflet map
+  let MAP = null;
+  let LINE = null;
+
+  function initMap(){
+    if (MAP) return MAP;
+    MAP = L.map("map", { scrollWheelZoom: false });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap"
+    }).addTo(MAP);
+    return MAP;
+  }
+
+  function renderMap(points){
+    const hint = $("mapHint");
+    initMap();
+
+    if (!Array.isArray(points) || points.length < 2){
+      if (LINE){ MAP.removeLayer(LINE); LINE = null; }
+      MAP.setView([46.7, 2.4], 6);
+      if (hint) hint.textContent = "Trace GPX non disponible (points manquants).";
+      return;
+    }
+
+    const latlngs = points
+      .map(p => [Number(p.lat), Number(p.lon ?? p.lng)])
+      .filter(([la, lo]) => Number.isFinite(la) && Number.isFinite(lo));
+
+    if (latlngs.length < 2){
+      if (hint) hint.textContent = "Trace GPX non exploitable (lat/lon manquants).";
+      MAP.setView([46.7, 2.4], 6);
+      return;
+    }
+
+    if (LINE){ MAP.removeLayer(LINE); LINE = null; }
+    LINE = L.polyline(latlngs, { weight: 4, opacity: 0.9 }).addTo(MAP);
+    try{ MAP.fitBounds(LINE.getBounds(), { padding: [18,18] }); }catch(_){}
+    if (hint) hint.textContent = `${latlngs.length.toLocaleString("fr-FR")} points tracés.`;
+  }
+
+  // Elevation profile (repères km tous les 5 km)
+  function ensureCanvasResolution(canvas){
+    const cssH = 360;
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(320, Math.floor(rect.width || 900));
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width  = Math.floor(w * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+    canvas.style.height = cssH + "px";
+  }
+
+  function drawElevation(canvas, points){
+    const ctx = canvas.getContext("2d");
+    const hint = $("elevHint");
+
+    const eles = (points || [])
+      .map(p => Number(p.ele ?? p.elevation ?? p.alt ?? p.altitude))
+      .filter(x => Number.isFinite(x));
+
+    const latlngs = (points || [])
+      .map(p => [Number(p.lat), Number(p.lon ?? p.lng)])
+      .filter(([la, lo]) => Number.isFinite(la) && Number.isFinite(lo));
+
+    if (eles.length < 10 || latlngs.length < 10){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      if (hint) hint.textContent = "Profil non disponible (altitudes manquantes dans le GPX).";
+      return;
+    }
+
+    // distance cumulée (km) via haversine
+    const dist = [0];
+    let total = 0;
+    for (let i=1;i<latlngs.length;i++){
+      const [a1,o1]=latlngs[i-1], [a2,o2]=latlngs[i];
+      const R = 6371000;
+      const toRad = (d)=>d*Math.PI/180;
+      const dLat = toRad(a2-a1), dLon = toRad(o2-o1);
+      const s1 = Math.sin(dLat/2), s2 = Math.sin(dLon/2);
+      const A = s1*s1 + Math.cos(toRad(a1))*Math.cos(toRad(a2))*s2*s2;
+      const c = 2*Math.atan2(Math.sqrt(A), Math.sqrt(1-A));
+      total += R*c;
+      dist.push(total/1000);
+    }
+
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    const mL=46, mR=18, mT=18, mB=34;
+    const w = W-mL-mR, h=H-mT-mB;
+
+    const minE = Math.min(...eles), maxE = Math.max(...eles);
+    const maxD = dist[dist.length-1] || 1;
+
+    // grille km (tous les 5 km)
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(40,60,40,0.18)";
+    ctx.fillStyle = "rgba(40,60,40,0.65)";
+    ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+
+    const stepKm = 5;
+    for (let km=0; km<=maxD; km+=stepKm){
+      const x = mL + (km/maxD)*w;
+      ctx.beginPath();
+      ctx.moveTo(x, mT);
+      ctx.lineTo(x, mT+h);
+      ctx.stroke();
+      ctx.fillText(String(km), x, mT+h+6);
+    }
+    ctx.textAlign="left";
+    ctx.fillText("km", mL, mT+h+6);
+
+    // labels altitude min/max
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillText(Math.round(maxE)+" m", mL-8, mT);
+    ctx.fillText(Math.round(minE)+" m", mL-8, mT+h);
+
+    // courbe
+    ctx.strokeStyle = "rgba(47,111,62,0.95)";
+    ctx.lineWidth = 2;
+
     ctx.beginPath();
-    els.forEach((e,i)=>{
-      const x = i/els.length*c.width;
-      const y = c.height-(e-min)/(max-min)*c.height;
-      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
-    });
-    ctx.strokeStyle="#2f6f3e";
-    ctx.lineWidth=2;
+    for (let i=0;i<eles.length && i<dist.length;i++){
+      const x = mL + (dist[i]/maxD)*w;
+      const y = mT + (1 - ((eles[i]-minE)/(maxE-minE || 1)))*h;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
     ctx.stroke();
+
+    // remplissage léger
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = "rgba(47,111,62,1)";
+    ctx.lineTo(mL+w, mT+h);
+    ctx.lineTo(mL, mT+h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    if (hint) hint.textContent =
+      `Altitude: ${Math.round(minE)}–${Math.round(maxE)} m • Distance: ${Math.round(maxD*10)/10} km • Repères tous les 5 km.`;
   }
 
-  loadRace();
+  function renderQr(raceId){
+    const url = `https://www.mtbpoint.fr/race.html?id=${encodeURIComponent(raceId)}`;
+    const box = $("qr");
+    const txt = $("qrUrlText");
+    if (txt) txt.textContent = url;
+    if (!box || !window.QRCode) return;
+
+    box.innerHTML = "";
+    new window.QRCode(box, {
+      text: url,
+      width: 96,
+      height: 96,
+      correctLevel: window.QRCode.CorrectLevel.M
+    });
+  }
+
+  function renderUI(row, authed){
+    CURRENT_RACE = row;
+
+    // Header
+    $("raceName").textContent = row?.name || "Épreuve";
+
+    const meta = [];
+    if (row?.date) meta.push("📅 " + row.date);
+    if (row?.time) meta.push("🕒 " + row.time);
+    if (row?.meeting_name) meta.push("🏁 " + row.meeting_name);
+    $("raceMeta").textContent = meta.join(" • ") || "—";
+
+    if (row?.comment){
+      const p = $("raceComment");
+      p.style.display = "block";
+      p.textContent = row.comment;
+    }
+
+    // KPI
+    const g = Number(row?.score_global);
+    const p = Number(row?.score_phys);
+    const t = Number(row?.score_tech);
+
+    $("kpiGlobal").textContent = Number.isFinite(g) ? String(Math.round(g)) : "—";
+    $("kpiPhys").textContent   = Number.isFinite(p) ? String(Math.round(p)) : "—";
+    $("kpiTech").textContent   = Number.isFinite(t) ? String(Math.round(t)) : "—";
+
+    $("kpiDisc").textContent = row?.disc ? String(row.disc) : "Discipline —";
+    $("kpiBike").textContent = (row?.ebike === true) ? "Vélo : E-bike" : (row?.ebike === false ? "Vélo : Musculaire" : "Vélo : —");
+    $("kpiDist").textContent = "Distance : " + fmtKm(row?.distance_km);
+    $("kpiDplus").textContent = "D+ : " + fmtM(row?.dplus_m);
+
+    const isPub = !!row?.is_published;
+    $("kpiPublish").textContent = isPub ? "Publié" : "Brouillon";
+
+    // Links meeting
+    const mid = row?.meeting_id || null;
+    $("btnBack").href = mid ? `meeting.html?id=${encodeURIComponent(mid)}` : "meetings.html";
+    if (mid){
+      const om = $("btnOpenMeeting");
+      const cs = $("btnCreateSibling");
+      om.href = `meeting.html?id=${encodeURIComponent(mid)}`;
+      cs.href = `course-create.html?meetingId=${encodeURIComponent(mid)}`;
+      om.style.display = "inline-flex";
+      cs.style.display = "inline-flex";
+    }
+
+    // Publish button
+    const btnPub = $("btnPublish");
+    const msgPub = $("publishMsg");
+    btnPub.style.display = (authed && !isPub) ? "inline-flex" : "none";
+    msgPub.textContent = (authed && !isPub) ? "Cette épreuve est en brouillon (preview). Publie-la pour la rendre visible publiquement." : (isPub ? "✅ Épreuve publiée" : "");
+
+    // Map + profile
+    const pts = extractPoints(row);
+    renderMap(pts);
+    const canvas = $("elevCanvas");
+    ensureCanvasResolution(canvas);
+    drawElevation(canvas, pts || []);
+
+    // QR
+    renderQr(raceId);
+  }
+
+  async function publishRace(){
+    const btn = $("btnPublish");
+    const msg = $("publishMsg");
+    try{
+      btn.disabled = true;
+      msg.textContent = "Publication…";
+
+      const { error } = await supabase
+        .from("races")
+        .update({ is_published: true })
+        .eq("id", raceId);
+
+      if (error) throw error;
+
+      msg.textContent = "✅ Publiée !";
+      btn.style.display = "none";
+      $("kpiPublish").textContent = "Publié";
+
+      // refresh row
+      const { row, authed } = await fetchRaceProper(raceId);
+      if (row) renderUI(row, authed);
+    }catch(e){
+      console.error(e);
+      msg.textContent = "❌ Impossible de publier (droits/RLS).";
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
+  async function main(){
+    if (!raceId){
+      setStatus(false, "ID d’épreuve manquant");
+      $("raceName").textContent = "Épreuve introuvable";
+      $("raceMeta").textContent = "Aucun id=... dans l’URL";
+      $("dataSource").textContent = "—";
+      return;
+    }
+
+    try{
+      setStatus(true, "Chargement…");
+      const { row, source, authed } = await fetchRaceProper(raceId);
+      $("dataSource").textContent = source;
+
+      if (!row){
+        setStatus(false, "Introuvable / non publiée");
+        $("raceName").textContent = "Épreuve introuvable";
+        $("raceMeta").textContent = authed
+          ? "Connecté, mais l’épreuve est introuvable ou bloquée par RLS."
+          : "Non connecté : l’épreuve n’est pas publiée (ou introuvable).";
+        return;
+      }
+
+      renderUI(row, authed);
+      setupPdfButtons(()=>CURRENT_RACE);
+      $("btnPublish")?.addEventListener("click", publishRace);
+
+      setStatus(true, authed ? "OK (preview)" : "OK");
+    }catch(e){
+      console.error(e);
+      setStatus(false, "Erreur");
+      $("raceName").textContent = "Erreur de chargement";
+      $("raceMeta").textContent = e?.message ? String(e.message) : "Erreur Supabase / RLS";
+      $("dataSource").textContent = "Erreur";
+    }
+  }
+
+  window.addEventListener("resize", () => {
+    const canvas = $("elevCanvas");
+    if (!canvas) return;
+    ensureCanvasResolution(canvas);
+    const pts = extractPoints(CURRENT_RACE);
+    if (pts) drawElevation(canvas, pts);
+  });
+
+  main();
 </script>
 
 </body>
