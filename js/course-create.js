@@ -1,11 +1,11 @@
 // js/course-create.js (ESM)
-// MTB Points — Création épreuve (organizer)
+// MTB Points â€” CrÃ©ation Ã©preuve (organizer)
 // Exigences projet:
 // - Multi-tours (case + grille) NE JAMAIS SUPPRIMER
-// - Bouton "Créer + dupliquer (Musculaire ↔ E-bike)" NE JAMAIS SUPPRIMER
+// - Bouton "CrÃ©er + dupliquer (Musculaire â†” E-bike)" NE JAMAIS SUPPRIMER
 // - Analyse GPX/OSM obligatoire (via window.analyzeGPX de js/gpx.js)
-// - Ne pas afficher les scores (ils seront affichés dans race.html)
-// - Distance et D+ sont calculés automatiquement (pas de champs à saisir)
+// - Ne pas afficher les scores (ils seront affichÃ©s dans race.html)
+// - Distance et D+ sont calculÃ©s automatiquement (pas de champs Ã  saisir)
 
 import {
   loadMeetingsHybrid,
@@ -18,23 +18,23 @@ import {
 const $ = (id) => document.getElementById(id);
 
 const AGE_CATS = [
-  { id: "U7", label: "U7 (Poussin 7–8)" },
-  { id: "U9", label: "U9 (Pupille 9–10)" },
-  { id: "U11", label: "U11 (Benjamin 11–12)" },
-  { id: "U13", label: "U13 (Minime 13–14)" },
-  { id: "U15", label: "U15 (Cadet 15–16)" },
-  { id: "U17", label: "U17 (Junior 17–18)" },
-  { id: "U23", label: "U23 (Espoir 19–22)" },
-  { id: "SEN", label: "SEN (Senior/Élite 19–34)" },
-  { id: "M1", label: "M1 (35–39)" },
-  { id: "M2", label: "M2 (40–44)" },
-  { id: "M3", label: "M3 (45–49)" },
-  { id: "M4", label: "M4 (50–54)" },
-  { id: "M5", label: "M5 (55–59)" },
-  { id: "M6", label: "M6 (60–64)" },
-  { id: "M7", label: "M7 (65–69)" },
-  { id: "M8", label: "M8 (70–74)" },
-  { id: "M9", label: "M9 (75–79)" },
+  { id: "U7", label: "U7 (Poussin 7â€“8)" },
+  { id: "U9", label: "U9 (Pupille 9â€“10)" },
+  { id: "U11", label: "U11 (Benjamin 11â€“12)" },
+  { id: "U13", label: "U13 (Minime 13â€“14)" },
+  { id: "U15", label: "U15 (Cadet 15â€“16)" },
+  { id: "U17", label: "U17 (Junior 17â€“18)" },
+  { id: "U23", label: "U23 (Espoir 19â€“22)" },
+  { id: "SEN", label: "SEN (Senior/Ã‰lite 19â€“34)" },
+  { id: "M1", label: "M1 (35â€“39)" },
+  { id: "M2", label: "M2 (40â€“44)" },
+  { id: "M3", label: "M3 (45â€“49)" },
+  { id: "M4", label: "M4 (50â€“54)" },
+  { id: "M5", label: "M5 (55â€“59)" },
+  { id: "M6", label: "M6 (60â€“64)" },
+  { id: "M7", label: "M7 (65â€“69)" },
+  { id: "M8", label: "M8 (70â€“74)" },
+  { id: "M9", label: "M9 (75â€“79)" },
 ];
 
 let ANALYSIS = null;
@@ -47,9 +47,9 @@ function clamp04(v){
 }
 
 /**
- * Suggestion automatique de discipline à partir de l'analyse GPX/OSM.
- * - Gravel si tech01 très faible (terrain très roulant)
- * - DH (optionnel) si très court
+ * Suggestion automatique de discipline Ã  partir de l'analyse GPX/OSM.
+ * - Gravel si tech01 trÃ¨s faible (terrain trÃ¨s roulant)
+ * - DH (optionnel) si trÃ¨s court
  * - XCC / XCO / XCM selon distance
  */
 function inferDisciplineFromAnalysis(analysis){
@@ -58,10 +58,10 @@ function inferDisciplineFromAnalysis(analysis){
 
   if (!Number.isFinite(km) || km <= 0) return null;
 
-  // Gravel si terrain très roulant
+  // Gravel si terrain trÃ¨s roulant
   if (Number.isFinite(tech01) && tech01 <= 0.18) return "Gravel";
 
-  // DH (heuristique simple: très court)
+  // DH (heuristique simple: trÃ¨s court)
   if (km < 6) return "DH";
 
   if (km < 12) return "XCC";
@@ -85,7 +85,7 @@ function showMsg(html, ok = true) {
   const el = $("msg");
   if (!el) return;
   el.style.display = html ? "block" : "none";
-  el.innerHTML = html ? (ok ? `✅ ${html}` : `❌ ${html}`) : "";
+  el.innerHTML = html ? (ok ? `âœ… ${html}` : `âŒ ${html}`) : "";
   el.style.borderColor = ok ? "#c7f9cc" : "#fecaca";
 }
 
@@ -102,8 +102,8 @@ function setStatus(phase, msg, prog = null, sub = "") {
   const wrap = $("statusBarWrap");
   const bar = $("statusBar");
 
-  if (phaseEl) phaseEl.innerHTML = `<span class="dot"></span> ${esc(phase || "—")}`;
-  if (msgEl) msgEl.textContent = msg || "—";
+  if (phaseEl) phaseEl.innerHTML = `<span class="dot"></span> ${esc(phase || "â€”")}`;
+  if (msgEl) msgEl.textContent = msg || "â€”";
   if (subEl) subEl.textContent = sub || "";
 
   if (wrap && bar) {
@@ -117,11 +117,11 @@ function setStatus(phase, msg, prog = null, sub = "") {
   }
 }
 
-// écoute les events de js/gpx.js
+// Ã©coute les events de js/gpx.js
 window.addEventListener("mtb:status", (e) => {
   const d = e?.detail || {};
-  const phase = d.phase || "—";
-  const msg = d.message || "—";
+  const phase = d.phase || "â€”";
+  const msg = d.message || "â€”";
   const p = typeof d.progress === "number" ? Math.round(d.progress * 100) : null;
   setStatus(phase, msg, p, $("statusSub")?.textContent || "");
 });
@@ -155,9 +155,9 @@ async function initMeetings() {
 
   meetings = (meetings || []).slice().sort((a, b) => String(b?.date || "").localeCompare(String(a?.date || "")));
 
-  sel.innerHTML = `<option value="">— Choisir —</option>` + meetings.map((m) => {
-    const d = m?.date ? ` • ${esc(m.date)}` : "";
-    return `<option value="${esc(m.id)}">${esc(m.name || "Événement")}${d}</option>`;
+  sel.innerHTML = `<option value="">â€” Choisir â€”</option>` + meetings.map((m) => {
+    const d = m?.date ? ` â€¢ ${esc(m.date)}` : "";
+    return `<option value="${esc(m.id)}">${esc(m.name || "Ã‰vÃ©nement")}${d}</option>`;
   }).join("");
 
   if (mid) {
@@ -165,7 +165,7 @@ async function initMeetings() {
     await applyMeetingDefaults(mid);
   } else {
     const hint = $("meetingHint");
-    if (hint) hint.textContent = "Sélectionne un événement.";
+    if (hint) hint.textContent = "SÃ©lectionne un Ã©vÃ©nement.";
   }
 
   sel.addEventListener("change", async () => {
@@ -173,7 +173,7 @@ async function initMeetings() {
   });
 }
 
-// defaults (si page ouverte sans meeting sélectionné)
+// defaults (si page ouverte sans meeting sÃ©lectionnÃ©)
 const timeEl0 = $("time");
 if (timeEl0 && !timeEl0.value) timeEl0.value = "08:30";
 const lvl0 = $("level");
@@ -184,11 +184,11 @@ if (mech0 && (mech0.value === "" || mech0.value == null)) mech0.value = "0";
 const feeds0 = $("feeds");
 if (feeds0 && (feeds0.value === "" || feeds0.value == null)) feeds0.value = "0";
 
-// Discipline obligatoire: on force required au cas où (HTML doit aussi l'avoir)
+// Discipline obligatoire: on force required au cas oÃ¹ (HTML doit aussi l'avoir)
 const disc0 = $("disc");
 if (disc0) disc0.required = true;
 
-// Vélo obligatoire: select ebike doit rester sur 0/1
+// VÃ©lo obligatoire: select ebike doit rester sur 0/1
 const eb0 = $("ebike");
 if (eb0) eb0.required = true;
 
@@ -196,7 +196,7 @@ if (eb0) eb0.required = true;
 async function applyMeetingDefaults(meetingId) {
   const hint = $("meetingHint");
   if (!meetingId) {
-    if (hint) hint.textContent = "⚠️ Sélectionne un événement.";
+    if (hint) hint.textContent = "âš ï¸ SÃ©lectionne un Ã©vÃ©nement.";
     return;
   }
 
@@ -209,7 +209,7 @@ async function applyMeetingDefaults(meetingId) {
   }
 
   if (!meeting) {
-    if (hint) hint.textContent = "⚠️ Événement introuvable.";
+    if (hint) hint.textContent = "âš ï¸ Ã‰vÃ©nement introuvable.";
     return;
   }
 
@@ -218,8 +218,8 @@ async function applyMeetingDefaults(meetingId) {
 
   if (hint) {
     hint.textContent = end
-      ? `📅 Plage événement : ${start || "—"} → ${end}`
-      : `📅 Date événement : ${start || "—"}`;
+      ? `ðŸ“… Plage Ã©vÃ©nement : ${start || "â€”"} â†’ ${end}`
+      : `ðŸ“… Date Ã©vÃ©nement : ${start || "â€”"}`;
   }
 
   const back = $("btnBack");
@@ -258,10 +258,10 @@ function renderAgeRows() {
         </label>
       </div>
 
-      <div><input type="number" min="0" step="1" placeholder="—" class="lapsM" data-cat="${esc(cat.id)}" disabled></div>
+      <div><input type="number" min="0" step="1" placeholder="â€”" class="lapsM" data-cat="${esc(cat.id)}" disabled></div>
       <div><input type="time" class="startM" data-cat="${esc(cat.id)}" disabled></div>
 
-      <div><input type="number" min="0" step="1" placeholder="—" class="lapsF" data-cat="${esc(cat.id)}" disabled></div>
+      <div><input type="number" min="0" step="1" placeholder="â€”" class="lapsF" data-cat="${esc(cat.id)}" disabled></div>
       <div><input type="time" class="startF" data-cat="${esc(cat.id)}" disabled></div>
     </div>
   `).join("");
@@ -354,21 +354,21 @@ function setAnalyzeBusy(on) {
   if (on) {
     btn.disabled = true;
     btn.dataset.label = btn.textContent;
-    btn.textContent = "⏳ Analyse en cours…";
+    btn.textContent = "â³ Analyse en coursâ€¦";
   } else {
     btn.disabled = false;
-    btn.textContent = btn.dataset.label || "📂 Choisir un GPX & analyser";
+    btn.textContent = btn.dataset.label || "ðŸ“‚ Choisir un GPX & analyser";
   }
 }
 
 async function analyzeGpx() {
   const f = $("gpxFile")?.files?.[0];
   if (!f) {
-    showMsg("GPX obligatoire : sélectionne un fichier GPX.", false);
+    showMsg("GPX obligatoire : sÃ©lectionne un fichier GPX.", false);
     return;
   }
   if (typeof window.analyzeGPX !== "function") {
-    showMsg("analyzeGPX introuvable : vérifie que js/gpx.js est bien chargé.", false);
+    showMsg("analyzeGPX introuvable : vÃ©rifie que js/gpx.js est bien chargÃ©.", false);
     return;
   }
 
@@ -376,7 +376,7 @@ async function analyzeGpx() {
   showMsg("");
 
   try {
-    setStatus("Préparation", "Lecture du fichier…", 5, "Démarrage…");
+    setStatus("PrÃ©paration", "Lecture du fichierâ€¦", 5, "DÃ©marrageâ€¦");
 
     const res = await window.analyzeGPX(f, {
       keepPoints: true,
@@ -396,7 +396,7 @@ async function analyzeGpx() {
       techV2: res?.techV2 ?? res?.tech ?? null,
       surfaceEstimate: res?.surfaceEstimate ?? res?.tech?.surfaceEstimate ?? null,
 
-      // Phys (côté serveur si renvoyé, sinon on laisse null)
+      // Phys (cÃ´tÃ© serveur si renvoyÃ©, sinon on laisse null)
       phys: res?.phys ?? null,
 
       // score global (mrs)
@@ -409,10 +409,10 @@ async function analyzeGpx() {
       raw: res || null,
     };
 
-    setStatus("done", "Analyse terminée.", 100, "Tu peux enregistrer l’épreuve.");
-    showMsg("Analyse GPX/OSM terminée.", true);
+    setStatus("done", "Analyse terminÃ©e.", 100, "Tu peux enregistrer lâ€™Ã©preuve.");
+    showMsg("Analyse GPX/OSM terminÃ©e.", true);
 
-    // Discipline: auto-suggestion après analyse (sans écraser un choix manuel)
+    // Discipline: auto-suggestion aprÃ¨s analyse (sans Ã©craser un choix manuel)
     const discEl = $("disc");
     if (discEl) {
       discEl.required = true;
@@ -425,7 +425,7 @@ async function analyzeGpx() {
   } catch (e) {
     ANALYSIS = null;
     console.warn(e);
-    setStatus("error", "Analyse impossible.", null, e?.message || "Erreur serveur / réseau.");
+    setStatus("error", "Analyse impossible.", null, e?.message || "Erreur serveur / rÃ©seau.");
     showMsg(`Analyse GPX/OSM impossible : ${esc(e?.message || "erreur")}`, false);
   } finally {
     setAnalyzeBusy(false);
@@ -442,21 +442,21 @@ function validate() {
   const disc = ($("disc")?.value || "").trim();
   const ebike = ($("ebike")?.value || "").trim();
 
-  if (!meetingId) return "Événement obligatoire.";
+  if (!meetingId) return "Ã‰vÃ©nement obligatoire.";
   if (!date) return "Date obligatoire.";
-  if (!name) return "Nom de l’épreuve obligatoire.";
+  if (!name) return "Nom de lâ€™Ã©preuve obligatoire.";
 
-  if (!level) return "Catégorie obligatoire (par défaut : Locale).";
+  if (!level) return "CatÃ©gorie obligatoire (par dÃ©faut : Locale).";
   if (!disc) return "Discipline obligatoire.";
-  if (ebike !== "0" && ebike !== "1") return "Choisis Musculaire ou Électrique.";
+  if (ebike !== "0" && ebike !== "1") return "Choisis Musculaire ou Ã‰lectrique.";
 
-  // Force 0..4 (au cas où)
+  // Force 0..4 (au cas oÃ¹)
   const mech = Math.max(0, Math.min(4, Number(($("mechanic")?.value ?? 0))));
   const feeds = Math.max(0, Math.min(4, Number(($("feeds")?.value ?? 0))));
   if ($("mechanic")) $("mechanic").value = String(mech);
   if ($("feeds")) $("feeds").value = String(feeds);
 
-  if (!ANALYSIS) return "GPX/OSM obligatoire : importe un GPX et lance l’analyse.";
+  if (!ANALYSIS) return "GPX/OSM obligatoire : importe un GPX et lance lâ€™analyse.";
   return null;
 }
 
@@ -502,7 +502,7 @@ async function buildRace({ ebikeOverride = null, nameSuffix = "", idSalt = 0 } =
     dplusM: ANALYSIS?.dplusM ?? null,
     surfaceEstimate: ANALYSIS?.surfaceEstimate ?? null,
 
-    // scores stockés mais NON affichés sur cette page
+    // scores stockÃ©s mais NON affichÃ©s sur cette page
     scorePhys: ANALYSIS?.phys?.score ?? null,
     scoreTech: (typeof ANALYSIS?.techV2?.techScoreV2 === "number") ? ANALYSIS.techV2.techScoreV2 : (ANALYSIS?.techV2?.techScore ?? null),
     scoreGlobal: ANALYSIS?.mrs ?? null,
@@ -512,7 +512,7 @@ async function buildRace({ ebikeOverride = null, nameSuffix = "", idSalt = 0 } =
     gpx: {
       fileName: ANALYSIS?.fileName || null,
       hasElevation: ANALYSIS?.hasElevation ?? null,
-      // on peut stocker un échantillon ou rien selon tes besoins
+      // on peut stocker un Ã©chantillon ou rien selon tes besoins
       points: ANALYSIS?.points ?? null,
     },
 
@@ -540,10 +540,10 @@ function afterSaveLinks(race, race2 = null) {
 }
 
 async function persistRace(race) {
-  // 1) insert race (supabase si connecté, sinon local)
+  // 1) insert race (supabase si connectÃ©, sinon local)
   await addStoredEventHybrid(race);
 
-  // 2) push raceId into meeting (supabase si connecté, sinon local)
+  // 2) push raceId into meeting (supabase si connectÃ©, sinon local)
   const meeting = await findMeetingHybrid(race.meetingId);
   if (meeting) {
     const updated = pushRaceId(meeting, race.id);
@@ -566,7 +566,7 @@ async function saveSingle({ thenNew = false } = {}) {
     const race = await buildRace();
     await persistRace(race);
 
-    showMsg(`Épreuve créée : <b>${esc(race.name)}</b>`, true);
+    showMsg(`Ã‰preuve crÃ©Ã©e : <b>${esc(race.name)}</b>`, true);
     afterSaveLinks(race);
 
     if (thenNew) {
@@ -593,12 +593,12 @@ async function saveAndDuplicate() {
 
   try {
     const race1 = await buildRace({ ebikeOverride: isEbikeSelected, nameSuffix: "", idSalt: 0 });
-    const race2 = await buildRace({ ebikeOverride: !isEbikeSelected, nameSuffix: isEbikeSelected ? "— Musculaire" : "— E-bike", idSalt: 7 });
+    const race2 = await buildRace({ ebikeOverride: !isEbikeSelected, nameSuffix: isEbikeSelected ? "â€” Musculaire" : "â€” E-bike", idSalt: 7 });
 
     await persistRace(race1);
     await persistRace(race2);
 
-    showMsg(`Deux épreuves créées : <b>${esc(race1.name)}</b> et <b>${esc(race2.name)}</b> (classements séparés).`, true);
+    showMsg(`Deux Ã©preuves crÃ©Ã©es : <b>${esc(race1.name)}</b> et <b>${esc(race2.name)}</b> (classements sÃ©parÃ©s).`, true);
     afterSaveLinks(race1, race2);
   } catch (e) {
     console.warn(e);
@@ -660,18 +660,18 @@ function resetForm(keepMeeting = true) {
   renderAgeRows();
   initMultiToggle();
 
-  // Discipline: liste autorisée (pour éviter les valeurs "fantômes")
+  // Discipline: liste autorisÃ©e (pour Ã©viter les valeurs "fantÃ´mes")
   const allowedDisc = new Set(["DH","Enduro","XCC","XCO","XCM_marathon","XCM_ultra","Gravel"]);
   const discEl = $("disc");
   if (discEl && discEl.value && !allowedDisc.has(discEl.value)) discEl.value = "";
 
 
   // IMPORTANT:
-  // - Sur certains navigateurs, inp.click() sur un <input type="file"> caché peut être bloqué.
-  // - Recommandé côté HTML: utiliser <label for="gpxFile" id="btnPickAnalyze">…</label>
-  // Ici on se contente de reset la valeur pour permettre de re-sélectionner le même fichier.
+  // - Sur certains navigateurs, inp.click() sur un <input type="file"> cachÃ© peut Ãªtre bloquÃ©.
+  // - RecommandÃ© cÃ´tÃ© HTML: utiliser <label for="gpxFile" id="btnPickAnalyze">â€¦</label>
+  // Ici on se contente de reset la valeur pour permettre de re-sÃ©lectionner le mÃªme fichier.
     const pickLbl = $("btnPickAnalyze");
-  // accessibilité: Enter/Espace sur le label ouvre le picker
+  // accessibilitÃ©: Enter/Espace sur le label ouvre le picker
   pickLbl?.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -687,7 +687,7 @@ $("btnPickAnalyze")?.addEventListener("click", () => {
 
   $("gpxFile")?.addEventListener("change", async () => {
     const f = $("gpxFile")?.files?.[0];
-    $("pickedFileName").textContent = f ? `Fichier sélectionné : ${f.name}` : "";
+    $("pickedFileName").textContent = f ? `Fichier sÃ©lectionnÃ© : ${f.name}` : "";
     if (f) await analyzeGpx();
   });
 
