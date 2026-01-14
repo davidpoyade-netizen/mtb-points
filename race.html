@@ -3,316 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fiche épreuve – MTB Points</title>
+  <title>Fiche épreuve — MTB Points</title>
 
-  <!-- Leaflet (carte) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+  <!-- Base + thème nature -->
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/theme-nature.css" />
 
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+
+  <!-- QR Code -->
+  <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
+
   <style>
-    /* Base (compatible avec ton style.css) */
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .blockTitle{font-weight:900;margin:0 0 10px 0}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .item{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:12px}
-    .label{color:#667085;font-size:12px;margin-bottom:6px}
-    .value{font-weight:900;font-size:18px;color:#0f172a}
-    .muted{color:#667085;font-size:12px;margin-top:6px}
-
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid #e5e7eb;background:#f8fafc;color:#0f172a}
-    .pillDot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
-
-    .scoreRow{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0 0}
-    .scoreBadge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;border:1px solid #e5e7eb;background:#fff;
-      font-weight:900;font-size:12px;white-space:nowrap;
+    body.theme-nature .panel{
+      background: rgba(255,255,255,0.78);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:12px;
+      box-shadow:0 10px 26px rgba(2,6,23,.06);
     }
-    .scoreBadge b{font-size:13px}
-
-    .barWrap{margin-top:8px;background:#f1f5f9;border-radius:999px;overflow:hidden;border:1px solid #e5e7eb;height:16px}
-    .barSeg{height:16px;display:block;float:left}
-    .segRoad{background:#64748b}
-    .segTrack{background:#22c55e}
-    .segSingle{background:#ef4444}
-
-    #map{height:380px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff}
-    #profileWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
-    #profileCanvas{width:100%;display:block}
-
-    .legendRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 10px 0}
-    .legendItem{display:inline-flex;align-items:center;gap:6px}
-    .legendSwatch{width:10px;height:10px;border-radius:3px;display:inline-block}
-
-    .linkBtn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 14px;border-radius:12px;background:#2563eb;color:#fff;
-      text-decoration:none;font-weight:900;border:1px solid #2563eb;
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+    @media(max-width:900px){.kpis{grid-template-columns:1fr}}
+    .kpi{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,0.82)}
+    .kpi .big{font-size:22px;font-weight:1000}
+    .kpi .sub{font-size:12px;color:var(--muted)}
+    #map,#elevCanvas{height:360px;border-radius:16px;border:1px solid var(--border);background:#fff}
+    footer.siteFooter{
+      margin-top:18px;padding:14px;border-radius:18px;border:1px solid var(--border);
+      background:rgba(255,255,255,0.72);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap
     }
-    .linkBtn.secondary{background:#fff;color:#0f172a;border:1px solid #e5e7eb}
-
-    @media(max-width:900px){
-      .grid,.grid3,.twoCol{grid-template-columns:1fr}
-      #map{height:320px}
+    footer.siteFooter img{width:48px;height:48px;border-radius:12px}
+    @media print{
+      .noPrint{display:none}
+      body{background:#fff}
     }
   </style>
 </head>
 
 <body class="theme-nature">
-<header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1 style="margin:0;font-size:18px">MTB Points — Fiche épreuve</h1>
-    <span class="pill"><span class="pillDot" id="statusDot"></span> <span id="statusText">Chargement…</span></span>
-  </div>
 
+<header class="header noPrint">
+  <h1>MTB Points — Fiche épreuve</h1>
   <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
-    <a href="events.html">Épreuves</a>
-    <a href="challengemtbpoints.html">Challenge</a>
-    <a href="login.html">Connexion</a>
   </nav>
-
-  <div class="headerRight" style="display:flex;gap:10px;flex-wrap:wrap">
-    <a class="linkBtn secondary" href="events.html">← Épreuves</a>
-  </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
+  <div class="card">
 
-  <!-- 1) Identité -->
-  <section class="card">
-    <h2 class="blockTitle" id="raceName">—</h2>
+    <h2 id="raceName">—</h2>
+    <p class="muted" id="raceMeta">—</p>
 
-    <div class="grid3">
-      <div class="item">
-        <div class="label">Date</div>
-        <div class="value" id="raceDate">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Discipline</div>
-        <div class="value" id="raceDisc">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Niveau</div>
-        <div class="value" id="raceLevel">—</div>
-      </div>
+    <div class="kpis">
+      <div class="kpi"><div class="big" id="kpiGlobal">—</div><div class="sub">Score global</div></div>
+      <div class="kpi"><div class="big" id="kpiPhys">—</div><div class="sub">Score physique</div></div>
+      <div class="kpi"><div class="big" id="kpiTech">—</div><div class="sub">Score TechScore</div></div>
     </div>
 
-    <div class="grid" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Distance</div>
-        <div class="value" id="raceDistance">—</div>
-        <div class="muted" id="raceDistanceHint">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Dénivelé</div>
-        <div class="value" id="raceDplus">—</div>
-        <div class="muted" id="raceElevInfo">—</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 2) Scores -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Scores & difficulté</h3>
-
-    <div class="scoreRow">
-      <span class="scoreBadge" id="scorePhysBadge">💪 Phys <b id="scorePhysVal">—</b>/100</span>
-      <span class="scoreBadge" id="scoreTechBadge">🪨 Tech <b id="scoreTechVal">—</b>/100</span>
-      <span class="scoreBadge" id="scoreGlobalBadge">🏁 Global <b id="scoreGlobalVal">—</b>/100</span>
-    </div>
-
-    <div class="grid3" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Score technique (officiel)</div>
-        <div class="value" id="scoreTechVal2">—</div>
-        <div class="muted" id="techInfo">OSM + bonus GPX capé (serveur Render)</div>
-      </div>
-      <div class="item">
-        <div class="label">Indicateur technique</div>
-        <div class="value" id="techP75">—</div>
-        <div class="muted" id="techP75Info">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Score physique</div>
-        <div class="value" id="scorePhysVal2">—</div>
-        <div class="muted" id="physInfo">—</div>
-      </div>
-    </div>
-
-    <div class="grid" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Score global</div>
-        <div class="value" id="scoreGlobalVal2">—</div>
-        <div class="muted">Synthèse technique + physique</div>
-      </div>
-      <div class="item">
-        <div class="label">Niveau de difficulté</div>
-        <div class="pill" id="diffPill">
-          <span class="pillDot" id="diffDot"></span>
-          <span id="diffLabel">—</span>
-        </div>
-        <div class="muted" id="diffHint">—</div>
-      </div>
-    </div>
-
-    <div class="item" style="margin-top:12px;">
-      <div class="label">Résumé automatique</div>
-      <div class="value" id="autoSummary" style="font-size:14px;font-weight:800;">—</div>
-      <div class="muted">Synthèse depuis la trace / scores</div>
-    </div>
-
-    <div class="item" style="margin-top:12px;">
-      <div class="label">Type de voie (si disponible)</div>
-      <div class="value" id="surfaceText">—</div>
-
-      <div class="barWrap" aria-label="Route / Piste large / Single">
-        <span class="barSeg segRoad" id="barRoad" style="width:0%"></span>
-        <span class="barSeg segTrack" id="barTrack" style="width:0%"></span>
-        <span class="barSeg segSingle" id="barSingle" style="width:0%"></span>
-      </div>
-
-      <div class="muted">Route (gris) • Piste (vert) • Single (rouge)</div>
-    </div>
-  </section>
-
-  <!-- 3) Profil + carte -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Profil & carte</h3>
-
-    <div class="twoCol">
-      <div id="profileWrap">
-        <div class="label">Profil altimétrique</div>
-
-        <div class="legendRow muted">
-          <span class="legendItem"><span class="legendSwatch" style="background:#22c55e;"></span> Facile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#3b82f6;"></span> Modéré</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#ef4444;"></span> Difficile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#111827;"></span> Très difficile</span>
-          <span class="muted" style="margin-left:auto;">Survole</span>
-        </div>
-
-        <div style="position:relative;">
-          <canvas id="profileCanvas" height="220"></canvas>
-          <div id="profileTooltip"
-               style="position:absolute;display:none;pointer-events:none;
-                      background:#0f172a;color:#fff;padding:8px 10px;border-radius:10px;
-                      font-size:12px;line-height:1.35;box-shadow:0 10px 30px rgba(0,0,0,.25);">
-          </div>
-        </div>
-
-        <div class="muted" id="profileInfo">—</div>
-      </div>
-
-      <div>
-        <div class="label">Carte du tracé</div>
-
-        <div class="legendRow muted">
-          <span class="legendItem"><span class="legendSwatch" style="background:#22c55e;"></span> Facile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#3b82f6;"></span> Modéré</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#ef4444;"></span> Difficile</span>
-          <span class="legendItem"><span class="legendSwatch" style="background:#111827;"></span> Très difficile</span>
-        </div>
-
+    <div class="grid2" style="margin-top:16px">
+      <div class="panel">
+        <h3>Carte du parcours</h3>
         <div id="map"></div>
-
-        <div class="muted">Départ / Arrivée affichés si le script les détecte</div>
       </div>
-    </div>
-  </section>
-
-  <!-- 4) Infos pratiques -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Informations pratiques</h3>
-
-    <div class="grid">
-      <div class="item">
-        <div class="label">Départ</div>
-        <div class="value" id="startPlace">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Arrivée</div>
-        <div class="value" id="finishPlace">—</div>
+      <div class="panel">
+        <h3>Profil altimétrique</h3>
+        <canvas id="elevCanvas" width="900" height="360"></canvas>
       </div>
     </div>
 
-    <div class="grid3" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Heure de départ</div>
-        <div class="value" id="startTime">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Ravitaillements</div>
-        <div class="value" id="aidStations">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Assistance mécanique</div>
-        <div class="value" id="mechStations">—</div>
-      </div>
+    <div class="noPrint" style="margin-top:16px">
+      <button onclick="window.print()" class="btn primary">📄 PDF / impression</button>
     </div>
 
-    <div class="grid3" style="margin-top:12px;">
-      <div class="item">
-        <div class="label">Lavage vélos</div>
-        <div class="value" id="bikeWash">—</div>
+    <footer class="siteFooter">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="img/mtbpoints-logo.png" alt="MTB Points"/>
+        <div>
+          <strong>Retrouvez vos résultats sur www.mtbpoint.fr</strong><br/>
+          <span class="muted small">Scannez pour ouvrir cette fiche</span>
+        </div>
       </div>
-      <div class="item">
-        <div class="label">Barrière horaire</div>
-        <div class="value" id="cutoffTime">—</div>
-      </div>
-      <div class="item">
-        <div class="label">Catégories d’âge</div>
-        <div class="value" id="ageCategories">—</div>
-        <div class="muted" id="ageHint">—</div>
-      </div>
-    </div>
+      <div id="qr"></div>
+    </footer>
 
-    <div class="item" style="margin-top:12px;">
-      <div class="label">Commentaire</div>
-      <div class="value" style="font-size:14px;font-weight:700;" id="raceComment">—</div>
-    </div>
-  </section>
-
-  <!-- 5) Lien événement -->
-  <section class="card" style="margin-top:14px;">
-    <h3 class="blockTitle">Événement</h3>
-    <div id="meetingBlock">
-      <div class="muted">Cette épreuve n’est rattachée à aucun événement.</div>
-    </div>
-  </section>
-
-  <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-    <a class="linkBtn secondary" href="events.html">← Retour aux épreuves</a>
-    <a class="linkBtn" id="meetingLinkBtn" href="meetings.html" style="display:none">Voir l’événement</a>
   </div>
+</main>
 
-</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- Scripts projet -->
-<script type="module" src="js/race.js"></script>
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
 
-<script>
-  // Petits helpers visuels de statut (optionnel)
-  (function(){
-    const dot = document.getElementById("statusDot");
-    const txt = document.getElementById("statusText");
-    function set(ok, t){
-      if (!dot || !txt) return;
-      dot.style.background = ok ? "#16a34a" : "#94a3b8";
-      txt.textContent = t || (ok ? "OK" : "—");
-    }
-    set(false, "Chargement…");
-    window.addEventListener("mtb:raceLoaded", () => set(true, "Données chargées"));
-    window.addEventListener("mtb:raceError", (e) => set(false, (e.detail && e.detail.message) ? e.detail.message : "Erreur"));
-  })();
+  const raceId = new URLSearchParams(location.search).get("id");
+  let map, poly;
+
+  async function loadRace(){
+    const { data, error } = await supabase
+      .from("v_public_races")
+      .select("*")
+      .eq("id", raceId)
+      .single();
+
+    if(error) return alert("Épreuve introuvable");
+
+    document.getElementById("raceName").textContent = data.name;
+    document.getElementById("raceMeta").textContent = data.date + " — " + data.discipline;
+
+    document.getElementById("kpiGlobal").textContent = Math.round(data.score_global || 0);
+    document.getElementById("kpiPhys").textContent = Math.round(data.score_phys || 0);
+    document.getElementById("kpiTech").textContent = Math.round(data.score_tech || 0);
+
+    drawMap(data.gpx?.points || []);
+    drawProfile(data.gpx?.points || []);
+
+    // QR vers le domaine officiel
+    new QRCode(document.getElementById("qr"), {
+      text: "https://www.mtbpoint.fr/race.html?id=" + encodeURIComponent(raceId),
+      width: 96,
+      height: 96
+    });
+  }
+
+  function drawMap(points){
+    map = L.map("map");
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    const latlngs = points.map(p=>[p.lat,p.lng]).filter(p=>p[0]&&p[1]);
+    poly = L.polyline(latlngs).addTo(map);
+    map.fitBounds(poly.getBounds());
+  }
+
+  function drawProfile(points){
+    const c = document.getElementById("elevCanvas");
+    const ctx = c.getContext("2d");
+    ctx.clearRect(0,0,c.width,c.height);
+    const els = points.map(p=>p.ele).filter(e=>e!=null);
+    if(!els.length) return;
+    const min=Math.min(...els), max=Math.max(...els);
+    ctx.beginPath();
+    els.forEach((e,i)=>{
+      const x = i/els.length*c.width;
+      const y = c.height-(e-min)/(max-min)*c.height;
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    });
+    ctx.strokeStyle="#2f6f3e";
+    ctx.lineWidth=2;
+    ctx.stroke();
+  }
+
+  loadRace();
 </script>
+
 </body>
 </html>
