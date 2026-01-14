@@ -40,6 +40,37 @@ const AGE_CATS = [
 let ANALYSIS = null;
 let ANALYZE_BUSY = false;
 
+function clamp04(v){
+  const n = Math.round(Number(v));
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(4, n));
+}
+
+/**
+ * Suggestion automatique de discipline à partir de l'analyse GPX/OSM.
+ * - Gravel si tech01 très faible (terrain très roulant)
+ * - DH (optionnel) si très court
+ * - XCC / XCO / XCM selon distance
+ */
+function inferDisciplineFromAnalysis(analysis){
+  const km = Number(analysis?.distanceKm);
+  const tech01 = Number(analysis?.techV2?.tech01 ?? analysis?.techV2?.tech01_avg ?? analysis?.tech01);
+
+  if (!Number.isFinite(km) || km <= 0) return null;
+
+  // Gravel si terrain très roulant
+  if (Number.isFinite(tech01) && tech01 <= 0.18) return "Gravel";
+
+  // DH (heuristique simple: très court)
+  if (km < 6) return "DH";
+
+  if (km < 12) return "XCC";
+  if (km < 40) return "XCO";
+  if (km < 100) return "XCM_marathon";
+  return "XCM_ultra";
+}
+
+
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (m) => ({
     "&": "&amp;",
@@ -148,6 +179,19 @@ if (timeEl0 && !timeEl0.value) timeEl0.value = "08:30";
 const lvl0 = $("level");
 if (lvl0 && !lvl0.value) lvl0.value = "Locale";
 
+const mech0 = $("mechanic");
+if (mech0 && (mech0.value === "" || mech0.value == null)) mech0.value = "0";
+const feeds0 = $("feeds");
+if (feeds0 && (feeds0.value === "" || feeds0.value == null)) feeds0.value = "0";
+
+// Discipline obligatoire: on force required au cas où (HTML doit aussi l'avoir)
+const disc0 = $("disc");
+if (disc0) disc0.required = true;
+
+// Vélo obligatoire: select ebike doit rester sur 0/1
+const eb0 = $("ebike");
+if (eb0) eb0.required = true;
+
 
 async function applyMeetingDefaults(meetingId) {
   const hint = $("meetingHint");
@@ -192,6 +236,9 @@ async function applyMeetingDefaults(meetingId) {
 
   const timeEl = $("time");
   if (timeEl && !timeEl.value) timeEl.value = "08:30";
+
+  const lvlEl = $("level");
+  if (lvlEl) { lvlEl.required = true; if (!lvlEl.value) lvlEl.value = "Locale"; }
 }
 
 // ---------- Multi-tours (NE PAS SUPPRIMER)
@@ -344,10 +391,15 @@ async function analyzeGpx() {
     setStatus("done", "Analyse terminée.", 100, "Tu peux enregistrer l’épreuve.");
     showMsg("Analyse GPX/OSM terminée.", true);
 
-    // petit hint : discipline auto si vide
-    const disc = $("disc");
-    if (disc && !disc.value && ANALYSIS?.discipline?.hint) {
-      disc.value = ANALYSIS.discipline.hint;
+    // Discipline: auto-suggestion après analyse (sans écraser un choix manuel)
+    const discEl = $("disc");
+    if (discEl) {
+      discEl.required = true;
+      const userAlreadyPicked = !!discEl.value;
+      if (!userAlreadyPicked) {
+        const inferred = inferDisciplineFromAnalysis(ANALYSIS);
+        if (inferred) discEl.value = inferred;
+      }
     }
   } catch (e) {
     ANALYSIS = null;
@@ -418,8 +470,8 @@ async function buildRace({ ebikeOverride = null, nameSuffix = "", idSalt = 0 } =
 
     ebike: ebikeVal,
     bikeWash: $("wash").value || null,
-    mechAssist: $("mechanic").value || null,
-    feeds: $("feeds").value || null,
+    mechAssist: clamp04($("mechanic")?.value ?? 0),
+    feeds: clamp04($("feeds")?.value ?? 0),
     sexAllowed: $("sexAllowed").value || "all",
 
     comment: $("comment").value.trim() || null,
@@ -538,7 +590,25 @@ function resetForm(keepMeeting = true) {
   const keepDate = keepMeeting ? $("date").value : "";
 
   ["name", "cutoff", "time", "comment"].forEach((id) => { const el = $(id); if (el) el.value = ""; });
-  ["level", "disc", "wash", "mechanic", "feeds"].forEach((id) => { const el = $(id); if (el) el.value = ""; });
+  // defaults
+  const timeEl = $("time");
+  if (timeEl) timeEl.value = "08:30";
+
+  const lvlEl = $("level");
+  if (lvlEl) lvlEl.value = "Locale";
+
+  const discEl = $("disc");
+  if (discEl) discEl.value = "";
+
+  const washEl = $("wash");
+  if (washEl) washEl.value = "";
+
+  const mechEl = $("mechanic");
+  if (mechEl) mechEl.value = "0";
+
+  const feedsEl = $("feeds");
+  if (feedsEl) feedsEl.value = "0";
+
   $("ebike").value = "0";
   $("sexAllowed").value = "all";
 
@@ -569,11 +639,20 @@ function resetForm(keepMeeting = true) {
   renderAgeRows();
   initMultiToggle();
 
+  // Discipline: liste autorisée (pour éviter les valeurs "fantômes")
+  const allowedDisc = new Set(["DH","Enduro","XCC","XCO","XCM_marathon","XCM_ultra","Gravel"]);
+  const discEl = $("disc");
+  if (discEl && discEl.value && !allowedDisc.has(discEl.value)) discEl.value = "";
+
+
+  // IMPORTANT:
+  // - Sur certains navigateurs, inp.click() sur un <input type="file"> caché peut être bloqué.
+  // - Recommandé côté HTML: utiliser <label for="gpxFile" id="btnPickAnalyze">…</label>
+  // Ici on se contente de reset la valeur pour permettre de re-sélectionner le même fichier.
   $("btnPickAnalyze")?.addEventListener("click", () => {
     showMsg("");
     const inp = $("gpxFile");
-    inp.value = ""; // force change
-    inp.click();
+    if (inp) inp.value = ""; // force change
   });
 
   $("gpxFile")?.addEventListener("change", async () => {
