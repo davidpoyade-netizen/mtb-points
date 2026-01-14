@@ -1,5 +1,6 @@
-// js/supabaseClient.js (clean)
-// ⚠️ Remplace ton fichier actuel (il est dupliqué et casse l'import ESM)
+// js/supabaseClient.js
+// Supabase client (GitHub Pages friendly)
+
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 export const SUPABASE_URL = "https://pqtjvvvemypuhhvsoyrc.supabase.co";
@@ -9,6 +10,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
+    detectSessionInUrl: true,
+  },
 });
