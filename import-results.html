@@ -20,118 +20,113 @@
     th,td{border-bottom:1px solid #eef2f7;padding:8px 6px;text-align:left;font-size:13px}
     .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f1f5f9;font-size:12px}
     .dot{width:8px;height:8px;border-radius:50%;background:#16a34a}
-    .err{color:#dc2626}
-    .ok{color:#16a34a}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace}
   </style>
 
-  <!-- CSV parser (PapaParse) -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <!-- XLSX parser (SheetJS) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
-  <header class="header">
-    <div class="wrap row" style="justify-content:space-between">
-      <div>
-        <h1 style="margin:0">Importer des résultats</h1>
-        <div class="muted">CSV / XLSX → Supabase + calcul UCI (âge sur l’année) + catégorie</div>
-      </div>
-      <div class="pill"><span class="dot"></span> Import prêt</div>
-    </div>
-  </header>
-<P> Importe les résultats sur un fichier CSV ou XLSX avec nom, prénom, âge, nationalité, statut (Finisher, Abandon, Disqualifié) type de vélo (musculaire, électrique), sexe et temps, l'analyse fera le classement automatique avec attributions de points </P>
-  <main class="wrap">
-    <div class="card" style="margin-bottom:12px">
-      <div class="grid">
-        <div>
-          <label class="muted">Épreuve (race)</label><br/>
-          <select id="raceSelect" style="width:100%"></select>
-          <div class="muted" id="raceMeta" style="margin-top:6px"></div>
-        </div>
-        <div>
-          <label class="muted">Fichier (CSV ou XLSX)</label><br/>
-          <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" style="width:100%"/>
-          <div class="muted" style="margin-top:6px">
-            Colonnes attendues (idéal) : <span class="mono">rank, name, sex, birth_year, time</span>
-          </div>
-        </div>
-      </div>
-
-      <hr style="border:none;border-top:1px solid #eef2f7;margin:14px 0"/>
-
-      <div class="grid">
-        <div>
-          <div class="muted" style="margin-bottom:6px">Mapping des colonnes</div>
-          <div class="grid">
-            <div>
-              <label class="muted">Rang</label><br/>
-              <select id="mapRank" style="width:100%"></select>
-            </div>
-            <div>
-              <label class="muted">Nom</label><br/>
-              <select id="mapName" style="width:100%"></select>
-            </div>
-            <div>
-              <label class="muted">Sexe (M/F)</label><br/>
-              <select id="mapSex" style="width:100%"></select>
-            </div>
-            <div>
-              <label class="muted">Année naissance</label><br/>
-              <select id="mapBirthYear" style="width:100%"></select>
-            </div>
-            <div>
-              <label class="muted">Temps (hh:mm:ss ou mm:ss)</label><br/>
-              <select id="mapTime" style="width:100%"></select>
-            </div>
-            <div>
-              <label class="muted">Statut (OBLIGATOIRE : FINISH/DNF/DNS)</label><br/>
-              <select id="mapStatus" style="width:100%"></select>
-            </div>
-          
-            <div>
-              <label class="muted">Type vélo (OBLIGATOIRE : MUSCLE / EBIKE)</label><br/>
-              <select id="mapBike" style="width:100%"></select>
-            </div>
-</div>
-        </div>
-<div>
-          <div class="muted" style="margin-bottom:6px">Aperçu</div>
-          <div style="max-height:240px;overflow:auto;border:1px solid #eef2f7;border-radius:12px">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th><th>Nom</th><th>Sexe</th><th>Naissance</th><th>Temps</th><th>Statut</th><th>Vélo</th><th>Âge</th><th>Cat.</th>
-                </tr>
-              </thead>
-              <tbody id="previewBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:14px;justify-content:space-between">
-        <div class="muted" id="statusLine">Charge un fichier pour commencer.</div>
-        <div class="row">
-          <button class="ghost" id="btnClear" type="button">Effacer</button>
-          <button class="secondary" id="btnDryRun" type="button">Dry-run (tester)</button>
-          <button id="btnImport" type="button">Importer dans Supabase</button>
-        </div>
-      </div>
-
-      <div id="log" class="muted" style="margin-top:10px;white-space:pre-wrap"></div>
-    </div>
-
-    <div class="card">
+<header class="header">
+  <div class="wrap row" style="justify-content:space-between">
+    <div>
+      <h1 style="margin:0">Importer des résultats</h1>
       <div class="muted">
-        ✅ Import direct navigateur (GitHub Pages).  
-        Si tu veux l’import “clean” avec création automatique riders, on le fera côté backend plus tard.
+        CSV / XLSX → classement automatique (sexe, âge, musculaire / VAE)
       </div>
     </div>
-  </main>
+    <div class="pill"><span class="dot"></span> Import prêt</div>
+  </div>
+</header>
 
-  <script type="module" src="js/import-results.js"></script>
+<main class="wrap">
+
+  <!-- ✅ MODÈLE XLSX -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="row" style="justify-content:space-between">
+      <div>
+        <strong>Modèle de fichier XLSX</strong>
+        <div class="muted" style="margin-top:4px">
+          Colonnes obligatoires :
+          <span class="mono">rider_name</span>,
+          <span class="mono">time_hhmmss</span>,
+          <span class="mono">status</span>,
+          <span class="mono">bike</span>
+        </div>
+        <div class="muted">
+          <span class="mono">status</span> = FINISH / DNF / DNS  
+          <span class="mono">bike</span> = MUSCLE / EBIKE
+        </div>
+      </div>
+      <a class="btn"
+         href="assets/MTBPoints_import_results_template.xlsx"
+         download>
+        ⬇️ Télécharger le modèle XLSX
+      </a>
+    </div>
+  </div>
+
+  <!-- IMPORT -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="grid">
+      <div>
+        <label class="muted">Épreuve</label><br/>
+        <select id="raceSelect" style="width:100%"></select>
+        <div class="muted" id="raceMeta" style="margin-top:6px"></div>
+      </div>
+      <div>
+        <label class="muted">Fichier CSV / XLSX</label><br/>
+        <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" style="width:100%"/>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #eef2f7;margin:14px 0"/>
+
+    <div class="grid">
+      <div>
+        <div class="muted" style="margin-bottom:6px">Mapping des colonnes</div>
+        <div class="grid">
+          <div><label class="muted">Rang</label><select id="mapRank" style="width:100%"></select></div>
+          <div><label class="muted">Nom</label><select id="mapName" style="width:100%"></select></div>
+          <div><label class="muted">Sexe</label><select id="mapSex" style="width:100%"></select></div>
+          <div><label class="muted">Année naissance</label><select id="mapBirthYear" style="width:100%"></select></div>
+          <div><label class="muted">Temps</label><select id="mapTime" style="width:100%"></select></div>
+          <div><label class="muted">Statut *</label><select id="mapStatus" style="width:100%"></select></div>
+          <div><label class="muted">Type vélo *</label><select id="mapBike" style="width:100%"></select></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="muted" style="margin-bottom:6px">Aperçu</div>
+        <div style="max-height:240px;overflow:auto;border:1px solid #eef2f7;border-radius:12px">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Nom</th><th>Sexe</th><th>Naissance</th>
+                <th>Temps</th><th>Statut</th><th>Vélo</th><th>Âge</th><th>Cat.</th>
+              </tr>
+            </thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:14px;justify-content:space-between">
+      <div class="muted" id="statusLine">Charge un fichier pour commencer.</div>
+      <div class="row">
+        <button class="ghost" id="btnClear" type="button">Effacer</button>
+        <button class="secondary" id="btnDryRun" type="button">Dry-run</button>
+        <button id="btnImport" type="button">Importer</button>
+      </div>
+    </div>
+
+    <div id="log" class="muted" style="margin-top:10px;white-space:pre-wrap"></div>
+  </div>
+
+</main>
+
+<script type="module" src="js/import-results.js"></script>
 </body>
 </html>
-
