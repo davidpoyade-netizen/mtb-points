@@ -188,9 +188,17 @@ if (feeds0 && (feeds0.value === "" || feeds0.value == null)) feeds0.value = "0";
 const disc0 = $("disc");
 if (disc0) disc0.required = true;
 
-// Vélo obligatoire: select ebike doit rester sur 0/1
-const eb0 = $("ebike");
-if (eb0) eb0.required = true;
+// Nouvel UI : case "Ouvert VAE" + heure de départ VAE
+const ebOpen0 = $("ebikeOpen");
+const ebStart0 = $("ebikeStartTime");
+if (ebOpen0 && ebStart0) {
+  const apply = () => {
+    ebStart0.disabled = !ebOpen0.checked;
+    if (!ebOpen0.checked) ebStart0.value = "";
+  };
+  ebOpen0.addEventListener("change", apply);
+  apply();
+}
 
 
 async function applyMeetingDefaults(meetingId) {
@@ -440,7 +448,8 @@ function validate() {
 
   const level = ($("level")?.value || "").trim();
   const disc = ($("disc")?.value || "").trim();
-  const ebike = ($("ebike")?.value || "").trim();
+  // UI: épreuve ouverte au VAE (checkbox)
+  const ebikeOpen = !!$("ebikeOpen")?.checked;
 
   if (!meetingId) return "Événement obligatoire.";
   if (!date) return "Date obligatoire.";
@@ -448,7 +457,7 @@ function validate() {
 
   if (!level) return "Catégorie obligatoire (par défaut : Locale).";
   if (!disc) return "Discipline obligatoire.";
-  if (ebike !== "0" && ebike !== "1") return "Choisis Musculaire ou Électrique.";
+  // "Ouvert VAE" n'est pas obligatoire
 
   // Force 0..4 (au cas où)
   const mech = Math.max(0, Math.min(4, Number(($("mechanic")?.value ?? 0))));
@@ -468,7 +477,8 @@ async function buildRace({ ebikeOverride = null, nameSuffix = "", idSalt = 0 } =
   const baseName = $("name").value.trim();
   const finalName = (baseName + (nameSuffix ? ` ${nameSuffix}` : "")).trim();
 
-  const ebikeVal = ebikeOverride === null ? ($("ebike").value === "1") : !!ebikeOverride;
+  const ebikeVal = ebikeOverride === null ? !!$("ebikeOpen")?.checked : !!ebikeOverride;
+  const ebikeStartTime = ($("ebikeStartTime")?.value || "").trim() || null;
 
   const id = makeIdFromName(finalName);
   const finalId = idSalt ? `${id}-${idSalt}` : id;
@@ -490,6 +500,8 @@ async function buildRace({ ebikeOverride = null, nameSuffix = "", idSalt = 0 } =
     disc: $("disc").value || null,
 
     ebike: ebikeVal,
+    ebikeOpen: ebikeVal,
+    ebikeStartTime,
     bikeWash: $("wash").value || null,
     mechAssist: clamp04($("mechanic")?.value ?? 0),
     feeds: clamp04($("feeds")?.value ?? 0),
