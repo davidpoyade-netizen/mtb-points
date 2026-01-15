@@ -16,6 +16,11 @@ import { computeScoreTechV2 } from "./scoretech_v2_osm.js";
 
 const app = express();
 
+// Healthcheck simple (Render/monitoring)
+app.get(["/health", "/_health"], (_req, res) => {
+  res.status(200).type("text").send("ok");
+});
+
 /* ----------------------------- helpers ----------------------------- */
 
 function withTimeout(promise, ms, label = "timeout") {
