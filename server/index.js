@@ -126,21 +126,28 @@ const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:5173",
 ]);
 
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
-      if (ALLOWED_ORIGINS.has(origin)) return cb(null, true);
-      return cb(new Error(`CORS blocked for origin: ${origin}`));
-    },
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: false,
-    maxAge: 86400,
-  })
-);
+const corsOptions = {
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (ALLOWED_ORIGINS.has(origin)) return cb(null, true);
+    // ⚠️ important : ne pas throw Error ici (ça peut casser le preflight)
+    return cb(null, false);
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false,
+  maxAge: 86400,
+};
 
-app.options("*", cors());
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
+/* ----------------------------- Health ----------------------------- */
+
+app.get("/", (_, res) => res.status(200).send("MTB Points API OK"));
+app.get("/health", (_, res) => res.status(200).send("ok"));        // ✅ alias simple
+app.get("/api/health", (_, res) => res.json({ ok: true }));
+
 
 /* --------------------------- Body parser --------------------------- */
 
@@ -150,11 +157,6 @@ app.use(
     limit: "10mb",
   })
 );
-
-/* ----------------------------- Health ----------------------------- */
-
-app.get("/", (_, res) => res.status(200).send("MTB Points API OK"));
-app.get("/api/health", (_, res) => res.json({ ok: true }));
 
 /* ------------------------- Friendly GET --------------------------- */
 
@@ -319,3 +321,4 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`[mtb-points] POST /api/analyze-gpx (Content-Type: application/gpx+xml)`);
   console.log(`[mtb-points] POST /api/analyze-gpx-lite (GPX only)`);
 });
+
