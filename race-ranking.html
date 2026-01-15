@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Classement de l’épreuve — MTB Points</title>
+
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/theme-nature.css?v=10" />
+
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
+    a{color:inherit}
+    .wrap{max-width:1280px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
+    header.header{position:sticky;top:0;z-index:20;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{width:44px;height:44px;border-radius:14px;overflow:hidden;border:1px solid rgba(40,60,40,.18);box-shadow:0 12px 22px rgba(15,23,42,.18);background:#fff}
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav.nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav.nav a{text-decoration:none;padding:8px 10px;border-radius:10px;font-weight:950;font-size:13px;color:var(--blue)}
+    nav.nav a:hover{background:rgba(47,111,62,.10)}
+    nav.nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
+    .hero{border-radius:22px;padding:18px;border:1px solid var(--border);background:
+      radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+      radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+      linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2)}
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .heroMeta{margin-top:8px;color:#223024;line-height:1.6}
+    .heroActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+    .toolbar .grow{flex:1;min-width:220px}
+    label{display:block;font-weight:1000;font-size:12px;color:var(--text)}
+    select{width:100%;padding:10px;margin-top:6px;border:1px solid rgba(40,60,40,.20);border-radius:12px;background:rgba(255,255,255,.82);font-size:14px}
+    select:focus{outline:3px solid rgba(47,111,62,.20);outline-offset:2px}
+
+    .grid4{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+    @media(min-width:1100px){.grid4{grid-template-columns:1fr 1fr 1fr 1fr}}
+    .panel{border:1px solid rgba(40,60,40,.14);background:rgba(255,255,255,.82);border-radius:20px;padding:12px;box-shadow:0 2px 12px rgba(15,23,42,.06)}
+    .panel h3{margin:0 0 8px 0;font-size:13px;letter-spacing:-.1px}
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    th,td{padding:8px 8px;border-bottom:1px solid rgba(40,60,40,.12);font-size:13px}
+    th{font-size:12px;color:var(--muted);text-align:left}
+    tr:last-child td{border-bottom:none}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .muted{color:var(--muted)}
+    .empty{border:1px dashed var(--border);background:rgba(255,255,255,.72);border-radius:18px;padding:10px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+
+<body class="theme-nature">
+
+<header class="header">
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>MTB Points — Classement épreuve</h1>
+      <span class="pill"><span class="dot"></span> <span id="pillRows">0</span> résultat(s)</span>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="login.html">Connexion</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div class="card">
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2 id="raceTitle">Épreuve</h2>
+          <div class="heroMeta" id="raceMeta">—</div>
+          <div class="muted" id="raceIdLine" style="margin-top:8px"></div>
+        </div>
+        <div class="heroActions">
+          <a class="btn" id="btnBack" href="meetings.html">⬅︎ Retour</a>
+          <a class="btn" id="btnImport" href="#">Importer résultats</a>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="grow">
+          <label for="mode">Vue</label>
+          <select id="mode">
+            <option value="global">Global (H/F × Musculaire/VAE)</option>
+            <option value="category">Par catégorie d’âge</option>
+          </select>
+        </div>
+        <div class="grow" id="catWrap" style="display:none">
+          <label for="ageCat">Catégorie d’âge</label>
+          <select id="ageCat"></select>
+        </div>
+        <div class="grow" style="min-width:220px">
+          <label for="status">Statut</label>
+          <select id="status">
+            <option value="FINISH">Finishers (FINISH)</option>
+            <option value="ALL">Tous (FINISH/DNF/DNS)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid4" style="margin-top:14px">
+      <div class="panel">
+        <h3>💪 Musculaire — Hommes</h3>
+        <div id="box1" class="empty" style="display:none">Aucun résultat</div>
+        <table id="tb1"><thead><tr><th>#</th><th>Nom</th><th>Cat.</th><th>Temps</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="panel">
+        <h3>💪 Musculaire — Femmes</h3>
+        <div id="box2" class="empty" style="display:none">Aucun résultat</div>
+        <table id="tb2"><thead><tr><th>#</th><th>Nom</th><th>Cat.</th><th>Temps</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="panel">
+        <h3>⚡ VAE — Hommes</h3>
+        <div id="box3" class="empty" style="display:none">Aucun résultat</div>
+        <table id="tb3"><thead><tr><th>#</th><th>Nom</th><th>Cat.</th><th>Temps</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="panel">
+        <h3>⚡ VAE — Femmes</h3>
+        <div id="box4" class="empty" style="display:none">Aucun résultat</div>
+        <table id="tb4"><thead><tr><th>#</th><th>Nom</th><th>Cat.</th><th>Temps</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <div id="alert" class="empty" style="display:none;margin-top:14px"></div>
+  </div>
+</main>
+
+<script type="module" src="js/race-ranking.js"></script>
+
+</body>
+</html>
