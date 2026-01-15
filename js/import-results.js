@@ -36,6 +36,25 @@ function parseTimeToSeconds(raw) {
   return null;
 }
 
+
+function normStatus(v){
+  const s = String(v ?? "").trim().toUpperCase();
+  if (["FINISH","FINISHED","OK","ARRIVEE","ARRIVÉE","ARRIVEE","CLASSE","CLASSÉ","CLASSÉE"].includes(s)) return "FINISH";
+  if (["DNF","ABANDON","ABANDONNE","ABANDONNÉ","ABANDONNÉE"].includes(s)) return "DNF";
+  if (["DNS","ABSENT","ABSENTE","NONPARTI","NON_PARTI","NP"].includes(s)) return "DNS";
+  return null;
+}
+
+function normBike(v){
+  const s = String(v ?? "").trim().toUpperCase();
+  if (!s) return null;
+  if (["M","MUSCLE","MUSCULAIRE","MUSCULAR","BIO","ACOUSTIC"].includes(s)) return { ebike:false, label:"Muscle" };
+  if (["E","EBIKE","E-BIKE","VAE","ELECTRIQUE","ÉLECTRIQUE","ASSISTANCE","AE"].includes(s)) return { ebike:true, label:"Ebike" };
+  if (["TRUE","YES","1"].includes(s)) return { ebike:true, label:"Ebike" };
+  if (["FALSE","NO","0"].includes(s)) return { ebike:false, label:"Muscle" };
+  return null;
+}
+
 function splitName(fullName) {
   const s = String(fullName ?? "").trim();
   if (!s) return { first_name: "", last_name: "" };
@@ -77,7 +96,8 @@ function guessDefaultMapping(headers) {
     time: find("time", "temps", "chrono", "duration"),
     status: find("status", "statut", "etat", "result"),
     club: find("club", "team", "equipe", "équipe"),
-    nationality: find("nationality", "nation", "pays", "country")
+    nationality: find("nationality", "nation", "pays", "country"),
+    bike: find("bike", "velo", "vélo", "vtt", "ebike", "e-bike", "vae", "assistance", "motor", "mode")
   };
 }
 
@@ -230,6 +250,7 @@ function onFileParsed() {
   fillSelect($("mapBirthYear"), headers, guess.birth_year);
   fillSelect($("mapTime"), headers, guess.time);
   fillSelect($("mapStatus"), headers, guess.status);
+  fillSelect($("mapBike"), headers, guess.bike);
 
   // Bonus: si tu veux aussi mapper club/nationality plus tard, on peut ajouter des selects (optionnel)
   // Pour ne pas modifier ton HTML maintenant, on tente juste de lire ces colonnes si elles existent.
@@ -249,6 +270,7 @@ function getMapping() {
     birth_year: $("mapBirthYear").value,
     time: $("mapTime").value,
     status: $("mapStatus").value,
+    bike: $("mapBike").value,
 
     // “hidden” guesses (no UI)
     first_name: $("mapName").dataset.guess_first || "",
@@ -262,7 +284,9 @@ function buildPreview() {
   if (!currentRace) return setStatus("Choisis d’abord une épreuve (race).", true);
 
   const m = getMapping();
-  if (!m.name || !m.time) setStatus("Choisis au minimum les colonnes: Nom + Temps.", true);
+  if (!m.name || !m.time || !m.status || !m.bike) {
+    setStatus("Choisis les colonnes obligatoires: Nom + Temps + Statut + Type vélo.", true);
+  }
 
   const eventDate = currentRace.date || new Date().toISOString();
 
@@ -297,9 +321,11 @@ function buildPreview() {
       // time
       const timeSec = m.time ? parseTimeToSeconds(r[m.time]) : null;
 
-      // status
-      const statusRaw = m.status ? String(r[m.status] ?? "").trim().toUpperCase() : "";
-      const status = statusRaw || (timeSec != null ? "FINISH" : "DNF");
+            // status (OBLIGATOIRE)
+      const status = m.status ? normStatus(r[m.status]) : null;
+
+      // bike (OBLIGATOIRE)
+      const bike = m.bike ? normBike(r[m.bike]) : null;
 
       // optional extra
       const club = m.club && r[m.club] ? String(r[m.club]).trim() : null;
@@ -320,6 +346,8 @@ function buildPreview() {
         time_seconds: timeSec,
         time_display: (m.time ? String(r[m.time] ?? "").trim() : null),
         status,
+        ebike: bike ? bike.ebike : null,
+        bike_label: bike ? bike.label : null,
         age_on_year: age,
         age_category_preview: ageCatPreview
       };
@@ -335,6 +363,8 @@ function buildPreview() {
       <td>${r.sex || ""}</td>
       <td>${r.birth_year ?? ""}</td>
       <td>${r.time_seconds ?? ""}</td>
+      <td>${r.status || ""}</td>
+      <td>${r.bike_label || ""}</td>
       <td>${r.age_on_year ?? ""}</td>
       <td>${r.age_category_preview ?? ""}</td>
     `;
@@ -350,6 +380,8 @@ function validateRows(items) {
     const n = idx + 1;
     if (!r.first_name) errors.push(`Ligne ${n}: first_name vide (impossible d’insérer)`);
     if (!r.last_name) errors.push(`Ligne ${n}: last_name vide (impossible d’insérer)`);
+    if (!r.status) errors.push(`Ligne ${n}: statut manquant/invalide (attendu FINISH/DNF/DNS)`);
+    if (r.ebike === null) errors.push(`Ligne ${n}: type vélo manquant/invalide (attendu MUSCLE/EBIKE)`);
     if (r.status === "FINISH" && r.time_seconds == null) errors.push(`Ligne ${n}: temps invalide alors que FINISH`);
   });
   return errors;
@@ -421,7 +453,8 @@ async function doImport() {
     time_display: r.time_display,
 
     points: null,
-    status: r.status
+    status: r.status,
+    ebike: !!r.ebike
   }));
 
   setStatus("Import en cours…");
@@ -458,7 +491,7 @@ function wireEvents() {
     parseFile(file);
   });
 
-  ["mapRank","mapName","mapSex","mapBirthYear","mapTime","mapStatus"].forEach(id => {
+  ["mapRank","mapName","mapSex","mapBirthYear","mapTime","mapStatus","mapBike"].forEach(id => {
     $(id).addEventListener("change", () => {
       if (rows.length) buildPreview();
     });
