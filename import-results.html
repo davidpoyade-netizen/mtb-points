@@ -86,23 +86,23 @@
               <select id="mapTime" style="width:100%"></select>
             </div>
             <div>
-              <label class="muted">Statut (optionnel: FINISH/DNF/DNS)</label><br/>
+              <label class="muted">Statut (OBLIGATOIRE : FINISH/DNF/DNS)</label><br/>
               <select id="mapStatus" style="width:100%"></select>
             </div>
-          </div>
-
-          <div class="muted" style="margin-top:10px">
-            Astuce : si tu n’as pas <b>statut</b>, on mettra <b>FINISH</b> par défaut.
-          </div>
+          
+            <div>
+              <label class="muted">Type vélo (OBLIGATOIRE : MUSCLE / EBIKE)</label><br/>
+              <select id="mapBike" style="width:100%"></select>
+            </div>
+</div>
         </div>
-
-        <div>
+<div>
           <div class="muted" style="margin-bottom:6px">Aperçu</div>
           <div style="max-height:240px;overflow:auto;border:1px solid #eef2f7;border-radius:12px">
             <table>
               <thead>
                 <tr>
-                  <th>#</th><th>Nom</th><th>Sexe</th><th>Naissance</th><th>Temps</th><th>Âge</th><th>Cat.</th>
+                  <th>#</th><th>Nom</th><th>Sexe</th><th>Naissance</th><th>Temps</th><th>Statut</th><th>Vélo</th><th>Âge</th><th>Cat.</th>
                 </tr>
               </thead>
               <tbody id="previewBody"></tbody>
