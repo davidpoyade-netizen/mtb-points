@@ -198,12 +198,29 @@
       </div>
 
       <div>
-        <label class="lbl">Type de vélo <span class="req">*</span></label>
-        <select id="ebike" class="inp" required>
-          <option value="0">Musculaire</option>
+        <label class="lbl">Ouvert au vélo à assistance électrique (VAE) ?</label>
+        <div class="toggleLine">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <input id="ebikeOpen" type="checkbox" />
+            <span><b>Oui</b>, l'épreuve accepte les VAE (classement séparé ensuite dans les résultats).</span>
+          </label>
+        </div>
+        <div class="muted2" style="margin-top:6px">
+          Crée autant d’épreuves que nécessaire selon <b>discipline</b> ou <b>distance</b> (sauf <b>multi-tours</b>).
+          L’import des résultats fera le tri (musculaire/VAE, H/F, catégories d’âge).
+        </div>
+
+        <div style="margin-top:10px">
+          <label class="lbl">Heure de départ VAE (optionnel)</label>
+          <input id="ebikeStartTime" class="inp" type="time" disabled />
+          <div class="muted2">Active "Ouvert VAE" pour saisir une heure différente.</div>
+        </div>
+
+        <!-- Compat projet : ancien select conservé mais masqué (ne pas supprimer) -->
+        <select id="ebike" class="inp" style="display:none">
+          <option value="0" selected>Musculaire</option>
           <option value="1">Électrique</option>
         </select>
-        <div class="muted2">Musculaire et E-bike peuvent partager le même parcours (classements séparés).</div>
       </div>
 
       <div>
@@ -275,7 +292,8 @@
     <div class="rowBtns">
       <button class="btn2 primary" id="btnSave" type="button">Créer l’épreuve</button>
       <button class="btn2" id="btnSaveAndNew" type="button">Créer + ajouter une autre épreuve</button>
-      <button class="btn2" id="btnSaveAndDuplicate" type="button">Créer + dupliquer (Musculaire ↔ E-bike)</button>
+      <!-- Conservé pour compat projet (ne pas supprimer), mais masqué : on ne duplique plus VAE ici. -->
+      <button class="btn2" id="btnSaveAndDuplicate" type="button" style="display:none">Créer + dupliquer (Musculaire ↔ E-bike)</button>
       <button class="btn2 ghost" id="btnReset" type="button">Réinitialiser</button>
     </div>
 
