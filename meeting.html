@@ -415,12 +415,20 @@
       const disc = r.disc || "—";
       const eb = r.ebike ? "E-bike" : "Musculaire";
 
-      const a = document.createElement("a");
-      a.className = "item";
-      // IMPORTANT : on ouvre la fiche course -> race.html
-      a.href = `race.html?id=${encodeURIComponent(r.id)}`;
+      const card = document.createElement("div");
+      card.className = "item";
+      card.tabIndex = 0;
+      // Click sur la carte = fiche épreuve
+      const raceUrl = `race.html?id=${encodeURIComponent(r.id)}`;
+      const rankUrl = `race-ranking.html?raceId=${encodeURIComponent(r.id)}`;
+      const importUrl = `import-results.html?raceId=${encodeURIComponent(r.id)}`;
 
-      a.innerHTML = `
+      card.addEventListener("click", () => { location.href = raceUrl; });
+      card.addEventListener("keydown", (e)=>{
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); location.href = raceUrl; }
+      });
+
+      card.innerHTML = `
         <div class="topline">
           <div class="title">${esc(r.name || "Épreuve")}</div>
           <div class="badge">${esc(date)}</div>
@@ -431,8 +439,13 @@
           <span class="miniPill">Phys: <b>${p == null ? "—" : Math.round(p)}</b></span>
           <span class="miniPill">Tech: <b>${t == null ? "—" : Math.round(t)}</b></span>
         </div>
+        <div class="miniRow" style="margin-top:10px; gap:10px; flex-wrap:wrap">
+          <a class="btn" href="${raceUrl}" onclick="event.stopPropagation()">Voir la fiche</a>
+          <a class="btn primary" href="${rankUrl}" onclick="event.stopPropagation()">Voir classement</a>
+          <a class="btn ghost" href="${importUrl}" onclick="event.stopPropagation()">Importer résultats</a>
+        </div>
       `;
-      root.appendChild(a);
+      root.appendChild(card);
     }
   }
 
