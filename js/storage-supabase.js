@@ -1,203 +1,80 @@
-// js/storage-supabase.js
-// MTB Points — Storage 100% Supabase (zéro localStorage)
-// - Dépendance: ./supabaseClient.js (export supabase)
-// - Exports conservés pour compat avec le front existant
+// js/storage-supabase.js (ESM)
+// MTB Points — stockage Supabase ONLY (aucun localStorage)
+// Objectif: fournir une API stable pour le front (meetings / races) sans dépendre de js/storage.js.
 
 import { supabase } from "./supabaseClient.js";
 
-/* ------------------------------------------------------------------ */
-/* Helpers                                                            */
-/* ------------------------------------------------------------------ */
+/* --------------------------- helpers --------------------------- */
 
 export function makeIdFromName(name) {
-  // slug + timestamp, compatible GitHub Pages / Supabase (ids TEXT)
-  const base = String(name || "")
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+  const slug = String(name || "")
+    .trim()
     .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replace(/(^-|-$)/g, "")
     .slice(0, 60) || "item";
-  return `${base}-${Date.now()}`;
+  return `${slug}-${Date.now()}`;
 }
 
-async function getUserSafe() {
+async function getUserOrNull() {
   try {
     const { data, error } = await supabase.auth.getUser();
     if (error) return null;
-    return data.user || null;
+    return data?.user || null;
   } catch {
     return null;
   }
 }
 
-function mapMeetingDbToLocal(m) {
-  return {
-    id: m.id,
-    organizerId: m.organizer_id ?? null,
-    name: m.name ?? "",
-    date: m.date ?? null,
-    endDate: m.end_date ?? null,
-    location: m.location ?? "",
-    comment: m.comment ?? "",
-    raceIds: Array.isArray(m.race_ids) ? m.race_ids : [],
-    isPublished: !!m.is_published,
-    createdAt: m.created_at ? Date.parse(m.created_at) : null,
-    updatedAt: m.updated_at ? Date.parse(m.updated_at) : null,
-  };
+function stripUndefined(obj) {
+  const out = {};
+  for (const [k, v] of Object.entries(obj || {})) {
+    if (v !== undefined) out[k] = v;
+  }
+  return out;
 }
 
-function mapMeetingLocalToDb(meeting, organizerId) {
-  return {
-    id: meeting.id,
-    organizer_id: organizerId,
-    name: meeting.name ?? "",
-    date: meeting.date ?? null,
-    end_date: meeting.endDate ?? null,
-    location: meeting.location ?? "",
-    comment: meeting.comment ?? "",
-    race_ids: Array.isArray(meeting.raceIds) ? meeting.raceIds : [],
-    is_published: !!meeting.isPublished,
-  };
+function toBool(v) {
+  if (v === true || v === false) return v;
+  if (v == null) return null;
+  const s = String(v).trim().toLowerCase();
+  if (["1", "true", "yes", "y", "on"].includes(s)) return true;
+  if (["0", "false", "no", "n", "off"].includes(s)) return false;
+  return null;
 }
 
-function mapRaceDbToLocal(r) {
-  return {
-    id: r.id,
-    meetingId: r.meeting_id ?? null,
-
-    name: r.name ?? "",
-    date: r.date ?? null,
-    time: r.time ?? null,
-
-    disc: r.disc ?? null,
-    level: r.level ?? null,
-
-    ebike: !!r.ebike,
-    sexAllowed: r.sex_allowed ?? "all",
-
-    wash: r.wash ?? null,
-    mechanic: r.mechanic ?? null,
-    feeds: r.feeds ?? null,
-    cutoff: r.cutoff ?? null,
-    comment: r.comment ?? null,
-
-    distanceKm: r.distance_km ?? null,
-    dplusM: r.dplus_m ?? null,
-    surfaceEstimate: r.surface_estimate ?? null,
-
-    scorePhys: r.score_phys ?? null,
-    scoreTech: r.score_tech ?? null,
-    scoreGlobal: r.score_global ?? null,
-
-    techV2: r.tech_v2 ?? null,
-    gpx: r.gpx ?? null,
-
-    lapsByCategorySex: r.laps_by_category_sex ?? null,
-
-    isPublished: !!r.is_published,
-    createdAt: r.created_at ? Date.parse(r.created_at) : null,
-    updatedAt: r.updated_at ? Date.parse(r.updated_at) : null,
-  };
+function toISODate(v) {
+  const s = String(v || "").trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : null;
 }
 
-function mapRaceLocalToDb(ev, organizerId) {
-  return {
-    id: ev.id,
-    organizer_id: organizerId,
-    meeting_id: ev.meetingId,
-
-    name: ev.name ?? "",
-    date: ev.date ?? null,
-    time: ev.time ?? null,
-
-    disc: ev.disc ?? null,
-    level: ev.level ?? null,
-
-    ebike: !!ev.ebike,
-    sex_allowed: ev.sexAllowed ?? "all",
-
-    wash: ev.wash ?? null,
-    mechanic: ev.mechanic ?? null,
-    feeds: ev.feeds ?? null,
-    cutoff: ev.cutoff ?? null,
-    comment: ev.comment ?? null,
-
-    distance_km: ev.distanceKm ?? null,
-    dplus_m: ev.dplusM ?? null,
-    surface_estimate: ev.surfaceEstimate ?? null,
-
-    score_phys: ev.scorePhys ?? null,
-    score_tech: ev.scoreTech ?? null,
-    score_global: ev.scoreGlobal ?? null,
-
-    tech_v2: ev.techV2 ?? null,
-    gpx: ev.gpx ?? null,
-
-    laps_by_category_sex: ev.lapsByCategorySex ?? null,
-
-    is_published: !!ev.isPublished,
-  };
+/**
+ * IMPORTANT (compat schema actuel)
+ * - Dans ta table public.races, la colonne `gpx` est TEXT (d'après tes erreurs/vues).
+ *   => On stocke un JSON stringifié dedans, qui peut contenir :
+ *      { gpx: {...}, lapsByCategorySex: {...}, comment: "...", surfaceEstimate: ... }
+ * - Si plus tard tu passes `gpx` en JSONB, ça continuera de marcher (il suffira d'enlever stringify).
+ */
+function packGpxText(race) {
+  try {
+    const payload = {
+      gpx: race?.gpx ?? null,
+      lapsByCategorySex: race?.lapsByCategorySex ?? null,
+      comment: race?.comment ?? null,
+      surfaceEstimate: race?.surfaceEstimate ?? null,
+      techV2: race?.techV2 ?? null,
+    };
+    return JSON.stringify(payload);
+  } catch {
+    return null;
+  }
 }
 
-/* ------------------------------------------------------------------ */
-/* RACES (compat: "StoredEvents")                                     */
-/* ------------------------------------------------------------------ */
+/* --------------------------- MEETINGS --------------------------- */
 
-export async function loadStoredEventsHybrid() {
-  const { data, error } = await supabase
-    .from("races")
-    .select("*")
-    .order("date", { ascending: false })
-    .limit(5000);
-
-  if (error) throw error;
-  return (data || []).map(mapRaceDbToLocal);
-}
-
-export async function findStoredEventHybrid(id) {
-  const { data, error } = await supabase
-    .from("races")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error) throw error;
-  return data ? mapRaceDbToLocal(data) : null;
-}
-
-export async function addStoredEventHybrid(ev) {
-  const user = await getUserSafe();
-  if (!user) throw new Error("Non connecté (auth requise).");
-
-  if (!ev.id) ev.id = makeIdFromName(ev.name || "race");
-
-  const payload = mapRaceLocalToDb(ev, user.id);
-
-  const { error } = await supabase
-    .from("races")
-    .insert(payload);
-
-  if (error) throw error;
-}
-
-export async function updateStoredEventHybrid(ev) {
-  const user = await getUserSafe();
-  if (!user) throw new Error("Non connecté (auth requise).");
-  if (!ev?.id) throw new Error("updateStoredEventHybrid: id manquant");
-
-  const payload = mapRaceLocalToDb(ev, user.id);
-
-  const { error } = await supabase
-    .from("races")
-    .update(payload)
-    .eq("id", ev.id);
-
-  if (error) throw error;
-}
-
-/* ------------------------------------------------------------------ */
-/* MEETINGS                                                           */
-/* ------------------------------------------------------------------ */
+// Ces fonctions sont nommées "...Hybrid" pour compat avec ton code actuel.
+// Ici, elles parlent UNIQUEMENT à Supabase.
 
 export async function loadMeetingsHybrid() {
   const { data, error } = await supabase
@@ -207,62 +84,120 @@ export async function loadMeetingsHybrid() {
     .limit(2000);
 
   if (error) throw error;
-  return (data || []).map(mapMeetingDbToLocal);
+  return data || [];
 }
 
-export async function findMeetingHybrid(id) {
+export async function findMeetingHybrid(meetingId) {
+  if (!meetingId) return null;
   const { data, error } = await supabase
     .from("meetings")
     .select("*")
-    .eq("id", id)
+    .eq("id", meetingId)
     .maybeSingle();
 
   if (error) throw error;
-  return data ? mapMeetingDbToLocal(data) : null;
-}
-
-export async function addMeetingHybrid(meeting) {
-  const user = await getUserSafe();
-  if (!user) throw new Error("Non connecté (auth requise).");
-
-  if (!meeting.id) meeting.id = makeIdFromName(meeting.name || "meeting");
-  if (!Array.isArray(meeting.raceIds)) meeting.raceIds = [];
-
-  const payload = mapMeetingLocalToDb(meeting, user.id);
-
-  const { error } = await supabase
-    .from("meetings")
-    .insert(payload);
-
-  if (error) throw error;
+  return data || null;
 }
 
 export async function updateMeetingHybrid(meeting) {
-  const user = await getUserSafe();
-  if (!user) throw new Error("Non connecté (auth requise).");
-  if (!meeting?.id) throw new Error("updateMeetingHybrid: id manquant");
+  if (!meeting?.id) throw new Error("updateMeetingHybrid: meeting.id manquant");
+  const patch = stripUndefined({
+    name: meeting.name ?? undefined,
+    date: toISODate(meeting.date) ?? meeting.date ?? undefined,
+    end_date: toISODate(meeting.endDate) ?? meeting.end_date ?? undefined,
+    location: meeting.location ?? undefined,
+    // raceIds si tu as la colonne (ex: race_ids jsonb). Sinon c'est ignoré côté front.
+    race_ids: meeting.raceIds ?? meeting.race_ids ?? undefined,
+    updated_at: new Date().toISOString(),
+  });
 
-  if (!Array.isArray(meeting.raceIds)) meeting.raceIds = [];
-
-  const payload = mapMeetingLocalToDb(meeting, user.id);
-
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("meetings")
-    .update(payload)
-    .eq("id", meeting.id);
+    .update(patch)
+    .eq("id", meeting.id)
+    .select("*")
+    .maybeSingle();
 
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteMeetingHybrid(meetingId) {
+  if (!meetingId) return;
+  const { error } = await supabase.from("meetings").delete().eq("id", meetingId);
   if (error) throw error;
 }
 
-export async function deleteMeetingHybrid(id) {
-  const user = await getUserSafe();
-  if (!user) throw new Error("Non connecté (auth requise).");
-  if (!id) throw new Error("deleteMeetingHybrid: id manquant");
+/* ----------------------------- RACES ---------------------------- */
 
-  const { error } = await supabase
-    .from("meetings")
-    .delete()
-    .eq("id", id);
+function mapRaceToDb(race) {
+  // On envoie UNIQUEMENT des colonnes "probables" (d'après tes captures/erreurs)
+  // pour éviter "Could not find the 'xxx' column".
+  return stripUndefined({
+    id: race.id,
+    meeting_id: race.meetingId ?? race.meeting_id ?? race.eventGroupId ?? null,
+    organizer_id: race.organizerId ?? race.organizer_id ?? undefined, // set below
+    name: race.name ?? null,
+    date: toISODate(race.date) ?? race.date ?? null,
+    start_time: race.time ?? race.start_time ?? null,
 
+    disc: race.disc ?? null,
+    ebike: toBool(race.ebike),
+
+    // champs calculés
+    distance_km: race.distanceKm ?? race.distance_km ?? null,
+    dplus_m: race.dplusM ?? race.dplus_m ?? null,
+
+    score_phys: race.scorePhys ?? race.score_phys ?? null,
+    score_tech: race.scoreTech ?? race.score_tech ?? null,
+    score_global: race.scoreGlobal ?? race.score_global ?? null,
+
+    // IMPORTANT: colonne TEXT => JSON string
+    gpx: packGpxText(race),
+
+    // optionnel si colonne existe (sinon -> erreur). On ne l'envoie pas par défaut.
+    // is_published: toBool(race.isPublished),
+  });
+}
+
+export async function addStoredEventHybrid(race) {
+  if (!race?.id) throw new Error("addStoredEventHybrid: race.id manquant");
+  const user = await getUserOrNull();
+  if (!user) throw new Error("Non connecté (auth required).");
+
+  const row = mapRaceToDb({ ...race, organizerId: user.id });
+
+  const { data, error } = await supabase
+    .from("races")
+    .insert(row)
+    .select("*")
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateStoredEventHybrid(race) {
+  if (!race?.id) throw new Error("updateStoredEventHybrid: race.id manquant");
+  const user = await getUserOrNull();
+  if (!user) throw new Error("Non connecté (auth required).");
+
+  const patch = mapRaceToDb({ ...race, organizerId: user.id });
+  delete patch.id; // on ne modifie pas la PK
+
+  const { data, error } = await supabase
+    .from("races")
+    .update(patch)
+    .eq("id", race.id)
+    .select("*")
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteStoredEventHybrid(raceId) {
+  if (!raceId) return;
+  const { error } = await supabase.from("races").delete().eq("id", raceId);
   if (error) throw error;
 }
