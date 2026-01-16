@@ -4,161 +4,182 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Événement — MTB Points</title>
+
   <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/theme-nature.css?v=10" />
+
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
+    a{color:inherit}
+    .wrap{max-width:1280px;margin:22px auto;padding:0 16px}
+    .muted{color:var(--muted)}
+    .muted2{color:var(--muted);font-size:12px}
+
+    header.header{
+      position:sticky;top:0;z-index:20;
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+
+    nav.nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav.nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      font-weight:950;font-size:13px;color:var(--blue);
+    }
+    nav.nav a:hover{background:rgba(47,111,62,.10)}
+    nav.nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
+    .headerRight{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2);
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .heroMeta{margin-top:8px;color:#223024;line-height:1.6}
+    .heroDesc{margin-top:10px;color:var(--muted);line-height:1.55}
+    .heroActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+    .infoBox{
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
+      background:rgba(47,111,62,.08);
+      border:1px solid rgba(47,111,62,.20);
+    }
+
+    .sectionTitle{margin:18px 0 10px 0;font-size:14px;letter-spacing:-.05px}
+
+    .list{display:grid;gap:12px;margin-top:12px}
+    .item{
+      border:1px solid rgba(40,60,40,.14);
+      background:rgba(255,255,255,.82);
+      border-radius:20px;
+      padding:14px;
+      box-shadow:0 2px 12px rgba(15,23,42,.06);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      display:block;
+      text-decoration:none;
+    }
+    .item:hover{
+      transform:translateY(-1px);
+      box-shadow:0 16px 26px rgba(15,23,42,.10);
+      border-color:rgba(47,111,62,.25);
+    }
+    .topline{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .title{font-weight:1100;font-size:16px;letter-spacing:-.15px}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.75);
+      font-weight:1000;font-size:12px;white-space:nowrap;
+    }
+    .badge.published{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.10)}
+    .badge.draft{border-color:rgba(234,88,12,.35);background:rgba(234,88,12,.10)}
+    
+    .metaLine{margin-top:8px;color:#223024;font-size:13px;line-height:1.5}
+    .miniRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+
+    .empty{
+      margin-top:12px;
+      border:1px dashed var(--border);
+      background:rgba(255,255,255,.72);
+      border-radius:18px;
+      padding:12px;
+      color:var(--muted);
+    }
+  </style>
 </head>
 
-<body>
+<body class="theme-nature">
+
 <header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Événement</h1>
-    <span class="pill" id="pillCount"><span class="dot"></span> <span id="pillCountTxt">0</span> épreuve(s)</span>
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>MTB Points — Événement</h1>
+      <span class="pill"><span class="dot"></span> <span id="countRaces">0</span> épreuve(s)</span>
+    </div>
   </div>
 
   <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
-    <a href="meetings.html" class="active">Événements</a>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="login.html">Connexion</a>
+    <a href="meetings.html">Événements</a>
+    <a href="organizer-dashboard.html">Mes événements</a>
   </nav>
 
-  <div class="headerRight" style="display:flex;gap:8px;flex-wrap:wrap;">
-    <a class="btn ghost" href="meetings.html">← Retour</a>
-    <a class="btn primary" id="btnCreateRaceTop" href="#" style="display:none;">+ Créer une épreuve</a>
+  <div class="headerRight">
+    <a class="btn" href="organizer-dashboard.html">← Retour tableau de bord</a>
   </div>
 </header>
 
 <main class="wrap">
   <div class="card">
 
-    <!-- HERO -->
     <section class="hero">
       <div class="heroTop">
         <div style="min-width:280px;flex:1">
-          <h2 id="mName">—</h2>
-          <div class="heroMeta" id="mMeta">—</div>
-          <div class="heroDesc" id="mComment" style="display:none;"></div>
-          <div id="alertBox" class="empty" style="display:none; margin-top:12px;"></div>
+          <h2 id="meetingName">Chargement…</h2>
+          <div class="heroMeta" id="meetingMeta">—</div>
+          <div class="heroDesc" id="meetingComment"></div>
+
+          <div class="infoBox">
+            <strong>📍 Pour cet événement :</strong><br>
+            1️⃣ Clique sur <strong>"+ Créer une épreuve"</strong> ci-dessous<br>
+            2️⃣ Importe un <strong>GPX</strong> (analyse automatique)<br>
+            3️⃣ Une fois l'épreuve créée, <strong>importe les résultats</strong><br>
+            4️⃣ Le <strong>classement public</strong> est généré automatiquement
+          </div>
         </div>
 
-        <div class="heroActions" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
-          <span class="pill"><span class="dot ok"></span> Événement</span>
-          <span class="pill"><span class="dot"></span> Épreuves rattachées</span>
-          <a class="btn primary" id="btnCreateRaceHero" href="#" style="display:none;">+ Créer une épreuve</a>
+        <div class="heroActions">
+          <span class="pill" id="statusPill"><span class="dot ok"></span> —</span>
         </div>
       </div>
     </section>
 
-    <!-- KPIs -->
-    <h3 class="sectionTitle" style="margin-top:18px;">Résumé</h3>
-    <div class="kpiGrid">
-      <div class="kpi">
-        <div class="kpiLabel">Épreuves (filtrées)</div>
-        <div class="kpiValue" id="kpiCount">—</div>
-        <div class="kpiSub" id="kpiRange">—</div>
+    <h3 class="sectionTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <span>Épreuves de cet événement</span>
+        <a class="btn primary" id="btnCreateRace" href="#">+ Créer une épreuve</a>
       </div>
+    </h3>
 
-      <div class="kpi">
-        <div class="kpiLabel">Difficulté moyenne</div>
-        <div class="kpiValue"><span id="kpiGlobal">—</span><span class="muted"> /100</span></div>
-        <div class="kpiSub" id="kpiGlobalSub">—</div>
-      </div>
-
-      <div class="kpi">
-        <div class="kpiLabel">Moyenne Physique</div>
-        <div class="kpiValue"><span id="kpiPhys">—</span><span class="muted"> /100</span></div>
-        <div class="kpiSub">ScorePhys moyen</div>
-      </div>
-
-      <div class="kpi">
-        <div class="kpiLabel">Moyenne Technique</div>
-        <div class="kpiValue"><span id="kpiTech">—</span><span class="muted"> /100</span></div>
-        <div class="kpiSub">TechScore (si dispo)</div>
-      </div>
-
-      <div class="kpi">
-        <div class="kpiLabel">Participants (total)</div>
-        <div class="kpiValue" id="kpiParticipants">—</div>
-        <div class="kpiSub">Somme des participants</div>
-      </div>
-
-      <div class="kpi">
-        <div class="kpiLabel">Épreuve la plus difficile</div>
-        <div class="kpiValue" style="font-size:16px;line-height:1.2;">
-          <a id="kpiHardestLink" href="#" style="text-decoration:none;">—</a>
-        </div>
-        <div class="kpiSub" id="kpiHardestScore">—</div>
-      </div>
+    <div id="racesList" class="list"></div>
+    <div id="empty" class="empty" style="display:none;">
+      Aucune épreuve pour cet événement. Clique sur <b>"+ Créer une épreuve"</b> pour commencer.
     </div>
-
-    <!-- FILTERS -->
-    <h3 class="sectionTitle" style="margin-top:18px;">Filtres & tri</h3>
-    <div class="filters" style="grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr 180px;">
-      <div class="spanAll" style="grid-column:1/3">
-        <label for="q">Recherche</label>
-        <input id="q" type="text" placeholder="Nom, commentaire…" />
-      </div>
-
-      <div>
-        <label for="fDisc">Discipline</label>
-        <select id="fDisc">
-          <option value="">Toutes</option>
-          <option value="XC">XC</option>
-          <option value="Enduro">Enduro</option>
-          <option value="DH">DH</option>
-          <option value="Gravel">Gravel</option>
-          <option value="Marathon">Marathon</option>
-          <option value="Ultra">Ultra</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="fEbike">Type vélo</label>
-        <select id="fEbike">
-          <option value="">Tous</option>
-          <option value="0">Musculaire</option>
-          <option value="1">Assistance électrique</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="minGlobal">Difficulté min (≥ <span id="minGlobalVal">0</span>)</label>
-        <input id="minGlobal" type="range" min="0" max="100" value="0" />
-      </div>
-
-      <div>
-        <label for="sortBy">Tri</label>
-        <select id="sortBy">
-          <option value="date_desc">Plus récentes</option>
-          <option value="date_asc">Plus anciennes</option>
-          <option value="global_desc">Difficulté ↓</option>
-          <option value="global_asc">Difficulté ↑</option>
-          <option value="distance_desc">Distance ↓</option>
-          <option value="name_asc">Nom A→Z</option>
-        </select>
-      </div>
-
-      <div>
-        <button class="btn primary" id="btnResetFilters" type="button">Réinitialiser</button>
-      </div>
-
-      <div class="hintRow" style="grid-column:1/-1;">
-        <div>Résultats : <strong id="countFiltered">0</strong></div>
-        <div class="muted">Astuce : clique sur une épreuve pour ouvrir la fiche.</div>
-      </div>
-    </div>
-
-    <!-- LIST -->
-    <h3 class="sectionTitle" style="margin-top:18px;">Épreuves de l’événement</h3>
-
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-      <a class="btn primary" id="btnCreateRaceBottom" href="#" style="display:none;">+ Créer une épreuve</a>
-      <!-- page optionnelle (si tu l’as) -->
-      <a class="btn" id="btnAllRaces" href="#" title="Optionnel : une page liste dédiée">Voir toutes les épreuves</a>
-    </div>
-
-    <div id="races" class="list" style="margin-top:12px;"></div>
-    <div id="emptyBox" class="empty" style="display:none;">Aucune épreuve ne correspond aux filtres.</div>
 
   </div>
 </main>
@@ -169,36 +190,31 @@
 <script>
 (function(){
   const $ = (id) => document.getElementById(id);
-  const params = new URLSearchParams(location.search);
 
   function esc(s){
     return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
-  function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
-  function fmt1(n){ return (n == null) ? "—" : String(Math.round(n * 10)/10); }
 
-  function setAlert(html){
-    const box = $("alertBox");
-    if (!box) return;
-    box.style.display = html ? "block" : "none";
-    box.innerHTML = html || "";
+  const params = new URLSearchParams(location.search);
+  const meetingId = params.get("id");
+
+  if (!meetingId) {
+    $("meetingName").textContent = "❌ Aucun événement spécifié";
+    $("meetingMeta").textContent = "Retourne au tableau de bord.";
+    return;
   }
 
-  // ---- Storage adapters (prefer storage.js; fallback localStorage keys used in earlier pages)
-  function listMeetingsSafe(){
-    if (typeof window.listMeetings === "function") return window.listMeetings();
-    if (typeof window.getMeetings === "function") return window.getMeetings();
+  // Storage adapters
+  function findMeetingSafe(id){
+    if (typeof window.findMeeting === "function") return window.findMeeting(id);
+    if (typeof window.getMeeting === "function") return window.getMeeting(id);
     try {
       const raw = localStorage.getItem("mtb.meetings.v1");
       const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch(_){ return []; }
+      return Array.isArray(arr) ? arr.find(m => m?.id === id) : null;
+    } catch(_){ return null; }
   }
-  function findMeetingSafe(id){
-    if (!id) return null;
-    if (typeof window.findMeeting === "function") return window.findMeeting(id);
-    return listMeetingsSafe().find(m => m && m.id === id) || null;
-  }
+
   function listRacesSafe(){
     if (typeof window.listRaces === "function") return window.listRaces();
     if (typeof window.getRaces === "function") return window.getRaces();
@@ -209,262 +225,84 @@
     } catch(_){ return []; }
   }
 
-  // ---- meeting id
-  const meetingId = params.get("id");
-  if (!meetingId){
-    setAlert(`❌ ID d’événement manquant. Retourne à la liste des événements : <a href="meetings.html">meetings.html</a>`);
-    return;
-  }
-
   const meeting = findMeetingSafe(meetingId);
-  if (!meeting){
-    setAlert(`❌ Événement introuvable (id: <code>${esc(meetingId)}</code>).`);
+
+  if (!meeting) {
+    $("meetingName").textContent = "❌ Événement introuvable";
+    $("meetingMeta").textContent = `ID: ${meetingId}`;
+    $("statusPill").innerHTML = `<span class="dot" style="background:#dc2626"></span> Introuvable`;
     return;
   }
 
-  // ---- render meeting header
-  $("mName").textContent = meeting.name || "Événement";
+  // Display meeting info
+  $("meetingName").textContent = meeting.name || "Événement";
+  
   const start = meeting.date || "—";
   const end = meeting.endDate || null;
   const range = end ? `${start} → ${end}` : start;
-
-  const metaBits = [];
-  metaBits.push(`📅 ${range}`);
-  if (meeting.location) metaBits.push(`📍 ${meeting.location}`);
-  $("mMeta").textContent = metaBits.join(" • ") || "—";
-
-  if (meeting.comment){
-    $("mComment").style.display = "block";
-    $("mComment").textContent = meeting.comment;
-  }
-
-  // ---- create race buttons
-  const createUrl = `course-create.html?meetingId=${encodeURIComponent(meetingId)}`;
-  ["btnCreateRaceTop","btnCreateRaceHero","btnCreateRaceBottom"].forEach(id=>{
-    const el = $(id);
-    if (!el) return;
-    el.href = createUrl;
-    el.style.display = "inline-flex";
-  });
-
-  // "Voir toutes les épreuves" (optionnel si tu as une page dédiée)
-  const allBtn = $("btnAllRaces");
-  if (allBtn) allBtn.href = `races.html?meetingId=${encodeURIComponent(meetingId)}`;
-
-  // ---- collect races belonging to meeting
-  const allRaces = listRacesSafe();
-
-  // prefer meeting.raceIds, fallback to meetingId field
-  const ids = Array.isArray(meeting.raceIds) ? meeting.raceIds : [];
-  const raceById = new Map(allRaces.filter(r=>r && r.id).map(r=>[r.id, r]));
-
-  let meetingRaces = [];
-  if (ids.length){
-    meetingRaces = ids.map(id => raceById.get(id)).filter(Boolean);
+  const location = meeting.location ? ` • 📍 ${meeting.location}` : "";
+  
+  $("meetingMeta").innerHTML = `📅 ${esc(range)}${esc(location)}`;
+  
+  if (meeting.comment) {
+    $("meetingComment").textContent = meeting.comment;
   } else {
-    meetingRaces = allRaces.filter(r => r && (r.meetingId === meetingId || r.eventGroupId === meetingId));
+    $("meetingComment").style.display = "none";
   }
 
-  // ---- filters
-  const qEl = $("q");
-  const discEl = $("fDisc");
-  const ebikeEl = $("fEbike");
-  const minGEl = $("minGlobal");
-  const minGVal = $("minGlobalVal");
-  const sortEl = $("sortBy");
+  $("statusPill").innerHTML = meeting.isPublished 
+    ? `<span class="dot ok"></span> Publié` 
+    : `<span class="dot" style="background:#ea580c"></span> Brouillon`;
 
-  function getRaceGlobal(r){
-    const g = num(r.globalScore);
-    if (g != null) return g;
-    const mrs = num(r.mrs);
-    if (mrs != null) return mrs;
-    return null;
-  }
-  function getRacePhys(r){
-    const p = num(r.physScore);
-    return p != null ? p : null;
-  }
-  function getRaceTech(r){
-    const t = (r.techV2 && typeof r.techV2.techScoreV2 === "number") ? num(r.techV2.techScoreV2) : null;
-    return t != null ? t : num(r.techScore);
+  // Set create race URL
+  $("btnCreateRace").href = `course-create.html?meetingId=${encodeURIComponent(meetingId)}`;
+
+  // Load races for this meeting
+  const allRaces = listRacesSafe();
+  const races = allRaces.filter(r => r?.meetingId === meetingId || r?.eventGroupId === meetingId);
+
+  $("countRaces").textContent = String(races.length);
+
+  const listEl = $("racesList");
+  const emptyEl = $("empty");
+
+  if (races.length === 0) {
+    listEl.innerHTML = "";
+    emptyEl.style.display = "block";
+    return;
   }
 
-  function applyFilters(){
-    const q = (qEl.value || "").trim().toLowerCase();
-    const fDisc = (discEl.value || "").trim();
-    const fEbike = (ebikeEl.value || "").trim(); // "", "0", "1"
-    const minG = Number(minGEl.value || 0);
+  emptyEl.style.display = "none";
 
-    let out = meetingRaces.slice();
+  races.sort((a, b) => String(a?.date || "").localeCompare(String(b?.date || "")));
 
-    if (q){
-      out = out.filter(r=>{
-        const s = `${r.name||""} ${r.comment||""} ${r.disc||""}`.toLowerCase();
-        return s.includes(q);
-      });
-    }
+  listEl.innerHTML = races.map(r => {
+    const rDate = r.date || "—";
+    const disc = r.disc || r.discipline || "—";
+    const level = r.level || "";
+    const dist = r.distanceKm ? `${Number(r.distanceKm).toFixed(1)} km` : "—";
+    const dplus = r.dplusM ? `D+ ${Math.round(r.dplusM)} m` : "—";
+    const pub = r.isPublished === true;
 
-    if (fDisc){
-      out = out.filter(r => String(r.disc || "").toLowerCase() === fDisc.toLowerCase());
-    }
-
-    if (fEbike !== ""){
-      const want = (fEbike === "1");
-      out = out.filter(r => Boolean(r.ebike) === want);
-    }
-
-    out = out.filter(r=>{
-      const g = getRaceGlobal(r);
-      if (g == null) return true; // si pas de global, on ne filtre pas
-      return g >= minG;
-    });
-
-    const sortBy = sortEl.value || "date_desc";
-    out.sort((a,b)=>{
-      const da = (a.date || "");
-      const db = (b.date || "");
-      const ga = getRaceGlobal(a) ?? -1;
-      const gb = getRaceGlobal(b) ?? -1;
-      const distA = num(a.distanceKm) ?? -1;
-      const distB = num(b.distanceKm) ?? -1;
-      const na = (a.name || "").toLowerCase();
-      const nb = (b.name || "").toLowerCase();
-
-      if (sortBy === "date_desc") return db.localeCompare(da);
-      if (sortBy === "date_asc") return da.localeCompare(db);
-      if (sortBy === "global_desc") return (gb - ga);
-      if (sortBy === "global_asc") return (ga - gb);
-      if (sortBy === "distance_desc") return (distB - distA);
-      if (sortBy === "name_asc") return na.localeCompare(nb);
-      return 0;
-    });
-
-    renderList(out);
-    renderKPIs(out);
-  }
-
-  function renderKPIs(filtered){
-    const count = filtered.length;
-
-    $("kpiCount").textContent = String(count);
-    $("countFiltered").textContent = String(count);
-    $("pillCountTxt").textContent = String(count);
-
-    const dates = filtered.map(r=>r.date).filter(Boolean).sort();
-    $("kpiRange").textContent = dates.length ? `📅 ${dates[0]} → ${dates[dates.length-1]}` : "—";
-
-    const globals = filtered.map(getRaceGlobal).filter(v=>v!=null);
-    const phys = filtered.map(getRacePhys).filter(v=>v!=null);
-    const tech = filtered.map(getRaceTech).filter(v=>v!=null);
-    const parts = filtered.map(r=>num(r.participants)).filter(v=>v!=null);
-
-    const avg = (arr)=> arr.length ? (arr.reduce((s,x)=>s+x,0)/arr.length) : null;
-    const sum = (arr)=> arr.length ? arr.reduce((s,x)=>s+x,0) : null;
-
-    const gAvg = avg(globals);
-    const pAvg = avg(phys);
-    const tAvg = avg(tech);
-    const pSum = sum(parts);
-
-    $("kpiGlobal").textContent = gAvg == null ? "—" : String(Math.round(gAvg));
-    $("kpiGlobalSub").textContent = globals.length ? `${globals.length} épreuve(s) avec score global` : "—";
-
-    $("kpiPhys").textContent = pAvg == null ? "—" : String(Math.round(pAvg));
-    $("kpiTech").textContent = tAvg == null ? "—" : String(Math.round(tAvg));
-    $("kpiParticipants").textContent = pSum == null ? "—" : String(Math.round(pSum));
-
-    // hardest -> race.html (IMPORTANT)
-    let hardest = null;
-    for (const r of filtered){
-      const g = getRaceGlobal(r);
-      if (g == null) continue;
-      if (!hardest || g > hardest.g) hardest = { r, g };
-    }
-    const link = $("kpiHardestLink");
-    const sub = $("kpiHardestScore");
-    if (!hardest){
-      link.textContent = "—";
-      link.href = "#";
-      sub.textContent = "—";
-    } else {
-      link.textContent = hardest.r.name || "Épreuve";
-      link.href = `race.html?id=${encodeURIComponent(hardest.r.id)}`;
-      sub.textContent = `Global: ${Math.round(hardest.g)}/100 • ${hardest.r.date || ""}`;
-    }
-  }
-
-  function renderList(list){
-    const root = $("races");
-    const empty = $("emptyBox");
-    root.innerHTML = "";
-
-    if (!list.length){
-      empty.style.display = "block";
-      return;
-    }
-    empty.style.display = "none";
-
-    for (const r of list){
-      const g = getRaceGlobal(r);
-      const p = getRacePhys(r);
-      const t = getRaceTech(r);
-
-      const dist = (num(r.distanceKm) != null) ? `${fmt1(num(r.distanceKm))} km` : "— km";
-      const dplus = (num(r.dplusM) != null) ? `D+ ${Math.round(num(r.dplusM))} m` : "D+ —";
-      const date = r.date || "—";
-      const disc = r.disc || "—";
-      const eb = r.ebike ? "E-bike" : "Musculaire";
-
-      const card = document.createElement("div");
-      card.className = "item";
-      card.tabIndex = 0;
-      // Click sur la carte = fiche épreuve
-      const raceUrl = `race.html?id=${encodeURIComponent(r.id)}`;
-      const rankUrl = `race-ranking.html?raceId=${encodeURIComponent(r.id)}`;
-      const importUrl = `import-results.html?raceId=${encodeURIComponent(r.id)}`;
-
-      card.addEventListener("click", () => { location.href = raceUrl; });
-      card.addEventListener("keydown", (e)=>{
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); location.href = raceUrl; }
-      });
-
-      card.innerHTML = `
+    return `
+      <div class="item">
         <div class="topline">
-          <div class="title">${esc(r.name || "Épreuve")}</div>
-          <div class="badge">${esc(date)}</div>
+          <div>
+            <div class="title">${esc(r.name || "Épreuve")}</div>
+            <div class="muted2">${esc(rDate)} • ${esc(disc)}${level ? " • " + esc(level) : ""}</div>
+            <div class="muted2">${dist} • ${dplus}</div>
+          </div>
+          <span class="badge ${pub ? 'published' : 'draft'}">${pub ? '✅ Publié' : '📝 Brouillon'}</span>
         </div>
-        <div class="metaLine">${esc(disc)} • ${esc(eb)} • ${esc(dist)} • ${esc(dplus)}</div>
+
         <div class="miniRow">
-          <span class="miniPill">Global: <b>${g == null ? "—" : Math.round(g)}</b></span>
-          <span class="miniPill">Phys: <b>${p == null ? "—" : Math.round(p)}</b></span>
-          <span class="miniPill">Tech: <b>${t == null ? "—" : Math.round(t)}</b></span>
+          <a class="btn primary" href="race.html?id=${encodeURIComponent(r.id)}">👁️ Voir la fiche</a>
+          <a class="btn" href="import-results.html?raceId=${encodeURIComponent(r.id)}">📊 Importer résultats</a>
+          <a class="btn ghost" href="race-ranking.html?id=${encodeURIComponent(r.id)}">🏆 Classement public</a>
         </div>
-        <div class="miniRow" style="margin-top:10px; gap:10px; flex-wrap:wrap">
-          <a class="btn" href="${raceUrl}" onclick="event.stopPropagation()">Voir la fiche</a>
-          <a class="btn primary" href="${rankUrl}" onclick="event.stopPropagation()">Voir classement</a>
-          <a class="btn ghost" href="${importUrl}" onclick="event.stopPropagation()">Importer résultats</a>
-        </div>
-      `;
-      root.appendChild(card);
-    }
-  }
-
-  // ---- wire
-  const syncMin = ()=> { if (minGVal) minGVal.textContent = String(minGEl.value || 0); };
-  minGEl.addEventListener("input", ()=>{ syncMin(); applyFilters(); });
-  [qEl, discEl, ebikeEl, sortEl].forEach(el => el.addEventListener("input", applyFilters));
-  $("btnResetFilters").addEventListener("click", ()=>{
-    qEl.value = "";
-    discEl.value = "";
-    ebikeEl.value = "";
-    minGEl.value = 0;
-    sortEl.value = "date_desc";
-    syncMin();
-    applyFilters();
-  });
-
-  syncMin();
-  applyFilters();
+      </div>
+    `;
+  }).join("");
 })();
 </script>
 

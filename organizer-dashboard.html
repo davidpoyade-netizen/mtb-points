@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Organisateur — Événements | MTB Points</title>
+  <title>Tableau de bord Organisateur — MTB Points</title>
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/theme-nature.css?v=20" />
@@ -111,6 +111,8 @@
       font-family:inherit;
     }
     textarea{min-height:96px;resize:vertical}
+
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
   </style>
 </head>
 
@@ -122,7 +124,7 @@
     </div>
 
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <h1>MTB Points — Organisateur</h1>
+      <h1>MTB Points — Tableau de bord Organisateur</h1>
       <span class="pill" id="whoami"><span class="dot"></span> Chargement…</span>
     </div>
   </div>
@@ -130,10 +132,9 @@
   <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
-    <a href="meetings.html">Événements</a>
-    <a href="events.html">Épreuves</a>
-    <a href="organizer-dashboard.html" class="active">Espace orga</a>
-    <a href="import-results.html">Import résultats</a>
+    <a href="meetings.html">Événements publics</a>
+    <a href="races.html">Épreuves publiques</a>
+    <a href="organizer-dashboard.html" class="active">📊 Mes événements</a>
   </nav>
 
   <div class="headerRight" style="display:flex;gap:10px;flex-wrap:wrap">
@@ -150,7 +151,14 @@
         <div style="min-width:260px;flex:1">
           <h2 style="margin:0">Mes événements</h2>
           <div class="muted2" style="margin-top:6px">
-            Crée un événement, puis ajoute des épreuves (avec analyse GPX auto).
+            Crée un événement, puis ajoute des épreuves avec analyse GPX automatique.
+          </div>
+          <div class="muted2" style="margin-top:6px;padding:10px;background:rgba(47,111,62,.08);border-radius:10px">
+            <strong>📍 Flux de travail :</strong><br>
+            1️⃣ Créer un <strong>événement</strong> (ci-dessous)<br>
+            2️⃣ Cliquer sur l'événement → Créer des <strong>épreuves</strong><br>
+            3️⃣ Dans chaque épreuve → <strong>Importer les résultats</strong><br>
+            4️⃣ Publier le <strong>classement</strong> public
           </div>
         </div>
         <div class="pillBtn">
@@ -163,12 +171,16 @@
 
       <div class="grid2" style="margin-top:14px;">
         <div>
-          <label for="name">Nom de l’événement *</label>
-          <input id="name" placeholder="Ex : Roc d’Azur 2026" />
+          <label for="name">Nom de l'événement *</label>
+          <input id="name" placeholder="Ex : Roc d'Azur 2026" />
         </div>
         <div>
-          <label for="date">Date (YYYY-MM-DD)</label>
+          <label for="date">Date de début (YYYY-MM-DD)</label>
           <input id="date" type="date" />
+        </div>
+        <div>
+          <label for="endDate">Date de fin (optionnel, si multi-jours)</label>
+          <input id="endDate" type="date" />
         </div>
         <div>
           <label for="location">Lieu</label>
@@ -182,11 +194,11 @@
           </div>
         </div>
         <div style="grid-column:1/-1">
-          <label for="comment">Commentaire</label>
+          <label for="comment">Commentaire / Description</label>
           <textarea id="comment" placeholder="Infos générales, programme, liens…"></textarea>
         </div>
         <div style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn primary" id="createBtn" type="button">+ Créer l’événement</button>
+          <button class="btn primary" id="createBtn" type="button">+ Créer l'événement</button>
           <button class="btn" id="reloadBtn" type="button">↻ Recharger</button>
         </div>
       </div>
@@ -203,7 +215,7 @@
       </div>
 
       <div id="list" class="list"></div>
-      <div id="empty" class="empty" style="display:none">Aucun événement pour l’instant.</div>
+      <div id="empty" class="empty" style="display:none">Aucun événement pour l'instant. Crée ton premier événement ci-dessus !</div>
     </section>
 
   </div>
@@ -212,4 +224,3 @@
 <script type="module" src="js/organizer-dashboard.js"></script>
 </body>
 </html>
-
