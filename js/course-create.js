@@ -678,27 +678,8 @@ function resetForm(keepMeeting = true) {
   if (discEl && discEl.value && !allowedDisc.has(discEl.value)) discEl.value = "";
 
 
-  // IMPORTANT:
-  // - Sur certains navigateurs, inp.click() sur un <input type="file"> caché peut être bloqué.
-  // - Recommandé côté HTML: utiliser <label for="gpxFile" id="btnPickAnalyze">…</label>
-  // Ici on se contente de reset la valeur pour permettre de re-sélectionner le même fichier.
-    const pickLbl = $("btnPickAnalyze");
-  // accessibilité: Enter/Espace sur le label ouvre le picker
-  pickLbl?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      $("gpxFile")?.click();
-    }
-  });
-
-$("btnPickAnalyze")?.addEventListener("click", () => {
-    showMsg("");
-    const inp = $("gpxFile");
-    if (inp) {
-      inp.value = ""; // force change
-      inp.click(); // Ouvre le sélecteur de fichiers
-    }
-  });
+  // Le bouton est maintenant un <label for="gpxFile"> dans le HTML
+  // ce qui permet l'ouverture native du sélecteur de fichiers
 
   $("gpxFile")?.addEventListener("change", async () => {
     const f = $("gpxFile")?.files?.[0];
