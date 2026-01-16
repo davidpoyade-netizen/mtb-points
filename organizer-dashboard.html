@@ -12,107 +12,36 @@
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
     a{color:inherit}
-
-    /* Header */
-    header.header{
-      position:sticky;top:0;z-index:20;
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    }
+    header.header{position:sticky;top:0;z-index:20;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .brandLogo{
-      width:44px;height:44px;border-radius:14px;overflow:hidden;
-      border:1px solid rgba(40,60,40,.18);
-      box-shadow:0 12px 22px rgba(15,23,42,.18);
-      background:#fff;
-    }
+    .brandLogo{width:44px;height:44px;border-radius:14px;overflow:hidden;border:1px solid rgba(40,60,40,.18);box-shadow:0 12px 22px rgba(15,23,42,.18);background:#fff}
     .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
     header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
-
-    /* mini-ajouts (compat) */
     .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:22px;
-      padding:18px;
-      box-shadow:var(--shadow);
-    }
-
+    .card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
     .muted2{color:var(--muted);font-size:12px;line-height:1.55}
     .row2{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-
     .pillBtn{display:inline-flex;gap:8px;align-items:center;white-space:nowrap}
-
     .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
     @media(max-width:900px){.list{grid-template-columns:1fr}}
-
-    .item{
-      border:1px solid rgba(40,60,40,.14);
-      border-radius:20px;
-      background:rgba(255,255,255,.82);
-      padding:14px;
-      text-decoration:none;
-      display:block;
-      box-shadow:0 2px 12px rgba(15,23,42,.06);
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .item:hover{
-      border-color:rgba(47,111,62,.25);
-      box-shadow:0 16px 26px rgba(15,23,42,.10);
-      transform:translateY(-1px);
-    }
+    .item{border:1px solid rgba(40,60,40,.14);border-radius:20px;background:rgba(255,255,255,.82);padding:14px;box-shadow:0 2px 12px rgba(15,23,42,.06);transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease}
     .topline{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
     .title{font-weight:1100;font-size:16px;letter-spacing:-.15px}
     .meta{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.45}
-
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      background:rgba(255,255,255,.78);
-      border:1px solid var(--border);
-      font-weight:1000;font-size:12px
-    }
-
-    .msg{
-      margin-top:12px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.78);
-      font-weight:1000;
-      display:none;
-      line-height:1.45
-    }
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid var(--border);font-weight:1000;font-size:12px}
+    .msg{margin-top:12px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.78);font-weight:1000;display:none;line-height:1.45}
     .msg.ok{display:block;border-color:rgba(22,163,74,.28);background:rgba(22,163,74,.10);color:#064e3b}
     .msg.err{display:block;border-color:rgba(220,38,38,.28);background:rgba(220,38,38,.10);color:#7f1d1d}
     .msg.warn{display:block;border-color:rgba(234,88,12,.30);background:rgba(234,88,12,.12);color:#7c2d12}
-
-    .empty{
-      margin-top:14px;
-      border:1px dashed var(--border);
-      border-radius:18px;
-      padding:14px;
-      color:var(--muted);
-      background:rgba(255,255,255,.72)
-    }
-
+    .empty{margin-top:14px;border:1px dashed var(--border);border-radius:18px;padding:14px;color:var(--muted);background:rgba(255,255,255,.72)}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media(max-width:900px){.grid2{grid-template-columns:1fr}}
-
     label{display:block;font-weight:1000;font-size:12px;color:var(--text)}
-    input,textarea{
-      width:100%;
-      padding:10px;margin-top:6px;
-      border:1px solid rgba(40,60,40,.20);
-      border-radius:12px;
-      background:rgba(255,255,255,.82);
-      font-size:14px;
-      font-family:inherit;
-    }
+    input,textarea{width:100%;padding:10px;margin-top:6px;border:1px solid rgba(40,60,40,.20);border-radius:12px;background:rgba(255,255,255,.82);font-size:14px;font-family:inherit}
     textarea{min-height:96px;resize:vertical}
-
     .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn.danger{background:#dc2626;border-color:#dc2626;color:#fff}
+    .btn.danger:hover{background:#b91c1c;border-color:#b91c1c}
   </style>
 </head>
 
@@ -122,13 +51,11 @@
     <div class="brandLogo" title="MTB Points">
       <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
     </div>
-
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <h1>MTB Points — Tableau de bord Organisateur</h1>
       <span class="pill" id="whoami"><span class="dot"></span> Chargement…</span>
     </div>
   </div>
-
   <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
@@ -136,7 +63,6 @@
     <a href="races.html">Épreuves publiques</a>
     <a href="organizer-dashboard.html" class="active">📊 Mes événements</a>
   </nav>
-
   <div class="headerRight" style="display:flex;gap:10px;flex-wrap:wrap">
     <a class="btn ghost" href="login.html" id="btnAccount">Compte</a>
     <button class="btn" id="btnLogout" type="button" style="display:none">Déconnexion</button>
@@ -145,7 +71,6 @@
 
 <main class="wrap">
   <div class="card">
-
     <section class="hero">
       <div class="row2">
         <div style="min-width:260px;flex:1">
@@ -175,27 +100,31 @@
           <input id="name" placeholder="Ex : Roc d'Azur 2026" />
         </div>
         <div>
-          <label for="date">Date de début (YYYY-MM-DD)</label>
+          <label for="date">Date de début</label>
           <input id="date" type="date" />
         </div>
         <div>
-          <label for="endDate">Date de fin (optionnel, si multi-jours)</label>
+          <label for="endDate">Date de fin (si multi-jours)</label>
           <input id="endDate" type="date" />
         </div>
         <div>
           <label for="location">Lieu</label>
           <input id="location" placeholder="Ex : Fréjus" />
         </div>
+        <div style="grid-column:1/-1">
+          <label for="externalUrl">🔗 Lien externe (site web, inscription...)</label>
+          <input id="externalUrl" type="url" placeholder="https://www.example.com/mon-event" />
+        </div>
         <div>
           <label for="published">Publié</label>
           <div style="margin-top:8px;display:flex;gap:10px;align-items:center">
             <input id="published" type="checkbox" style="width:auto;margin:0;transform:scale(1.1)" />
-            <span class="muted2">Visible publiquement si coché</span>
+            <span class="muted2">Visible publiquement</span>
           </div>
         </div>
         <div style="grid-column:1/-1">
-          <label for="comment">Commentaire / Description</label>
-          <textarea id="comment" placeholder="Infos générales, programme, liens…"></textarea>
+          <label for="comment">Description</label>
+          <textarea id="comment" placeholder="Infos générales, programme..."></textarea>
         </div>
         <div style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn primary" id="createBtn" type="button">+ Créer l'événement</button>
@@ -207,17 +136,14 @@
     <section style="margin-top:14px;">
       <div class="row2">
         <div class="badge">Résultats : <span id="count">0</span></div>
-
         <div style="min-width:260px;flex:1;max-width:420px">
           <label for="q">Recherche</label>
-          <input id="q" placeholder="Nom, lieu, commentaire…" />
+          <input id="q" placeholder="Nom, lieu..." />
         </div>
       </div>
-
       <div id="list" class="list"></div>
-      <div id="empty" class="empty" style="display:none">Aucun événement pour l'instant. Crée ton premier événement ci-dessus !</div>
+      <div id="empty" class="empty" style="display:none">Aucun événement. Crée-en un ci-dessus !</div>
     </section>
-
   </div>
 </main>
 
