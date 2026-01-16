@@ -694,7 +694,10 @@ function resetForm(keepMeeting = true) {
 $("btnPickAnalyze")?.addEventListener("click", () => {
     showMsg("");
     const inp = $("gpxFile");
-    if (inp) inp.value = ""; // force change
+    if (inp) {
+      inp.value = ""; // force change
+      inp.click(); // Ouvre le sélecteur de fichiers
+    }
   });
 
   $("gpxFile")?.addEventListener("change", async () => {
