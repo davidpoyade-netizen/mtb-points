@@ -83,16 +83,20 @@ import { supabase } from "./supabaseClient.js";
     `).join("");
   }
 
+  // ✅ CORRECTION : Récupérer l'ID depuis l'URL (raceId ou id)
   const params = new URLSearchParams(window.location.search);
-  const raceId = params.get("raceId") || params.get("id") || "";
+  const raceId = params.get("id") || params.get("raceId") || "";
+  
   if (!raceId){
     $("raceTitle").textContent = "Épreuve introuvable";
-    $("raceMeta").innerHTML = "❌ Paramètre <span class='mono'>raceId</span> manquant.";
-    $("raceIdLine").textContent = "";
+    $("raceMeta").innerHTML = "❌ Paramètre <span class='mono'>id</span> manquant dans l'URL.";
+    $("raceIdLine").textContent = "Utilisez : race-ranking.html?id=xxx";
     return;
   }
 
   $("raceIdLine").innerHTML = `Race ID: <span class="mono">${esc(raceId)}</span>`;
+  
+  // ✅ Boutons de navigation
   const importUrl = `import-results.html?raceId=${encodeURIComponent(raceId)}`;
   const btnImport = $("btnImport");
   if (btnImport) btnImport.href = importUrl;
@@ -110,12 +114,13 @@ import { supabase } from "./supabaseClient.js";
     try{
       const { data, error } = await supabase
         .from("races")
-        .select("id,name,date,disc,meeting_id")
+        .select("id,name,date,discipline,level,meeting_id")
         .eq("id", raceId)
         .maybeSingle();
       if (error) throw error;
       raceInfo = data || null;
-    }catch(_){
+    }catch(err){
+      console.warn("[race-ranking] loadRaceInfo failed:", err);
       raceInfo = null;
     }
   }
@@ -195,16 +200,31 @@ import { supabase } from "./supabaseClient.js";
       $("raceTitle").textContent = raceInfo.name || "Épreuve";
       const bits = [];
       if (raceInfo.date) bits.push(`📅 ${raceInfo.date}`);
-      if (raceInfo.disc) bits.push(`🏷️ ${raceInfo.disc}`);
+      if (raceInfo.discipline) bits.push(`🏷️ ${raceInfo.discipline}`);
+      if (raceInfo.level) bits.push(`📊 ${raceInfo.level}`);
       $("raceMeta").textContent = bits.join(" • ") || "—";
-      // back button: meeting if available
+      
+      // ✅ Bouton retour vers meeting ou race
       const back = $("btnBack");
       if (back){
-        back.href = raceInfo.meeting_id ? `meeting.html?id=${encodeURIComponent(raceInfo.meeting_id)}` : "meetings.html";
+        if (raceInfo.meeting_id) {
+          back.href = `meeting.html?id=${encodeURIComponent(raceInfo.meeting_id)}`;
+          back.innerHTML = "⬅️ Retour à l'événement";
+        } else {
+          back.href = `race.html?id=${encodeURIComponent(raceId)}`;
+          back.innerHTML = "⬅️ Retour à l'épreuve";
+        }
       }
     } else {
-      $("raceTitle").textContent = "Classement de l’épreuve";
+      $("raceTitle").textContent = "Classement de l'épreuve";
       $("raceMeta").textContent = "Source: Supabase (v_public_results)";
+      
+      // Bouton retour par défaut
+      const back = $("btnBack");
+      if (back){
+        back.href = `race.html?id=${encodeURIComponent(raceId)}`;
+        back.innerHTML = "⬅️ Retour à l'épreuve";
+      }
     }
   }
 

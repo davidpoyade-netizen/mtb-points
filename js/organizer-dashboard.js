@@ -11,6 +11,7 @@ const q = $("q");
 
 const nameEl = $("name");
 const dateEl = $("date");
+const endDateEl = $("endDate");
 const locationEl = $("location");
 const commentEl = $("comment");
 const publishedEl = $("published");
@@ -90,7 +91,7 @@ async function loadMeetings(){
 
   const { data, error } = await supabase
     .from("meetings")
-    .select("id,name,date,location,comment,is_published,race_ids,created_at")
+    .select("id,name,date,end_date,location,comment,is_published,race_ids,created_at")
     .eq("organizer_id", user.id)
     .order("date", { ascending: false })
     .order("created_at", { ascending: false });
@@ -116,13 +117,19 @@ function render(items){
 
   list.innerHTML = items.map(m => {
     const n = Array.isArray(m.race_ids) ? m.race_ids.length : 0;
-    const pub = m.is_published ? "✅ Publié" : "🕒 Brouillon";
+    const pub = m.is_published ? "✅ Publié" : "📝 Brouillon";
+    
+    // ✅ Gestion date de fin pour événements multi-jours
+    const dateDisplay = m.end_date 
+      ? `${esc(m.date || "—")} → ${esc(m.end_date)}`
+      : esc(m.date || "—");
+    
     return `
       <div class="item">
         <div class="topline">
           <div>
             <div class="title">${esc(m.name)}</div>
-            <div class="meta">📅 ${esc(m.date || "—")} • 📍 ${esc(m.location || "—")} • ${pub}</div>
+            <div class="meta">📅 ${dateDisplay} • 📍 ${esc(m.location || "—")} • ${pub}</div>
           </div>
           <span class="badge">🏁 ${n} épreuve${n>1?"s":""}</span>
         </div>
@@ -130,8 +137,8 @@ function render(items){
         ${m.comment ? `<div class="meta" style="margin-top:10px;color:#334155;border-top:1px dashed #e5e7eb;padding-top:10px">${esc(m.comment)}</div>` : ``}
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <a class="btn" href="organizer-meeting.html?id=${encodeURIComponent(m.id)}">Ouvrir</a>
-          <a class="btn primary" href="course-create.html?meetingId=${encodeURIComponent(m.id)}">+ Ajouter une épreuve</a>
+          <a class="btn primary" href="meeting.html?id=${encodeURIComponent(m.id)}">👁️ Voir l'événement</a>
+          <a class="btn" href="course-create.html?meetingId=${encodeURIComponent(m.id)}">+ Ajouter une épreuve</a>
         </div>
       </div>
     `;
@@ -159,6 +166,7 @@ if (createBtn) {
         organizer_id: user.id,
         name,
         date: dateEl?.value || null,
+        end_date: (endDateEl?.value || "").trim() || null,
         location: (locationEl?.value || "").trim() || null,
         comment: (commentEl?.value || "").trim() || null,
         race_ids: [],
@@ -172,6 +180,7 @@ if (createBtn) {
       showMsg("Événement créé ✅", "ok");
       if (nameEl) nameEl.value = "";
       if (dateEl) dateEl.value = "";
+      if (endDateEl) endDateEl.value = "";
       if (locationEl) locationEl.value = "";
       if (commentEl) commentEl.value = "";
       if (publishedEl) publishedEl.checked = false;
