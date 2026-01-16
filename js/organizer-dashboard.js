@@ -13,6 +13,7 @@ const nameEl = $("name");
 const dateEl = $("date");
 const endDateEl = $("endDate");
 const locationEl = $("location");
+const externalUrlEl = $("externalUrl");
 const commentEl = $("comment");
 const publishedEl = $("published");
 
@@ -30,9 +31,11 @@ function showMsg(text, kind="warn"){
 function normalize(s){
   return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
 }
+
 function esc(s){
   return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
+
 function slugId(name){
   const base = String(name||"")
     .toLowerCase()
@@ -91,7 +94,7 @@ async function loadMeetings(){
 
   const { data, error } = await supabase
     .from("meetings")
-    .select("id,name,date,end_date,location,comment,is_published,race_ids,created_at")
+    .select("id,name,date,end_date,location,external_url,comment,is_published,race_ids,created_at")
     .eq("organizer_id", user.id)
     .order("date", { ascending: false })
     .order("created_at", { ascending: false });
@@ -101,6 +104,29 @@ async function loadMeetings(){
   meetings = data || [];
   showMsg("", "warn");
   applyFilter();
+}
+
+// ✅ Fonction de suppression
+async function deleteMeeting(meetingId, meetingName){
+  if (!confirm(`⚠️ Supprimer définitivement l'événement "${meetingName}" ?\n\nCette action est irréversible.`)) {
+    return;
+  }
+
+  try {
+    showMsg("Suppression en cours…", "warn");
+    
+    const { error } = await supabase
+      .from("meetings")
+      .delete()
+      .eq("id", meetingId);
+
+    if (error) throw error;
+
+    showMsg(`✅ Événement "${meetingName}" supprimé`, "ok");
+    await loadMeetings(); // Recharger la liste
+  } catch (e) {
+    showMsg(`❌ Erreur suppression : ${e?.message || e}`, "err");
+  }
 }
 
 function render(items){
@@ -119,11 +145,15 @@ function render(items){
     const n = Array.isArray(m.race_ids) ? m.race_ids.length : 0;
     const pub = m.is_published ? "✅ Publié" : "📝 Brouillon";
     
-    // ✅ Gestion date de fin pour événements multi-jours
     const dateDisplay = m.end_date 
       ? `${esc(m.date || "—")} → ${esc(m.end_date)}`
       : esc(m.date || "—");
-    
+
+    // ✅ Lien externe si disponible
+    const extLink = m.external_url 
+      ? `<a class="btn ghost" href="${esc(m.external_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 Site web</a>`
+      : "";
+
     return `
       <div class="item">
         <div class="topline">
@@ -139,11 +169,16 @@ function render(items){
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
           <a class="btn primary" href="meeting.html?id=${encodeURIComponent(m.id)}">👁️ Voir l'événement</a>
           <a class="btn" href="course-create.html?meetingId=${encodeURIComponent(m.id)}">+ Ajouter une épreuve</a>
+          ${extLink}
+          <button class="btn danger" onclick="window.deleteMeeting('${esc(m.id)}', '${esc(m.name).replace(/'/g, "\\'")}')">🗑️ Supprimer</button>
         </div>
       </div>
     `;
   }).join("");
 }
+
+// ✅ Exposer la fonction de suppression au scope global
+window.deleteMeeting = deleteMeeting;
 
 function applyFilter(){
   const qq = normalize(q?.value || "");
@@ -168,6 +203,7 @@ if (createBtn) {
         date: dateEl?.value || null,
         end_date: (endDateEl?.value || "").trim() || null,
         location: (locationEl?.value || "").trim() || null,
+        external_url: (externalUrlEl?.value || "").trim() || null,
         comment: (commentEl?.value || "").trim() || null,
         race_ids: [],
         is_published: !!publishedEl?.checked
@@ -182,6 +218,7 @@ if (createBtn) {
       if (dateEl) dateEl.value = "";
       if (endDateEl) endDateEl.value = "";
       if (locationEl) locationEl.value = "";
+      if (externalUrlEl) externalUrlEl.value = "";
       if (commentEl) commentEl.value = "";
       if (publishedEl) publishedEl.checked = false;
 
