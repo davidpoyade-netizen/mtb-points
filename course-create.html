@@ -3,315 +3,196 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Créer une épreuve — MTB Points</title>
-
+  <title>Créer une épreuve – MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/theme-nature.css" />
-
   <style>
+    :root{
+      --bg:#f3f7f2;--card:#fff;--text:#0b1220;--muted:#5b6b5f;--border:#dbe6da;
+      --blue:#1f7a4d;--blue2:#16623d;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:16px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);
+      background:
+        radial-gradient(900px 320px at 14% 0%, rgba(31,122,77,.14), transparent 60%),
+        radial-gradient(760px 280px at 92% 10%, rgba(34,197,94,.10), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.65), rgba(243,247,242,1) 38%),
+        var(--bg);
+    }
+    a{color:inherit}
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{ text-decoration:none; padding:8px 10px;border-radius:10px;color:var(--blue);font-weight:800;font-size:13px; }
+    nav a:hover{background:rgba(31,122,77,.08)}
+    nav a.active{background:rgba(31,122,77,.10);color:var(--blue2)}
     .wrap{max-width:1100px;margin:26px auto;padding:0 16px}
-    .card{border-radius:18px;padding:18px}
-    .muted2{opacity:.85;font-size:12px}
-    .req{color:var(--err);font-weight:1000}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .hero{
+      border-radius:22px;padding:22px;border:1px solid var(--border);
+      background:
+        radial-gradient(1000px 260px at 15% 0%, rgba(31,122,77,.16), transparent 60%),
+        radial-gradient(700px 220px at 95% 10%, rgba(34,197,94,.12), transparent 60%),
+        #fff;
+      box-shadow:var(--shadow);
+    }
     .heroTop{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
-    .heroMeta{margin-top:10px;line-height:1.6}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-
+    .hero h2{margin:0;font-size:26px;letter-spacing:-.4px}
+    .muted{color:var(--muted)}
+    .muted2{color:#5b6b5f;font-size:12px}
+    .sectionTitle{margin:18px 0 10px 0;font-size:14px;font-weight:900}
+    .filters{display:grid;gap:12px}
+    .lbl{display:block;font-weight:900;font-size:12px;margin-bottom:6px}
+    .inp{width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff;outline:none;font-size:14px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr}}
     .btn2{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:12px 14px;border-radius:12px;text-decoration:none;
-      border:1px solid var(--border);background:rgba(255,255,255,.9);
-      font-weight:1000;color:var(--text);
+      border:1px solid var(--border);background:#fff;font-weight:900;color:var(--text);
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
       cursor:pointer;
     }
-    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#cfe0d0}
     .btn2.primary{background:var(--blue);border-color:var(--blue);color:#fff}
     .btn2.primary:hover{background:var(--blue2);border-color:var(--blue2)}
     .btn2:disabled{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none}
-    .sectionTitle{margin:18px 0 10px 0;font-size:14px;font-weight:1000}
-    .filters{display:grid;gap:12px}
-    .lbl{display:block;font-weight:1000;font-size:12px;margin-bottom:6px}
-    .inp{
-      width:100%;
-      padding:12px 12px;
-      border:1px solid var(--border);
-      border-radius:12px;
-      background:rgba(255,255,255,92);
-      outline:none;
-      font-size:14px;
-    }
-    textarea.inp{resize:vertical}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:900px){.grid2{grid-template-columns:1fr}}
-    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-    @media(max-width:900px){.grid4{grid-template-columns:1fr 1fr}}
-    @media(max-width:520px){.grid4{grid-template-columns:1fr}}
-    .rowBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-
     .statusBox{
-      margin-top:14px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.9);
-      border-radius:16px;
-      padding:12px;
+      border:1px solid var(--border);border-radius:16px;padding:14px;background:rgba(255,255,255,.92);
+      margin-top:14px;display:none;
     }
-    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-    .bar > div{height:100%;width:0%;background:var(--blue);border-radius:999px;transition:width .25s}
-
-    #msg{
-      display:none;
-      margin-top:14px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.9);
-      border-radius:14px;
-      padding:12px;
-      line-height:1.55;
-    }
-
-    .ageBox{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,.9)}
-    .ageHead{display:grid;grid-template-columns: 1fr 120px 120px 120px 120px;gap:10px;font-weight:1000;color:var(--text)}
-    .ageRow{display:grid;grid-template-columns: 1fr 120px 120px 120px 120px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed #e5e7eb}
-    .ageRow:last-child{border-bottom:0}
-    .ageRow label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
-    .ageRow input[type="checkbox"]{margin-top:3px}
-    .ageRow input[type="number"], .ageRow input[type="time"]{
-      width:100%;padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.95)
-    }
-    .toggleLine{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:900}
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:10px;display:none}
+    .bar > div{height:100%;width:0%;background:linear-gradient(90deg, rgba(34,197,94,.25), rgba(31,122,77,.92));border-radius:999px;transition:width .25s}
+    .msg{display:none;margin-top:14px;border:1px solid var(--border);background:#fff;border-radius:14px;padding:12px;line-height:1.55}
+    .req{color:var(--err);font-weight:900}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+    @media(max-width:900px){.kpis{grid-template-columns:1fr}}
+    .kpi{border:1px solid var(--border);border-radius:16px;padding:12px;background:#fff}
+    .kpi b{font-size:22px}
   </style>
 </head>
 
-<body class="theme-nature">
+<body>
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points</h1>
-    <span class="chip">Créer une épreuve</span>
+    <span class="pill">Créer une épreuve</span>
   </div>
 
-  <nav class="nav">
+  <nav>
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
-    <a href="public-clubs.html">Clubs</a>
     <a href="meetings.html">Événements</a>
     <a href="races.html" class="active">Épreuves</a>
-    <a href="challengemtbpoints.html">Challenge</a>
     <a href="login.html">Connexion</a>
   </nav>
 
-  <div class="headerRight">
-    <a class="btn2 ghost" id="btnBack" href="meetings.html">← Retour</a>
+  <div>
+    <a class="btn2" id="btnBack" href="meetings.html">← Retour</a>
   </div>
 </header>
 
 <main class="wrap">
   <div class="card">
-
     <section class="hero">
       <div class="heroTop">
         <div style="min-width:280px;flex:1">
           <h2>Nouvelle épreuve</h2>
-          <div class="heroMeta">
-            L’épreuve est rattachée à un événement. La date est pré-remplie et bornée selon la plage de l’événement.
-            <br><span class="muted2" id="meetingHint"></span>
+          <div class="muted" style="margin-top:8px">
+            GPX <b>obligatoire</b> • Altitude <b>obligatoire</b> • Distance min <b>3 km</b>
           </div>
-          <div class="chips">
-            <span class="chip">Multi-tours âge/sexe</span>
-            <span class="chip">GPX/OSM obligatoire</span>
-            <span class="chip">Duplication Musculaire ↔ E-bike</span>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <a class="btn2" href="meeting-create.html">+ Créer un événement</a>
+          <div class="muted2" id="meetingHint" style="margin-top:6px"></div>
         </div>
       </div>
     </section>
-
-    <!-- STATUS (progress) -->
-    <div id="statusBox" class="statusBox" style="display:none;">
-      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <span class="chip" id="statusPhase"><span class="dot"></span> —</span>
-        <span id="statusMsg" class="muted2">—</span>
-      </div>
-      <div class="bar" style="margin-top:10px; display:none;" id="statusBarWrap" aria-label="progress">
-        <div id="statusBar"></div>
-      </div>
-      <div class="muted2" style="margin-top:8px;" id="statusSub"></div>
-    </div>
 
     <h3 class="sectionTitle">Rattachement & date</h3>
     <div class="filters" style="grid-template-columns: 1.4fr 1fr 1fr; align-items:end;">
       <div>
         <label class="lbl">Événement <span class="req">*</span></label>
         <select id="meetingId" class="inp"></select>
-        <div class="muted2">Les épreuves créées ici seront rattachées automatiquement.</div>
+        <div class="muted2">L'épreuve est rattachée automatiquement.</div>
       </div>
-
       <div>
-        <label class="lbl">Date de l’épreuve <span class="req">*</span></label>
-        <input id="date" class="inp" type="date" required />
+        <label class="lbl">Date <span class="req">*</span></label>
+        <input id="date" class="inp" type="date" />
       </div>
-
       <div>
-        <label class="lbl">Heure de départ <span class="req">*</span></label>
-        <input id="time" class="inp" type="time" required />
+        <label class="lbl">Heure (optionnel)</label>
+        <input id="time" class="inp" type="time" />
       </div>
     </div>
 
-    <h3 class="sectionTitle">Information</h3>
-    <div class="filters" style="grid-template-columns: 1.6fr 0.7fr 0.7fr; align-items:end;">
+    <h3 class="sectionTitle">Informations</h3>
+    <div class="grid2">
       <div>
-        <label class="lbl">Nom de l’épreuve <span class="req">*</span></label>
-        <input id="name" class="inp" type="text" placeholder="Ex: XC des Trois Collines" required />
+        <label class="lbl">Nom de l'épreuve <span class="req">*</span></label>
+        <input id="name" class="inp" type="text" placeholder="Ex : 30 km / XCO Open..." />
       </div>
-
       <div>
-        <label class="lbl">Barrière horaire (optionnelle)</label>
-        <input id="cutoff" class="inp" type="text" placeholder="Ex: 04:00" />
-      </div>
-
-      <div>
-        <label class="lbl">Catégorie d’épreuve <span class="req">*</span></label>
-        <select id="level" class="inp" required>
-          <option value="Locale">Locale</option>
-          <option value="Régionale">Régionale</option>
-          <option value="Nationale">Nationale</option>
-          <option value="Internationale">Internationale</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="grid4" style="margin-top:12px;">
-      <div>
-        <label class="lbl">Discipline <span class="req">*</span></label>
-        <select id="disc" class="inp" required>
-          <option value="">— Choisir —</option>
-          <option value="Gravel">Gravel</option>
-          <option value="DH">DH</option>
-          <option value="Enduro">Enduro</option>
-          <option value="XCC">XCC</option>
-          <option value="XCO">XCO</option>
-          <option value="XCM_marathon">XCM marathon</option>
-          <option value="XCM_ultra">XCM ultra</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="lbl">Ouvert au vélo à assistance électrique (VAE) ?</label>
-        <div class="toggleLine">
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-            <input id="ebikeOpen" type="checkbox" />
-            <span><b>Oui</b>, l'épreuve accepte les VAE (classement séparé ensuite dans les résultats).</span>
-          </label>
-        </div>
-        <div class="muted2" style="margin-top:6px">
-          Crée autant d’épreuves que nécessaire selon <b>discipline</b> ou <b>distance</b> (sauf <b>multi-tours</b>).
-          L’import des résultats fera le tri (musculaire/VAE, H/F, catégories d’âge).
-        </div>
-
-        <div style="margin-top:10px">
-          <label class="lbl">Heure de départ VAE (optionnel)</label>
-          <input id="ebikeStartTime" class="inp" type="time" disabled />
-          <div class="muted2">Active "Ouvert VAE" pour saisir une heure différente.</div>
-        </div>
-
-        <!-- Compat projet : ancien select conservé mais masqué (ne pas supprimer) -->
-        <select id="ebike" class="inp" style="display:none">
-          <option value="0" selected>Musculaire</option>
-          <option value="1">Électrique</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="lbl">Sexe autorisé</label>
-        <select id="sexAllowed" class="inp">
-          <option value="all">Mixte</option>
-          <option value="M">Hommes</option>
-          <option value="F">Femmes</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="lbl">Lavage vélos</label>
-        <select id="wash" class="inp">
+        <label class="lbl">Discipline (optionnel)</label>
+        <select id="disc" class="inp">
           <option value="">—</option>
-          <option value="oui">Oui</option>
-          <option value="non">Non</option>
+          <option value="XC">XC</option>
+          <option value="Enduro">Enduro</option>
+          <option value="DH">DH</option>
+          <option value="Marathon">Marathon</option>
+          <option value="Ultra">Ultra</option>
+          <option value="Gravel">Gravel</option>
         </select>
       </div>
     </div>
 
-    <div class="grid2" style="margin-top:12px;">
+    <h3 class="sectionTitle">GPX / Analyse <span class="req">*</span></h3>
+    <div class="filters" style="grid-template-columns: 1.6fr 1fr; align-items:end;">
       <div>
-        <label class="lbl">Assistance mécanique (0→4)</label>
-        <input id="mechanic" class="inp" type="number" min="0" max="4" step="1" />
+        <input id="gpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml" style="position:absolute;opacity:0;pointer-events:none;"/>
+        <label for="gpxFile" class="btn2 primary" style="cursor:pointer;">📂 Choisir un GPX & analyser</label>
+        <div class="muted2" id="pickedFileName" style="margin-top:6px;"></div>
       </div>
       <div>
-        <label class="lbl">Ravitaillements (0→4)</label>
-        <input id="feeds" class="inp" type="number" min="0" max="4" step="1" />
+        <button class="btn2" id="btnClearGPX" type="button">Effacer GPX</button>
       </div>
     </div>
 
-    <div style="margin-top:12px;">
-      <label class="lbl">Commentaire</label>
-      <textarea id="comment" class="inp" rows="3" placeholder="Infos organisateur…"></textarea>
+    <div class="kpis">
+      <div class="kpi"><div class="muted2">Score Physique</div><b id="kpiPhys">—</b><div class="muted2" id="kpiPhysSub">—</div></div>
+      <div class="kpi"><div class="muted2">Score Technique</div><b id="kpiTech">—</b><div class="muted2" id="kpiTechSub">—</div></div>
+      <div class="kpi"><div class="muted2">Score Global</div><b id="kpiGlobal">—</b><div class="muted2" id="kpiGlobalSub">—</div></div>
     </div>
 
-    <h3 class="sectionTitle">GPX / OSM (obligatoire)</h3>
-    <div class="rowBtns">
-      <button class="btn2 primary" id="btnPickAnalyze" type="button">📂 Choisir un GPX & analyser</button>
-      <button class="btn2" id="btnClearGPX" type="button">🧹 Effacer GPX</button>
-      <span class="muted2" id="pickedFileName"></span>
-    </div>
-    <input id="gpxFile" type="file" accept=".gpx,application/gpx+xml" style="display:none" />
-    <div class="muted2" style="margin-top:8px;">L’analyse (distance/D+ + TechScore V2) est nécessaire pour enregistrer l’épreuve.</div>
-
-    <h3 class="sectionTitle">Multi-tours âge/sexe</h3>
-    <div class="toggleLine">
-      <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-        <input id="enableMultiLaps" type="checkbox" />
-        <span style="font-weight:1000">Activer les tours par catégorie</span>
-      </label>
-      <span class="muted2">Ex: M = 5 tours, F = 4 tours, départs séparés.</span>
-    </div>
-
-    <div id="multiLapsWrap" style="display:none; margin-top:10px;">
-      <div class="ageBox">
-        <div class="ageHead">
-          <div>Catégorie</div>
-          <div>Tour(s) M</div>
-          <div>Départ M</div>
-          <div>Tour(s) F</div>
-          <div>Départ F</div>
-        </div>
-        <div id="ageRows"></div>
+    <div id="statusBox" class="statusBox">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="pill" id="statusPhase"><span class="dot"></span> —</span>
+        <span id="statusMsg" class="muted">—</span>
       </div>
+      <div class="bar" id="statusBarWrap"><div id="statusBar"></div></div>
+      <div class="muted2" id="statusSub" style="margin-top:8px;"></div>
     </div>
 
-    <div class="rowBtns">
-      <button class="btn2 primary" id="btnSave" type="button">Créer l’épreuve</button>
-      <button class="btn2" id="btnSaveAndNew" type="button">Créer + ajouter une autre épreuve</button>
-      <!-- Conservé pour compat projet (ne pas supprimer), mais masqué : on ne duplique plus VAE ici. -->
-      <button class="btn2" id="btnSaveAndDuplicate" type="button" style="display:none">Créer + dupliquer (Musculaire ↔ E-bike)</button>
-      <button class="btn2 ghost" id="btnReset" type="button">Réinitialiser</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+      <button class="btn2 primary" id="btnSave" type="button">Créer l'épreuve</button>
+      <button class="btn2" id="btnReset" type="button">Réinitialiser</button>
+      <a class="btn2" id="btnViewRace" href="#" style="display:none;">👁️ Voir la fiche</a>
     </div>
 
-    <div class="rowBtns" style="margin-top:10px;">
-      <a class="btn2" id="btnViewRace" href="#" style="display:none;">👁️ Voir la fiche de l’épreuve</a>
-      <a class="btn2" id="btnViewRace2" href="#" style="display:none;">👁️ Voir la fiche (duplicata)</a>
-    </div>
-
-    <div id="msg"></div>
+    <div id="msg" class="msg"></div>
   </div>
 </main>
 
-<!-- gpx.js doit exposer window.analyzeGPX et émettre mtb:status -->
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
 <script src="js/gpx.js"></script>
-
-<!-- logique page -->
-<script type="module" src="js/course-create.js"></script>
-
+<script src="js/course-create.js"></script>
 </body>
 </html>
-   
