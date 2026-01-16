@@ -5,19 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Événements — MTB Points</title>
 
-  <!-- Base + thème nature (le thème après la base) -->
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="./css/theme-nature.css?v=10" />
 
   <style>
-    /* Page-specific only (ne pas redefinir :root ici) */
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
     a{color:inherit}
     .wrap{max-width:1280px;margin:22px auto;padding:0 16px}
     .muted{color:var(--muted)}
 
-    /* Header */
     header.header{
       position:sticky;top:0;z-index:20;
       padding:14px 16px;
@@ -33,7 +30,6 @@
     .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
     header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
 
-    /* Nav (ton thème cible nav a, on sécurise ici aussi) */
     nav.nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     nav.nav a{
       text-decoration:none;
@@ -43,10 +39,8 @@
     nav.nav a:hover{background:rgba(47,111,62,.10)}
     nav.nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
 
-    /* CTA */
     .headerRight{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
-    /* Page cards */
     .card{
       background:var(--card);
       border:1px solid var(--border);
@@ -55,7 +49,6 @@
       box-shadow:var(--shadow);
     }
 
-    /* Hero (look nature) */
     .hero{
       border-radius:22px;
       padding:18px;
@@ -69,10 +62,8 @@
     .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
     .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
     .heroMeta{margin-top:8px;color:#223024;line-height:1.6}
-    .heroDesc{margin-top:10px;color:var(--muted);line-height:1.55}
     .heroActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
-    /* Filters */
     .sectionTitle{margin:18px 0 10px 0;font-size:14px;letter-spacing:-.05px}
     .filters{
       margin-top:10px;
@@ -104,7 +95,6 @@
       margin-top:2px;
     }
 
-    /* List items */
     .list{display:grid;gap:12px}
     .item{
       border:1px solid rgba(40,60,40,.14);
@@ -113,6 +103,8 @@
       padding:14px;
       box-shadow:0 2px 12px rgba(15,23,42,.06);
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      display:block;
+      text-decoration:none;
     }
     .item:hover{
       transform:translateY(-1px);
@@ -129,9 +121,8 @@
       font-weight:1000;font-size:12px;white-space:nowrap;
     }
     .metaLine{margin-top:8px;color:#223024;font-size:13px;line-height:1.5}
-    .miniRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .miniRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
 
-    /* Empty */
     .empty{
       margin-top:12px;
       border:1px dashed var(--border);
@@ -140,9 +131,6 @@
       padding:12px;
       color:var(--muted);
     }
-
-    /* Make sure existing .btn variants look right even if style.css differs */
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
   </style>
 </head>
 
@@ -164,12 +152,12 @@
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html" class="active">Événements</a>
-    <a href="dashboard.html">Dashboard</a>
+    <a href="races.html">Épreuves</a>
     <a href="login.html">Connexion</a>
   </nav>
 
   <div class="headerRight">
-    <a class="btn primary" href="meeting-create.html">+ Créer un événement</a>
+    <a class="btn" href="organizer-dashboard.html">Espace organisateur</a>
   </div>
 </header>
 
@@ -179,17 +167,15 @@
     <section class="hero">
       <div class="heroTop">
         <div style="min-width:280px;flex:1">
-          <h2>Gérer tes événements</h2>
+          <h2>Tous les événements VTT</h2>
           <div class="heroMeta">
-            Crée un événement, puis ajoute des épreuves rattachées (obligatoire).
-            Les événements multi-jours sont supportés.
+            Découvre tous les événements et courses VTT.
+            Clique sur un événement pour voir ses épreuves et t'inscrire.
           </div>
-          <div class="heroDesc" id="hintBox" style="display:none;"></div>
         </div>
 
         <div class="heroActions">
-          <span class="pill"><span class="dot ok"></span> Multi-jours</span>
-          <span class="pill"><span class="dot"></span> Races rattachées</span>
+          <span class="pill"><span class="dot ok"></span> Liste publique</span>
         </div>
       </div>
     </section>
@@ -208,7 +194,7 @@
       </div>
 
       <div>
-        <label for="toDate">Jusqu’au</label>
+        <label for="toDate">Jusqu'au</label>
         <input id="toDate" type="date" />
       </div>
 
@@ -228,7 +214,7 @@
 
       <div class="hintRow">
         <div>Résultats : <strong id="countFiltered">0</strong></div>
-        <div class="muted">Astuce : crée une épreuve depuis un événement (rattachement auto).</div>
+        <div class="muted">💡 Clique sur un événement pour voir ses épreuves</div>
       </div>
     </div>
 
@@ -236,198 +222,153 @@
 
     <div id="meetings" class="list" style="margin-top:12px;"></div>
     <div id="emptyBox" class="empty" style="display:none;">
-      Aucun événement trouvé. Clique sur <b>“+ Créer un événement”</b>.
+      Aucun événement trouvé pour l'instant.
     </div>
 
   </div>
 </main>
 
-<script src="js/data.js"></script>
-<script src="js/storage.js"></script>
+<script type="module">
+import { supabase } from "./js/supabaseClient.js";
 
-<script>
-(function(){
-  const $ = (id) => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
-  function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-  function num(x){ const n = Number(x); return Number.isFinite(n) ? n : null; }
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
 
-  function setHint(html){
-    const el = $("hintBox");
-    if (!el) return;
-    el.style.display = html ? "block" : "none";
-    el.innerHTML = html || "";
-  }
+// ✅ Chargement depuis Supabase (événements publiés seulement)
+async function loadMeetings(){
+  try {
+    const { data, error } = await supabase
+      .from("meetings")
+      .select("id,name,date,end_date,location,comment,race_ids")
+      .eq("is_published", true)
+      .order("date", { ascending: false })
+      .limit(500);
 
-  // ---- Storage adapters
-  function listMeetingsSafe(){
-    if (typeof window.listMeetings === "function") return window.listMeetings();
-    if (typeof window.getMeetings === "function") return window.getMeetings();
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.warn("[meetings] Supabase failed, fallback localStorage", e);
+    // Fallback localStorage
     try {
       const raw = localStorage.getItem("mtb.meetings.v1");
       const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch(_){ return []; }
+      return Array.isArray(arr) ? arr.filter(m => m.isPublished !== false) : [];
+    } catch { return []; }
   }
+}
 
-  function listRacesSafe(){
-    if (typeof window.listRaces === "function") return window.listRaces();
-    if (typeof window.getRaces === "function") return window.getRaces();
-    try {
-      const raw = localStorage.getItem("mtb.races.v1");
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch(_){ return []; }
-  }
+let allMeetings = [];
 
-  const allMeetings = listMeetingsSafe();
-  const allRaces = listRacesSafe();
+function inRange(meeting, fromISO, toISO){
+  const start = meeting.date || null;
+  const end = meeting.end_date || meeting.date || null;
 
-  // map: meetingId -> count races
-  const countByMeeting = new Map();
-  for (const r of allRaces){
-    if (!r) continue;
-    const mid = r.meetingId || r.eventGroupId || null;
-    if (!mid) continue;
-    countByMeeting.set(mid, (countByMeeting.get(mid) || 0) + 1);
-  }
+  if (!start) return true;
 
-  // Use meeting.raceIds if available as the truth for counts (fallback to race meetingId)
-  function meetingRaceCount(m){
-    if (!m) return 0;
-    const ids = Array.isArray(m.raceIds) ? m.raceIds : [];
-    if (ids.length) return ids.length;
-    return countByMeeting.get(m.id) || 0;
-  }
+  const s = start;
+  const e = end || start;
 
-  // ---- UI + filters
-  const qEl = $("q");
-  const fromEl = $("fromDate");
-  const toEl = $("toDate");
-  const sortEl = $("sortBy");
+  if (fromISO && e < fromISO) return false;
+  if (toISO && s > toISO) return false;
+  return true;
+}
 
-  function inRange(meeting, fromISO, toISO){
-    const start = meeting.date || null;
-    const end = meeting.endDate || meeting.date || null;
+function applyFilters(){
+  const q = ($("q").value || "").trim().toLowerCase();
+  const fromISO = ($("fromDate").value || "").trim();
+  const toISO = ($("toDate").value || "").trim();
+  const sortBy = $("sortBy").value || "date_desc";
 
-    // if no dates, keep
-    if (!start) return true;
+  let filtered = allMeetings.slice();
 
-    // compare as YYYY-MM-DD lexicographic is OK
-    const s = start;
-    const e = end || start;
-
-    // if filter range intersects [s,e]
-    if (fromISO && e < fromISO) return false;
-    if (toISO && s > toISO) return false;
-    return true;
-  }
-
-  function apply(){
-    const q = (qEl.value || "").trim().toLowerCase();
-    const fromISO = (fromEl.value || "").trim();
-    const toISO = (toEl.value || "").trim();
-
-    let out = allMeetings.slice();
-
-    if (q){
-      out = out.filter(m=>{
-        const txt = `${m.name||""} ${m.location||""} ${m.comment||""}`.toLowerCase();
-        return txt.includes(q);
-      });
-    }
-
-    out = out.filter(m => inRange(m, fromISO || null, toISO || null));
-
-    const sortBy = sortEl.value || "date_desc";
-    out.sort((a,b)=>{
-      const ad = a.date || "";
-      const bd = b.date || "";
-      const an = (a.name || "").toLowerCase();
-      const bn = (b.name || "").toLowerCase();
-      const ar = meetingRaceCount(a);
-      const br = meetingRaceCount(b);
-
-      if (sortBy === "date_desc") return bd.localeCompare(ad);
-      if (sortBy === "date_asc") return ad.localeCompare(bd);
-      if (sortBy === "name_asc") return an.localeCompare(bn);
-      if (sortBy === "races_desc") return br - ar;
-      return 0;
+  if (q){
+    filtered = filtered.filter(m => {
+      const txt = `${m.name||""} ${m.location||""} ${m.comment||""}`.toLowerCase();
+      return txt.includes(q);
     });
-
-    render(out);
   }
 
-  function render(list){
-    $("countMeetings").textContent = String(allMeetings.length);
-    $("countFiltered").textContent = String(list.length);
+  filtered = filtered.filter(m => inRange(m, fromISO || null, toISO || null));
 
-    const root = $("meetings");
-    const empty = $("emptyBox");
-    root.innerHTML = "";
+  filtered.sort((a,b) => {
+    const ad = a.date || "";
+    const bd = b.date || "";
+    const an = (a.name || "").toLowerCase();
+    const bn = (b.name || "").toLowerCase();
+    const ar = Array.isArray(a.race_ids) ? a.race_ids.length : 0;
+    const br = Array.isArray(b.race_ids) ? b.race_ids.length : 0;
 
-    if (!allMeetings.length){
-      setHint("⚠️ Aucun événement en mémoire. Crée ton premier événement pour commencer.");
-    } else {
-      setHint("");
-    }
-
-    if (!list.length){
-      empty.style.display = "block";
-      return;
-    }
-    empty.style.display = "none";
-
-    for (const m of list){
-      const start = m.date || "—";
-      const end = m.endDate || null;
-      const range = end ? `${start} → ${end}` : start;
-
-      const racesCount = meetingRaceCount(m);
-
-      const viewUrl = `meeting.html?id=${encodeURIComponent(m.id)}`;
-      const createRaceUrl = `course-create.html?meetingId=${encodeURIComponent(m.id)}`;
-
-      const el = document.createElement("div");
-      el.className = "item";
-      el.style.display = "block";
-
-      el.innerHTML = `
-        <div class="topline">
-          <div class="title">${esc(m.name || "Événement")}</div>
-          <div class="badge">${esc(range)}</div>
-        </div>
-
-        <div class="metaLine">
-          ${m.location ? `📍 ${esc(m.location)} • ` : ""}🏁 ${esc(String(racesCount))} épreuve(s)
-        </div>
-
-        <div class="miniRow" style="margin-top:10px;">
-          <a class="btn" href="${viewUrl}" style="width:auto;">Voir</a>
-          <a class="btn primary" href="${createRaceUrl}" style="width:auto;">+ Créer une épreuve</a>
-          <a class="btn ghost" href="events.html" style="width:auto;">Toutes les épreuves</a>
-        </div>
-
-        ${m.comment ? `<div class="muted" style="margin-top:10px; font-size:12px; line-height:1.5;">${esc(m.comment)}</div>` : ""}
-      `;
-
-      root.appendChild(el);
-    }
-  }
-
-  // wire
-  [qEl, fromEl, toEl, sortEl].forEach(el => el.addEventListener("input", apply));
-  $("btnReset").addEventListener("click", ()=>{
-    qEl.value = "";
-    fromEl.value = "";
-    toEl.value = "";
-    sortEl.value = "date_desc";
-    apply();
+    if (sortBy === "date_desc") return bd.localeCompare(ad);
+    if (sortBy === "date_asc") return ad.localeCompare(bd);
+    if (sortBy === "name_asc") return an.localeCompare(bn);
+    if (sortBy === "races_desc") return br - ar;
+    return 0;
   });
 
-  apply();
+  render(filtered);
+}
+
+function render(list){
+  $("countMeetings").textContent = String(allMeetings.length);
+  $("countFiltered").textContent = String(list.length);
+
+  const root = $("meetings");
+  const empty = $("emptyBox");
+
+  if (!list.length){
+    root.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  root.innerHTML = list.map(m => {
+    const dateDisplay = m.end_date 
+      ? `${esc(m.date || "—")} → ${esc(m.end_date)}`
+      : esc(m.date || "—");
+    
+    const racesCount = Array.isArray(m.race_ids) ? m.race_ids.length : 0;
+
+    return `
+      <a class="item" href="meeting.html?id=${encodeURIComponent(m.id)}">
+        <div class="topline">
+          <div>
+            <div class="title">${esc(m.name || "Événement")}</div>
+            <div class="metaLine">
+              📅 ${dateDisplay}
+              ${m.location ? ` • 📍 ${esc(m.location)}` : ""}
+              • 🏁 ${racesCount} épreuve${racesCount > 1 ? "s" : ""}
+            </div>
+          </div>
+          <span class="badge">👁️ Voir</span>
+        </div>
+
+        ${m.comment ? `<div class="muted" style="margin-top:10px;font-size:12px;line-height:1.5;">${esc(m.comment)}</div>` : ""}
+      </a>
+    `;
+  }).join("");
+}
+
+// Wire events
+[$("q"), $("fromDate"), $("toDate"), $("sortBy")].forEach(el => 
+  el.addEventListener(el.tagName === "SELECT" ? "change" : "input", applyFilters)
+);
+
+$("btnReset").addEventListener("click", () => {
+  $("q").value = "";
+  $("fromDate").value = "";
+  $("toDate").value = "";
+  $("sortBy").value = "date_desc";
+  applyFilters();
+});
+
+// Boot
+(async () => {
+  allMeetings = await loadMeetings();
+  applyFilters();
 })();
 </script>
 
