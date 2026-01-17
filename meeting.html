@@ -115,6 +115,27 @@
       padding:12px;
       color:var(--muted);
     }
+    
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 14px;border-radius:12px;text-decoration:none;
+      border:1px solid var(--border);background:#fff;font-weight:900;color:var(--text);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      cursor:pointer;font-size:13px;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08)}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ghost{background:rgba(255,255,255,.75)}
+    
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-size:12px;font-weight:900;color:#0f172a;
+      white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:#16a34a}
   </style>
 </head>
 
@@ -155,7 +176,7 @@
           <div class="heroDesc" id="meetingComment"></div>
 
           <div class="infoBox">
-            <strong>📍 Pour cet événement :</strong><br>
+            <strong>📌 Pour cet événement :</strong><br>
             1️⃣ Clique sur <strong>"+ Créer une épreuve"</strong> ci-dessous<br>
             2️⃣ Importe un <strong>GPX</strong> (analyse automatique)<br>
             3️⃣ Une fois l'épreuve créée, <strong>importe les résultats</strong><br>
@@ -254,7 +275,7 @@
     ? `<span class="dot ok"></span> Publié` 
     : `<span class="dot" style="background:#ea580c"></span> Brouillon`;
 
-  // Set create race URL
+  // CORRECTION: Set create race URL with course-create.html
   $("btnCreateRace").href = `course-create.html?meetingId=${encodeURIComponent(meetingId)}`;
 
   // Load races for this meeting
