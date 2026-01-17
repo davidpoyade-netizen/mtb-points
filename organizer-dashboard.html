@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tableau de bord Organisateur — MTB Points</title>
+  <title>Tableau de bord Organisateur – MTB Points</title>
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/theme-nature.css?v=20" />
@@ -42,6 +42,7 @@
     .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .btn.danger{background:#dc2626;border-color:#dc2626;color:#fff}
     .btn.danger:hover{background:#b91c1c;border-color:#b91c1c}
+    .actionBtns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
   </style>
 </head>
 
@@ -49,10 +50,10 @@
 <header class="header">
   <div class="brandRow">
     <div class="brandLogo" title="MTB Points">
-      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points – Coins">
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <h1>MTB Points — Tableau de bord Organisateur</h1>
+      <h1>MTB Points – Tableau de bord Organisateur</h1>
       <span class="pill" id="whoami"><span class="dot"></span> Chargement…</span>
     </div>
   </div>
@@ -71,6 +72,13 @@
 
 <main class="wrap">
   <div class="card">
+    
+    <!-- Boutons d'actions principales -->
+    <div class="actionBtns">
+      <a href="meeting-create.html" class="btn primary">+ Créer un événement</a>
+      <a href="import-results.html" class="btn">📥 Importer des résultats</a>
+    </div>
+
     <section class="hero">
       <div class="row2">
         <div style="min-width:260px;flex:1">
@@ -79,8 +87,8 @@
             Crée un événement, puis ajoute des épreuves avec analyse GPX automatique.
           </div>
           <div class="muted2" style="margin-top:6px;padding:10px;background:rgba(47,111,62,.08);border-radius:10px">
-            <strong>📍 Flux de travail :</strong><br>
-            1️⃣ Créer un <strong>événement</strong> (ci-dessous)<br>
+            <strong>🔄 Flux de travail :</strong><br>
+            1️⃣ Créer un <strong>événement</strong> (bouton ci-dessus)<br>
             2️⃣ Cliquer sur l'événement → Créer des <strong>épreuves</strong><br>
             3️⃣ Dans chaque épreuve → <strong>Importer les résultats</strong><br>
             4️⃣ Publier le <strong>classement</strong> public
@@ -93,44 +101,6 @@
       </div>
 
       <div id="msg" class="msg"></div>
-
-      <div class="grid2" style="margin-top:14px;">
-        <div>
-          <label for="name">Nom de l'événement *</label>
-          <input id="name" placeholder="Ex : Roc d'Azur 2026" />
-        </div>
-        <div>
-          <label for="date">Date de début</label>
-          <input id="date" type="date" />
-        </div>
-        <div>
-          <label for="endDate">Date de fin (si multi-jours)</label>
-          <input id="endDate" type="date" />
-        </div>
-        <div>
-          <label for="location">Lieu</label>
-          <input id="location" placeholder="Ex : Fréjus" />
-        </div>
-        <div style="grid-column:1/-1">
-          <label for="externalUrl">🔗 Lien externe (site web, inscription...)</label>
-          <input id="externalUrl" type="url" placeholder="https://www.example.com/mon-event" />
-        </div>
-        <div>
-          <label for="published">Publié</label>
-          <div style="margin-top:8px;display:flex;gap:10px;align-items:center">
-            <input id="published" type="checkbox" style="width:auto;margin:0;transform:scale(1.1)" />
-            <span class="muted2">Visible publiquement</span>
-          </div>
-        </div>
-        <div style="grid-column:1/-1">
-          <label for="comment">Description</label>
-          <textarea id="comment" placeholder="Infos générales, programme..."></textarea>
-        </div>
-        <div style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn primary" id="createBtn" type="button">+ Créer l'événement</button>
-          <button class="btn" id="reloadBtn" type="button">↻ Recharger</button>
-        </div>
-      </div>
     </section>
 
     <section style="margin-top:14px;">
@@ -140,9 +110,10 @@
           <label for="q">Recherche</label>
           <input id="q" placeholder="Nom, lieu..." />
         </div>
+        <button class="btn" id="reloadBtn" type="button">↻ Recharger</button>
       </div>
       <div id="list" class="list"></div>
-      <div id="empty" class="empty" style="display:none">Aucun événement. Crée-en un ci-dessus !</div>
+      <div id="empty" class="empty" style="display:none">Aucun événement. Crée-en un avec le bouton ci-dessus !</div>
     </section>
   </div>
 </main>
