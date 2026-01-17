@@ -1,7 +1,6 @@
 // js/race.js
 // MTB Points — Fiche épreuve (publique)
-// - Supabase en priorité (public: publié / connecté: preview)
-// - fallback localStorage mtb.races.v1
+// CORRECTION: localStorage en priorité, puis Supabase en fallback
 (function () {
   const $ = (id) => document.getElementById(id);
 
@@ -65,17 +64,23 @@
   }
 
   function extractAnalysis(race) {
-    return race?.analysis || race?.analysis_json || race?.raw || null;
+    return race?.analysis || race?.analysis_json || race?.raw || race?.gpx || null;
   }
 
-  function extractPoints(analysis) {
+  function extractPoints(race) {
+    // Essayer plusieurs sources pour les points GPX
+    const analysis = extractAnalysis(race);
+    
     const pts =
+      race?.gpx?.points ||
+      race?.points ||
       analysis?.points ||
       analysis?.raw?.points ||
       analysis?.rawServer?.points ||
       analysis?.meta?.points ||
       analysis?.rawServer?.meta?.points ||
       null;
+    
     return Array.isArray(pts) ? pts : null;
   }
 
@@ -109,6 +114,7 @@
       lapsByCategorySex: row.laps_by_category_sex ?? row.lapsByCategorySex ?? null,
 
       analysis: row.analysis_json,
+      gpx: row.gpx,
       isPublished: row.is_published
     };
   }
@@ -166,14 +172,14 @@
     setText("raceLevel", race?.level || "—");
     setText("raceEbike", race?.ebike === true || race?.ebike === 1 ? "E-bike" : "Musculaire");
     setText("raceCutoff", race?.cutoffTime || "—");
-    setText("raceWash", race?.wash || "—");
-    setText("raceMechanic", race?.mechanic || "—");
+    setText("raceWash", race?.wash || race?.bikeWash || "—");
+    setText("raceMechanic", race?.mechanic || race?.mechAssist || "—");
     setText("raceFeeds", race?.feeds || "—");
     setText("raceSexAllowed", race?.sexAllowed || "all");
     setText("raceComment", race?.comment || "—");
     setText("dataSource", sourceLabel || "—");
 
-    // ✅ Boutons d'action
+    // Boutons d'action
     const raceId = getParam("id");
     
     // Bouton vers meeting
@@ -183,14 +189,14 @@
       btnMeeting.style.display = "inline-flex";
     }
 
-    // ✅ NOUVEAU : Bouton import résultats
+    // Bouton import résultats
     const btnImport = $("btnImportResults");
     if (btnImport && raceId) {
       btnImport.href = `import-results.html?raceId=${encodeURIComponent(raceId)}`;
       btnImport.style.display = "inline-flex";
     }
 
-    // ✅ NOUVEAU : Bouton classement public
+    // Bouton classement public
     const btnRanking = $("btnViewRanking");
     if (btnRanking && raceId) {
       btnRanking.href = `race-ranking.html?id=${encodeURIComponent(raceId)}`;
@@ -236,8 +242,13 @@
       a?.tech?.details?.error ||
       null;
 
-    if (tech == null) setText("techInfo", osmErr ? `Tech indisponible (OSM): ${osmErr}` : "Tech indisponible (OSM/Overpass)");
-    else setText("techInfo", "TechScore V2 (OSM hybrid) ✅");
+    if (tech == null && race?.gpx?.localAnalysis) {
+      setText("techInfo", "Analyse locale (pas de score technique)");
+    } else if (tech == null) {
+      setText("techInfo", osmErr ? `Tech indisponible (OSM): ${osmErr}` : "Tech indisponible (OSM/Overpass)");
+    } else {
+      setText("techInfo", "TechScore V2 (OSM hybrid) ✅");
+    }
 
     // surface bars si présents
     const surf =
@@ -286,9 +297,13 @@
   }
 
   function renderMapAndProfile(race) {
-    const a = extractAnalysis(race);
-    const pts = extractPoints(a);
-    if (!pts || pts.length < 2) return;
+    const pts = extractPoints(race);
+    console.log("Points GPX trouvés:", pts ? pts.length : 0);
+    
+    if (!pts || pts.length < 2) {
+      console.warn("Pas assez de points pour afficher la carte et le profil");
+      return;
+    }
 
     // Carte Leaflet si présente
     const mapEl = $("map");
@@ -297,6 +312,8 @@
         .map(p => [Number(p.lat), Number(p.lon)])
         .filter(([la, lo]) => Number.isFinite(la) && Number.isFinite(lo));
 
+      console.log("Points valides pour la carte:", latlngs.length);
+
       if (latlngs.length >= 2) {
         const map = L.map(mapEl, { scrollWheelZoom: false });
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -304,13 +321,15 @@
           attribution: "&copy; OpenStreetMap"
         }).addTo(map);
 
-        const poly = L.polyline(latlngs, { weight: 4 }).addTo(map);
+        const poly = L.polyline(latlngs, { color: '#2563eb', weight: 4 }).addTo(map);
         map.fitBounds(poly.getBounds(), { padding: [18, 18] });
 
         try {
           L.marker(latlngs[0]).addTo(map).bindPopup("Départ");
           L.marker(latlngs[latlngs.length - 1]).addTo(map).bindPopup("Arrivée");
-        } catch {}
+        } catch(e) {
+          console.warn("Erreur ajout markers:", e);
+        }
       }
     }
 
@@ -319,7 +338,13 @@
     if (canvas) {
       const ctx = canvas.getContext("2d");
       const eles = pts.map(p => Number(p.ele)).filter(e => Number.isFinite(e));
-      if (eles.length < 5) return;
+      
+      console.log("Points avec altitude:", eles.length);
+      
+      if (eles.length < 5) {
+        setText("profileInfo", "Pas assez de données d'altitude pour le profil");
+        return;
+      }
 
       const minE = Math.min(...eles);
       const maxE = Math.max(...eles);
@@ -333,12 +358,18 @@
       const h = H - pad * 2;
       const span = Math.max(1, maxE - minE);
 
+      // Axes
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(pad, pad);
       ctx.lineTo(pad, pad + h);
       ctx.lineTo(pad + w, pad + h);
       ctx.stroke();
 
+      // Profil
+      ctx.strokeStyle = "#2563eb";
+      ctx.lineWidth = 2;
       ctx.beginPath();
       for (let i = 0; i < eles.length; i++) {
         const x = pad + (i / (eles.length - 1)) * w;
@@ -360,9 +391,26 @@
       return;
     }
 
-    // 1) Supabase
+    console.log("Chargement épreuve:", id);
+
+    // 1) PRIORITÉ: localStorage (pour les épreuves créées localement)
+    const local = findRaceLocal(id);
+    if (local) {
+      console.log("Épreuve trouvée dans localStorage:", local);
+      setStatus(true, "OK (local)");
+      renderHeader(local, "localStorage");
+      renderMetrics(local);
+      renderMultiLaps(local);
+      renderMapAndProfile(local);
+      return;
+    }
+
+    console.log("Épreuve non trouvée dans localStorage, essai Supabase...");
+
+    // 2) Supabase fallback (pour les épreuves en base)
     const { race: supaRace, mode } = await fetchRaceSupabase(id);
     if (supaRace) {
+      console.log("Épreuve trouvée dans Supabase:", supaRace);
       setStatus(true, mode === "authed" ? "OK (preview)" : "OK");
       renderHeader(supaRace, mode === "authed" ? "Supabase (connecté)" : "Supabase (public)");
       renderMetrics(supaRace);
@@ -371,19 +419,10 @@
       return;
     }
 
-    // 2) localStorage fallback
-    const local = findRaceLocal(id);
-    if (!local) {
-      setStatus(false, "Épreuve introuvable");
-      setHTML("raceName", "Épreuve introuvable");
-      return;
-    }
-
-    setStatus(true, "OK (local)");
-    renderHeader(local, "localStorage");
-    renderMetrics(local);
-    renderMultiLaps(local);
-    renderMapAndProfile(local);
+    // 3) Rien trouvé
+    console.error("Épreuve introuvable dans localStorage et Supabase");
+    setStatus(false, "Épreuve introuvable");
+    setHTML("raceName", "Épreuve introuvable");
   }
 
   main();
