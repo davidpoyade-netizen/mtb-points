@@ -4,7 +4,7 @@
   const id = params.get("id");
 const btn = document.getElementById("btnCreateRace");
 if (btn && id) {
-  btn.href = `course.html?meetingId=${encodeURIComponent(id)}`;
+  btn.href = `course-create.html?meetingId=${encodeURIComponent(id)}`; // CORRIGÉ : course.html → course-create.html
 }
 
   const qEl = document.getElementById("q");
@@ -260,4 +260,3 @@ if (btn && id) {
   if (minGlobalValEl && minGlobalEl) minGlobalValEl.textContent = String(minGlobalEl.value);
   apply();
 })();
-
