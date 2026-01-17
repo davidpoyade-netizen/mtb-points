@@ -159,7 +159,7 @@
           </div>
           <div class="chips">
             <span class="chip">Multi-tours âge/sexe</span>
-            <span class="chip">GPX/OSM obligatoire</span>
+            <span class="chip">GPX obligatoire</span>
           </div>
         </div>
       </div>
@@ -219,12 +219,12 @@
         <label class="lbl">Discipline</label>
         <select id="disc" class="inp">
           <option value="">—</option>
-          <option value="XCC">XCC</option>
-          <option value="XCO">XCO</option>
-          <option value="XCM">XCM</option>
+          <option value="XCO">XCO (Cross-Country Olympic)</option>
+          <option value="XCC">XCC (Cross-Country Short Track)</option>
+          <option value="XCM">XCM (Marathon / Raid / Ultra)</option>
           <option value="Gravel">Gravel</option>
-          <option value="DH">DH</option>
           <option value="Enduro">Enduro</option>
+          <option value="DH">DH (Descente)</option>
         </select>
       </div>
       <div>
@@ -298,7 +298,7 @@
     <div id="multiLapsWrap" style="display:none;">
       <div class="ageBox">
         <div class="ageHead">
-          <div>Catégorie</div>
+          <div>Catégorie UCI</div>
           <div>Hommes (tours)</div>
           <div>Femmes (tours)</div>
         </div>
@@ -311,8 +311,8 @@
       </div>
     </div>
 
-    <!-- BLOC 2 : ANALYSE GPX/OSM (OBLIGATOIRE) -->
-    <h3 class="sectionTitle">Analyse GPX / OSM <span class="req">*</span></h3>
+    <!-- BLOC 2 : ANALYSE GPX -->
+    <h3 class="sectionTitle">Analyse GPX <span class="req">*</span></h3>
 
     <div class="filters" style="grid-template-columns: 1.6fr 1fr; align-items:end;">
       <div>
@@ -369,14 +369,27 @@
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
 
-  // Catégories basées sur public-ranking.html (système dynamique)
+  // Catégories UCI officielles (basées sur l'année en cours)
+  const currentYear = new Date().getFullYear();
   const AGE_CATS = [
-    { id:"XCC", label:"XCC (Cross-Country Short Track)" },
-    { id:"XCO", label:"XCO (Cross-Country Olympic)" },
-    { id:"XCM", label:"XCM (Cross-Country Marathon)" },
-    { id:"Gravel", label:"Gravel" },
-    { id:"DH", label:"DH (Descente)" },
-    { id:"Enduro", label:"Enduro" },
+    { id:"U7", label:`U7 (Poussin, 7-8 ans, ${currentYear-8}-${currentYear-7})` },
+    { id:"U9", label:`U9 (Pupille, 9-10 ans, ${currentYear-10}-${currentYear-9})` },
+    { id:"U11", label:`U11 (Benjamin, 11-12 ans, ${currentYear-12}-${currentYear-11})` },
+    { id:"U13", label:`U13 (Minime, 13-14 ans, ${currentYear-14}-${currentYear-13})` },
+    { id:"U15", label:`U15 (Cadet, 15-16 ans, ${currentYear-16}-${currentYear-15})` },
+    { id:"U17", label:`U17 (Junior, 17-18 ans, ${currentYear-18}-${currentYear-17})` },
+    { id:"U19", label:`U19 (18-19 ans, ${currentYear-19}-${currentYear-18})` },
+    { id:"U23", label:`U23 (Espoir, 20-22 ans, ${currentYear-22}-${currentYear-20})` },
+    { id:"U23PLUS", label:`U23+ (Espoir+, 23 ans, ${currentYear-23})` },
+    { id:"SENIOR", label:`Senior (23-34 ans, ${currentYear-34}-${currentYear-23})` },
+    { id:"M1", label:`Masters 1 (35-39 ans, ${currentYear-39}-${currentYear-35})` },
+    { id:"M2", label:`Masters 2 (40-44 ans, ${currentYear-44}-${currentYear-40})` },
+    { id:"M3", label:`Masters 3 (45-49 ans, ${currentYear-49}-${currentYear-45})` },
+    { id:"M4", label:`Masters 4 (50-54 ans, ${currentYear-54}-${currentYear-50})` },
+    { id:"M5", label:`Masters 5 (55-59 ans, ${currentYear-59}-${currentYear-55})` },
+    { id:"M6", label:`Masters 6 (60-64 ans, ${currentYear-64}-${currentYear-60})` },
+    { id:"M7", label:`Masters 7 (65-69 ans, ${currentYear-69}-${currentYear-65})` },
+    { id:"M8", label:`Masters 8 (70+ ans, ${currentYear-70} et avant)` },
   ];
 
   let ANALYSIS = null;
@@ -525,8 +538,6 @@
         const f = box.querySelector(`.lapsF[data-cat="${CSS.escape(id)}"]`);
         const on = this.checked;
         
-        console.log(`Category ${id} changed to: ${on}`);
-        
         if (m) { 
           m.disabled = !on; 
           if (!on) m.value = ""; 
@@ -537,39 +548,25 @@
         }
       });
     });
-    
-    console.log("Age rows rendered and events attached");
   }
 
   function initMultiToggle(){
     const chk = $("enableMultiLaps");
     const wrap = $("multiLapsWrap");
-    if (!chk || !wrap) {
-      console.error("Multi-laps elements not found!");
-      return;
-    }
+    if (!chk || !wrap) return;
 
     const apply = () => {
       const isChecked = chk.checked;
-      console.log(`Multi-laps toggled: ${isChecked}`);
-      
       wrap.style.display = isChecked ? "block" : "none";
       
       if (!isChecked){
-        document.querySelectorAll(".catOn").forEach(c => {
-          c.checked = false;
-        });
-        document.querySelectorAll(".lapsM,.lapsF").forEach(i => { 
-          i.value = ""; 
-          i.disabled = true; 
-        });
+        document.querySelectorAll(".catOn").forEach(c => c.checked = false);
+        document.querySelectorAll(".lapsM,.lapsF").forEach(i => { i.value = ""; i.disabled = true; });
       }
     };
 
     chk.addEventListener("change", apply);
     apply();
-    
-    console.log("Multi-laps toggle initialized");
   }
 
   function collectLapsByCategorySex(){
@@ -596,7 +593,7 @@
     return Object.keys(out).length ? out : null;
   }
 
-  // GPX analysis
+  // GPX analysis avec fallback local
   function setAnalyzeBusy(busy){
     ANALYZE_BUSY = !!busy;
     const btn = $("btnPickAnalyze");
@@ -615,6 +612,74 @@
     showStatusBox(false);
   }
 
+  // Analyse GPX locale en fallback (calcul basique)
+  async function analyzeGpxLocal(file){
+    setStatus("Analyse locale", "Lecture du fichier GPX...", 10);
+    
+    const text = await file.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, "text/xml");
+    
+    // Extraire les points
+    const trkpts = doc.querySelectorAll("trkpt");
+    const points = [];
+    
+    trkpts.forEach(pt => {
+      const lat = parseFloat(pt.getAttribute("lat"));
+      const lon = parseFloat(pt.getAttribute("lon"));
+      const eleNode = pt.querySelector("ele");
+      const ele = eleNode ? parseFloat(eleNode.textContent) : null;
+      
+      if (!isNaN(lat) && !isNaN(lon)) {
+        points.push({ lat, lon, ele });
+      }
+    });
+    
+    if (points.length === 0) {
+      throw new Error("Aucun point trouvé dans le fichier GPX");
+    }
+    
+    setStatus("Analyse locale", "Calcul distance et dénivelé...", 50);
+    
+    // Calculer distance et dénivelé
+    let distance = 0;
+    let dplus = 0;
+    let hasElevation = false;
+    
+    for (let i = 1; i < points.length; i++) {
+      const p1 = points[i-1];
+      const p2 = points[i];
+      
+      // Distance (formule Haversine simplifiée)
+      const R = 6371; // Rayon de la Terre en km
+      const dLat = (p2.lat - p1.lat) * Math.PI / 180;
+      const dLon = (p2.lon - p1.lon) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(p1.lat * Math.PI / 180) * Math.cos(p2.lat * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      distance += R * c;
+      
+      // Dénivelé
+      if (p1.ele !== null && p2.ele !== null) {
+        hasElevation = true;
+        const diff = p2.ele - p1.ele;
+        if (diff > 0) dplus += diff;
+      }
+    }
+    
+    setStatus("Terminé", "Analyse locale terminée", 100);
+    
+    return {
+      fileName: file.name,
+      distanceKm: distance,
+      dplusM: dplus,
+      hasElevation: hasElevation,
+      points: points,
+      localAnalysis: true
+    };
+  }
+
   async function analyzeGpx(){
     const f = $("gpxFile")?.files?.[0];
     if (!f){
@@ -622,26 +687,29 @@
       return;
     }
 
-    console.log("Starting GPX analysis for:", f.name);
-
-    if (typeof window.analyzeGPX !== "function"){
-      showMsg("La fonction analyzeGPX est introuvable. Vérifie que js/gpx.js est bien chargé.", false);
-      console.error("window.analyzeGPX is not a function");
-      return;
-    }
-
     setAnalyzeBusy(true);
     showMsg("");
 
     try {
-      setStatus("Préparation", "Lecture du fichier…", 5, "Démarrage…");
-
-      const res = await window.analyzeGPX(f, {
-        keepPoints: true,
-        timeoutMs: 45000
-      });
-
-      console.log("GPX analysis result:", res);
+      let res;
+      
+      // Essayer l'API d'abord
+      if (typeof window.analyzeGPX === "function"){
+        try {
+          setStatus("Préparation", "Tentative connexion API...", 5);
+          res = await Promise.race([
+            window.analyzeGPX(f, { keepPoints: true, timeoutMs: 10000 }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 10000))
+          ]);
+        } catch(apiError) {
+          console.warn("API non disponible, utilisation analyse locale:", apiError);
+          showMsg("⚠️ API distante indisponible. Utilisation de l'analyse locale (basique).", true);
+          res = await analyzeGpxLocal(f);
+        }
+      } else {
+        // Pas d'API, utiliser directement l'analyse locale
+        res = await analyzeGpxLocal(f);
+      }
 
       ANALYSIS = {
         fileName: f.name,
@@ -654,23 +722,22 @@
         techScore: res?.techV2?.techScoreV2 ?? null,
         globalScore: res?.mrs ?? null,
         points: res?.points ?? null,
+        localAnalysis: res?.localAnalysis ?? false,
         raw: res || null
       };
 
+      const distTxt = ANALYSIS.distanceKm ? ANALYSIS.distanceKm.toFixed(1) + ' km' : '—';
+      const dplusTxt = ANALYSIS.dplusM ? Math.round(ANALYSIS.dplusM) + ' m' : '—';
+      const mode = ANALYSIS.localAnalysis ? '(analyse locale basique)' : '(API serveur)';
+      
       setStatus("done", "Analyse terminée.", 100, "Tu peux enregistrer l'épreuve.");
-      showMsg(`Analyse GPX/OSM terminée : ${ANALYSIS.distanceKm ? ANALYSIS.distanceKm.toFixed(1) + ' km' : '—'}, D+ ${ANALYSIS.dplusM ? Math.round(ANALYSIS.dplusM) + ' m' : '—'}`, true);
-
-      // Auto-fill discipline si vide
-      const disc = $("disc");
-      if (disc && !disc.value && res?.discipline?.hint){
-        disc.value = res.discipline.hint;
-      }
+      showMsg(`✅ Analyse terminée ${mode} : ${distTxt}, D+ ${dplusTxt}`, true);
 
     } catch(e){
       ANALYSIS = null;
       console.error("GPX analysis error:", e);
-      setStatus("error", "Analyse impossible.", null, e?.message || "Erreur serveur / réseau.");
-      showMsg(`Analyse GPX/OSM impossible : ${esc(e?.message || "erreur")}`, false);
+      setStatus("error", "Analyse impossible.", null, e?.message || "Erreur");
+      showMsg(`❌ Analyse GPX impossible : ${esc(e?.message || "erreur")}`, false);
     } finally {
       setAnalyzeBusy(false);
     }
@@ -726,31 +793,27 @@
 
     const f = $("gpxFile")?.files?.[0];
     if (!f) return "GPX obligatoire : sélectionne un fichier GPX.";
-    if (!ANALYSIS) return "Analyse GPX/OSM obligatoire : clique sur \"Choisir un GPX & analyser\".";
+    if (!ANALYSIS) return "Analyse GPX obligatoire : clique sur \"Choisir un GPX & analyser\".";
 
     return null;
   }
 
-  function buildRace({ ebikeOverride=null, nameSuffix="", idSalt=0 } = {}){
+  function buildRace(){
     const lapsByCategorySex = collectLapsByCategorySex();
 
     const baseName = $("name").value.trim();
-    const finalName = (baseName + (nameSuffix ? ` ${nameSuffix}` : "")).trim();
-
     const bikeType = document.querySelector('input[name="bikeType"]:checked')?.value || 'musculaire';
-    const ebikeVal = (ebikeOverride === null)
-      ? (bikeType === "electrique")
-      : !!ebikeOverride;
+    const ebikeVal = (bikeType === "electrique");
 
     return {
-      id: makeIdFromName(finalName, idSalt),
+      id: makeIdFromName(baseName, 0),
       meetingId: MEETING_ID,
       meetingName: MEETING?.name || null,
 
       date: normalizeDate($("date").value),
       time: $("time").value || null,
 
-      name: finalName,
+      name: baseName,
       cutoffTime: $("cutoff").value.trim() || null,
       level: $("level").value || null,
       disc: $("disc").value || null,
@@ -774,7 +837,8 @@
       
       gpx: { 
         fileName: ANALYSIS.fileName, 
-        points: ANALYSIS.points ?? null 
+        points: ANALYSIS.points ?? null,
+        localAnalysis: ANALYSIS.localAnalysis ?? false
       },
 
       lapsByCategorySex: (lapsByCategorySex && Object.keys(lapsByCategorySex).length) ? lapsByCategorySex : null,
@@ -851,82 +915,30 @@
   }
 
   // -------- INIT
-  console.log("Initializing course-create page...");
-  
   loadMeetingInfo();
   renderAgeRows();
   initMultiToggle();
 
   // Bouton : ouvrir fichier + analyse auto
-  const btnPick = $("btnPickAnalyze");
-  if (btnPick) {
-    btnPick.addEventListener("click", function() {
-      console.log("Pick analyze button clicked");
-      showMsg("");
-      const inp = $("gpxFile");
-      if (inp) {
-        inp.value = ""; // force change event
-        inp.click();
-        console.log("File picker opened");
-      } else {
-        console.error("gpxFile input not found!");
-      }
-    });
-  } else {
-    console.error("btnPickAnalyze button not found!");
-  }
+  $("btnPickAnalyze")?.addEventListener("click", function() {
+    showMsg("");
+    const inp = $("gpxFile");
+    if (inp) {
+      inp.value = "";
+      inp.click();
+    }
+  });
 
-  const gpxInput = $("gpxFile");
-  if (gpxInput) {
-    gpxInput.addEventListener("change", async function() {
-      const f = this.files?.[0];
-      console.log("File selected:", f?.name || "none");
-      $("pickedFileName").textContent = f ? ("✓ Fichier sélectionné : " + f.name) : "";
-      if (f) {
-        await analyzeGpx();
-      }
-    });
-  } else {
-    console.error("gpxFile input not found!");
-  }
+  $("gpxFile")?.addEventListener("change", async function() {
+    const f = this.files?.[0];
+    $("pickedFileName").textContent = f ? ("✓ Fichier sélectionné : " + f.name) : "";
+    if (f) await analyzeGpx();
+  });
 
-  const btnClear = $("btnClearGPX");
-  if (btnClear) {
-    btnClear.addEventListener("click", () => {
-      console.log("Clear GPX clicked");
-      clearGpx();
-      showMsg("");
-    });
-  }
-
-  const btnSave = $("btnSave");
-  if (btnSave) {
-    btnSave.addEventListener("click", ()=> {
-      console.log("Save clicked");
-      saveSingle(false);
-    });
-  }
-
-  const btnSaveNew = $("btnSaveAndNew");
-  if (btnSaveNew) {
-    btnSaveNew.addEventListener("click", ()=> {
-      console.log("Save and new clicked");
-      saveSingle(true);
-    });
-  }
-
-  const btnReset = $("btnReset");
-  if (btnReset) {
-    btnReset.addEventListener("click", ()=> {
-      console.log("Reset clicked");
-      resetForm(true);
-    });
-  }
-
-  console.log("Course-create initialization complete");
-  console.log("Meeting ID:", MEETING_ID);
-  console.log("Meeting:", MEETING);
-  console.log("analyzeGPX function available:", typeof window.analyzeGPX);
+  $("btnClearGPX")?.addEventListener("click", () => { clearGpx(); showMsg(""); });
+  $("btnSave")?.addEventListener("click", ()=> saveSingle(false));
+  $("btnSaveAndNew")?.addEventListener("click", ()=> saveSingle(true));
+  $("btnReset")?.addEventListener("click", ()=> resetForm(true));
 
 })();
 </script>
