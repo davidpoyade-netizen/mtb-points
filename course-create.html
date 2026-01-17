@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Créer une épreuve – MTB Points</title>
+  <title>Créer une épreuve — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
     :root{
@@ -67,11 +67,11 @@
     .btn2:disabled{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none}
     .statusBox{
       border:1px solid var(--border);border-radius:16px;padding:14px;background:rgba(255,255,255,.92);
-      margin-top:14px;display:none;
+      margin-top:14px;
     }
     .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:900}
     .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:10px;display:none}
+    .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:10px}
     .bar > div{height:100%;width:0%;background:linear-gradient(90deg, rgba(34,197,94,.25), rgba(31,122,77,.92));border-radius:999px;transition:width .25s}
     .msg{display:none;margin-top:14px;border:1px solid var(--border);background:#fff;border-radius:14px;padding:12px;line-height:1.55}
     .req{color:var(--err);font-weight:900}
@@ -140,15 +140,21 @@
         <input id="name" class="inp" type="text" placeholder="Ex : 30 km / XCO Open..." />
       </div>
       <div>
-        <label class="lbl">Discipline (optionnel)</label>
+        <label class="lbl">Discipline <span class="req">*</span></label>
         <select id="disc" class="inp">
           <option value="">—</option>
           <option value="XC">XC</option>
+          <option value="XCM">XCM (Marathon)</option>
+          <option value="XCO">XCO (Olympique)</option>
+          <option value="XCC">XCC (Short Track)</option>
           <option value="Enduro">Enduro</option>
-          <option value="DH">DH</option>
-          <option value="Marathon">Marathon</option>
-          <option value="Ultra">Ultra</option>
+          <option value="DH">DH (Descente)</option>
+          <option value="Trail">Trail</option>
+          <option value="All Mountain">All Mountain</option>
+          <option value="E-Bike">E-Bike</option>
           <option value="Gravel">Gravel</option>
+          <option value="Cyclocross">Cyclocross</option>
+          <option value="Autre">Autre</option>
         </select>
       </div>
     </div>
@@ -157,7 +163,7 @@
     <div class="filters" style="grid-template-columns: 1.6fr 1fr; align-items:end;">
       <div>
         <input id="gpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml" style="position:absolute;opacity:0;pointer-events:none;"/>
-        <label for="gpxFile" class="btn2 primary" style="cursor:pointer;">📂 Choisir un GPX & analyser</label>
+        <label for="gpxFile" class="btn2 primary" id="btnPickAnalyze" style="cursor:pointer;">📂 Choisir un GPX & analyser</label>
         <div class="muted2" id="pickedFileName" style="margin-top:6px;"></div>
       </div>
       <div>
@@ -171,7 +177,7 @@
       <div class="kpi"><div class="muted2">Score Global</div><b id="kpiGlobal">—</b><div class="muted2" id="kpiGlobalSub">—</div></div>
     </div>
 
-    <div id="statusBox" class="statusBox">
+    <div id="statusBox" class="statusBox" style="display:none;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span class="pill" id="statusPhase"><span class="dot"></span> —</span>
         <span id="statusMsg" class="muted">—</span>
@@ -193,6 +199,336 @@
 <script src="js/data.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/gpx.js"></script>
-<script src="js/course-create.js"></script>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  function showMsg(html, ok=true){
+    const el = $("msg");
+    if (!el) return;
+    el.style.display = html ? "block" : "none";
+    el.innerHTML = html ? (ok ? `✅ ${html}` : `❌ ${html}`) : "";
+  }
+
+  function showStatus(phase, msg, progress=0, sub=""){
+    const box = $("statusBox");
+    const phaseEl = $("statusPhase");
+    const msgEl = $("statusMsg");
+    const barWrap = $("statusBarWrap");
+    const bar = $("statusBar");
+    const subEl = $("statusSub");
+
+    if (!phase){
+      box.style.display = "none";
+      return;
+    }
+
+    box.style.display = "block";
+    phaseEl.innerHTML = `<span class="dot" style="background:var(--blue)"></span> ${esc(phase)}`;
+    msgEl.textContent = msg || "—";
+    barWrap.style.display = progress > 0 ? "block" : "none";
+    bar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+    subEl.textContent = sub || "";
+  }
+
+  // STORAGE ADAPTERS
+  function findMeetingSafe(id){
+    if (typeof window.findMeeting === "function") return window.findMeeting(id);
+    if (typeof window.getMeeting === "function") return window.getMeeting(id);
+    try {
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr.find(m => m?.id === id) : null;
+    } catch(_){ return null; }
+  }
+
+  function listMeetingsSafe(){
+    if (typeof window.getMeetings === "function") return window.getMeetings();
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    try {
+      const raw = localStorage.getItem("mtb.meetings.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch(_){ return []; }
+  }
+
+  function upsertRaceSafe(race){
+    if (typeof window.upsertRace === "function") return window.upsertRace(race);
+    const KEY = "mtb.races.v1";
+    let arr = [];
+    try{ arr = JSON.parse(localStorage.getItem(KEY)||"[]"); }catch(_){ arr=[]; }
+    if (!Array.isArray(arr)) arr=[];
+    const idx = arr.findIndex(r => r && r.id === race.id);
+    if (idx >= 0) arr[idx] = race; else arr.unshift(race);
+    localStorage.setItem(KEY, JSON.stringify(arr));
+    return race;
+  }
+
+  function attachRaceToMeeting(meetingId, raceId){
+    const m = findMeetingSafe(meetingId);
+    if (!m) return;
+    m.raceIds = Array.isArray(m.raceIds) ? m.raceIds : [];
+    if (!m.raceIds.includes(raceId)) m.raceIds.push(raceId);
+
+    if (typeof window.upsertMeeting === "function") return window.upsertMeeting(m);
+    const KEY = "mtb.meetings.v1";
+    let arr = [];
+    try{ arr = JSON.parse(localStorage.getItem(KEY)||"[]"); }catch(_){ arr=[]; }
+    if (!Array.isArray(arr)) arr=[];
+    const idx = arr.findIndex(x => x && x.id === m.id);
+    if (idx >= 0) arr[idx] = m; else arr.unshift(m);
+    localStorage.setItem(KEY, JSON.stringify(arr));
+  }
+
+  // INIT MEETING SELECT
+  function initMeetingSelect(){
+    const all = listMeetingsSafe();
+    const sel = $("meetingId");
+    sel.innerHTML = `<option value="">—</option>`;
+    all.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = `${m.name || "Événement"} — ${m.date || "—"}`;
+      sel.appendChild(opt);
+    });
+
+    const params = new URLSearchParams(location.search);
+    const preselect = params.get("meetingId");
+    if (preselect && all.find(m => m.id === preselect)){
+      sel.value = preselect;
+      applyMeetingDefaults(preselect);
+    }
+
+    sel.addEventListener("change", () => {
+      const id = sel.value;
+      applyMeetingDefaults(id);
+    });
+  }
+
+  function applyMeetingDefaults(meetingId){
+    if (!meetingId){
+      $("meetingHint").textContent = "";
+      $("date").value = "";
+      $("date").min = "";
+      $("date").max = "";
+      $("btnBack").href = "meetings.html";
+      return;
+    }
+
+    const m = findMeetingSafe(meetingId);
+    if (!m){
+      $("meetingHint").textContent = "";
+      return;
+    }
+
+    // Afficher le nom de l'événement
+    $("meetingHint").textContent = `📌 Événement : ${m.name || "—"} (${m.date || "—"})`;
+
+    // Date par défaut = date de l'événement
+    if (m.date){
+      $("date").value = m.date;
+      $("date").min = m.date;
+      $("date").max = m.endDate || m.date;
+    } else {
+      $("date").value = "";
+      $("date").min = "";
+      $("date").max = "";
+    }
+
+    // Retour vers la fiche de l'événement
+    $("btnBack").href = `meeting.html?id=${encodeURIComponent(meetingId)}`;
+  }
+
+  // GPX ANALYSIS
+  let ANALYSIS = null;
+  let ANALYZE_BUSY = false;
+
+  function clearGpx(){
+    ANALYSIS = null;
+    $("gpxFile").value = "";
+    $("pickedFileName").textContent = "";
+    $("kpiPhys").textContent = "—";
+    $("kpiPhysSub").textContent = "—";
+    $("kpiTech").textContent = "—";
+    $("kpiTechSub").textContent = "—";
+    $("kpiGlobal").textContent = "—";
+    $("kpiGlobalSub").textContent = "—";
+    showStatus("", "", 0, "");
+  }
+
+  async function analyzeGpx(){
+    if (ANALYZE_BUSY) return;
+
+    const f = $("gpxFile")?.files?.[0];
+    if (!f){
+      showMsg("Aucun fichier GPX sélectionné.", false);
+      return;
+    }
+
+    ANALYZE_BUSY = true;
+    showMsg("");
+    showStatus("Analyse", "Lecture du fichier GPX...", 10);
+
+    try {
+      // Vérifier que gpx.js est chargé
+      if (typeof window.analyzeGPX !== "function"){
+        throw new Error("Le module gpx.js n'est pas chargé. Vérifie que js/gpx.js existe.");
+      }
+
+      showStatus("Analyse", "Extraction des points GPS...", 30);
+
+      const result = await window.analyzeGPX(f);
+
+      showStatus("Analyse", "Calcul des scores...", 70);
+
+      ANALYSIS = {
+        fileName: f.name,
+        distanceKm: result.distanceKm,
+        dplusM: result.dplusM,
+        surfaceEstimate: result.surfaceEstimate || null,
+        physScore: result.physScore || 0,
+        techScore: result.techScore || 0,
+        globalScore: result.globalScore || 0,
+        points: result.points || []
+      };
+
+      // Afficher les résultats
+      $("kpiPhys").textContent = String(ANALYSIS.physScore || 0);
+      $("kpiPhysSub").textContent = `${(ANALYSIS.distanceKm || 0).toFixed(1)} km • D+ ${Math.round(ANALYSIS.dplusM || 0)} m`;
+      
+      $("kpiTech").textContent = String(ANALYSIS.techScore || 0);
+      $("kpiTechSub").textContent = ANALYSIS.surfaceEstimate 
+        ? `Route ${ANALYSIS.surfaceEstimate.road}% • Chemin ${ANALYSIS.surfaceEstimate.track}% • Single ${ANALYSIS.surfaceEstimate.single}%`
+        : "—";
+      
+      $("kpiGlobal").textContent = String(ANALYSIS.globalScore || 0);
+      const global5 = 1 + Math.round(4 * Math.min(1, Math.max(0, (ANALYSIS.globalScore || 0) / 100)));
+      $("kpiGlobalSub").textContent = `Niveau estimé : ${global5}/5`;
+
+      showStatus("Analyse", `✅ Analyse terminée : ${(ANALYSIS.distanceKm || 0).toFixed(1)} km, D+ ${Math.round(ANALYSIS.dplusM || 0)} m`, 100, `Score global : ${ANALYSIS.globalScore}/100 (≈${global5}/5)`);
+
+    } catch(err){
+      console.error(err);
+      showMsg(`Erreur lors de l'analyse : ${err.message || err}`, false);
+      showStatus("", "", 0, "");
+      ANALYSIS = null;
+    } finally {
+      ANALYZE_BUSY = false;
+    }
+  }
+
+  // VALIDATION & SAVE
+  function makeIdFromName(name, salt=0){
+    const slug = String(name || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      .slice(0, 60) || "race";
+    return `${slug}-${Date.now() + (salt || 0)}`;
+  }
+
+  function validate(){
+    if (ANALYZE_BUSY) return "Analyse en cours : attends la fin.";
+    if (!$("meetingId").value) return "Événement obligatoire.";
+    if (!$("date").value) return "Date d'épreuve obligatoire.";
+    if (!$("name").value.trim()) return "Nom d'épreuve obligatoire.";
+    if (!$("disc").value) return "Discipline obligatoire.";
+
+    const f = $("gpxFile")?.files?.[0];
+    if (!f) return "GPX obligatoire : sélectionne un fichier GPX.";
+    if (!ANALYSIS) return "Analyse GPX obligatoire : clique sur "📂 Choisir un GPX & analyser".";
+
+    return null;
+  }
+
+  function buildRace(){
+    const meetingId = $("meetingId").value;
+    const meeting = findMeetingSafe(meetingId);
+
+    return {
+      id: makeIdFromName($("name").value.trim()),
+      meetingId,
+      meetingName: meeting?.name || null,
+      date: $("date").value,
+      time: $("time").value || null,
+      name: $("name").value.trim(),
+      disc: $("disc").value || null,
+      
+      analysis: {
+        fileName: ANALYSIS.fileName,
+        distanceKm: ANALYSIS.distanceKm ?? null,
+        dplusM: ANALYSIS.dplusM ?? null,
+        surfaceEstimate: ANALYSIS.surfaceEstimate ?? null,
+        physScore: ANALYSIS.physScore ?? null,
+        techScore: ANALYSIS.techScore ?? null,
+        globalScore: ANALYSIS.globalScore ?? null,
+        points: ANALYSIS.points ?? null
+      },
+
+      distanceKm: ANALYSIS.distanceKm ?? null,
+      dplusM: ANALYSIS.dplusM ?? null,
+      surfaceEstimate: ANALYSIS.surfaceEstimate ?? null,
+      physScore: ANALYSIS.physScore ?? null,
+      techScore: ANALYSIS.techScore ?? null,
+      globalScore: ANALYSIS.globalScore ?? null,
+      gpx: { fileName: ANALYSIS.fileName, points: ANALYSIS.points ?? null },
+
+      createdAt: Date.now(),
+      isPublished: false
+    };
+  }
+
+  function saveSingle(){
+    $("btnViewRace").style.display = "none";
+    showMsg("");
+
+    const err = validate();
+    if (err){ showMsg(err, false); return; }
+
+    const race = buildRace();
+    upsertRaceSafe(race);
+    attachRaceToMeeting(race.meetingId, race.id);
+
+    showMsg(`Épreuve créée : <b>${esc(race.name)}</b>`, true);
+    $("btnViewRace").href = `race.html?id=${encodeURIComponent(race.id)}`;
+    $("btnViewRace").style.display = "inline-flex";
+  }
+
+  function resetForm(){
+    ["name","time"].forEach(id => $(id).value = "");
+    $("disc").value = "";
+    clearGpx();
+    $("btnViewRace").style.display = "none";
+    showMsg("");
+    showStatus("", "", 0, "");
+  }
+
+  // INIT
+  initMeetingSelect();
+
+  $("btnPickAnalyze").addEventListener("click", () => {
+    showMsg("");
+    $("gpxFile").value = "";
+    $("gpxFile").click();
+  });
+
+  $("gpxFile").addEventListener("change", async () => {
+    const f = $("gpxFile")?.files?.[0];
+    $("pickedFileName").textContent = f ? ("Fichier sélectionné : " + f.name) : "";
+    if (f) await analyzeGpx();
+  });
+
+  $("btnClearGPX").addEventListener("click", () => clearGpx());
+  $("btnSave").addEventListener("click", () => saveSingle());
+  $("btnReset").addEventListener("click", () => resetForm());
+
+})();
+</script>
+
 </body>
 </html>
