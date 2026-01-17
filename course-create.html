@@ -65,13 +65,13 @@
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
       cursor:pointer;font-size:14px;
     }
-    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn2:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
     .btn2.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn2.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn2.primary:hover:not(:disabled){background:var(--blue2);border-color:var(--blue2)}
     .btn2.ghost{background:#fff}
     .btn2.ok{background:var(--ok);border-color:var(--ok);color:#fff}
     .btn2.warn{background:var(--warn);border-color:var(--warn);color:#fff}
-    .btn2:disabled{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn2:disabled{opacity:.50;cursor:not-allowed;transform:none;box-shadow:none}
 
     .sectionTitle{margin:18px 0 10px 0;font-size:14px;font-weight:900;color:#0f172a}
     .filters{display:grid;gap:12px}
@@ -107,14 +107,24 @@
       background:#fff;border-radius:14px;padding:12px;line-height:1.55;
     }
 
-    .ageBox{border:1px solid var(--border);border-radius:16px;padding:12px;background:#fff}
-    .ageHead{display:grid;grid-template-columns: 1fr 120px 120px;gap:10px;font-weight:900;color:#0f172a}
+    .ageBox{border:1px solid var(--border);border-radius:16px;padding:12px;background:#fff;margin-top:12px}
+    .ageHead{display:grid;grid-template-columns: 1fr 120px 120px;gap:10px;font-weight:900;color:#0f172a;padding-bottom:8px;border-bottom:1px solid var(--border)}
     .ageRow{display:grid;grid-template-columns: 1fr 120px 120px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed #e5e7eb}
     .ageRow:last-child{border-bottom:0}
     .ageRow label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
-    .ageRow input[type="checkbox"]{margin-top:3px}
+    .ageRow input[type="checkbox"]{margin-top:3px;cursor:pointer}
     .ageRow input[type="number"]{width:100%;padding:10px;border:1px solid var(--border);border-radius:12px}
     .toggleLine{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+    
+    .eventInfo{
+      background:rgba(37,99,235,.06);
+      border:1px solid rgba(37,99,235,.20);
+      border-radius:14px;
+      padding:14px;
+      margin-top:12px;
+    }
+    .eventInfo h3{margin:0 0 8px 0;font-size:16px;color:#0f172a}
+    .eventInfo .meta{color:#475569;font-size:13px;line-height:1.6}
   </style>
 </head>
 
@@ -145,32 +155,32 @@
         <div style="min-width:280px;flex:1">
           <h2>Nouvelle épreuve</h2>
           <div class="heroMeta">
-            L'épreuve est rattachée à un événement. La date est pré-remplie selon l'événement.
-            <br><span class="muted2" id="meetingHint"></span>
+            Importe un GPX pour analyse automatique, puis configure les détails de l'épreuve.
           </div>
           <div class="chips">
             <span class="chip">Multi-tours âge/sexe</span>
             <span class="chip">GPX/OSM obligatoire</span>
           </div>
         </div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <a class="btn2" href="meeting-create.html">+ Créer un événement</a>
-        </div>
       </div>
     </section>
 
-    <!-- RATTACHEMENT -->
-    <h3 class="sectionTitle">Rattachement & date</h3>
-    <div class="filters" style="grid-template-columns: 1.4fr 1fr 1fr; align-items:end;">
-      <div>
-        <label class="lbl">Événement <span class="req">*</span></label>
-        <select id="meetingId" class="inp"></select>
-        <div class="muted2">Les épreuves créées ici seront rattachées automatiquement.</div>
+    <!-- ÉVÉNEMENT INFO -->
+    <div class="eventInfo">
+      <h3 id="eventName">Chargement...</h3>
+      <div class="meta">
+        <div id="eventDate">📅 —</div>
+        <div id="eventLocation" style="margin-top:4px"></div>
       </div>
+    </div>
+
+    <!-- DATE DE L'ÉPREUVE -->
+    <h3 class="sectionTitle">Date de l'épreuve</h3>
+    <div class="grid2">
       <div>
-        <label class="lbl">Date de l'épreuve <span class="req">*</span></label>
+        <label class="lbl">Date <span class="req">*</span></label>
         <input id="date" class="inp" type="date" />
+        <div class="muted2" style="margin-top:6px;">Date de l'épreuve (pré-remplie avec la date de l'événement)</div>
       </div>
       <div>
         <label class="lbl">Heure de départ</label>
@@ -179,7 +189,7 @@
     </div>
 
     <!-- BLOC 1 : INFORMATIONS -->
-    <h3 class="sectionTitle">Bloc 1 — Informations</h3>
+    <h3 class="sectionTitle">Informations de l'épreuve</h3>
 
     <div class="filters" style="grid-template-columns: 1.4fr 1fr 1fr; align-items:end;">
       <div>
@@ -209,12 +219,12 @@
         <label class="lbl">Discipline</label>
         <select id="disc" class="inp">
           <option value="">—</option>
-          <option value="XC">XC</option>
-          <option value="Enduro">Enduro</option>
-          <option value="DH">DH</option>
-          <option value="Marathon">Marathon</option>
-          <option value="Ultra">Ultra</option>
+          <option value="XCC">XCC</option>
+          <option value="XCO">XCO</option>
+          <option value="XCM">XCM</option>
           <option value="Gravel">Gravel</option>
+          <option value="DH">DH</option>
+          <option value="Enduro">Enduro</option>
         </select>
       </div>
       <div>
@@ -285,24 +295,24 @@
       </label>
     </div>
 
-    <div id="multiLapsWrap" style="display:none;margin-top:12px;">
+    <div id="multiLapsWrap" style="display:none;">
       <div class="ageBox">
         <div class="ageHead">
           <div>Catégorie</div>
-          <div>H (tours)</div>
-          <div>F (tours)</div>
+          <div>Hommes (tours)</div>
+          <div>Femmes (tours)</div>
         </div>
 
         <div id="ageRows"></div>
 
         <div class="muted2" style="margin-top:10px;">
-          Si multi-tours activé mais aucune catégorie cochée : l'épreuve restera "standard".
+          Coche les catégories concernées et indique le nombre de tours pour chaque sexe.
         </div>
       </div>
     </div>
 
     <!-- BLOC 2 : ANALYSE GPX/OSM (OBLIGATOIRE) -->
-    <h3 class="sectionTitle">Bloc 2 — Analyse GPX / OSM <span class="req">*</span></h3>
+    <h3 class="sectionTitle">Analyse GPX / OSM <span class="req">*</span></h3>
 
     <div class="filters" style="grid-template-columns: 1.6fr 1fr; align-items:end;">
       <div>
@@ -315,7 +325,7 @@
         <div class="muted2" style="margin-top:6px;">
           Obligatoire : l'analyse démarre automatiquement après sélection du GPX.
         </div>
-        <div class="muted2" id="pickedFileName" style="margin-top:6px;"></div>
+        <div class="muted2" id="pickedFileName" style="margin-top:6px;font-weight:900"></div>
       </div>
 
       <div>
@@ -359,28 +369,20 @@
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
 
+  // Catégories basées sur public-ranking.html (système dynamique)
   const AGE_CATS = [
-    { id:"U7",  label:"U7 (Poussin 7–8)" },
-    { id:"U9",  label:"U9 (Pupille 9–10)" },
-    { id:"U11", label:"U11 (Benjamin 11–12)" },
-    { id:"U13", label:"U13 (Minime 13–14)" },
-    { id:"U15", label:"U15 (Cadet 15–16)" },
-    { id:"U17", label:"U17 (Junior 17–18)" },
-    { id:"U23", label:"U23 (Espoir 19–22)" },
-    { id:"SEN", label:"SEN (Senior/Élite 19–34)" },
-    { id:"M1",  label:"M1 (35–39)" },
-    { id:"M2",  label:"M2 (40–44)" },
-    { id:"M3",  label:"M3 (45–49)" },
-    { id:"M4",  label:"M4 (50–54)" },
-    { id:"M5",  label:"M5 (55–59)" },
-    { id:"M6",  label:"M6 (60–64)" },
-    { id:"M7",  label:"M7 (65–69)" },
-    { id:"M8",  label:"M8 (70–74)" },
-    { id:"M9",  label:"M9 (75–79)" }
+    { id:"XCC", label:"XCC (Cross-Country Short Track)" },
+    { id:"XCO", label:"XCO (Cross-Country Olympic)" },
+    { id:"XCM", label:"XCM (Cross-Country Marathon)" },
+    { id:"Gravel", label:"Gravel" },
+    { id:"DH", label:"DH (Descente)" },
+    { id:"Enduro", label:"Enduro" },
   ];
 
   let ANALYSIS = null;
   let ANALYZE_BUSY = false;
+  let MEETING_ID = null;
+  let MEETING = null;
 
   function esc(s){
     return String(s??"").replace(/[&<>"']/g, m => ({
@@ -449,58 +451,49 @@
     return listMeetingsSafe().find(m => m && m.id === id) || null;
   }
 
-  function initMeetingSelect(){
-    const sel = $("meetingId");
-    if (!sel) return;
-
-    const meetings = listMeetingsSafe().slice()
-      .sort((a,b)=> String(b?.date||"").localeCompare(String(a?.date||"")));
-
-    sel.innerHTML = `<option value="">— Choisir —</option>` + meetings.map(m => {
-      const d = m.date ? ` • ${esc(m.date)}` : "";
-      return `<option value="${esc(m.id)}">${esc(m.name || "Événement")}${d}</option>`;
-    }).join("");
-
-    const mid = params.get("meetingId");
-    if (mid){
-      sel.value = mid;
-      applyMeetingDefaults(mid);
-    } else {
-      const hint = $("meetingHint");
-      if (hint) hint.textContent = "Sélectionne un événement.";
-    }
-
-    sel.addEventListener("change", ()=> applyMeetingDefaults(sel.value));
-  }
-
-  function applyMeetingDefaults(meetingId){
-    const meeting = findMeetingSafe(meetingId);
-    const hint = $("meetingHint");
-    if (!meeting){
-      if (hint) hint.textContent = "⚠️ Sélectionne un événement.";
+  function loadMeetingInfo(){
+    MEETING_ID = params.get("meetingId");
+    if (!MEETING_ID){
+      $("eventName").textContent = "❌ Aucun événement spécifié";
+      $("eventDate").textContent = "Retourne à la liste des événements.";
+      showMsg("Aucun événement spécifié. Retourne à la liste des événements.", false);
       return;
     }
 
-    const start = meeting.date || "";
-    const end = meeting.endDate || "";
-
-    if (hint){
-      hint.textContent = end
-        ? `📅 Plage événement : ${start || "—"} → ${end}`
-        : `📅 Date événement : ${start || "—"}`;
+    MEETING = findMeetingSafe(MEETING_ID);
+    if (!MEETING){
+      $("eventName").textContent = "❌ Événement introuvable";
+      $("eventDate").textContent = `ID: ${MEETING_ID}`;
+      showMsg("Événement introuvable.", false);
+      return;
     }
 
-    const back = $("btnBack");
-    if (back) back.href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+    // Afficher les infos de l'événement
+    $("eventName").textContent = MEETING.name || "Événement";
+    
+    const start = MEETING.date || "—";
+    const end = MEETING.endDate || null;
+    const range = end ? `${start} → ${end}` : start;
+    $("eventDate").textContent = `📅 ${range}`;
+    
+    if (MEETING.location){
+      $("eventLocation").textContent = `📍 ${MEETING.location}`;
+      $("eventLocation").style.display = "block";
+    } else {
+      $("eventLocation").style.display = "none";
+    }
 
+    // Pré-remplir la date avec celle de l'événement
     const dateEl = $("date");
-    if (dateEl) {
-      dateEl.min = start || "";
-      dateEl.max = end || start || "";
-      if (!dateEl.value && start) dateEl.value = start;
-      if (start && dateEl.value && dateEl.value < start) dateEl.value = start;
-      if (end && dateEl.value && dateEl.value > end) dateEl.value = start || end;
+    if (dateEl && start && start !== "—"){
+      dateEl.value = start;
+      dateEl.min = start;
+      if (end) dateEl.max = end;
     }
+
+    // Mettre à jour le lien retour
+    const back = $("btnBack");
+    if (back) back.href = `meeting.html?id=${encodeURIComponent(MEETING_ID)}`;
   }
 
   // multi-laps
@@ -524,33 +517,59 @@
       </div>
     `).join("");
 
+    // Attacher les événements aux checkboxes
     box.querySelectorAll(".catOn").forEach(chk => {
-      chk.addEventListener("change", () => {
-        const id = chk.getAttribute("data-cat");
+      chk.addEventListener("change", function() {
+        const id = this.getAttribute("data-cat");
         const m = box.querySelector(`.lapsM[data-cat="${CSS.escape(id)}"]`);
         const f = box.querySelector(`.lapsF[data-cat="${CSS.escape(id)}"]`);
-        const on = chk.checked;
-        if (m) { m.disabled = !on; if (!on) m.value = ""; }
-        if (f) { f.disabled = !on; if (!on) f.value = ""; }
+        const on = this.checked;
+        
+        console.log(`Category ${id} changed to: ${on}`);
+        
+        if (m) { 
+          m.disabled = !on; 
+          if (!on) m.value = ""; 
+        }
+        if (f) { 
+          f.disabled = !on; 
+          if (!on) f.value = ""; 
+        }
       });
     });
+    
+    console.log("Age rows rendered and events attached");
   }
 
   function initMultiToggle(){
     const chk = $("enableMultiLaps");
     const wrap = $("multiLapsWrap");
-    if (!chk || !wrap) return;
+    if (!chk || !wrap) {
+      console.error("Multi-laps elements not found!");
+      return;
+    }
 
     const apply = () => {
-      wrap.style.display = chk.checked ? "block" : "none";
-      if (!chk.checked){
-        document.querySelectorAll(".catOn").forEach(c => c.checked = false);
-        document.querySelectorAll(".lapsM,.lapsF").forEach(i => { i.value = ""; i.disabled = true; });
+      const isChecked = chk.checked;
+      console.log(`Multi-laps toggled: ${isChecked}`);
+      
+      wrap.style.display = isChecked ? "block" : "none";
+      
+      if (!isChecked){
+        document.querySelectorAll(".catOn").forEach(c => {
+          c.checked = false;
+        });
+        document.querySelectorAll(".lapsM,.lapsF").forEach(i => { 
+          i.value = ""; 
+          i.disabled = true; 
+        });
       }
     };
 
     chk.addEventListener("change", apply);
     apply();
+    
+    console.log("Multi-laps toggle initialized");
   }
 
   function collectLapsByCategorySex(){
@@ -581,7 +600,10 @@
   function setAnalyzeBusy(busy){
     ANALYZE_BUSY = !!busy;
     const btn = $("btnPickAnalyze");
-    if (btn) btn.disabled = ANALYZE_BUSY;
+    if (btn) {
+      btn.disabled = ANALYZE_BUSY;
+      btn.textContent = ANALYZE_BUSY ? "⏳ Analyse en cours..." : "📂 Choisir un GPX & analyser";
+    }
   }
 
   function clearGpx(){
@@ -591,7 +613,6 @@
     if (inp) inp.value = "";
     $("pickedFileName").textContent = "";
     showStatusBox(false);
-    showMsg("");
   }
 
   async function analyzeGpx(){
@@ -601,8 +622,11 @@
       return;
     }
 
+    console.log("Starting GPX analysis for:", f.name);
+
     if (typeof window.analyzeGPX !== "function"){
       showMsg("La fonction analyzeGPX est introuvable. Vérifie que js/gpx.js est bien chargé.", false);
+      console.error("window.analyzeGPX is not a function");
       return;
     }
 
@@ -616,6 +640,8 @@
         keepPoints: true,
         timeoutMs: 45000
       });
+
+      console.log("GPX analysis result:", res);
 
       ANALYSIS = {
         fileName: f.name,
@@ -632,7 +658,7 @@
       };
 
       setStatus("done", "Analyse terminée.", 100, "Tu peux enregistrer l'épreuve.");
-      showMsg("Analyse GPX/OSM terminée.", true);
+      showMsg(`Analyse GPX/OSM terminée : ${ANALYSIS.distanceKm ? ANALYSIS.distanceKm.toFixed(1) + ' km' : '—'}, D+ ${ANALYSIS.dplusM ? Math.round(ANALYSIS.dplusM) + ' m' : '—'}`, true);
 
       // Auto-fill discipline si vide
       const disc = $("disc");
@@ -642,7 +668,7 @@
 
     } catch(e){
       ANALYSIS = null;
-      console.warn(e);
+      console.error("GPX analysis error:", e);
       setStatus("error", "Analyse impossible.", null, e?.message || "Erreur serveur / réseau.");
       showMsg(`Analyse GPX/OSM impossible : ${esc(e?.message || "erreur")}`, false);
     } finally {
@@ -694,20 +720,18 @@
 
   function validate(){
     if (ANALYZE_BUSY) return "Analyse en cours : attends la fin.";
-    if (!$("meetingId").value) return "Événement obligatoire.";
+    if (!MEETING_ID) return "Événement non spécifié.";
     if (!normalizeDate($("date").value)) return "Date d'épreuve obligatoire.";
     if (!$("name").value.trim()) return "Nom d'épreuve obligatoire.";
 
     const f = $("gpxFile")?.files?.[0];
     if (!f) return "GPX obligatoire : sélectionne un fichier GPX.";
-    if (!ANALYSIS) return "Analyse GPX/OSM obligatoire : clique sur "Choisir un GPX & analyser".";
+    if (!ANALYSIS) return "Analyse GPX/OSM obligatoire : clique sur \"Choisir un GPX & analyser\".";
 
     return null;
   }
 
   function buildRace({ ebikeOverride=null, nameSuffix="", idSalt=0 } = {}){
-    const meetingId = $("meetingId").value;
-    const meeting = findMeetingSafe(meetingId);
     const lapsByCategorySex = collectLapsByCategorySex();
 
     const baseName = $("name").value.trim();
@@ -720,8 +744,8 @@
 
     return {
       id: makeIdFromName(finalName, idSalt),
-      meetingId,
-      meetingName: meeting?.name || null,
+      meetingId: MEETING_ID,
+      meetingName: MEETING?.name || null,
 
       date: normalizeDate($("date").value),
       time: $("time").value || null,
@@ -739,7 +763,7 @@
       sexAllowed: $("sexAllowed").value || "all",
 
       comment: $("comment").value.trim() || null,
-      meetingUrl: meeting?.url || null,
+      meetingUrl: MEETING?.url || null,
 
       distanceKm: ANALYSIS.distanceKm ?? null,
       dplusM: ANALYSIS.dplusM ?? null,
@@ -768,9 +792,6 @@
   }
 
   function resetForm(keepMeeting=true){
-    const keepMid = keepMeeting ? $("meetingId").value : "";
-    const keepDate = keepMeeting ? $("date").value : "";
-
     ["name","cutoff","time","comment"].forEach(id => { const el = $(id); if (el) el.value = ""; });
     ["level","disc","wash","mechanic","feeds"].forEach(id => { const el = $(id); if (el) el.value = ""; });
     
@@ -795,10 +816,10 @@
     $("btnViewRace").href = "#";
 
     showMsg("");
-    if (keepMeeting){
-      $("meetingId").value = keepMid;
-      applyMeetingDefaults(keepMid);
-      $("date").value = keepDate;
+    
+    if (keepMeeting && MEETING){
+      const dateEl = $("date");
+      if (dateEl && MEETING.date) dateEl.value = MEETING.date;
     }
   }
 
@@ -807,44 +828,105 @@
     showMsg("");
 
     const err = validate();
-    if (err){ showMsg(err, false); return; }
+    if (err){ 
+      showMsg(err, false); 
+      return; 
+    }
 
-    const race = buildRace();
-    upsertRaceSafe(race);
-    attachRaceToMeeting(race.meetingId, race.id);
+    try {
+      const race = buildRace();
+      upsertRaceSafe(race);
+      attachRaceToMeeting(race.meetingId, race.id);
 
-    showMsg(`Épreuve créée : <b>${esc(race.name)}</b>`, true);
-    afterSaveLinks(race);
+      showMsg(`Épreuve créée : <b>${esc(race.name)}</b>`, true);
+      afterSaveLinks(race);
 
-    if (thenNew){
-      setTimeout(()=> resetForm(true), 80);
+      if (thenNew){
+        setTimeout(()=> resetForm(true), 800);
+      }
+    } catch(e) {
+      console.error("Save error:", e);
+      showMsg(`Erreur lors de la sauvegarde : ${esc(e?.message || "erreur inconnue")}`, false);
     }
   }
 
-  // -------- init
-  initMeetingSelect();
+  // -------- INIT
+  console.log("Initializing course-create page...");
+  
+  loadMeetingInfo();
   renderAgeRows();
   initMultiToggle();
 
   // Bouton : ouvrir fichier + analyse auto
-  $("btnPickAnalyze").addEventListener("click", () => {
-    showMsg("");
-    const inp = $("gpxFile");
-    inp.value = ""; // force change event
-    inp.click();
-  });
+  const btnPick = $("btnPickAnalyze");
+  if (btnPick) {
+    btnPick.addEventListener("click", function() {
+      console.log("Pick analyze button clicked");
+      showMsg("");
+      const inp = $("gpxFile");
+      if (inp) {
+        inp.value = ""; // force change event
+        inp.click();
+        console.log("File picker opened");
+      } else {
+        console.error("gpxFile input not found!");
+      }
+    });
+  } else {
+    console.error("btnPickAnalyze button not found!");
+  }
 
-  $("gpxFile").addEventListener("change", async () => {
-    const f = $("gpxFile")?.files?.[0];
-    $("pickedFileName").textContent = f ? ("Fichier sélectionné : " + f.name) : "";
-    if (f) await analyzeGpx();
-  });
+  const gpxInput = $("gpxFile");
+  if (gpxInput) {
+    gpxInput.addEventListener("change", async function() {
+      const f = this.files?.[0];
+      console.log("File selected:", f?.name || "none");
+      $("pickedFileName").textContent = f ? ("✓ Fichier sélectionné : " + f.name) : "";
+      if (f) {
+        await analyzeGpx();
+      }
+    });
+  } else {
+    console.error("gpxFile input not found!");
+  }
 
-  $("btnClearGPX").addEventListener("click", () => clearGpx());
+  const btnClear = $("btnClearGPX");
+  if (btnClear) {
+    btnClear.addEventListener("click", () => {
+      console.log("Clear GPX clicked");
+      clearGpx();
+      showMsg("");
+    });
+  }
 
-  $("btnSave").addEventListener("click", ()=> saveSingle(false));
-  $("btnSaveAndNew").addEventListener("click", ()=> saveSingle(true));
-  $("btnReset").addEventListener("click", ()=> resetForm(true));
+  const btnSave = $("btnSave");
+  if (btnSave) {
+    btnSave.addEventListener("click", ()=> {
+      console.log("Save clicked");
+      saveSingle(false);
+    });
+  }
+
+  const btnSaveNew = $("btnSaveAndNew");
+  if (btnSaveNew) {
+    btnSaveNew.addEventListener("click", ()=> {
+      console.log("Save and new clicked");
+      saveSingle(true);
+    });
+  }
+
+  const btnReset = $("btnReset");
+  if (btnReset) {
+    btnReset.addEventListener("click", ()=> {
+      console.log("Reset clicked");
+      resetForm(true);
+    });
+  }
+
+  console.log("Course-create initialization complete");
+  console.log("Meeting ID:", MEETING_ID);
+  console.log("Meeting:", MEETING);
+  console.log("analyzeGPX function available:", typeof window.analyzeGPX);
 
 })();
 </script>
