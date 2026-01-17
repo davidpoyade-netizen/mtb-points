@@ -4,174 +4,371 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Classement — MTB Points</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme-nature.css">
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f4f4;margin:0;color:#0f172a}
-    header{background:#fff;padding:14px 16px;box-shadow:0 1px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
-    nav a{margin-right:10px;text-decoration:none;color:#2563eb}
-    .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    h1{margin:0;font-size:22px}
-    .muted{color:#667085;font-size:13px}
-    .filters{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
-    label{display:block;font-size:12px;color:#667085;margin-bottom:6px}
-    select,input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-top:12px}
-    .btn{padding:10px 14px;border-radius:10px;border:0;background:#2563eb;color:#fff;cursor:pointer;font-weight:800}
-    .btn.secondary{background:#f1f5f9;color:#0f172a;border:1px solid #e5e7eb}
-    table{width:100%;border-collapse:collapse;margin-top:14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
-    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:14px}
-    th{background:#f8fafc;font-size:12px;color:#334155;text-transform:uppercase;letter-spacing:.04em}
-    tr:hover td{background:#f8fafc}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e5e7eb;font-weight:800;font-size:12px}
-    .pillDot{width:10px;height:10px;border-radius:999px;background:#94a3b8}
-    .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    @media(max-width:1100px){ .filters{grid-template-columns:repeat(3,1fr);} }
-    @media(max-width:650px){ .filters{grid-template-columns:repeat(2,1fr);} }
+    /* Onglets de discipline */
+    .disciplineTabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .disciplineTabs button {
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 10px 10px 0 0;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      position: relative;
+    }
+    
+    .disciplineTabs button:hover {
+      background: rgba(47, 111, 62, 0.08);
+      color: var(--text);
+    }
+    
+    .disciplineTabs button.active {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 -2px 8px rgba(47, 111, 62, 0.15);
+    }
+    
+    body.theme-nature .disciplineTabs button.active {
+      background: linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));
+    }
+    
+    /* Grille de colonnes pour les 4 classements */
+    .rankingGrid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 20px;
+    }
+    
+    @media(max-width: 1400px) {
+      .rankingGrid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media(max-width: 768px) {
+      .rankingGrid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .rankingColumn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    
+    body.theme-nature .rankingColumn {
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.80));
+      border: 1px solid rgba(40,60,40,.16);
+    }
+    
+    .rankingColumn h3 {
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+    
+    body.theme-nature .rankingColumn h3 {
+      color: var(--blue);
+    }
+    
+    .rankingColumn .icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: var(--blue);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    
+    /* Liste de cyclistes */
+    .riderList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .riderItem {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      transition: background 0.15s ease;
+    }
+    
+    .riderItem:hover {
+      background: rgba(47, 111, 62, 0.05);
+    }
+    
+    .riderItem:last-child {
+      border-bottom: none;
+    }
+    
+    .riderRank {
+      font-weight: 1000;
+      font-size: 14px;
+      color: var(--muted2);
+      min-width: 28px;
+    }
+    
+    .riderRank.top1 { color: #fbbf24; }
+    .riderRank.top2 { color: #94a3b8; }
+    .riderRank.top3 { color: #d97706; }
+    
+    .riderInfo {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .riderName {
+      font-weight: 900;
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .riderTeam {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .riderPoints {
+      font-weight: 1000;
+      font-size: 14px;
+      color: var(--blue);
+      min-width: 50px;
+      text-align: right;
+    }
+    
+    body.theme-nature .riderPoints {
+      color: var(--blue);
+    }
+    
+    .emptyState {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    
+    /* Filtres compacts */
+    .compactFilters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .compactFilters label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .compactFilters select {
+      width: auto;
+      min-width: 120px;
+      padding: 8px 10px;
+      margin-top: 0;
+    }
   </style>
 </head>
-<body>
+<body class="theme-nature">
 
-<header>
-  <nav>
+<header class="header">
+  <nav class="nav">
     <a href="index.html">Accueil</a>
     <a href="events.html">Épreuves</a>
     <a href="meetings.html">Événements</a>
-    <a href="ranking.html">Classement</a>
+    <a href="ranking.html" class="active">Classement</a>
   </nav>
-  <div class="right">
-    <span class="pill" id="periodPill"><span class="pillDot" id="periodDot"></span><span id="periodLabel">24 mois</span></span>
+  <div class="headerRight">
+    <span class="pill" id="periodPill">
+      <span class="dot ok" id="periodDot"></span>
+      <span id="periodLabel">24 mois</span>
+    </span>
     <span class="muted" id="lastUpdate">—</span>
   </div>
 </header>
 
 <div class="wrap">
   <div class="card">
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+    <div class="heroTop">
       <div>
-        <h1>Classement MTB Points</h1>
-        <div class="muted">Filtre par discipline, sexe, âge, type vélo et période (24 mois ou année). Les classements sont séparés par sexe et type de vélo.</div>
+        <h1 style="font-size: 24px; margin: 0;">Classement MTB Points</h1>
+        <div class="muted" style="margin-top: 6px;">
+          Classements par discipline, catégorie et type de vélo
+        </div>
       </div>
-      <div class="row" style="margin-top:0;">
-        <button class="btn secondary" id="resetBtn" type="button">Réinitialiser</button>
-        <button class="btn" id="refreshBtn" type="button">Recalculer</button>
+      <div class="heroActions">
+        <button class="btn ghost" id="resetBtn" type="button">Réinitialiser</button>
+        <button class="btn primary" id="refreshBtn" type="button">Recalculer</button>
       </div>
     </div>
 
-    <div class="filters">
-      <div>
-        <label for="disc">Discipline</label>
-        <select id="disc">
-          <option value="ALL">Toutes</option>
-          <option value="XCO">XCO (Cross-Country Olympic)</option>
-          <option value="XCC">XCC (Short Track)</option>
-          <option value="XCM">XCM (Marathon / Raid / Ultra)</option>
-          <option value="Gravel">Gravel</option>
-          <option value="Enduro">Enduro</option>
-          <option value="DH">DH (Descente)</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="sex">Sexe</label>
-        <select id="sex">
-          <option value="ALL">Tous</option>
-          <option value="M">Hommes</option>
-          <option value="F">Femmes</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="age">Catégorie d'âge (UCI)</label>
+    <!-- Filtres compacts -->
+    <div class="compactFilters" style="margin-top: 20px;">
+      <label>
+        <span>Catégorie d'âge:</span>
         <select id="age">
           <option value="ALL">Toutes</option>
-          <option value="U7">U7 (Poussin, 7-8 ans)</option>
-          <option value="U9">U9 (Pupille, 9-10 ans)</option>
-          <option value="U11">U11 (Benjamin, 11-12 ans)</option>
-          <option value="U13">U13 (Minime, 13-14 ans)</option>
-          <option value="U15">U15 (Cadet, 15-16 ans)</option>
-          <option value="U17">U17 (Junior, 17-18 ans)</option>
-          <option value="U19">U19 (18-19 ans)</option>
-          <option value="U23">U23 (Espoir, 20-22 ans)</option>
-          <option value="U23PLUS">U23+ (Espoir+, 23 ans)</option>
-          <option value="SENIOR">Senior (23-34 ans)</option>
-          <option value="M1">Masters 1 (35-39 ans)</option>
-          <option value="M2">Masters 2 (40-44 ans)</option>
-          <option value="M3">Masters 3 (45-49 ans)</option>
-          <option value="M4">Masters 4 (50-54 ans)</option>
-          <option value="M5">Masters 5 (55-59 ans)</option>
-          <option value="M6">Masters 6 (60-64 ans)</option>
-          <option value="M7">Masters 7 (65-69 ans)</option>
-          <option value="M8">Masters 8 (70+ ans)</option>
+          <option value="U7">U7</option>
+          <option value="U9">U9</option>
+          <option value="U11">U11</option>
+          <option value="U13">U13</option>
+          <option value="U15">U15</option>
+          <option value="U17">U17</option>
+          <option value="U19">U19</option>
+          <option value="U23">U23</option>
+          <option value="U23PLUS">U23+</option>
+          <option value="SENIOR">Seniors</option>
+          <option value="M1">Masters 1</option>
+          <option value="M2">Masters 2</option>
+          <option value="M3">Masters 3</option>
         </select>
-      </div>
+      </label>
 
-      <div>
-        <label for="ebike">Type vélo</label>
-        <select id="ebike">
-          <option value="ALL">Tous</option>
-          <option value="0">Musculaire</option>
-          <option value="1">Assistance électrique</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="period">Période</label>
+      <label>
+        <span>Période:</span>
         <select id="period">
           <option value="24M" selected>24 mois (glissant)</option>
           <option value="YEAR">Année</option>
         </select>
-      </div>
+      </label>
 
-      <div>
-        <label for="year">Année</label>
+      <label>
+        <span>Année:</span>
         <select id="year" disabled>
           <option value="">—</option>
         </select>
-      </div>
-    </div>
+      </label>
 
-    <div class="row">
-      <div style="flex:1;min-width:240px;">
-        <label for="q">Recherche (nom / team)</label>
-        <input id="q" type="text" placeholder="Ex : Martin, Team Maures..." />
-      </div>
-      <div style="min-width:240px;">
-        <label for="topN">Résultats retenus</label>
+      <label>
+        <span>Résultats retenus:</span>
         <select id="topN">
-          <option value="5" selected>Top 5 (recommandé)</option>
+          <option value="5" selected>Top 5</option>
           <option value="8">Top 8</option>
-          <option value="999">Tout (somme totale)</option>
+          <option value="999">Tous</option>
         </select>
+      </label>
+    </div>
+
+    <!-- Onglets de discipline -->
+    <div class="disciplineTabs">
+      <button class="active" data-discipline="GLOBAL">Global</button>
+      <button data-discipline="XCC">XCC</button>
+      <button data-discipline="XCO">XCO</button>
+      <button data-discipline="XCM">XCM (Raid/Marathon/Ultra)</button>
+      <button data-discipline="DH">DH</button>
+      <button data-discipline="Enduro">Enduro</button>
+      <button data-discipline="Gravel">Gravel</button>
+    </div>
+
+    <!-- Grille de classements (4 colonnes) -->
+    <div class="rankingGrid">
+      <!-- Hommes Musculaire -->
+      <div class="rankingColumn">
+        <h3>
+          <span class="icon">♂</span>
+          Hommes Musculaire
+        </h3>
+        <ul class="riderList" id="rankingMenMuscular">
+          <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
+        </ul>
+      </div>
+
+      <!-- Femmes Musculaire -->
+      <div class="rankingColumn">
+        <h3>
+          <span class="icon">♀</span>
+          Femmes Musculaire
+        </h3>
+        <ul class="riderList" id="rankingWomenMuscular">
+          <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
+        </ul>
+      </div>
+
+      <!-- Hommes Électrique -->
+      <div class="rankingColumn">
+        <h3>
+          <span class="icon">⚡</span>
+          Hommes Électrique
+        </h3>
+        <ul class="riderList" id="rankingMenElectric">
+          <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
+        </ul>
+      </div>
+
+      <!-- Femmes Électrique -->
+      <div class="rankingColumn">
+        <h3>
+          <span class="icon">⚡</span>
+          Femmes Électrique
+        </h3>
+        <ul class="riderList" id="rankingWomenElectric">
+          <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
+        </ul>
       </div>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th style="width:70px;">Rang</th>
-          <th>Cycliste</th>
-          <th>Team</th>
-          <th>Nationalité</th>
-          <th style="width:120px;">Points</th>
-          <th style="width:120px;">Épreuves</th>
-        </tr>
-      </thead>
-      <tbody id="rows">
-        <tr><td colspan="6" class="muted">Aucun classement calculé. Clique sur "Recalculer".</td></tr>
-      </tbody>
-    </table>
-
-    <div class="muted" style="margin-top:10px;">
-      <strong>Note :</strong> Les classements sont séparés par sexe (Hommes/Femmes) et par type de vélo (Musculaire/Électrique).
-      Les points sont calculés à partir des résultats importés et de la valeur de difficulté des épreuves (analyse GPX).
+    <div class="muted" style="margin-top: 16px; font-size: 12px;">
+      Note : les points sont calculés à partir des résultats importés et de la valeur de difficulté des épreuves (analyse GPX).
     </div>
   </div>
 </div>
 
-<script src="js/storage.js"></script>
-<script src="js/ranking.js"></script>
 <script>
-  // UI only: enable/disable year based on period
+  // Configuration
+  let currentDiscipline = 'GLOBAL';
+  
+  // Gestion des onglets de discipline
+  const disciplineTabs = document.querySelectorAll('.disciplineTabs button');
+  disciplineTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      disciplineTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentDiscipline = tab.dataset.discipline;
+      // Ici, vous pouvez déclencher le recalcul automatiquement
+      // refreshRankings();
+    });
+  });
+
+  // Gestion du période/année
   const period = document.getElementById("period");
   const year = document.getElementById("year");
   const pillLabel = document.getElementById("periodLabel");
@@ -196,16 +393,109 @@
     year.disabled = !isYear;
     if (isYear) {
       pillLabel.textContent = `Année ${year.value || ""}`.trim();
-      pillDot.style.background = "#3b82f6";
+      pillDot.className = "dot warn";
     } else {
       pillLabel.textContent = "24 mois";
-      pillDot.style.background = "#22c55e";
+      pillDot.className = "dot ok";
     }
   }
 
   period.addEventListener("change", updatePeriodUI);
   year.addEventListener("change", updatePeriodUI);
   updatePeriodUI();
+
+  // Fonction pour créer un élément de classement
+  function createRiderItem(rider, rank) {
+    const li = document.createElement('li');
+    li.className = 'riderItem';
+    
+    let rankClass = 'riderRank';
+    if (rank === 1) rankClass += ' top1';
+    else if (rank === 2) rankClass += ' top2';
+    else if (rank === 3) rankClass += ' top3';
+    
+    li.innerHTML = `
+      <div class="${rankClass}">${rank}</div>
+      <div class="riderInfo">
+        <div class="riderName">${rider.name || 'Inconnu'}</div>
+        <div class="riderTeam">${rider.team || '—'}</div>
+      </div>
+      <div class="riderPoints">${rider.points || 0}</div>
+    `;
+    
+    return li;
+  }
+
+  // Fonction de rafraîchissement des classements
+  function refreshRankings() {
+    // Données de démonstration
+    const demoData = {
+      menMuscular: [
+        { name: 'Jean Dupont', team: 'Team Maures VTT', points: 1250 },
+        { name: 'Pierre Martin', team: 'VC Ollioules', points: 1180 },
+        { name: 'Marc Lefebvre', team: 'BMC Racing', points: 1050 },
+        { name: 'Luc Bernard', team: 'Scott-SRAM', points: 980 },
+        { name: 'Paul Durand', team: 'Trek Factory', points: 920 }
+      ],
+      womenMuscular: [
+        { name: 'Sophie Dubois', team: 'Team Maures VTT', points: 1100 },
+        { name: 'Marie Lambert', team: 'VC Ollioules', points: 1050 },
+        { name: 'Julie Moreau', team: 'Canyon CLLCTV', points: 980 },
+        { name: 'Anne Petit', team: 'Trek Factory', points: 910 },
+        { name: 'Claire Roux', team: 'Specialized Racing', points: 850 }
+      ],
+      menElectric: [
+        { name: 'Antoine Garnier', team: 'E-Bike Pro Team', points: 950 },
+        { name: 'Thomas Rousseau', team: 'Team Maures VTT', points: 920 },
+        { name: 'Nicolas Blanc', team: 'VC Ollioules', points: 880 },
+        { name: 'David Simon', team: 'Lapierre E-Team', points: 820 },
+        { name: 'Alexandre Michel', team: 'Focus E-Racing', points: 780 }
+      ],
+      womenElectric: [
+        { name: 'Isabelle Laurent', team: 'E-Bike Pro Team', points: 890 },
+        { name: 'Nathalie Bonnet', team: 'Team Maures VTT', points: 860 },
+        { name: 'Camille Fournier', team: 'VC Ollioules', points: 810 },
+        { name: 'Émilie Girard', team: 'Specialized E-Team', points: 770 },
+        { name: 'Céline Morel', team: 'Trek E-Factory', points: 720 }
+      ]
+    };
+
+    // Remplir les colonnes
+    const lists = {
+      menMuscular: document.getElementById('rankingMenMuscular'),
+      womenMuscular: document.getElementById('rankingWomenMuscular'),
+      menElectric: document.getElementById('rankingMenElectric'),
+      womenElectric: document.getElementById('rankingWomenElectric')
+    };
+
+    Object.keys(lists).forEach(key => {
+      const list = lists[key];
+      list.innerHTML = '';
+      
+      if (demoData[key] && demoData[key].length > 0) {
+        demoData[key].forEach((rider, index) => {
+          list.appendChild(createRiderItem(rider, index + 1));
+        });
+      } else {
+        list.innerHTML = '<li class="emptyState">Aucun cycliste dans cette catégorie</li>';
+      }
+    });
+
+    // Mise à jour de la date
+    document.getElementById('lastUpdate').textContent = `Mis à jour le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+  }
+
+  // Gestionnaires d'événements
+  document.getElementById('refreshBtn').addEventListener('click', refreshRankings);
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('age').value = 'ALL';
+    document.getElementById('period').value = '24M';
+    document.getElementById('topN').value = '5';
+    updatePeriodUI();
+  });
+
+  // Initialisation au chargement
+  // refreshRankings(); // Décommentez pour charger automatiquement
 </script>
 
 </body>

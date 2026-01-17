@@ -1,0 +1,122 @@
+<!-- ✅ Snippet à ajouter dans race.html après les boutons existants -->
+
+<div class="btnRow" style="margin-top:12px;">
+  <!-- Boutons existants -->
+  <a class="btn" id="btnOpenMeeting" href="#" style="display:none;">📅 Voir l'événement</a>
+  <a class="btn" id="btnImportResults" href="#" style="display:none;">📊 Importer résultats</a>
+  <a class="btn" id="btnViewRanking" href="#" style="display:none;">🏆 Classement</a>
+  
+  <!-- ✅ NOUVEAU : Bouton Publier -->
+  <button class="btn primary" id="btnPublish" style="display:none;" type="button">
+    🌐 Publier en ligne
+  </button>
+  
+  <!-- ✅ NOUVEAU : Badge statut publication -->
+  <span class="pill2" id="publishStatus" style="display:none;">
+    <span class="dot" id="publishDot"></span>
+    <span id="publishLabel">Brouillon</span>
+  </span>
+</div>
+
+<script type="module">
+// ✅ Code à ajouter dans race.js (ou dans un <script> en bas de race.html)
+
+// Import Supabase
+let supabase = null;
+try {
+  const mod = await import('./js/supabaseClient.js');
+  supabase = mod?.supabase || null;
+} catch(e) {
+  console.warn("Supabase non disponible");
+}
+
+// Fonction pour publier l'épreuve
+async function publishRace(raceId) {
+  if (!supabase) {
+    alert("❌ Supabase non disponible. Impossible de publier en ligne.");
+    return;
+  }
+
+  const btn = document.getElementById('btnPublish');
+  if (btn) btn.disabled = true;
+
+  try {
+    const { data: session } = await supabase.auth.getSession();
+    
+    if (!session?.session) {
+      alert("❌ Tu dois être connecté pour publier une épreuve.");
+      return;
+    }
+
+    // Mettre à jour is_published = true
+    const { error } = await supabase
+      .from('races')
+      .update({ 
+        is_published: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', raceId);
+
+    if (error) {
+      console.error("Erreur publication:", error);
+      alert("❌ Erreur lors de la publication : " + error.message);
+      return;
+    }
+
+    // Succès !
+    alert("✅ Épreuve publiée en ligne ! Elle est maintenant visible par tous.");
+    
+    // Mettre à jour l'interface
+    updatePublishUI(true);
+    
+  } catch(e) {
+    console.error("Erreur:", e);
+    alert("❌ Erreur : " + e.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Mettre à jour l'UI selon le statut
+function updatePublishUI(isPublished) {
+  const btn = document.getElementById('btnPublish');
+  const status = document.getElementById('publishStatus');
+  const dot = document.getElementById('publishDot');
+  const label = document.getElementById('publishLabel');
+
+  if (status) status.style.display = 'inline-flex';
+
+  if (isPublished) {
+    if (btn) btn.style.display = 'none';
+    if (dot) dot.style.background = '#16a34a'; // vert
+    if (label) label.textContent = 'Publié';
+  } else {
+    if (btn) btn.style.display = 'inline-flex';
+    if (dot) dot.style.background = '#ea580c'; // orange
+    if (label) label.textContent = 'Brouillon';
+  }
+}
+
+// Attacher l'événement au bouton
+document.getElementById('btnPublish')?.addEventListener('click', function() {
+  const raceId = new URLSearchParams(location.search).get('id');
+  if (!raceId) {
+    alert("❌ ID épreuve manquant");
+    return;
+  }
+  
+  if (confirm("📢 Publier cette épreuve en ligne ?\n\nElle sera visible par tous les utilisateurs.")) {
+    publishRace(raceId);
+  }
+});
+
+// Au chargement, déterminer le statut
+// (À appeler dans la fonction main() de race.js après le chargement de l'épreuve)
+function initPublishButton(race) {
+  const isPublished = race?.isPublished || race?.is_published || false;
+  updatePublishUI(isPublished);
+}
+
+// Exporter pour utilisation dans race.js
+window.initPublishButton = initPublishButton;
+</script>

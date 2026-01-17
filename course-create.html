@@ -125,6 +125,16 @@
     }
     .eventInfo h3{margin:0 0 8px 0;font-size:16px;color:#0f172a}
     .eventInfo .meta{color:#475569;font-size:13px;line-height:1.6}
+
+    .saveStatus{
+      display:none;
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .saveStatus.show{display:block}
   </style>
 </head>
 
@@ -159,7 +169,7 @@
           </div>
           <div class="chips">
             <span class="chip">Multi-tours âge/sexe</span>
-            <span class="chip">GPX obligatoire</span>
+            <span class="chip">Sauvegarde automatique cloud</span>
           </div>
         </div>
       </div>
@@ -346,9 +356,20 @@
 
     <!-- ACTIONS -->
     <div class="rowBtns">
-      <button class="btn2 primary" id="btnSave" type="button">Créer l'épreuve</button>
-      <button class="btn2" id="btnSaveAndNew" type="button">Créer + ajouter une autre épreuve</button>
-      <button class="btn2" id="btnReset" type="button">Réinitialiser</button>
+      <button class="btn2 primary" id="btnSave" type="button">💾 Créer l'épreuve</button>
+      <button class="btn2" id="btnSaveAndNew" type="button">➕ Créer + ajouter une autre</button>
+      <button class="btn2" id="btnReset" type="button">🔄 Réinitialiser</button>
+    </div>
+
+    <!-- Statut de sauvegarde -->
+    <div id="saveStatus" class="saveStatus">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="saveIcon">💾</span>
+        <div style="flex:1;">
+          <div id="saveMainMsg" style="font-weight:900;"></div>
+          <div id="saveSubMsg" class="muted2" style="margin-top:4px;"></div>
+        </div>
+      </div>
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
@@ -364,12 +385,22 @@
 <script src="js/storage.js"></script>
 <script src="js/gpx.js"></script>
 
-<script>
+<script type="module">
+// Import Supabase
+let supabase = null;
+try {
+  const mod = await import('./js/supabaseClient.js');
+  supabase = mod?.supabase || null;
+  console.log("✅ Supabase client chargé");
+} catch(e) {
+  console.warn("⚠️ Supabase non disponible, fallback localStorage uniquement:", e);
+}
+
 (function(){
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
 
-  // Catégories UCI officielles (basées sur l'année en cours)
+  // Catégories UCI officielles
   const currentYear = new Date().getFullYear();
   const AGE_CATS = [
     { id:"U7", label:`U7 (Poussin, 7-8 ans, ${currentYear-8}-${currentYear-7})` },
@@ -411,6 +442,20 @@
     el.style.borderColor = ok ? "#dbeafe" : "#fee2e2";
   }
 
+  function showSaveStatus(icon, mainMsg, subMsg){
+    const box = $("saveStatus");
+    if (!box) return;
+    box.classList.add("show");
+    $("saveIcon").textContent = icon;
+    $("saveMainMsg").textContent = mainMsg;
+    $("saveSubMsg").textContent = subMsg || "";
+  }
+
+  function hideSaveStatus(){
+    const box = $("saveStatus");
+    if (box) box.classList.remove("show");
+  }
+
   function showStatusBox(on){
     const box = $("statusBox");
     if (box) box.style.display = on ? "block" : "none";
@@ -439,7 +484,6 @@
     }
   }
 
-  // Écoute les événements du js/gpx.js
   window.addEventListener("mtb:status", (e) => {
     const d = e?.detail || {};
     const phase = d.phase || "—";
@@ -448,7 +492,6 @@
     setStatus(phase, msg, p, $("statusSub")?.textContent || "");
   });
 
-  // meeting helpers
   function listMeetingsSafe(){
     if (typeof window.listMeetings === "function") return window.listMeetings();
     try{
@@ -481,7 +524,6 @@
       return;
     }
 
-    // Afficher les infos de l'événement
     $("eventName").textContent = MEETING.name || "Événement";
     
     const start = MEETING.date || "—";
@@ -496,7 +538,6 @@
       $("eventLocation").style.display = "none";
     }
 
-    // Pré-remplir la date avec celle de l'événement
     const dateEl = $("date");
     if (dateEl && start && start !== "—"){
       dateEl.value = start;
@@ -504,12 +545,10 @@
       if (end) dateEl.max = end;
     }
 
-    // Mettre à jour le lien retour
     const back = $("btnBack");
     if (back) back.href = `meeting.html?id=${encodeURIComponent(MEETING_ID)}`;
   }
 
-  // multi-laps
   function renderAgeRows(){
     const box = $("ageRows");
     if (!box) return;
@@ -530,7 +569,6 @@
       </div>
     `).join("");
 
-    // Attacher les événements aux checkboxes
     box.querySelectorAll(".catOn").forEach(chk => {
       chk.addEventListener("change", function() {
         const id = this.getAttribute("data-cat");
@@ -593,7 +631,6 @@
     return Object.keys(out).length ? out : null;
   }
 
-  // GPX analysis avec fallback local
   function setAnalyzeBusy(busy){
     ANALYZE_BUSY = !!busy;
     const btn = $("btnPickAnalyze");
@@ -612,7 +649,6 @@
     showStatusBox(false);
   }
 
-  // Analyse GPX locale en fallback (calcul basique)
   async function analyzeGpxLocal(file){
     setStatus("Analyse locale", "Lecture du fichier GPX...", 10);
     
@@ -620,7 +656,6 @@
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, "text/xml");
     
-    // Extraire les points
     const trkpts = doc.querySelectorAll("trkpt");
     const points = [];
     
@@ -641,7 +676,6 @@
     
     setStatus("Analyse locale", "Calcul distance et dénivelé...", 50);
     
-    // Calculer distance et dénivelé
     let distance = 0;
     let dplus = 0;
     let hasElevation = false;
@@ -650,8 +684,7 @@
       const p1 = points[i-1];
       const p2 = points[i];
       
-      // Distance (formule Haversine simplifiée)
-      const R = 6371; // Rayon de la Terre en km
+      const R = 6371;
       const dLat = (p2.lat - p1.lat) * Math.PI / 180;
       const dLon = (p2.lon - p1.lon) * Math.PI / 180;
       const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -660,7 +693,6 @@
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       distance += R * c;
       
-      // Dénivelé
       if (p1.ele !== null && p2.ele !== null) {
         hasElevation = true;
         const diff = p2.ele - p1.ele;
@@ -693,7 +725,6 @@
     try {
       let res;
       
-      // Essayer l'API d'abord
       if (typeof window.analyzeGPX === "function"){
         try {
           setStatus("Préparation", "Tentative connexion API...", 5);
@@ -707,7 +738,6 @@
           res = await analyzeGpxLocal(f);
         }
       } else {
-        // Pas d'API, utiliser directement l'analyse locale
         res = await analyzeGpxLocal(f);
       }
 
@@ -743,7 +773,6 @@
     }
   }
 
-  // Save race
   function makeIdFromName(name, salt=0){
     const base = String(name||"").trim().toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -800,7 +829,6 @@
 
   function buildRace(){
     const lapsByCategorySex = collectLapsByCategorySex();
-
     const baseName = $("name").value.trim();
     const bikeType = document.querySelector('input[name="bikeType"]:checked')?.value || 'musculaire';
     const ebikeVal = (bikeType === "electrique");
@@ -809,43 +837,115 @@
       id: makeIdFromName(baseName, 0),
       meetingId: MEETING_ID,
       meetingName: MEETING?.name || null,
-
       date: normalizeDate($("date").value),
       time: $("time").value || null,
-
       name: baseName,
       cutoffTime: $("cutoff").value.trim() || null,
       level: $("level").value || null,
       disc: $("disc").value || null,
-
       bikeTypeAllowed: bikeType,
       ebike: ebikeVal,
       bikeWash: $("wash").value || null,
       mechAssist: $("mechanic").value || null,
       feeds: $("feeds").value || null,
       sexAllowed: $("sexAllowed").value || "all",
-
       comment: $("comment").value.trim() || null,
       meetingUrl: MEETING?.url || null,
-
       distanceKm: ANALYSIS.distanceKm ?? null,
       dplusM: ANALYSIS.dplusM ?? null,
       surfaceEstimate: ANALYSIS.surfaceEstimate ?? null,
       physScore: ANALYSIS.physScore ?? null,
       techScore: ANALYSIS.techScore ?? null,
       globalScore: ANALYSIS.globalScore ?? null,
-      
       gpx: { 
         fileName: ANALYSIS.fileName, 
         points: ANALYSIS.points ?? null,
         localAnalysis: ANALYSIS.localAnalysis ?? false
       },
-
       lapsByCategorySex: (lapsByCategorySex && Object.keys(lapsByCategorySex).length) ? lapsByCategorySex : null,
-
       createdAt: Date.now(),
       isPublished: false
     };
+  }
+
+  // ✅ NOUVELLE FONCTION : Sauvegarde hybride localStorage + Supabase
+  async function saveRaceHybrid(race) {
+    showSaveStatus("💾", "Sauvegarde en cours...", "Enregistrement local...");
+
+    // 1. Sauvegarde locale (toujours)
+    try {
+      upsertRaceSafe(race);
+      attachRaceToMeeting(race.meetingId, race.id);
+      console.log("✅ Sauvegarde localStorage OK");
+    } catch(e) {
+      console.error("❌ Erreur localStorage:", e);
+      throw e;
+    }
+
+    // 2. Sauvegarde Supabase (si disponible et connecté)
+    if (supabase) {
+      try {
+        showSaveStatus("☁️", "Sauvegarde cloud...", "Synchronisation Supabase...");
+        
+        const { data: session } = await supabase.auth.getSession();
+        
+        if (session?.session) {
+          // Préparer les données pour Supabase
+          const raceData = {
+            id: race.id,
+            meeting_id: race.meetingId,
+            name: race.name,
+            date: race.date,
+            time: race.time,
+            discipline: race.disc,
+            level: race.level,
+            ebike: race.ebike,
+            cutoff_time: race.cutoffTime,
+            bike_wash: race.bikeWash,
+            mech_assist: race.mechAssist,
+            feeds: race.feeds,
+            sex_allowed: race.sexAllowed,
+            comment: race.comment,
+            distance_km: race.distanceKm,
+            dplus_m: race.dplusM,
+            score_phys: race.physScore,
+            score_tech: race.techScore,
+            score_global: race.globalScore,
+            laps_by_category_sex: race.lapsByCategorySex,
+            analysis_json: {
+              surfaceEstimate: race.surfaceEstimate,
+              localAnalysis: race.gpx?.localAnalysis,
+              raw: ANALYSIS.raw
+            },
+            is_published: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+
+          const { error } = await supabase
+            .from('races')
+            .upsert(raceData);
+
+          if (error) {
+            console.warn("⚠️ Erreur Supabase:", error);
+            showSaveStatus("⚠️", "Épreuve créée (local uniquement)", "Cloud non disponible : " + error.message);
+          } else {
+            console.log("✅ Sauvegarde Supabase OK");
+            showSaveStatus("✅", "Épreuve créée et synchronisée !", "Local + Cloud (brouillon)");
+          }
+        } else {
+          console.log("ℹ️ Non connecté, sauvegarde locale uniquement");
+          showSaveStatus("✅", "Épreuve créée (local)", "Connecte-toi pour synchroniser dans le cloud");
+        }
+      } catch(e) {
+        console.warn("⚠️ Erreur Supabase:", e);
+        showSaveStatus("⚠️", "Épreuve créée (local uniquement)", "Cloud non disponible");
+      }
+    } else {
+      showSaveStatus("✅", "Épreuve créée (local)", "Supabase non configuré");
+    }
+
+    return race;
   }
 
   function afterSaveLinks(race){
@@ -880,6 +980,7 @@
     $("btnViewRace").href = "#";
 
     showMsg("");
+    hideSaveStatus();
     
     if (keepMeeting && MEETING){
       const dateEl = $("date");
@@ -887,9 +988,10 @@
     }
   }
 
-  function saveSingle(thenNew){
+  async function saveSingle(thenNew){
     $("btnViewRace").style.display = "none";
     showMsg("");
+    hideSaveStatus();
 
     const err = validate();
     if (err){ 
@@ -899,27 +1001,28 @@
 
     try {
       const race = buildRace();
-      upsertRaceSafe(race);
-      attachRaceToMeeting(race.meetingId, race.id);
+      
+      // ✅ Sauvegarde hybride
+      await saveRaceHybrid(race);
 
       showMsg(`Épreuve créée : <b>${esc(race.name)}</b>`, true);
       afterSaveLinks(race);
 
       if (thenNew){
-        setTimeout(()=> resetForm(true), 800);
+        setTimeout(()=> resetForm(true), 1500);
       }
     } catch(e) {
       console.error("Save error:", e);
       showMsg(`Erreur lors de la sauvegarde : ${esc(e?.message || "erreur inconnue")}`, false);
+      showSaveStatus("❌", "Erreur de sauvegarde", e?.message || "");
     }
   }
 
-  // -------- INIT
+  // INIT
   loadMeetingInfo();
   renderAgeRows();
   initMultiToggle();
 
-  // Bouton : ouvrir fichier + analyse auto
   $("btnPickAnalyze")?.addEventListener("click", function() {
     showMsg("");
     const inp = $("gpxFile");
