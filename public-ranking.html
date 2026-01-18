@@ -66,6 +66,34 @@
       }
     }
     
+    /* Titres de groupes */
+    .groupTitle {
+      grid-column: span 2;
+      text-align: center;
+      font-weight: 1100;
+      font-size: 14px;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 12px;
+      background: rgba(47, 111, 62, 0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(47, 111, 62, 0.2);
+      margin-bottom: -8px;
+    }
+    
+    @media(max-width: 1400px) {
+      .groupTitle {
+        grid-column: span 2;
+      }
+    }
+    
+    @media(max-width: 768px) {
+      .groupTitle {
+        grid-column: span 1;
+      }
+    }
+    
     .rankingColumn {
       background: var(--card);
       border: 1px solid var(--border);
@@ -198,25 +226,86 @@
       gap: 6px;
       font-size: 12px;
       color: var(--muted);
+      font-weight: 900;
     }
     
-    .compactFilters select {
+    .compactFilters select,
+    .compactFilters input {
       width: auto;
       min-width: 120px;
       padding: 8px 10px;
       margin-top: 0;
+    }
+    
+    /* Recherche */
+    .searchBox {
+      flex: 1;
+      max-width: 300px;
+      position: relative;
+    }
+    
+    .searchBox input {
+      width: 100%;
+      padding: 8px 32px 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,.82);
+      font-size: 13px;
+    }
+    
+    .searchBox input:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(47,111,62,.1);
+    }
+    
+    .searchBox .clearBtn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .searchBox .clearBtn:hover {
+      color: var(--text);
+    }
+    
+    .searchBox.hasValue .clearBtn {
+      display: block;
+    }
+    
+    /* Highlight pour la recherche */
+    .riderItem.highlighted {
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 8px;
+      margin: 2px 0;
     }
   </style>
 </head>
 <body class="theme-nature">
 
 <header class="header">
+  <div class="brandRow">
+    <div class="brandLogo">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points">
+    </div>
+    <h1 style="margin:0">Classement MTB Points</h1>
+  </div>
+  
   <nav class="nav">
     <a href="index.html">Accueil</a>
-    <a href="events.html">Épreuves</a>
     <a href="meetings.html">Événements</a>
-    <a href="ranking.html" class="active">Classement</a>
+    <a href="public-ranking.html" class="active">Classement</a>
   </nav>
+  
   <div class="headerRight">
     <span class="pill" id="periodPill">
       <span class="dot ok" id="periodDot"></span>
@@ -230,7 +319,7 @@
   <div class="card">
     <div class="heroTop">
       <div>
-        <h1 style="font-size: 24px; margin: 0;">Classement MTB Points</h1>
+        <h2 style="font-size: 24px; margin: 0;">Classement MTB Points</h2>
         <div class="muted" style="margin-top: 6px;">
           Classements par discipline, catégorie et type de vélo
         </div>
@@ -243,6 +332,17 @@
 
     <!-- Filtres compacts -->
     <div class="compactFilters" style="margin-top: 20px;">
+      <!-- Recherche -->
+      <div class="searchBox">
+        <input 
+          type="text" 
+          id="searchRider" 
+          placeholder="🔍 Rechercher un rider..." 
+          autocomplete="off"
+        />
+        <button class="clearBtn" id="clearSearch" type="button">✕</button>
+      </div>
+      
       <label>
         <span>Catégorie d'âge:</span>
         <select id="age">
@@ -260,6 +360,24 @@
           <option value="M1">Masters 1</option>
           <option value="M2">Masters 2</option>
           <option value="M3">Masters 3</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Nationalité:</span>
+        <select id="nationality">
+          <option value="ALL">Toutes</option>
+          <option value="FR">France</option>
+          <option value="BE">Belgique</option>
+          <option value="CH">Suisse</option>
+          <option value="IT">Italie</option>
+          <option value="ES">Espagne</option>
+          <option value="DE">Allemagne</option>
+          <option value="GB">Royaume-Uni</option>
+          <option value="NL">Pays-Bas</option>
+          <option value="PT">Portugal</option>
+          <option value="CA">Canada</option>
+          <option value="US">États-Unis</option>
         </select>
       </label>
 
@@ -297,15 +415,21 @@
       <button data-discipline="DH">DH</button>
       <button data-discipline="Enduro">Enduro</button>
       <button data-discipline="Gravel">Gravel</button>
+      <button data-discipline="Club">Club</button>
     </div>
 
-    <!-- Grille de classements (4 colonnes) -->
+    <!-- Grille de classements (4 colonnes avec titres de groupe) -->
     <div class="rankingGrid">
+      <!-- Titre Musculaire -->
+      <div class="groupTitle">🚴 MUSCULAIRE</div>
+      <!-- Titre Assistance Électrique -->
+      <div class="groupTitle">⚡ ASSISTANCE ÉLECTRIQUE</div>
+      
       <!-- Hommes Musculaire -->
       <div class="rankingColumn">
         <h3>
           <span class="icon">♂</span>
-          Hommes Musculaire
+          Hommes
         </h3>
         <ul class="riderList" id="rankingMenMuscular">
           <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
@@ -316,7 +440,7 @@
       <div class="rankingColumn">
         <h3>
           <span class="icon">♀</span>
-          Femmes Musculaire
+          Femmes
         </h3>
         <ul class="riderList" id="rankingWomenMuscular">
           <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
@@ -326,8 +450,8 @@
       <!-- Hommes Électrique -->
       <div class="rankingColumn">
         <h3>
-          <span class="icon">⚡</span>
-          Hommes Électrique
+          <span class="icon">♂</span>
+          Hommes
         </h3>
         <ul class="riderList" id="rankingMenElectric">
           <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
@@ -337,8 +461,8 @@
       <!-- Femmes Électrique -->
       <div class="rankingColumn">
         <h3>
-          <span class="icon">⚡</span>
-          Femmes Électrique
+          <span class="icon">♀</span>
+          Femmes
         </h3>
         <ul class="riderList" id="rankingWomenElectric">
           <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
@@ -355,6 +479,7 @@
 <script>
   // Configuration
   let currentDiscipline = 'GLOBAL';
+  let allRiders = {}; // Stockage de tous les riders pour la recherche
   
   // Gestion des onglets de discipline
   const disciplineTabs = document.querySelectorAll('.disciplineTabs button');
@@ -363,12 +488,17 @@
       disciplineTabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       currentDiscipline = tab.dataset.discipline;
-      // Ici, vous pouvez déclencher le recalcul automatiquement
-      // refreshRankings();
+      
+      // Afficher différent contenu pour l'onglet Club
+      if (currentDiscipline === 'Club') {
+        showClubRanking();
+      } else {
+        showRiderRanking();
+      }
     });
   });
 
-  // Gestion du période/année
+  // Gestion de la période/année
   const period = document.getElementById("period");
   const year = document.getElementById("year");
   const pillLabel = document.getElementById("periodLabel");
@@ -404,6 +534,59 @@
   year.addEventListener("change", updatePeriodUI);
   updatePeriodUI();
 
+  // Gestion de la recherche
+  const searchInput = document.getElementById("searchRider");
+  const clearSearchBtn = document.getElementById("clearSearch");
+  const searchBox = document.querySelector(".searchBox");
+
+  searchInput.addEventListener("input", (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    
+    if (query) {
+      searchBox.classList.add("hasValue");
+      highlightRiders(query);
+    } else {
+      searchBox.classList.remove("hasValue");
+      clearHighlights();
+    }
+  });
+
+  clearSearchBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    searchBox.classList.remove("hasValue");
+    clearHighlights();
+  });
+
+  function highlightRiders(query) {
+    const allLists = document.querySelectorAll('.riderList');
+    let foundCount = 0;
+    
+    allLists.forEach(list => {
+      const items = list.querySelectorAll('.riderItem');
+      items.forEach(item => {
+        const nameEl = item.querySelector('.riderName');
+        if (nameEl) {
+          const name = nameEl.textContent.toLowerCase();
+          if (name.includes(query)) {
+            item.classList.add('highlighted');
+            foundCount++;
+            // Scroll vers le premier résultat
+            if (foundCount === 1) {
+              item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          } else {
+            item.classList.remove('highlighted');
+          }
+        }
+      });
+    });
+  }
+
+  function clearHighlights() {
+    const highlighted = document.querySelectorAll('.riderItem.highlighted');
+    highlighted.forEach(item => item.classList.remove('highlighted'));
+  }
+
   // Fonction pour créer un élément de classement
   function createRiderItem(rider, rank) {
     const li = document.createElement('li');
@@ -418,7 +601,7 @@
       <div class="${rankClass}">${rank}</div>
       <div class="riderInfo">
         <div class="riderName">${rider.name || 'Inconnu'}</div>
-        <div class="riderTeam">${rider.team || '—'}</div>
+        <div class="riderTeam">${rider.team || '—'} ${rider.nationality ? '· ' + rider.nationality : ''}</div>
       </div>
       <div class="riderPoints">${rider.points || 0}</div>
     `;
@@ -426,39 +609,116 @@
     return li;
   }
 
+  // Fonction pour créer un élément de classement club
+  function createClubItem(club, rank) {
+    const li = document.createElement('li');
+    li.className = 'riderItem';
+    
+    let rankClass = 'riderRank';
+    if (rank === 1) rankClass += ' top1';
+    else if (rank === 2) rankClass += ' top2';
+    else if (rank === 3) rankClass += ' top3';
+    
+    li.innerHTML = `
+      <div class="${rankClass}">${rank}</div>
+      <div class="riderInfo">
+        <div class="riderName">${club.name || 'Inconnu'}</div>
+        <div class="riderTeam">${club.riders || 0} riders · ${club.country || '—'}</div>
+      </div>
+      <div class="riderPoints">${club.points || 0}</div>
+    `;
+    
+    return li;
+  }
+
+  // Fonction d'affichage classement riders
+  function showRiderRanking() {
+    // Réafficher la grille normale
+    document.querySelector('.rankingGrid').style.display = 'grid';
+    refreshRankings();
+  }
+
+  // Fonction d'affichage classement clubs
+  function showClubRanking() {
+    const demoClubs = [
+      { name: 'Team Maures VTT', riders: 45, country: 'FR', points: 12500 },
+      { name: 'VC Ollioules', riders: 38, country: 'FR', points: 11200 },
+      { name: 'BMC Racing Team', riders: 32, country: 'CH', points: 10800 },
+      { name: 'Scott-SRAM MTB Racing', riders: 28, country: 'US', points: 9500 },
+      { name: 'Trek Factory Racing', riders: 25, country: 'US', points: 8900 },
+      { name: 'Canyon CLLCTV', riders: 30, country: 'DE', points: 8200 },
+      { name: 'Specialized Racing', riders: 22, country: 'US', points: 7800 },
+      { name: 'Santa Cruz Syndicate', riders: 18, country: 'US', points: 7200 }
+    ];
+
+    const lists = {
+      menMuscular: document.getElementById('rankingMenMuscular'),
+      womenMuscular: document.getElementById('rankingWomenMuscular'),
+      menElectric: document.getElementById('rankingMenElectric'),
+      womenElectric: document.getElementById('rankingWomenElectric')
+    };
+
+    // Pour l'onglet club, on affiche tous les clubs dans chaque colonne
+    Object.keys(lists).forEach(key => {
+      const list = lists[key];
+      list.innerHTML = '';
+      
+      demoClubs.forEach((club, index) => {
+        list.appendChild(createClubItem(club, index + 1));
+      });
+    });
+
+    document.getElementById('lastUpdate').textContent = `Mis à jour le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+  }
+
   // Fonction de rafraîchissement des classements
   function refreshRankings() {
     // Données de démonstration
     const demoData = {
       menMuscular: [
-        { name: 'Jean Dupont', team: 'Team Maures VTT', points: 1250 },
-        { name: 'Pierre Martin', team: 'VC Ollioules', points: 1180 },
-        { name: 'Marc Lefebvre', team: 'BMC Racing', points: 1050 },
-        { name: 'Luc Bernard', team: 'Scott-SRAM', points: 980 },
-        { name: 'Paul Durand', team: 'Trek Factory', points: 920 }
+        { name: 'Jean Dupont', team: 'Team Maures VTT', nationality: 'FR', points: 1250 },
+        { name: 'Pierre Martin', team: 'VC Ollioules', nationality: 'FR', points: 1180 },
+        { name: 'Marc Lefebvre', team: 'BMC Racing', nationality: 'CH', points: 1050 },
+        { name: 'Luc Bernard', team: 'Scott-SRAM', nationality: 'US', points: 980 },
+        { name: 'Paul Durand', team: 'Trek Factory', nationality: 'FR', points: 920 },
+        { name: 'Antoine Rousseau', team: 'Canyon CLLCTV', nationality: 'DE', points: 890 },
+        { name: 'Thomas Blanc', team: 'Specialized', nationality: 'FR', points: 850 },
+        { name: 'Nicolas Petit', team: 'Santa Cruz', nationality: 'US', points: 820 }
       ],
       womenMuscular: [
-        { name: 'Sophie Dubois', team: 'Team Maures VTT', points: 1100 },
-        { name: 'Marie Lambert', team: 'VC Ollioules', points: 1050 },
-        { name: 'Julie Moreau', team: 'Canyon CLLCTV', points: 980 },
-        { name: 'Anne Petit', team: 'Trek Factory', points: 910 },
-        { name: 'Claire Roux', team: 'Specialized Racing', points: 850 }
+        { name: 'Sophie Dubois', team: 'Team Maures VTT', nationality: 'FR', points: 1100 },
+        { name: 'Marie Lambert', team: 'VC Ollioules', nationality: 'FR', points: 1050 },
+        { name: 'Julie Moreau', team: 'Canyon CLLCTV', nationality: 'DE', points: 980 },
+        { name: 'Anne Petit', team: 'Trek Factory', nationality: 'US', points: 910 },
+        { name: 'Claire Roux', team: 'Specialized Racing', nationality: 'FR', points: 850 },
+        { name: 'Isabelle Laurent', team: 'BMC Racing', nationality: 'CH', points: 820 },
+        { name: 'Nathalie Bonnet', team: 'Scott-SRAM', nationality: 'US', points: 780 },
+        { name: 'Camille Fournier', team: 'Santa Cruz', nationality: 'US', points: 750 }
       ],
       menElectric: [
-        { name: 'Antoine Garnier', team: 'E-Bike Pro Team', points: 950 },
-        { name: 'Thomas Rousseau', team: 'Team Maures VTT', points: 920 },
-        { name: 'Nicolas Blanc', team: 'VC Ollioules', points: 880 },
-        { name: 'David Simon', team: 'Lapierre E-Team', points: 820 },
-        { name: 'Alexandre Michel', team: 'Focus E-Racing', points: 780 }
+        { name: 'Antoine Garnier', team: 'E-Bike Pro Team', nationality: 'FR', points: 950 },
+        { name: 'Thomas Rousseau', team: 'Team Maures VTT', nationality: 'FR', points: 920 },
+        { name: 'Nicolas Blanc', team: 'VC Ollioules', nationality: 'FR', points: 880 },
+        { name: 'David Simon', team: 'Lapierre E-Team', nationality: 'FR', points: 820 },
+        { name: 'Alexandre Michel', team: 'Focus E-Racing', nationality: 'DE', points: 780 },
+        { name: 'Julien Morel', team: 'Specialized E-MTB', nationality: 'BE', points: 750 },
+        { name: 'François Girard', team: 'Trek E-Factory', nationality: 'CH', points: 720 },
+        { name: 'Sébastien Roux', team: 'Canyon E-Team', nationality: 'FR', points: 690 }
       ],
       womenElectric: [
-        { name: 'Isabelle Laurent', team: 'E-Bike Pro Team', points: 890 },
-        { name: 'Nathalie Bonnet', team: 'Team Maures VTT', points: 860 },
-        { name: 'Camille Fournier', team: 'VC Ollioules', points: 810 },
-        { name: 'Émilie Girard', team: 'Specialized E-Team', points: 770 },
-        { name: 'Céline Morel', team: 'Trek E-Factory', points: 720 }
+        { name: 'Isabelle Laurent', team: 'E-Bike Pro Team', nationality: 'FR', points: 890 },
+        { name: 'Nathalie Bonnet', team: 'Team Maures VTT', nationality: 'FR', points: 860 },
+        { name: 'Camille Fournier', team: 'VC Ollioules', nationality: 'FR', points: 810 },
+        { name: 'Émilie Girard', team: 'Specialized E-Team', nationality: 'BE', points: 770 },
+        { name: 'Céline Morel', team: 'Trek E-Factory', nationality: 'CH', points: 720 },
+        { name: 'Aurélie Blanc', team: 'Focus E-Racing', nationality: 'DE', points: 690 },
+        { name: 'Valérie Simon', team: 'Canyon E-Team', nationality: 'FR', points: 660 },
+        { name: 'Sandrine Petit', team: 'Lapierre E-Team', nationality: 'FR', points: 630 }
       ]
     };
+
+    // Stocker tous les riders pour la recherche
+    allRiders = demoData;
 
     // Remplir les colonnes
     const lists = {
@@ -486,11 +746,22 @@
   }
 
   // Gestionnaires d'événements
-  document.getElementById('refreshBtn').addEventListener('click', refreshRankings);
+  document.getElementById('refreshBtn').addEventListener('click', () => {
+    if (currentDiscipline === 'Club') {
+      showClubRanking();
+    } else {
+      refreshRankings();
+    }
+  });
+  
   document.getElementById('resetBtn').addEventListener('click', () => {
     document.getElementById('age').value = 'ALL';
+    document.getElementById('nationality').value = 'ALL';
     document.getElementById('period').value = '24M';
     document.getElementById('topN').value = '5';
+    searchInput.value = '';
+    searchBox.classList.remove('hasValue');
+    clearHighlights();
     updatePeriodUI();
   });
 
