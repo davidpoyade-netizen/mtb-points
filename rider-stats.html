@@ -3,457 +3,514 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stats Rider — MTB Points</title>
+  <title>Profil Rider — MTB Points</title>
+
+  <!-- Design system + Theme nature -->
   <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/theme-nature.css" />
 
   <style>
-    :root{
-      --bg:#f4f4f4;--card:#fff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
-      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 12px 34px rgba(2,6,23,.10);
-      --r:22px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
+    /* Page-only (léger) : on s'appuie sur style.css + theme-nature.css */
+    .heroRider{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:flex-start;
+      flex-wrap:wrap;
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
-    a{color:inherit}
-    .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
-    .muted{color:var(--muted)}
-    header.header{
-      position:sticky;top:0;z-index:20;
-      background:rgba(255,255,255,.90);
-      backdrop-filter:saturate(180%) blur(8px);
-      border-bottom:1px solid var(--border);
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    }
-    .nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    .nav a{
-      text-decoration:none;padding:8px 10px;border-radius:10px;
-      color:var(--blue);font-weight:900;font-size:13px
-    }
-    .nav a:hover{background:#eff6ff}
-    .nav a.active{background:#eff6ff;color:var(--blue2)}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:900;color:var(--text);
-      text-decoration:none;white-space:nowrap;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
-    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .btn.ghost{background:#f8fafc}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
-    }
-    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .dot.ok{background:var(--ok)}
-    .dot.warn{background:var(--warn)}
-    .dot.err{background:var(--err)}
 
-    .hero{
-      border-radius:22px;padding:18px;border:1px solid var(--border);
-      background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.10), transparent 60%),
-        #fff;
+    .identity{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      flex-wrap:wrap;
+      min-width: 260px;
+      flex: 1;
     }
-    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .identity{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+
     .avatar{
-      width:74px;height:74px;border-radius:999px;
-      border:1px solid var(--border);background:#fff;object-fit:cover;
-      box-shadow:0 8px 22px rgba(2,6,23,.10);
+      width:78px;height:78px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      object-fit:cover;
+      box-shadow: 0 10px 22px rgba(15,23,42,.12);
     }
-    .name{font-weight:1000;font-size:18px;letter-spacing:-.2px}
-    .subline{display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:#334155;margin-top:6px}
-    .mtbPoints{
-      display:flex;flex-direction:column;gap:6px;align-items:flex-end;min-width:220px;
-    }
-    .mtbPoints .big{
-      font-size:34px;font-weight:1100;letter-spacing:-.6px;line-height:1;
-    }
-    .mtbPoints .label{
-      font-size:12px;font-weight:1000;color:var(--muted);text-transform:uppercase;letter-spacing:.02em
-    }
-    .mtbPoints .hint{font-size:12px;color:var(--muted);text-align:right;max-width:260px}
 
-    .sectionTitle{margin:16px 0 10px 0;font-size:15px;font-weight:1000;letter-spacing:-.15px}
-    .grid{
-      display:grid;gap:12px;
+    .riderName{
+      font-weight:1100;
+      font-size:20px;
+      letter-spacing:-.25px;
     }
-    .grid.kpis{grid-template-columns: repeat(4, minmax(0,1fr));}
-    @media(max-width:980px){.grid.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:560px){.grid.kpis{grid-template-columns:1fr}}
 
-    .grid.two{grid-template-columns:1fr 1fr}
-    @media(max-width:980px){.grid.two{grid-template-columns:1fr}}
+    .subline{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:6px;
+    }
 
-    .box{
+    .pointsBox{
+      min-width: 280px;
+      text-align:right;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:8px;
+    }
+
+    .pointsLine{
+      font-weight:1100;
+      letter-spacing:-.35px;
+      font-size:22px;
+      line-height:1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pointsLine .num{
+      font-size:34px;
+      letter-spacing:-.6px;
+      display:inline-block;
+      min-width: 80px;
+      text-align:right;
+    }
+
+    .hintSmall{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+      max-width: 320px;
+    }
+
+    /* KPI cards : on réutilise les classes du design system */
+    .kpiGrid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:12px;
+    }
+    @media(max-width:980px){ .kpiGrid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media(max-width:560px){ .kpiGrid{ grid-template-columns: 1fr; } }
+
+    .kpiCard{
       border:1px solid var(--border);
       border-radius:18px;
       padding:14px;
       background:#fff;
-      box-shadow:0 2px 10px rgba(0,0,0,.04);
+      box-shadow: 0 2px 10px rgba(0,0,0,.04);
     }
-    .kpiLabel{color:var(--muted);font-size:12px;font-weight:1000;text-transform:uppercase;letter-spacing:.02em}
-    .kpiValue{margin-top:6px;font-size:24px;font-weight:1100;letter-spacing:-.35px}
-    .kpiSub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.4}
+    body.theme-nature .kpiCard{
+      background: rgba(255,255,255,.80);
+      border-color: rgba(40,60,40,.14);
+    }
+
+    .kpiLabel{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+    }
+    .kpiValue{
+      margin-top:6px;
+      font-size:24px;
+      font-weight:1100;
+      letter-spacing:-.35px;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpiSub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.4;
+    }
 
     table{
       width:100%;
-      border-collapse:separate;border-spacing:0;
+      border-collapse:separate;
+      border-spacing:0;
       border:1px solid var(--border);
-      border-radius:18px;overflow:hidden;
-      background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.04);
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,.04);
     }
     thead th{
-      text-align:left;font-size:12px;color:#334155;background:#f8fafc;
-      padding:12px;border-bottom:1px solid var(--border);font-weight:1000;white-space:nowrap;
+      text-align:left;
+      font-size:12px;
+      color:#334155;
+      background:#f8fafc;
+      padding:12px;
+      border-bottom:1px solid var(--border);
+      font-weight:1000;
+      white-space:nowrap;
     }
-    tbody td{padding:12px;border-bottom:1px solid var(--border);vertical-align:top;font-size:13px}
+    tbody td{
+      padding:12px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      font-size:13px;
+    }
     tbody tr:last-child td{border-bottom:none}
     .right{text-align:right}
-    .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:900;font-size:12px}
+
+    .tag{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 8px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:900;font-size:12px;
+    }
     .tag.ok{border-color:rgba(22,163,74,.35);color:#166534;background:#f0fdf4}
     .tag.warn{border-color:rgba(234,88,12,.35);color:#9a3412;background:#fff7ed}
     .tag.err{border-color:rgba(220,38,38,.35);color:#991b1b;background:#fef2f2}
   </style>
 </head>
 
-<body>
-<header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1 style="margin:0;font-size:18px;letter-spacing:.2px;">MTB Points — Stats Rider</h1>
-    <span class="pill"><span class="dot ok"></span> Rider</span>
-  </div>
+<body class="theme-nature">
+  <header class="header">
+    <div class="brandRow">
+      <div class="brandLogo" aria-hidden="true">
+        <!-- optionnel : remplace par ton logo -->
+        <img src="./img/mtbpoints-logo.png" alt="" onerror="this.style.display='none';this.parentElement.style.display='none'">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <h1 style="margin:0;">MTB Points — Profil Rider</h1>
+        <div class="muted" style="font-size:12px;">Stats & points personnels</div>
+      </div>
+      <span class="pill"><span class="dot ok"></span> Rider</span>
+    </div>
 
-  <nav class="nav">
-    <a href="index.html">Accueil</a>
-    <a href="public-ranking.html">Classement</a>
-    <a href="meetings.html">Événements</a>
-    <a href="events.html">Épreuves</a>
-    <a href="rider.html" class="active">Rider</a>
-  </nav>
+    <nav class="nav">
+      <a href="index.html">Accueil</a>
+      <a href="public-ranking.html">Classement</a>
+      <a href="meetings.html">Événements</a>
+      <a href="rider.html" class="active">Rider</a>
+    </nav>
 
-  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-    <a class="btn ghost" href="rider.html">← Retour</a>
-  </div>
-</header>
+    <div class="headerRight">
+      <a class="btn ghost" href="rider.html">← Retour</a>
+    </div>
+  </header>
 
-<main class="wrap">
-  <div class="card">
+  <main class="wrap">
+    <div class="card">
+      <!-- HERO -->
+      <section class="hero">
+        <div class="heroRider">
+          <div class="identity">
+            <img class="avatar" id="riderPhoto" src="./img/rider-placeholder.png" alt="Photo du rider" />
+            <div>
+              <div class="riderName" id="riderName">Rider</div>
 
-    <!-- HERO -->
-    <section class="hero">
-      <div class="heroTop">
-        <div class="identity">
-          <img class="avatar" id="riderPhoto" src="./img/rider-placeholder.png" alt="Photo du rider" />
-          <div>
-            <div class="name" id="riderName">Nom Prénom</div>
-            <div class="subline">
-              <span class="pill"><span class="dot"></span> <span id="riderSex">Homme</span></span>
-              <span class="pill"><span class="dot"></span> <span id="riderAgeCat">M 35–39</span></span>
-              <span class="pill"><span class="dot"></span> <span id="riderCountry">France (FRA)</span></span>
+              <div class="subline">
+                <span class="pill"><span class="dot"></span> <span id="riderSex">—</span></span>
+                <span class="pill"><span class="dot"></span> <span id="riderAgeCat">—</span></span>
+                <span class="pill"><span class="dot"></span> <span id="riderCountry">—</span></span>
+              </div>
+
+              <div class="muted" style="font-size:13px;line-height:1.55;margin-top:8px" id="riderHint">
+                Chargement du profil…
+              </div>
             </div>
-            <div class="muted" style="font-size:13px;line-height:1.55;margin-top:6px" id="riderHint">
-              Statistiques basées sur tes résultats enregistrés.
+          </div>
+
+          <div class="pointsBox">
+            <!-- ✅ demandé : "tu as 0 MTB-points" + animation -->
+            <div class="pointsLine" aria-live="polite">
+              Tu as <span class="num" id="mtbPointsNum">0</span> MTB-points
+            </div>
+            <div class="hintSmall" id="pointsHint">
+              Somme des points (vue <code>v_public_ranking</code> si disponible).
+            </div>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:4px">
+              <button class="btn" id="btnReload" type="button">↻ Recharger</button>
+              <a class="btn primary" href="public-ranking.html">Voir le classement</a>
             </div>
           </div>
         </div>
+      </section>
 
-        <div class="mtbPoints">
-          <div class="label">Points MTB</div>
-          <div class="big" id="mtbPoints">0</div>
-          <div class="hint">Somme des points MTB (à connecter à tes résultats / classement).</div>
+      <!-- KPIs -->
+      <h3 class="sectionTitle">Statistiques générales</h3>
+      <div class="kpiGrid">
+        <div class="kpiCard">
+          <div class="kpiLabel">Courses</div>
+          <div class="kpiValue" id="kpiRaces">—</div>
+          <div class="kpiSub">Nombre d’épreuves prises en compte</div>
+        </div>
+
+        <div class="kpiCard">
+          <div class="kpiLabel">Meilleur rang</div>
+          <div class="kpiValue" id="kpiBestRank">—</div>
+          <div class="kpiSub">Sur tes résultats (si dispo)</div>
+        </div>
+
+        <div class="kpiCard">
+          <div class="kpiLabel">Discipline</div>
+          <div class="kpiValue" id="kpiDisc">—</div>
+          <div class="kpiSub">Info indicative (si dispo)</div>
+        </div>
+
+        <div class="kpiCard">
+          <div class="kpiLabel">Statut</div>
+          <div class="kpiValue" id="kpiStatus">—</div>
+          <div class="kpiSub">Connexion / accès public</div>
         </div>
       </div>
-    </section>
 
-    <!-- 1er bloc -->
-    <h3 class="sectionTitle">Statistiques générales</h3>
-    <div class="grid kpis">
-      <div class="box">
-        <div class="kpiLabel">Courses terminées</div>
-        <div class="kpiValue" id="kpiFinished">0</div>
-        <div class="kpiSub">Nombre de courses avec un temps validé</div>
+      <!-- Last results (placeholder) -->
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px">
+        <h3 class="sectionTitle" style="margin:0">Derniers résultats</h3>
+        <a class="btn ghost" href="#" id="btnSeeAll">Tout voir →</a>
       </div>
 
-      <div class="box">
-        <div class="kpiLabel">Temps de course total</div>
-        <div class="kpiValue" id="kpiTotalTime">00:00:00</div>
-        <div class="kpiSub">Somme des temps (HH:MM:SS)</div>
+      <div style="margin-top:10px; overflow:auto">
+        <table aria-label="Derniers résultats">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Épreuve</th>
+              <th>Pays</th>
+              <th>Dist / D+</th>
+              <th>MTB</th>
+              <th>Rang</th>
+              <th>Temps</th>
+              <th class="right">Score</th>
+            </tr>
+          </thead>
+          <tbody id="lastResults">
+            <tr>
+              <td colspan="8" class="muted" style="padding:14px">
+                (À brancher) — Quand tu voudras, je te connecte ça à ta vue publique des résultats.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div class="box">
-        <div class="kpiLabel">Distance totale</div>
-        <div class="kpiValue"><span id="kpiTotalDist">0.0</span> <span class="muted" style="font-size:14px">km</span></div>
-        <div class="kpiSub">Somme des distances</div>
-      </div>
-
-      <div class="box">
-        <div class="kpiLabel">Dénivelé total</div>
-        <div class="kpiValue">+<span id="kpiTotalDplus">0</span> <span class="muted" style="font-size:14px">m</span></div>
-        <div class="kpiSub">Somme des D+</div>
-      </div>
-
-      <div class="box">
-        <div class="kpiLabel">Course la plus longue</div>
-        <div class="kpiValue" id="kpiLongest">—</div>
-        <div class="kpiSub">Distance max (avec nom de course)</div>
-      </div>
-
-      <div class="box">
-        <div class="kpiLabel">Plus gros dénivelé</div>
-        <div class="kpiValue" id="kpiMaxDplus">—</div>
-        <div class="kpiSub">D+ max (avec nom de course)</div>
-      </div>
-
-      <div class="box">
-        <div class="kpiLabel">—</div>
-        <div class="kpiValue"> </div>
-        <div class="kpiSub muted">Emplacement libre (option)</div>
-      </div>
-
-      <div class="box">
-        <div class="kpiLabel">—</div>
-        <div class="kpiValue"> </div>
-        <div class="kpiSub muted">Emplacement libre (option)</div>
-      </div>
+      <div class="muted" style="margin-top:12px;font-size:12px;line-height:1.55" id="debugLine"></div>
     </div>
+  </main>
 
-    <!-- 2e bloc -->
-    <h3 class="sectionTitle">Records</h3>
-    <div class="grid two">
-      <div class="box">
-        <div class="kpiLabel">Meilleure performance</div>
-        <div class="kpiValue" id="bestPerformance">DNF</div>
-        <div class="kpiSub">Meilleur “Race Score” / score global (selon ton modèle)</div>
-      </div>
+  <script type="module">
+    import { supabase } from "./js/supabaseClient.js";
 
-      <div class="box">
-        <div class="kpiLabel">Meilleur classement</div>
-        <div class="kpiValue" id="bestRanking">DNF</div>
-        <div class="kpiSub">Meilleur rang (genre / catégorie selon tes règles)</div>
-      </div>
-    </div>
+    const $ = (id) => document.getElementById(id);
 
-    <!-- 3e bloc -->
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px">
-      <h3 class="sectionTitle" style="margin:0">3 derniers résultats</h3>
-      <a class="btn ghost" href="#" id="btnSeeAll">Tout voir →</a>
-    </div>
-
-    <div style="margin-top:10px; overflow:auto">
-      <table aria-label="3 derniers résultats">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Course</th>
-            <th>Pays</th>
-            <th>Distance / D+</th>
-            <th>Points MTB</th>
-            <th>Classement</th>
-            <th>Temps</th>
-            <th class="right">Race Score</th>
-          </tr>
-        </thead>
-        <tbody id="lastResults">
-          <tr>
-            <td>—</td>
-            <td class="muted">Aucun résultat</td>
-            <td class="muted">—</td>
-            <td class="muted">—</td>
-            <td class="muted">—</td>
-            <td class="muted">—</td>
-            <td class="muted">—</td>
-            <td class="right"><span class="tag err">DNF</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- 4e bloc -->
-    <h3 class="sectionTitle">Classements par catégorie d’âge</h3>
-    <div class="grid two">
-      <div class="box">
-        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
-          <div>
-            <div style="font-weight:1000">Classement mondial</div>
-            <div class="muted" style="font-size:12px;margin-top:4px">Catégorie : <b id="rankAgeCatW">M 35–39</b></div>
-          </div>
-          <span class="pill"><span class="dot"></span> Monde</span>
-        </div>
-        <div style="margin-top:10px;font-size:22px;font-weight:1100;letter-spacing:-.3px">
-          <span id="worldAgeRank">DNF</span> <span class="muted" style="font-size:14px">/</span> <span class="muted" id="worldAgeTotal">DNF</span>
-        </div>
-        <div class="muted" style="font-size:12px;margin-top:6px">Rang / total (catégorie d’âge)</div>
-      </div>
-
-      <div class="box">
-        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
-          <div>
-            <div style="font-weight:1000">Classement continental</div>
-            <div class="muted" style="font-size:12px;margin-top:4px">Catégorie : <b id="rankAgeCatEU">M 35–39</b></div>
-          </div>
-          <span class="pill"><span class="dot warn"></span> Europe</span>
-        </div>
-        <div style="margin-top:10px;font-size:22px;font-weight:1100;letter-spacing:-.3px">
-          <span id="euAgeRank">DNF</span> <span class="muted" style="font-size:14px">/</span> <span class="muted" id="euAgeTotal">DNF</span>
-        </div>
-        <div class="muted" style="font-size:12px;margin-top:6px">Rang / total (catégorie d’âge)</div>
-      </div>
-
-      <div class="box">
-        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
-          <div>
-            <div style="font-weight:1000">Classement national</div>
-            <div class="muted" style="font-size:12px;margin-top:4px">Catégorie : <b id="rankAgeCatFR">M 35–39</b></div>
-          </div>
-          <span class="pill"><span class="dot ok"></span> France</span>
-        </div>
-        <div style="margin-top:10px;font-size:22px;font-weight:1100;letter-spacing:-.3px">
-          <span id="frAgeRank">DNF</span> <span class="muted" style="font-size:14px">/</span> <span class="muted" id="frAgeTotal">DNF</span>
-        </div>
-        <div class="muted" style="font-size:12px;margin-top:6px">Rang / total (catégorie d’âge)</div>
-      </div>
-
-      <div class="box">
-        <div style="font-weight:1000">Note</div>
-        <div class="muted" style="margin-top:8px;font-size:12px;line-height:1.55">
-          Ce bloc est prêt pour être alimenté depuis Supabase (ranks calculés) ou depuis un import (CSV/XLS).
-          Si tu veux, je te branche la récupération du rider connecté + résultats.
-        </div>
-      </div>
-    </div>
-
-  </div>
-</main>
-
-<script>
-/*
-  Version "statique prête à brancher".
-  Tu peux:
-  - Remplacer les valeurs ci-dessous (DATA) par tes vraies données,
-  - Ou brancher Supabase / localStorage.
-*/
-
-(function(){
-  const $ = (id)=>document.getElementById(id);
-
-  // ---- Données exemple (remplace par ton JSON réel)
-  const DATA = {
-    rider: {
-      name: "Nom Prénom",
-      sex: "Homme",
-      ageCat: "M 35–39",
-      country: "France (FRA)",
-      photoUrl: "./img/rider-placeholder.png",
-      mtbPoints: 0
-    },
-    stats: {
-      finished: 0,
-      totalTime: "00:00:00",
-      totalDistKm: 0.0,
-      totalDplusM: 0,
-      longest: "DNF",
-      maxDplus: "DNF"
-    },
-    records: {
-      bestPerformance: "DNF",
-      bestRanking: "DNF"
-    },
-    last3: [
-      // { date, title, country, distDplus, mtbPoints, rank, time, raceScore, status }
-    ],
-    ranksAge: {
-      ageCat: "M 35–39",
-      world: { rank: "DNF", total: "DNF" },
-      eu: { rank: "DNF", total: "DNF" },
-      fr: { rank: "DNF", total: "DNF" }
+    function esc(s){
+      return String(s ?? "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[m]));
     }
-  };
 
-  // ---- Inject rider
-  $("riderName").textContent = DATA.rider.name;
-  $("riderSex").textContent = DATA.rider.sex;
-  $("riderAgeCat").textContent = DATA.rider.ageCat;
-  $("riderCountry").textContent = DATA.rider.country;
-  $("mtbPoints").textContent = String(DATA.rider.mtbPoints ?? 0);
-  const img = $("riderPhoto");
-  if (img && DATA.rider.photoUrl) img.src = DATA.rider.photoUrl;
+    function easeOutCubic(t){
+      return 1 - Math.pow(1 - t, 3);
+    }
 
-  // ---- Stats
-  $("kpiFinished").textContent = String(DATA.stats.finished ?? 0);
-  $("kpiTotalTime").textContent = DATA.stats.totalTime || "00:00:00";
-  $("kpiTotalDist").textContent = String(DATA.stats.totalDistKm ?? 0);
-  $("kpiTotalDplus").textContent = String(DATA.stats.totalDplusM ?? 0);
-  $("kpiLongest").textContent = DATA.stats.longest || "DNF";
-  $("kpiMaxDplus").textContent = DATA.stats.maxDplus || "DNF";
+    function animateNumber(el, start, end, durationMs = 1200){
+      if (!el) return;
+      const s = Number.isFinite(start) ? start : 0;
+      const e = Number.isFinite(end) ? end : 0;
 
-  // ---- Records
-  $("bestPerformance").textContent = DATA.records.bestPerformance || "DNF";
-  $("bestRanking").textContent = DATA.records.bestRanking || "DNF";
+      // si pas d'animation utile
+      if (durationMs <= 0 || s === e){
+        el.textContent = String(Math.round(e));
+        return;
+      }
 
-  // ---- Last 3 results
-  const tbody = $("lastResults");
-  const rows = Array.isArray(DATA.last3) ? DATA.last3.slice(0,3) : [];
-  if (tbody){
-    if (!rows.length){
-      // laisse le placeholder
-    } else {
-      tbody.innerHTML = "";
-      for (const r of rows){
-        const status = r.status || (r.raceScore === "DNF" ? "err" : "ok");
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${escapeHtml(r.date || "—")}</td>
-          <td>
-            <div style="font-weight:1000">${escapeHtml(r.title || "—")}</div>
-            <div class="muted" style="font-size:12px;margin-top:2px">${escapeHtml(r.league || "")}</div>
-          </td>
-          <td><span class="tag">${escapeHtml(r.country || "—")}</span></td>
-          <td>${escapeHtml(r.distDplus || "—")}</td>
-          <td><span class="tag ok">${escapeHtml(String(r.mtbPoints ?? "—"))}</span></td>
-          <td>${escapeHtml(r.rank || "—")}</td>
-          <td>${escapeHtml(r.time || "—")}</td>
-          <td class="right"><span class="tag ${status}">${escapeHtml(r.raceScore || "—")}</span></td>
-        `;
-        tbody.appendChild(tr);
+      const t0 = performance.now();
+      const step = (now) => {
+        const p = Math.min(1, (now - t0) / durationMs);
+        const v = s + (e - s) * easeOutCubic(p);
+        el.textContent = String(Math.round(v));
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    function getQueryParams(){
+      const u = new URL(location.href);
+      return {
+        id: u.searchParams.get("id"),
+        email: u.searchParams.get("email")
+      };
+    }
+
+    async function getUserSafe(){
+      try{
+        const { data, error } = await supabase.auth.getUser();
+        if (error) return null;
+        return data?.user ?? null;
+      }catch{
+        return null;
       }
     }
-  }
 
-  // ---- Ranks
-  $("rankAgeCatW").textContent = DATA.ranksAge.ageCat || "—";
-  $("rankAgeCatEU").textContent = DATA.ranksAge.ageCat || "—";
-  $("rankAgeCatFR").textContent = DATA.ranksAge.ageCat || "—";
+    async function loadFromPublicRankingByRiderId(riderId){
+      // attend une vue type v_public_ranking avec rider_id + score + name...
+      const { data, error } = await supabase
+        .from("v_public_ranking")
+        .select("*")
+        .eq("rider_id", riderId)
+        .maybeSingle();
 
-  $("worldAgeRank").textContent = DATA.ranksAge.world.rank || "DNF";
-  $("worldAgeTotal").textContent = DATA.ranksAge.world.total || "DNF";
+      if (error) throw error;
+      return data || null;
+    }
 
-  $("euAgeRank").textContent = DATA.ranksAge.eu.rank || "DNF";
-  $("euAgeTotal").textContent = DATA.ranksAge.eu.total || "DNF";
+    async function loadFromPublicRankingByEmail(email){
+      // fallback si ta vue expose email (parfois non)
+      const { data, error } = await supabase
+        .from("v_public_ranking")
+        .select("*")
+        .ilike("email", email)
+        .limit(1);
 
-  $("frAgeRank").textContent = DATA.ranksAge.fr.rank || "DNF";
-  $("frAgeTotal").textContent = DATA.ranksAge.fr.total || "DNF";
+      if (error) throw error;
+      return (data && data[0]) ? data[0] : null;
+    }
 
-  // ---- CTA "Tout voir"
-  const btn = $("btnSeeAll");
-  if (btn){
-    btn.addEventListener("click", (e)=>{
+    function setStatusLine(ok, text){
+      const el = $("debugLine");
+      if (!el) return;
+      el.textContent = text || "";
+      el.style.color = ok ? "" : "var(--warn)";
+    }
+
+    function setRiderUI({ name, sex, ageCat, country, photoUrl }){
+      $("riderName").textContent = name || "Rider";
+      $("riderSex").textContent = sex || "—";
+      $("riderAgeCat").textContent = ageCat || "—";
+      $("riderCountry").textContent = country || "—";
+
+      const img = $("riderPhoto");
+      if (img && photoUrl) img.src = photoUrl;
+    }
+
+    function setKpis({ races, bestRank, disc, status }){
+      $("kpiRaces").textContent = races ?? "—";
+      $("kpiBestRank").textContent = bestRank ?? "—";
+      $("kpiDisc").textContent = disc ?? "—";
+      $("kpiStatus").textContent = status ?? "—";
+    }
+
+    async function loadProfile(){
+      const btn = $("btnReload");
+      if (btn) btn.disabled = true;
+
+      // reset UI
+      $("riderHint").textContent = "Chargement…";
+      $("pointsHint").textContent = "Somme des points (vue v_public_ranking si disponible).";
+      setKpis({ races:"—", bestRank:"—", disc:"—", status:"—" });
+      setStatusLine(true, "");
+
+      // compteur : repartir de 0 à chaque chargement (effet sympa)
+      const counterEl = $("mtbPointsNum");
+      counterEl.textContent = "0";
+
+      const qp = getQueryParams();
+      const user = await getUserSafe();
+
+      const riderId = qp.id || user?.id || null;
+      const riderEmail = qp.email || user?.email || null;
+
+      try{
+        let row = null;
+
+        // 1) rider_id
+        if (riderId){
+          try{
+            row = await loadFromPublicRankingByRiderId(riderId);
+          }catch(_){}
+        }
+
+        // 2) email (si ta vue l'expose)
+        if (!row && riderEmail){
+          try{
+            row = await loadFromPublicRankingByEmail(riderEmail.toLowerCase());
+          }catch(_){}
+        }
+
+        // UI "status"
+        const status = user ? "Connecté" : "Public";
+
+        if (!row){
+          // Pas de données : on reste à 0, mais propre.
+          setRiderUI({
+            name: user?.email ? user.email.split("@")[0] : "Rider",
+            sex: "—",
+            ageCat: "—",
+            country: "—",
+            photoUrl: "./img/rider-placeholder.png"
+          });
+
+          $("riderHint").textContent = user
+            ? "Connecté, mais aucun score public trouvé (vue absente / pas de données / filtre)."
+            : "Aucun score public trouvé. Connecte-toi ou ouvre la page avec ?id=...";
+
+          setKpis({ races:"—", bestRank:"—", disc:"—", status });
+          animateNumber(counterEl, 0, 0, 0);
+
+          $("pointsHint").textContent = "⚠️ Impossible de charger les points (vue absente / RLS / rider introuvable).";
+          setStatusLine(false, "Astuce : si besoin, ajoute rider_id dans v_public_ranking (ou passe ?id=... dans l’URL).");
+          return;
+        }
+
+        // Mapping "best effort"
+        const name =
+          row.name ||
+          `${(row.last_name || "").trim()} ${(row.first_name || "").trim()}`.trim() ||
+          user?.email?.split("@")[0] ||
+          "Rider";
+
+        const sex = row.sex || "—";
+        const country = row.nationality || row.nat || "—";
+        const ageCat = row.age_cat || row.ageCat || (row.birth_year ? `Né(e) ${row.birth_year}` : "—");
+
+        setRiderUI({ name, sex, ageCat, country });
+
+        const points = Number(row.score ?? row.points ?? 0);
+        const races = Number(row.races ?? row.race_count ?? row.count ?? null);
+
+        // animation : 0 -> points
+        animateNumber(counterEl, 0, Number.isFinite(points) ? points : 0, 1200);
+
+        $("riderHint").textContent = "Statistiques basées sur tes données publiques.";
+        setKpis({
+          races: Number.isFinite(races) ? races : "—",
+          bestRank: row.best_rank ?? "—",
+          disc: row.disc ?? row.discipline ?? "—",
+          status
+        });
+
+        $("pointsHint").textContent = "Ton total s’anime automatiquement au chargement ✨";
+        setStatusLine(true, `Source: v_public_ranking${riderId ? " (filtre rider_id)" : ""}`);
+
+      } catch (e){
+        console.warn("[rider-stats] loadProfile failed", e);
+
+        $("riderHint").textContent = "Erreur de chargement (Supabase / RLS / configuration).";
+        $("pointsHint").textContent = "⚠️ Impossible de charger les points.";
+        setKpis({ races:"—", bestRank:"—", disc:"—", status: user ? "Connecté" : "Public" });
+
+        animateNumber($("mtbPointsNum"), 0, 0, 0);
+        setStatusLine(false, "Erreur Supabase : vérifie la vue v_public_ranking et les policies (RLS).");
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    // bindings
+    $("btnReload")?.addEventListener("click", loadProfile);
+    $("btnSeeAll")?.addEventListener("click", (e) => {
       e.preventDefault();
       alert("À brancher : page complète des résultats (ex: rider-results.html).");
     });
-  }
 
-  function escapeHtml(s){
-    return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-})();
-</script>
+    // init
+    await loadProfile();
+  </script>
 </body>
 </html>
