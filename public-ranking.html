@@ -16,7 +16,7 @@
       margin-bottom: 20px;
       border-bottom: 2px solid var(--border);
     }
-    
+
     .disciplineTabs button {
       padding: 10px 16px;
       border: none;
@@ -30,22 +30,22 @@
       white-space: nowrap;
       position: relative;
     }
-    
+
     .disciplineTabs button:hover {
       background: rgba(47, 111, 62, 0.08);
       color: var(--text);
     }
-    
+
     .disciplineTabs button.active {
       background: var(--blue);
       color: #fff;
       box-shadow: 0 -2px 8px rgba(47, 111, 62, 0.15);
     }
-    
+
     body.theme-nature .disciplineTabs button.active {
       background: linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));
     }
-    
+
     /* Grille de colonnes pour les 4 classements */
     .rankingGrid {
       display: grid;
@@ -53,19 +53,15 @@
       gap: 16px;
       margin-top: 20px;
     }
-    
+
     @media(max-width: 1400px) {
-      .rankingGrid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .rankingGrid { grid-template-columns: repeat(2, 1fr); }
     }
-    
+
     @media(max-width: 768px) {
-      .rankingGrid {
-        grid-template-columns: 1fr;
-      }
+      .rankingGrid { grid-template-columns: 1fr; }
     }
-    
+
     .rankingColumn {
       background: var(--card);
       border: 1px solid var(--border);
@@ -73,12 +69,12 @@
       padding: 16px;
       box-shadow: var(--shadow);
     }
-    
+
     body.theme-nature .rankingColumn {
       background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.80));
       border: 1px solid rgba(40,60,40,.16);
     }
-    
+
     .rankingColumn h3 {
       margin: 0 0 12px 0;
       font-size: 15px;
@@ -89,11 +85,9 @@
       border-bottom: 2px solid var(--border);
       padding-bottom: 8px;
     }
-    
-    body.theme-nature .rankingColumn h3 {
-      color: var(--blue);
-    }
-    
+
+    body.theme-nature .rankingColumn h3 { color: var(--blue); }
+
     .rankingColumn .icon {
       width: 20px;
       height: 20px;
@@ -106,14 +100,10 @@
       font-size: 11px;
       font-weight: 900;
     }
-    
+
     /* Liste de cyclistes */
-    .riderList {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    
+    .riderList { list-style: none; padding: 0; margin: 0; }
+
     .riderItem {
       display: flex;
       align-items: center;
@@ -122,31 +112,23 @@
       border-bottom: 1px solid rgba(0,0,0,0.05);
       transition: background 0.15s ease;
     }
-    
-    .riderItem:hover {
-      background: rgba(47, 111, 62, 0.05);
-    }
-    
-    .riderItem:last-child {
-      border-bottom: none;
-    }
-    
+
+    .riderItem:hover { background: rgba(47, 111, 62, 0.05); }
+    .riderItem:last-child { border-bottom: none; }
+
     .riderRank {
       font-weight: 1000;
       font-size: 14px;
       color: var(--muted2);
       min-width: 28px;
     }
-    
+
     .riderRank.top1 { color: #fbbf24; }
     .riderRank.top2 { color: #94a3b8; }
     .riderRank.top3 { color: #d97706; }
-    
-    .riderInfo {
-      flex: 1;
-      min-width: 0;
-    }
-    
+
+    .riderInfo { flex: 1; min-width: 0; }
+
     .riderName {
       font-weight: 900;
       font-size: 13px;
@@ -155,7 +137,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    
+
     .riderTeam {
       font-size: 11px;
       color: var(--muted);
@@ -163,7 +145,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    
+
     .riderPoints {
       font-weight: 1000;
       font-size: 14px;
@@ -171,18 +153,16 @@
       min-width: 50px;
       text-align: right;
     }
-    
-    body.theme-nature .riderPoints {
-      color: var(--blue);
-    }
-    
+
+    body.theme-nature .riderPoints { color: var(--blue); }
+
     .emptyState {
       text-align: center;
       padding: 40px 20px;
       color: var(--muted);
       font-size: 13px;
     }
-    
+
     /* Filtres compacts */
     .compactFilters {
       display: flex;
@@ -191,7 +171,7 @@
       align-items: center;
       margin-bottom: 16px;
     }
-    
+
     .compactFilters label {
       display: flex;
       align-items: center;
@@ -199,15 +179,25 @@
       font-size: 12px;
       color: var(--muted);
     }
-    
-    .compactFilters select {
+
+    .compactFilters select, .compactFilters input {
       width: auto;
       min-width: 120px;
       padding: 8px 10px;
       margin-top: 0;
     }
+
+    .compactFilters input { min-width: 220px; }
+
+    .miniHint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.35;
+    }
   </style>
 </head>
+
 <body class="theme-nature">
 
 <header class="header">
@@ -215,7 +205,7 @@
     <a href="index.html">Accueil</a>
     <a href="events.html">Épreuves</a>
     <a href="meetings.html">Événements</a>
-    <a href="ranking.html" class="active">Classement</a>
+    <a href="public-ranking.html" class="active">Classement</a>
   </nav>
   <div class="headerRight">
     <span class="pill" id="periodPill">
@@ -241,7 +231,7 @@
       </div>
     </div>
 
-    <!-- Filtres compacts -->
+    <!-- Filtres compacts (1) -->
     <div class="compactFilters" style="margin-top: 20px;">
       <label>
         <span>Catégorie d'âge:</span>
@@ -288,7 +278,30 @@
       </label>
     </div>
 
-    <!-- Onglets de discipline -->
+    <!-- Filtres compacts (2) : recherche + nationalité -->
+    <div class="compactFilters">
+      <label style="flex: 2; min-width: 260px;">
+        <span>Rider:</span>
+        <input id="q" type="text" placeholder="Rechercher par nom / prénom" />
+      </label>
+
+      <label style="flex: 1; min-width: 180px;">
+        <span>Nationalité:</span>
+        <select id="nat">
+          <option value="">Toutes</option>
+        </select>
+      </label>
+
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <a class="btn ghost" href="public-clubs.html" title="Classement des clubs">Voir Clubs</a>
+      </div>
+    </div>
+
+    <div class="miniHint">
+      Astuce : tu peux aussi arriver ici avec <strong>?q=Nom Prénom</strong> et <strong>&amp;nat=FR</strong> (utile depuis rider-create).
+    </div>
+
+    <!-- Onglets de discipline + Clubs -->
     <div class="disciplineTabs">
       <button class="active" data-discipline="GLOBAL">Global</button>
       <button data-discipline="XCC">XCC</button>
@@ -297,6 +310,7 @@
       <button data-discipline="DH">DH</button>
       <button data-discipline="Enduro">Enduro</button>
       <button data-discipline="Gravel">Gravel</button>
+      <button data-discipline="CLUBS">Clubs</button>
     </div>
 
     <!-- Grille de classements (4 colonnes) -->
@@ -305,7 +319,7 @@
       <div class="rankingColumn">
         <h3>
           <span class="icon">♂</span>
-          Hommes Musculaire
+          Hommes (musculaire)
         </h3>
         <ul class="riderList" id="rankingMenMuscular">
           <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
@@ -316,7 +330,7 @@
       <div class="rankingColumn">
         <h3>
           <span class="icon">♀</span>
-          Femmes Musculaire
+          Femmes (musculaire)
         </h3>
         <ul class="riderList" id="rankingWomenMuscular">
           <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
@@ -327,7 +341,7 @@
       <div class="rankingColumn">
         <h3>
           <span class="icon">⚡</span>
-          Hommes Électrique
+          Hommes (assistance électrique)
         </h3>
         <ul class="riderList" id="rankingMenElectric">
           <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
@@ -338,7 +352,7 @@
       <div class="rankingColumn">
         <h3>
           <span class="icon">⚡</span>
-          Femmes Électrique
+          Femmes (assistance électrique)
         </h3>
         <ul class="riderList" id="rankingWomenElectric">
           <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
@@ -353,26 +367,65 @@
 </div>
 
 <script>
+  // ----------------------------
   // Configuration
+  // ----------------------------
   let currentDiscipline = 'GLOBAL';
-  
-  // Gestion des onglets de discipline
+
+  const $ = (id) => document.getElementById(id);
+
+  function norm(s){
+    return String(s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g,'');
+  }
+
+  function getUrlParams(){
+    const u = new URL(location.href);
+    return {
+      q: (u.searchParams.get('q') || '').trim(),
+      nat: (u.searchParams.get('nat') || '').trim()
+    };
+  }
+
+  function setUrlParams(q, nat){
+    const u = new URL(location.href);
+    if (q) u.searchParams.set('q', q);
+    else u.searchParams.delete('q');
+    if (nat) u.searchParams.set('nat', nat);
+    else u.searchParams.delete('nat');
+    history.replaceState(null, '', u.toString());
+  }
+
+  // ----------------------------
+  // Onglets de discipline
+  // ----------------------------
   const disciplineTabs = document.querySelectorAll('.disciplineTabs button');
   disciplineTabs.forEach(tab => {
     tab.addEventListener('click', () => {
+      const d = tab.dataset.discipline;
+
+      // Onglet Clubs => redirection
+      if (d === 'CLUBS') {
+        location.href = 'public-clubs.html';
+        return;
+      }
+
       disciplineTabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      currentDiscipline = tab.dataset.discipline;
-      // Ici, vous pouvez déclencher le recalcul automatiquement
-      // refreshRankings();
+      currentDiscipline = d;
+      // Si tu branches un vrai backend plus tard : refreshRankings();
     });
   });
 
-  // Gestion du période/année
-  const period = document.getElementById("period");
-  const year = document.getElementById("year");
-  const pillLabel = document.getElementById("periodLabel");
-  const pillDot = document.getElementById("periodDot");
+  // ----------------------------
+  // Période / année
+  // ----------------------------
+  const period = $("period");
+  const year = $("year");
+  const pillLabel = $("periodLabel");
+  const pillDot = $("periodDot");
 
   function fillYears() {
     const now = new Date();
@@ -400,102 +453,170 @@
     }
   }
 
-  period.addEventListener("change", updatePeriodUI);
-  year.addEventListener("change", updatePeriodUI);
+  period.addEventListener("change", () => { updatePeriodUI(); });
+  year.addEventListener("change", () => { updatePeriodUI(); });
   updatePeriodUI();
 
-  // Fonction pour créer un élément de classement
+  // ----------------------------
+  // UI helpers
+  // ----------------------------
   function createRiderItem(rider, rank) {
     const li = document.createElement('li');
     li.className = 'riderItem';
-    
+
     let rankClass = 'riderRank';
     if (rank === 1) rankClass += ' top1';
     else if (rank === 2) rankClass += ' top2';
     else if (rank === 3) rankClass += ' top3';
-    
+
     li.innerHTML = `
       <div class="${rankClass}">${rank}</div>
       <div class="riderInfo">
         <div class="riderName">${rider.name || 'Inconnu'}</div>
-        <div class="riderTeam">${rider.team || '—'}</div>
+        <div class="riderTeam">${rider.team || '—'}${rider.nationality ? ' · ' + rider.nationality : ''}</div>
       </div>
       <div class="riderPoints">${rider.points || 0}</div>
     `;
-    
+
     return li;
   }
 
-  // Fonction de rafraîchissement des classements
+  function setEmpty(listEl, text){
+    listEl.innerHTML = `<li class="emptyState">${text}</li>`;
+  }
+
+  // ----------------------------
+  // Données demo (à remplacer par Supabase plus tard)
+  // => On ajoute nationality pour permettre le filtre
+  // ----------------------------
+  const demoData = {
+    menMuscular: [
+      { name: 'Jean Dupont', team: 'Team Maures VTT', points: 1250, nationality: 'FR' },
+      { name: 'Pierre Martin', team: 'VC Ollioules', points: 1180, nationality: 'FR' },
+      { name: 'Marc Lefebvre', team: 'BMC Racing', points: 1050, nationality: 'BE' },
+      { name: 'Luc Bernard', team: 'Scott-SRAM', points: 980, nationality: 'FR' },
+      { name: 'Paul Durand', team: 'Trek Factory', points: 920, nationality: 'CH' }
+    ],
+    womenMuscular: [
+      { name: 'Sophie Dubois', team: 'Team Maures VTT', points: 1100, nationality: 'FR' },
+      { name: 'Marie Lambert', team: 'VC Ollioules', points: 1050, nationality: 'FR' },
+      { name: 'Julie Moreau', team: 'Canyon CLLCTV', points: 980, nationality: 'CA' },
+      { name: 'Anne Petit', team: 'Trek Factory', points: 910, nationality: 'FR' },
+      { name: 'Claire Roux', team: 'Specialized Racing', points: 850, nationality: 'ES' }
+    ],
+    menElectric: [
+      { name: 'Antoine Garnier', team: 'E-Bike Pro Team', points: 950, nationality: 'FR' },
+      { name: 'Thomas Rousseau', team: 'Team Maures VTT', points: 920, nationality: 'FR' },
+      { name: 'Nicolas Blanc', team: 'VC Ollioules', points: 880, nationality: 'BE' },
+      { name: 'David Simon', team: 'Lapierre E-Team', points: 820, nationality: 'FR' },
+      { name: 'Alexandre Michel', team: 'Focus E-Racing', points: 780, nationality: 'DE' }
+    ],
+    womenElectric: [
+      { name: 'Isabelle Laurent', team: 'E-Bike Pro Team', points: 890, nationality: 'FR' },
+      { name: 'Nathalie Bonnet', team: 'Team Maures VTT', points: 860, nationality: 'FR' },
+      { name: 'Camille Fournier', team: 'VC Ollioules', points: 810, nationality: 'CH' },
+      { name: 'Émilie Girard', team: 'Specialized E-Team', points: 770, nationality: 'FR' },
+      { name: 'Céline Morel', team: 'Trek E-Factory', points: 720, nationality: 'IT' }
+    ]
+  };
+
+  function collectNationalities(){
+    const set = new Set();
+    Object.values(demoData).forEach(arr => {
+      (arr || []).forEach(r => {
+        const nat = String(r.nationality || '').trim();
+        if (nat) set.add(nat);
+      });
+    });
+    return Array.from(set).sort((a,b) => a.localeCompare(b));
+  }
+
+  function fillNationalitySelect(){
+    const natSel = $("nat");
+    const keep = natSel.value;
+    const nats = collectNationalities();
+    natSel.innerHTML = `<option value="">Toutes</option>` + nats.map(n => `<option value="${n}">${n}</option>`).join('');
+    if (keep) natSel.value = keep;
+  }
+
+  // ----------------------------
+  // Filtrage search + nat
+  // ----------------------------
+  function applyFilters(list){
+    const q = norm($("q").value.trim());
+    const nat = String($("nat").value || '').trim();
+
+    return (list || []).filter(r => {
+      const okQ = !q || norm(r.name).includes(q);
+      const okNat = !nat || String(r.nationality || '').trim() === nat;
+      return okQ && okNat;
+    });
+  }
+
+  // ----------------------------
+  // Rafraîchissement
+  // ----------------------------
   function refreshRankings() {
-    // Données de démonstration
-    const demoData = {
-      menMuscular: [
-        { name: 'Jean Dupont', team: 'Team Maures VTT', points: 1250 },
-        { name: 'Pierre Martin', team: 'VC Ollioules', points: 1180 },
-        { name: 'Marc Lefebvre', team: 'BMC Racing', points: 1050 },
-        { name: 'Luc Bernard', team: 'Scott-SRAM', points: 980 },
-        { name: 'Paul Durand', team: 'Trek Factory', points: 920 }
-      ],
-      womenMuscular: [
-        { name: 'Sophie Dubois', team: 'Team Maures VTT', points: 1100 },
-        { name: 'Marie Lambert', team: 'VC Ollioules', points: 1050 },
-        { name: 'Julie Moreau', team: 'Canyon CLLCTV', points: 980 },
-        { name: 'Anne Petit', team: 'Trek Factory', points: 910 },
-        { name: 'Claire Roux', team: 'Specialized Racing', points: 850 }
-      ],
-      menElectric: [
-        { name: 'Antoine Garnier', team: 'E-Bike Pro Team', points: 950 },
-        { name: 'Thomas Rousseau', team: 'Team Maures VTT', points: 920 },
-        { name: 'Nicolas Blanc', team: 'VC Ollioules', points: 880 },
-        { name: 'David Simon', team: 'Lapierre E-Team', points: 820 },
-        { name: 'Alexandre Michel', team: 'Focus E-Racing', points: 780 }
-      ],
-      womenElectric: [
-        { name: 'Isabelle Laurent', team: 'E-Bike Pro Team', points: 890 },
-        { name: 'Nathalie Bonnet', team: 'Team Maures VTT', points: 860 },
-        { name: 'Camille Fournier', team: 'VC Ollioules', points: 810 },
-        { name: 'Émilie Girard', team: 'Specialized E-Team', points: 770 },
-        { name: 'Céline Morel', team: 'Trek E-Factory', points: 720 }
-      ]
+    fillNationalitySelect();
+
+    const lists = {
+      menMuscular: $("rankingMenMuscular"),
+      womenMuscular: $("rankingWomenMuscular"),
+      menElectric: $("rankingMenElectric"),
+      womenElectric: $("rankingWomenElectric")
     };
 
-    // Remplir les colonnes
-    const lists = {
-      menMuscular: document.getElementById('rankingMenMuscular'),
-      womenMuscular: document.getElementById('rankingWomenMuscular'),
-      menElectric: document.getElementById('rankingMenElectric'),
-      womenElectric: document.getElementById('rankingWomenElectric')
-    };
+    // on persiste q/nat dans l'URL (utile si on partage le lien)
+    setUrlParams($("q").value.trim(), $("nat").value.trim());
 
     Object.keys(lists).forEach(key => {
-      const list = lists[key];
-      list.innerHTML = '';
-      
-      if (demoData[key] && demoData[key].length > 0) {
-        demoData[key].forEach((rider, index) => {
-          list.appendChild(createRiderItem(rider, index + 1));
+      const listEl = lists[key];
+      listEl.innerHTML = '';
+
+      const filtered = applyFilters(demoData[key]);
+
+      if (filtered.length > 0) {
+        filtered.forEach((rider, index) => {
+          listEl.appendChild(createRiderItem(rider, index + 1));
         });
       } else {
-        list.innerHTML = '<li class="emptyState">Aucun cycliste dans cette catégorie</li>';
+        setEmpty(listEl, "Aucun rider ne correspond à la recherche / filtre.");
       }
     });
 
-    // Mise à jour de la date
-    document.getElementById('lastUpdate').textContent = `Mis à jour le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+    $("lastUpdate").textContent =
+      `Mis à jour le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
   }
 
-  // Gestionnaires d'événements
-  document.getElementById('refreshBtn').addEventListener('click', refreshRankings);
-  document.getElementById('resetBtn').addEventListener('click', () => {
-    document.getElementById('age').value = 'ALL';
-    document.getElementById('period').value = '24M';
-    document.getElementById('topN').value = '5';
+  // ----------------------------
+  // Handlers
+  // ----------------------------
+  $("refreshBtn").addEventListener('click', refreshRankings);
+
+  $("resetBtn").addEventListener('click', () => {
+    $("age").value = 'ALL';
+    $("period").value = '24M';
+    $("topN").value = '5';
+    $("q").value = '';
+    $("nat").value = '';
     updatePeriodUI();
+    setUrlParams('', '');
   });
 
-  // Initialisation au chargement
-  // refreshRankings(); // Décommentez pour charger automatiquement
+  $("q").addEventListener('input', () => refreshRankings());
+  $("nat").addEventListener('change', () => refreshRankings());
+
+  // ----------------------------
+  // Init: lire ?q= & nat=
+  // ----------------------------
+  const params = getUrlParams();
+  if (params.q) $("q").value = params.q;
+  if (params.nat) $("nat").value = params.nat;
+
+  fillNationalitySelect();
+
+  // Option : tu peux auto-charger
+  // refreshRankings();
 </script>
 
 </body>
