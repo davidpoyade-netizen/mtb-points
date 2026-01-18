@@ -4,107 +4,224 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Importer des résultats — MTB Points</title>
+  
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/theme-nature.css" />
+
   <style>
     .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(2,6,23,.08)}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .muted{color:#64748b;font-size:13px}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media(max-width:900px){.grid{grid-template-columns:1fr}}
-    input,select,button{padding:10px 12px;border-radius:10px;border:1px solid #e5e7eb}
-    button{cursor:pointer;background:#2563eb;color:#fff;border:0}
+    
+    input,select,button{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.82);
+      font-family:inherit;
+    }
+    input:focus,select:focus{
+      outline:none;
+      border-color:var(--blue);
+      box-shadow:0 0 0 3px rgba(47,111,62,.1);
+    }
+    
+    button{
+      cursor:pointer;
+      background:var(--blue);
+      color:#fff;
+      border:0;
+      font-weight:900;
+      transition:transform .12s ease, box-shadow .12s ease;
+    }
+    button:hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 18px rgba(2,6,23,.08);
+    }
     button.secondary{background:#0f172a}
-    button.ghost{background:#fff;color:#0f172a;border:1px solid #e5e7eb}
-    table{width:100%;border-collapse:collapse}
-    th,td{border-bottom:1px solid #eef2f7;padding:8px 6px;text-align:left;font-size:13px}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f1f5f9;font-size:12px}
-    .dot{width:8px;height:8px;border-radius:50%;background:#16a34a}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace}
+    button.ghost{
+      background:rgba(255,255,255,.78);
+      color:var(--text);
+      border:1px solid var(--border);
+    }
+    button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      border:1px solid var(--border);
+      border-radius:16px;
+      overflow:hidden;
+      background:#fff;
+    }
+    thead th{
+      border-bottom:1px solid var(--border);
+      padding:10px 8px;
+      text-align:left;
+      font-size:12px;
+      background:#f8fafc;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    tbody td{
+      padding:8px 6px;
+      border-bottom:1px solid #eef2f7;
+      font-size:13px;
+    }
+    tbody tr:last-child td{border-bottom:none}
+    
+    .mono{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background:rgba(47,111,62,.08);
+      padding:2px 6px;
+      border-radius:6px;
+      font-size:11px;
+    }
+    
+    .download-box{
+      border:1px solid rgba(120,76,36,.25);
+      background:rgba(255,247,237,.75);
+      border-radius:16px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+    .download-box strong{color:#7a3b12}
+    
+    hr{border:none;border-top:1px solid var(--border);margin:14px 0}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 
-<body>
+<body class="theme-nature">
 <header class="header">
-  <div class="wrap row" style="justify-content:space-between">
+  <div class="brandRow">
+    <div class="brandLogo">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points">
+    </div>
     <div>
       <h1 style="margin:0">Importer des résultats</h1>
-      <div class="muted">
+      <div class="muted" style="font-size:12px;margin-top:2px">
         CSV / XLSX → classement automatique (sexe, âge, musculaire / VAE)
       </div>
     </div>
-    <div class="pill"><span class="dot"></span> Import prêt</div>
+  </div>
+  
+  <nav class="nav">
+    <a href="index.html">Accueil</a>
+    <a href="organizer-dashboard.html">Mes événements</a>
+    <a href="import-results.html" class="active">Importer résultats</a>
+  </nav>
+  
+  <div class="headerRight">
+    <span class="pill"><span class="dot ok"></span> Import prêt</span>
   </div>
 </header>
 
 <main class="wrap">
 
-  <!-- ✅ MODÈLE XLSX -->
-  <div class="card" style="margin-bottom:14px">
+  <!-- MODÈLE XLSX -->
+  <div class="download-box">
     <div class="row" style="justify-content:space-between">
-      <div>
-        <strong>Modèle de fichier XLSX</strong>
-        <div class="muted" style="margin-top:4px">
+      <div style="flex:1">
+        <strong>📥 Modèle de fichier XLSX</strong>
+        <div class="muted" style="margin-top:6px;font-size:13px;line-height:1.5">
           Colonnes obligatoires :
           <span class="mono">rider_name</span>,
           <span class="mono">time_hhmmss</span>,
           <span class="mono">status</span>,
-          <span class="mono">bike</span>
+          <span class="mono">bike</span>,
+          <span class="mono">nationality</span>
         </div>
-        <div class="muted">
-          <span class="mono">status</span> = FINISH / DNF / DNS  
-          <span class="mono">bike</span> = MUSCLE / EBIKE
+        <div class="muted" style="font-size:12px;margin-top:4px">
+          <span class="mono">status</span> = FINISH / DNF / DNS  ·  
+          <span class="mono">bike</span> = MUSCLE / EBIKE  ·  
+          <span class="mono">nationality</span> = FR, BE, CH, etc.
         </div>
       </div>
-      <a class="btn"
+      <a class="btn primary"
          href="assets/MTBPoints_import_results_template.xlsx"
-         download>
+         download
+         style="white-space:nowrap">
         ⬇️ Télécharger le modèle XLSX
       </a>
     </div>
   </div>
 
   <!-- IMPORT -->
-  <div class="card" style="margin-bottom:12px">
+  <div class="card">
     <div class="grid">
       <div>
-        <label class="muted">Épreuve</label><br/>
+        <label class="muted" style="display:block;margin-bottom:6px;font-weight:900;font-size:12px">Épreuve</label>
         <select id="raceSelect" style="width:100%"></select>
-        <div class="muted" id="raceMeta" style="margin-top:6px"></div>
+        <div class="muted" id="raceMeta" style="margin-top:6px;font-size:12px"></div>
       </div>
       <div>
-        <label class="muted">Fichier CSV / XLSX</label><br/>
+        <label class="muted" style="display:block;margin-bottom:6px;font-weight:900;font-size:12px">Fichier CSV / XLSX</label>
         <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" style="width:100%"/>
       </div>
     </div>
 
-    <hr style="border:none;border-top:1px solid #eef2f7;margin:14px 0"/>
+    <hr/>
 
     <div class="grid">
       <div>
-        <div class="muted" style="margin-bottom:6px">Mapping des colonnes</div>
+        <div class="muted" style="margin-bottom:8px;font-weight:900;font-size:12px">Mapping des colonnes</div>
         <div class="grid">
-          <div><label class="muted">Rang</label><select id="mapRank" style="width:100%"></select></div>
-          <div><label class="muted">Nom</label><select id="mapName" style="width:100%"></select></div>
-          <div><label class="muted">Sexe</label><select id="mapSex" style="width:100%"></select></div>
-          <div><label class="muted">Année naissance</label><select id="mapBirthYear" style="width:100%"></select></div>
-          <div><label class="muted">Temps</label><select id="mapTime" style="width:100%"></select></div>
-          <div><label class="muted">Statut *</label><select id="mapStatus" style="width:100%"></select></div>
-          <div><label class="muted">Type vélo *</label><select id="mapBike" style="width:100%"></select></div>
+          <div>
+            <label class="muted" style="display:block;margin-bottom:4px;font-size:11px">Rang</label>
+            <select id="mapRank" style="width:100%"></select>
+          </div>
+          <div>
+            <label class="muted" style="display:block;margin-bottom:4px;font-size:11px">Nom</label>
+            <select id="mapName" style="width:100%"></select>
+          </div>
+          <div>
+            <label class="muted" style="display:block;margin-bottom:4px;font-size:11px">Sexe</label>
+            <select id="mapSex" style="width:100%"></select>
+          </div>
+          <div>
+            <label class="muted" style="display:block;margin-bottom:4px;font-size:11px">Année naissance</label>
+            <select id="mapBirthYear" style="width:100%"></select>
+          </div>
+          <div>
+            <label class="muted" style="display:block;margin-bottom:4px;font-size:11px">Temps</label>
+            <select id="mapTime" style="width:100%"></select>
+          </div>
+          <div>
+            <label class="muted" style="display:block;margin-bottom:4px;font-size:11px">Statut *</label>
+            <select id="mapStatus" style="width:100%"></select>
+          </div>
+          <div>
+            <label class="muted" style="display:block;margin-bottom:4px;font-size:11px">Type vélo *</label>
+            <select id="mapBike" style="width:100%"></select>
+          </div>
+          <div>
+            <label class="muted" style="display:block;margin-bottom:4px;font-size:11px">Nationalité</label>
+            <select id="mapNationality" style="width:100%"></select>
+          </div>
         </div>
       </div>
 
       <div>
-        <div class="muted" style="margin-bottom:6px">Aperçu</div>
-        <div style="max-height:240px;overflow:auto;border:1px solid #eef2f7;border-radius:12px">
+        <div class="muted" style="margin-bottom:8px;font-weight:900;font-size:12px">Aperçu</div>
+        <div style="max-height:280px;overflow:auto;border:1px solid var(--border);border-radius:12px">
           <table>
             <thead>
               <tr>
-                <th>#</th><th>Nom</th><th>Sexe</th><th>Naissance</th>
-                <th>Temps</th><th>Statut</th><th>Vélo</th><th>Âge</th><th>Cat.</th>
+                <th>#</th>
+                <th>Nom</th>
+                <th>Sexe</th>
+                <th>Naissance</th>
+                <th>Temps</th>
+                <th>Statut</th>
+                <th>Vélo</th>
+                <th>Nationalité</th>
+                <th>Âge</th>
+                <th>Cat.</th>
               </tr>
             </thead>
             <tbody id="previewBody"></tbody>
@@ -113,8 +230,8 @@
       </div>
     </div>
 
-    <div class="row" style="margin-top:14px;justify-content:space-between">
-      <div class="muted" id="statusLine">Charge un fichier pour commencer.</div>
+    <div class="row" style="margin-top:16px;justify-content:space-between">
+      <div class="muted" id="statusLine" style="font-size:13px">Charge un fichier pour commencer.</div>
       <div class="row">
         <button class="ghost" id="btnClear" type="button">Effacer</button>
         <button class="secondary" id="btnDryRun" type="button">Dry-run</button>
@@ -122,7 +239,7 @@
       </div>
     </div>
 
-    <div id="log" class="muted" style="margin-top:10px;white-space:pre-wrap"></div>
+    <div id="log" class="muted" style="margin-top:12px;white-space:pre-wrap;font-size:12px;line-height:1.6"></div>
   </div>
 
 </main>

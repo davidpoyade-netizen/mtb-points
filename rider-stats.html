@@ -82,26 +82,30 @@
       max-width: 320px;
     }
 
-    /* KPI cards : on réutilise les classes du design system */
-    .kpiGrid{
-      margin-top:14px;
+    /* KPI cards */
+    .grid{
       display:grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
       gap:12px;
     }
-    @media(max-width:980px){ .kpiGrid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
-    @media(max-width:560px){ .kpiGrid{ grid-template-columns: 1fr; } }
+    .grid.two{grid-template-columns: repeat(2, minmax(0,1fr));}
+    .grid.three{grid-template-columns: repeat(3, minmax(0,1fr));}
+    .grid.four{grid-template-columns: repeat(4, minmax(0,1fr));}
+    @media(max-width:980px){ 
+      .grid.two{ grid-template-columns: 1fr; }
+      .grid.three{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .grid.four{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media(max-width:560px){ 
+      .grid.three{ grid-template-columns: 1fr; }
+      .grid.four{ grid-template-columns: 1fr; }
+    }
 
-    .kpiCard{
+    .box{
       border:1px solid var(--border);
       border-radius:18px;
       padding:14px;
-      background:#fff;
+      background:rgba(255,255,255,.80);
       box-shadow: 0 2px 10px rgba(0,0,0,.04);
-    }
-    body.theme-nature .kpiCard{
-      background: rgba(255,255,255,.80);
-      border-color: rgba(40,60,40,.14);
     }
 
     .kpiLabel{
@@ -171,8 +175,7 @@
   <header class="header">
     <div class="brandRow">
       <div class="brandLogo" aria-hidden="true">
-        <!-- optionnel : remplace par ton logo -->
-        <img src="./img/mtbpoints-logo.png" alt="" onerror="this.style.display='none';this.parentElement.style.display='none'">
+        <img src="./img/mtbpoints-coins.png" alt="" onerror="this.style.display='none';this.parentElement.style.display='none'">
       </div>
       <div style="display:flex;flex-direction:column;gap:2px;">
         <h1 style="margin:0;">MTB Points — Profil Rider</h1>
@@ -185,11 +188,11 @@
       <a href="index.html">Accueil</a>
       <a href="public-ranking.html">Classement</a>
       <a href="meetings.html">Événements</a>
-      <a href="rider.html" class="active">Rider</a>
+      <a href="rider-stats.html" class="active">Mon Profil</a>
     </nav>
 
     <div class="headerRight">
-      <a class="btn ghost" href="rider.html">← Retour</a>
+      <button class="btn ghost" id="btnLogout" type="button">Déconnexion</button>
     </div>
   </header>
 
@@ -216,7 +219,6 @@
           </div>
 
           <div class="pointsBox">
-            <!-- ✅ demandé : "tu as 0 MTB-points" + animation -->
             <div class="pointsLine" aria-live="polite">
               Tu as <span class="num" id="mtbPointsNum">0</span> MTB-points
             </div>
@@ -232,62 +234,115 @@
         </div>
       </section>
 
-      <!-- KPIs -->
+      <!-- 1er bloc : Stats générales (4 colonnes) -->
       <h3 class="sectionTitle">Statistiques générales</h3>
-      <div class="kpiGrid">
-        <div class="kpiCard">
+      <div class="grid four">
+        <div class="box">
           <div class="kpiLabel">Courses</div>
           <div class="kpiValue" id="kpiRaces">—</div>
-          <div class="kpiSub">Nombre d’épreuves prises en compte</div>
+          <div class="kpiSub">Nombre d'épreuves</div>
         </div>
 
-        <div class="kpiCard">
-          <div class="kpiLabel">Meilleur rang</div>
-          <div class="kpiValue" id="kpiBestRank">—</div>
-          <div class="kpiSub">Sur tes résultats (si dispo)</div>
+        <div class="box">
+          <div class="kpiLabel">MTB Points</div>
+          <div class="kpiValue" id="kpiPoints">—</div>
+          <div class="kpiSub">Total cumulé</div>
         </div>
 
-        <div class="kpiCard">
+        <div class="box">
           <div class="kpiLabel">Discipline</div>
           <div class="kpiValue" id="kpiDisc">—</div>
-          <div class="kpiSub">Info indicative (si dispo)</div>
+          <div class="kpiSub">Principale</div>
         </div>
 
-        <div class="kpiCard">
+        <div class="box">
           <div class="kpiLabel">Statut</div>
           <div class="kpiValue" id="kpiStatus">—</div>
-          <div class="kpiSub">Connexion / accès public</div>
+          <div class="kpiSub">Actif / Inactif</div>
         </div>
       </div>
 
-      <!-- Last results (placeholder) -->
+      <!-- 2e bloc : Performances (2 colonnes) -->
+      <h3 class="sectionTitle">Meilleures performances</h3>
+      <div class="grid two">
+        <div class="box">
+          <div class="kpiLabel">Meilleure performance</div>
+          <div class="kpiValue" id="bestPerformance">—</div>
+          <div class="kpiSub">Meilleur Race Score</div>
+        </div>
+
+        <div class="box">
+          <div class="kpiLabel">Meilleur classement</div>
+          <div class="kpiValue" id="bestRanking">—</div>
+          <div class="kpiSub">Meilleur rang</div>
+        </div>
+      </div>
+
+      <!-- 3e bloc : Derniers résultats -->
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px">
-        <h3 class="sectionTitle" style="margin:0">Derniers résultats</h3>
+        <h3 class="sectionTitle" style="margin:0">3 derniers résultats</h3>
         <a class="btn ghost" href="#" id="btnSeeAll">Tout voir →</a>
       </div>
 
       <div style="margin-top:10px; overflow:auto">
-        <table aria-label="Derniers résultats">
+        <table aria-label="3 derniers résultats">
           <thead>
             <tr>
               <th>Date</th>
-              <th>Épreuve</th>
+              <th>Course</th>
               <th>Pays</th>
-              <th>Dist / D+</th>
-              <th>MTB</th>
-              <th>Rang</th>
+              <th>Distance / D+</th>
+              <th>Points MTB</th>
+              <th>Classement</th>
               <th>Temps</th>
-              <th class="right">Score</th>
+              <th class="right">Race Score</th>
             </tr>
           </thead>
           <tbody id="lastResults">
             <tr>
-              <td colspan="8" class="muted" style="padding:14px">
-                (À brancher) — Quand tu voudras, je te connecte ça à ta vue publique des résultats.
-              </td>
+              <td>—</td>
+              <td class="muted">Aucun résultat</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="muted">—</td>
+              <td class="right"><span class="tag err">—</span></td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- 4e bloc : Classements par catégorie -->
+      <h3 class="sectionTitle">Classements par catégorie d'âge</h3>
+      <div class="grid two">
+        <div class="box">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+            <div>
+              <div style="font-weight:1000">Classement mondial</div>
+              <div class="muted" style="font-size:12px;margin-top:4px">Catégorie : <b id="rankAgeCatW">—</b></div>
+            </div>
+            <span class="pill"><span class="dot"></span> Monde</span>
+          </div>
+          <div style="margin-top:10px;font-size:22px;font-weight:1100;letter-spacing:-.3px">
+            <span id="worldAgeRank">—</span> <span class="muted" style="font-size:14px">/</span> <span class="muted" id="worldAgeTotal">—</span>
+          </div>
+          <div class="muted" style="font-size:12px;margin-top:6px">Rang / total (catégorie d'âge)</div>
+        </div>
+
+        <div class="box">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+            <div>
+              <div style="font-weight:1000">Classement national</div>
+              <div class="muted" style="font-size:12px;margin-top:4px">Catégorie : <b id="rankAgeCatN">—</b></div>
+            </div>
+            <span class="pill"><span class="dot"></span> <span id="countryFlag">FR</span></span>
+          </div>
+          <div style="margin-top:10px;font-size:22px;font-weight:1100;letter-spacing:-.3px">
+            <span id="nationalAgeRank">—</span> <span class="muted" style="font-size:14px">/</span> <span class="muted" id="nationalAgeTotal">—</span>
+          </div>
+          <div class="muted" style="font-size:12px;margin-top:6px">Rang / total (catégorie d'âge)</div>
+        </div>
       </div>
 
       <div class="muted" style="margin-top:12px;font-size:12px;line-height:1.55" id="debugLine"></div>
@@ -314,7 +369,6 @@
       const s = Number.isFinite(start) ? start : 0;
       const e = Number.isFinite(end) ? end : 0;
 
-      // si pas d'animation utile
       if (durationMs <= 0 || s === e){
         el.textContent = String(Math.round(e));
         return;
@@ -349,7 +403,6 @@
     }
 
     async function loadFromPublicRankingByRiderId(riderId){
-      // attend une vue type v_public_ranking avec rider_id + score + name...
       const { data, error } = await supabase
         .from("v_public_ranking")
         .select("*")
@@ -361,7 +414,6 @@
     }
 
     async function loadFromPublicRankingByEmail(email){
-      // fallback si ta vue expose email (parfois non)
       const { data, error } = await supabase
         .from("v_public_ranking")
         .select("*")
@@ -384,14 +436,15 @@
       $("riderSex").textContent = sex || "—";
       $("riderAgeCat").textContent = ageCat || "—";
       $("riderCountry").textContent = country || "—";
+      $("countryFlag").textContent = country || "FR";
 
       const img = $("riderPhoto");
       if (img && photoUrl) img.src = photoUrl;
     }
 
-    function setKpis({ races, bestRank, disc, status }){
+    function setKpis({ races, points, disc, status }){
       $("kpiRaces").textContent = races ?? "—";
-      $("kpiBestRank").textContent = bestRank ?? "—";
+      $("kpiPoints").textContent = points ?? "—";
       $("kpiDisc").textContent = disc ?? "—";
       $("kpiStatus").textContent = status ?? "—";
     }
@@ -400,13 +453,11 @@
       const btn = $("btnReload");
       if (btn) btn.disabled = true;
 
-      // reset UI
       $("riderHint").textContent = "Chargement…";
       $("pointsHint").textContent = "Somme des points (vue v_public_ranking si disponible).";
-      setKpis({ races:"—", bestRank:"—", disc:"—", status:"—" });
+      setKpis({ races:"—", points:"—", disc:"—", status:"—" });
       setStatusLine(true, "");
 
-      // compteur : repartir de 0 à chaque chargement (effet sympa)
       const counterEl = $("mtbPointsNum");
       counterEl.textContent = "0";
 
@@ -419,25 +470,21 @@
       try{
         let row = null;
 
-        // 1) rider_id
         if (riderId){
           try{
             row = await loadFromPublicRankingByRiderId(riderId);
           }catch(_){}
         }
 
-        // 2) email (si ta vue l'expose)
         if (!row && riderEmail){
           try{
             row = await loadFromPublicRankingByEmail(riderEmail.toLowerCase());
           }catch(_){}
         }
 
-        // UI "status"
         const status = user ? "Connecté" : "Public";
 
         if (!row){
-          // Pas de données : on reste à 0, mais propre.
           setRiderUI({
             name: user?.email ? user.email.split("@")[0] : "Rider",
             sex: "—",
@@ -447,18 +494,18 @@
           });
 
           $("riderHint").textContent = user
-            ? "Connecté, mais aucun score public trouvé (vue absente / pas de données / filtre)."
+            ? "Connecté, mais aucun score public trouvé."
             : "Aucun score public trouvé. Connecte-toi ou ouvre la page avec ?id=...";
 
-          setKpis({ races:"—", bestRank:"—", disc:"—", status });
+          setKpis({ races:"—", points:"—", disc:"—", status });
           animateNumber(counterEl, 0, 0, 0);
 
-          $("pointsHint").textContent = "⚠️ Impossible de charger les points (vue absente / RLS / rider introuvable).";
-          setStatusLine(false, "Astuce : si besoin, ajoute rider_id dans v_public_ranking (ou passe ?id=... dans l’URL).");
+          $("pointsHint").textContent = "⚠️ Impossible de charger les points.";
+          setStatusLine(false, "Astuce : ajoute rider_id dans v_public_ranking.");
+          if (btn) btn.disabled = false;
           return;
         }
 
-        // Mapping "best effort"
         const name =
           row.name ||
           `${(row.last_name || "").trim()} ${(row.first_name || "").trim()}`.trim() ||
@@ -468,24 +515,36 @@
         const sex = row.sex || "—";
         const country = row.nationality || row.nat || "—";
         const ageCat = row.age_cat || row.ageCat || (row.birth_year ? `Né(e) ${row.birth_year}` : "—");
+        const photoUrl = row.photo_url || row.photoUrl || "./img/rider-placeholder.png";
 
-        setRiderUI({ name, sex, ageCat, country });
+        setRiderUI({ name, sex, ageCat, country, photoUrl });
 
         const points = Number(row.score ?? row.points ?? 0);
-        const races = Number(row.races ?? row.race_count ?? row.count ?? null);
+        const races = Number(row.races ?? row.race_count ?? row.count ?? 0);
 
-        // animation : 0 -> points
         animateNumber(counterEl, 0, Number.isFinite(points) ? points : 0, 1200);
 
         $("riderHint").textContent = "Statistiques basées sur tes données publiques.";
         setKpis({
           races: Number.isFinite(races) ? races : "—",
-          bestRank: row.best_rank ?? "—",
-          disc: row.disc ?? row.discipline ?? "—",
+          points: Number.isFinite(points) ? points : "—",
+          disc: row.disc ?? row.discipline ?? "XC",
           status
         });
 
-        $("pointsHint").textContent = "Ton total s’anime automatiquement au chargement ✨";
+        // Performances
+        $("bestPerformance").textContent = row.best_score ?? "—";
+        $("bestRanking").textContent = row.best_rank ?? "—";
+
+        // Classements
+        $("rankAgeCatW").textContent = ageCat;
+        $("rankAgeCatN").textContent = ageCat;
+        $("worldAgeRank").textContent = row.world_rank ?? "—";
+        $("worldAgeTotal").textContent = row.world_total ?? "—";
+        $("nationalAgeRank").textContent = row.national_rank ?? "—";
+        $("nationalAgeTotal").textContent = row.national_total ?? "—";
+
+        $("pointsHint").textContent = "Ton total s'anime automatiquement au chargement ✨";
         setStatusLine(true, `Source: v_public_ranking${riderId ? " (filtre rider_id)" : ""}`);
 
       } catch (e){
@@ -493,7 +552,7 @@
 
         $("riderHint").textContent = "Erreur de chargement (Supabase / RLS / configuration).";
         $("pointsHint").textContent = "⚠️ Impossible de charger les points.";
-        setKpis({ races:"—", bestRank:"—", disc:"—", status: user ? "Connecté" : "Public" });
+        setKpis({ races:"—", points:"—", disc:"—", status: user ? "Connecté" : "Public" });
 
         animateNumber($("mtbPointsNum"), 0, 0, 0);
         setStatusLine(false, "Erreur Supabase : vérifie la vue v_public_ranking et les policies (RLS).");
@@ -502,14 +561,24 @@
       }
     }
 
-    // bindings
+    // Déconnexion
+    $("btnLogout")?.addEventListener("click", async () => {
+      try {
+        await supabase.auth.signOut();
+        location.href = "index.html";
+      } catch (e) {
+        alert(`Erreur déconnexion: ${e.message}`);
+      }
+    });
+
+    // Bindings
     $("btnReload")?.addEventListener("click", loadProfile);
     $("btnSeeAll")?.addEventListener("click", (e) => {
       e.preventDefault();
       alert("À brancher : page complète des résultats (ex: rider-results.html).");
     });
 
-    // init
+    // Init
     await loadProfile();
   </script>
 </body>

@@ -249,6 +249,23 @@
         </div>
       </div>
 
+      <!-- Photo de profil -->
+      <div class="form-section">
+        <h3>📸 Photo de profil</h3>
+        
+        <div class="form-field">
+          <label>
+            Photo de profil
+            <span class="hint">Optionnel - JPG, PNG (max 2MB)</span>
+          </label>
+          <input type="file" id="photoFile" name="photoFile" accept="image/jpeg,image/png,image/jpg" />
+        </div>
+        
+        <div id="photoPreview" style="display:none;margin-top:12px">
+          <img id="photoPreviewImg" src="" alt="Aperçu" style="max-width:150px;max-height:150px;border-radius:12px;border:1px solid var(--border)" />
+        </div>
+      </div>
+
       <div class="info-box">
         <strong>ℹ️ À savoir :</strong><br>
         • Tes informations seront utilisées pour calculer ta catégorie UCI et ton classement<br>
@@ -348,6 +365,41 @@
       // Calcul de la catégorie UCI
       const ageCat = calculateUCICategory(birthYear, sex);
 
+      // Gestion de la photo (optionnelle)
+      let photoUrl = null;
+      const photoFile = $("photoFile").files[0];
+      if (photoFile) {
+        // Upload vers Supabase Storage (si configuré)
+        // Pour l'instant on stocke juste le fait qu'il y a une photo
+        // Tu peux implémenter l'upload vers Supabase Storage ici
+        showMsg("Upload photo en cours...", "warn");
+        
+        try {
+          const fileExt = photoFile.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const filePath = `profiles/${fileName}`;
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('rider-photos')
+            .upload(filePath, photoFile);
+
+          if (uploadError) {
+            console.warn("Erreur upload photo:", uploadError);
+            // On continue sans la photo
+          } else {
+            const { data: { publicUrl } } = supabase.storage
+              .from('rider-photos')
+              .getPublicUrl(filePath);
+            photoUrl = publicUrl;
+          }
+        } catch (uploadErr) {
+          console.warn("Erreur upload photo:", uploadErr);
+          // On continue sans la photo
+        }
+      }
+
+      showMsg("Création de votre compte...", "warn");
+
       // Création du compte Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -362,7 +414,8 @@
             nationality: nationality,
             club: club || null,
             team: team || null,
-            age_cat: ageCat
+            age_cat: ageCat,
+            photo_url: photoUrl
           }
         }
       });
@@ -389,6 +442,7 @@
           club: club || null,
           team: team || null,
           age_cat: ageCat,
+          photo_url: photoUrl,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'id'
@@ -437,6 +491,30 @@
   // Auto-uppercase pour la nationalité
   $("nationality").addEventListener("input", (e) => {
     e.target.value = e.target.value.toUpperCase();
+  });
+
+  // Gestion de l'aperçu photo
+  $("photoFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Vérifier la taille
+      if (file.size > 2 * 1024 * 1024) {
+        alert("La photo ne doit pas dépasser 2MB");
+        e.target.value = "";
+        $("photoPreview").style.display = "none";
+        return;
+      }
+
+      // Aperçu
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        $("photoPreviewImg").src = event.target.result;
+        $("photoPreview").style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    } else {
+      $("photoPreview").style.display = "none";
+    }
   });
 </script>
 
