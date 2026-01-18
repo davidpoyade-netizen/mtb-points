@@ -102,7 +102,7 @@
     .kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}
     @media(max-width:700px){ .kpis{grid-template-columns:1fr} }
 
-    .miniCard{border:1px solid var(--border);border-radius:18px;padding:14px;background:rgba(255,255,255,.80)}
+    .miniCard{border:1px solid var(--border);border-radius:18px;padding:14px;background:rgba(255,255,255,.80);margin-bottom:14px}
     .miniCard h3{margin:0 0 6px 0;font-size:16px}
     .miniCard p{margin:0;line-height:1.55;color:#223024}
 
@@ -154,12 +154,35 @@
     .rightScore{font-weight:950;font-size:13px;color:var(--text);white-space:nowrap}
     .mutedSmall{color:var(--muted2);font-size:12px}
 
-    .eventsGrid{margin-top:12px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .eventsGrid{margin-top:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
     @media(max-width:900px){ .eventsGrid{grid-template-columns:1fr 1fr} }
     @media(max-width:520px){ .eventsGrid{grid-template-columns:1fr} }
     .eventCard{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,.75)}
     .eventCard .t{font-weight:950;font-size:13px;margin:0}
     .eventCard .m{margin-top:6px;color:var(--muted2);font-size:12px;line-height:1.4}
+
+    /* CTA boxes pour riders et organisateurs */
+    .cta-box{
+      border:2px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      background:rgba(255,255,255,.88);
+      margin-bottom:14px;
+    }
+    .cta-box.rider{
+      border-color:rgba(47,111,62,.35);
+      background:
+        radial-gradient(600px 200px at 10% 0%, rgba(47,111,62,.08), transparent 70%),
+        rgba(255,255,255,.88);
+    }
+    .cta-box.organizer{
+      border-color:rgba(234,88,12,.35);
+      background:
+        radial-gradient(600px 200px at 10% 0%, rgba(234,88,12,.08), transparent 70%),
+        rgba(255,255,255,.88);
+    }
+    .cta-box h3{margin:0 0 8px 0;font-size:18px}
+    .cta-box p{margin:0 0 12px 0;line-height:1.6;color:#334155}
   </style>
 </head>
 
@@ -185,7 +208,6 @@
     <a href="methodologie.html">Méthodologie</a>
     <a href="about.html">À propos</a>
     <a href="contact.html">Contact</a>
-    <a href="login.html">Connexion</a>
   </nav>
 
   <div class="lang">
@@ -213,14 +235,6 @@
           <span class="chip">Badges Challenge</span>
         </div>
 
-        <div class="heroActions">
-          <a class="btn2 primary" href="login.html">Je suis organisateur</a>
-          <a class="btn2" href="public-ranking.html">Voir le classement</a>
-          <a class="btn2" href="public-clubs.html">Voir les clubs</a>
-          <a class="btn2" href="challengemtbpoints.html">Voir le challenge</a>
-          <a class="btn2" href="contact.html">Nous contacter</a>
-        </div>
-
         <div class="kpis">
           <div class="kpi">
             <div class="big">24 mois</div>
@@ -228,7 +242,7 @@
           </div>
           <div class="kpi">
             <div class="big">Physique + Technique</div>
-            <div class="sub">score d’épreuve (MRS)</div>
+            <div class="sub">score d'épreuve (MRS)</div>
           </div>
           <div class="kpi">
             <div class="big">XC • Enduro • DH</div>
@@ -245,17 +259,49 @@
     </div>
   </section>
 
+  <!-- BLOC 1 : ESPACE CYCLISTE RIDERS -->
+  <section style="margin-top:20px">
+    <div class="cta-box rider">
+      <h3>🚴 Espace Cycliste : Riders</h3>
+      <p>
+        Inscris-toi pour avoir tes statistiques personnalisées ! Suis tes points MTB, ton classement,
+        et tes performances sur toutes les courses. Analyse tes progrès et compare-toi aux autres riders.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="rider-create.html" class="btn2 primary">Créer mon compte Rider</a>
+        <a href="rider.html" class="btn2">Se connecter</a>
+        <a href="public-ranking.html" class="btn2">Voir le classement</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOC 2 : ESPACE ORGANISATEUR -->
+  <section>
+    <div class="cta-box organizer">
+      <h3>📋 Organisateurs : Inscris-toi et valorise tes épreuves</h3>
+      <p>
+        Publie tes résultats, analyse tes parcours GPX automatiquement, et donne de la visibilité
+        à tes événements. Rejoins la plateforme MTB Points et offre à tes participants un classement reconnu.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="organizer-create.html" class="btn2 primary">Créer mon compte Organisateur</a>
+        <a href="login.html" class="btn2">Se connecter</a>
+        <a href="meetings.html" class="btn2">Voir les événements</a>
+      </div>
+    </div>
+  </section>
+
   <!-- APERÇUS -->
   <section class="previewRow" aria-label="Aperçus">
 
-    <!-- 1) Classement -->
+    <!-- BLOC 3 : Classement Top 3 Mondial Hommes et Femmes -->
     <div class="preview" id="previewRanking" role="link" tabindex="0" title="Ouvrir le classement">
       <div class="previewTop">
         <div>
           <h3>Classement mondial — Global</h3>
-          <div class="sub">Top 3 Hommes / Femmes (aperçu)</div>
+          <div class="sub">Top 3 Hommes / Femmes avec leurs MTB Points</div>
         </div>
-        <span class="previewBadge">→ Voir le classement</span>
+        <span class="previewBadge">→ Voir le classement complet</span>
       </div>
 
       <div class="previewBody">
@@ -277,20 +323,27 @@
       <div class="mutedSmall" id="rankHint" style="margin-top:10px">Source: Supabase</div>
     </div>
 
-    <!-- 2) Challenge -->
+    <!-- BLOC 4 : Challenge Top 3 Hommes et Femmes -->
     <div class="preview" id="previewChallenge" role="link" tabindex="0" title="Ouvrir le challenge">
       <div class="previewTop">
         <div>
           <h3>Challenge MTB Points</h3>
-          <div class="sub">Top 3 (aperçu)</div>
+          <div class="sub">Top 3 Hommes / Femmes</div>
         </div>
         <span class="previewBadge">→ Voir le challenge</span>
       </div>
 
-      <div class="previewBody" style="grid-template-columns:1fr;">
+      <div class="previewBody">
         <div class="miniTable">
-          <div class="title">🔥 Leaders</div>
-          <ul class="miniList" id="challengeTop">
+          <div class="title">🔥 Hommes</div>
+          <ul class="miniList" id="challengeMen">
+            <li class="miniItem"><div class="left"><span class="medal">…</span><span class="name">Chargement…</span></div><span class="rightScore">—</span></li>
+          </ul>
+        </div>
+
+        <div class="miniTable">
+          <div class="title">🔥 Femmes</div>
+          <ul class="miniList" id="challengeWomen">
             <li class="miniItem"><div class="left"><span class="medal">…</span><span class="name">Chargement…</span></div><span class="rightScore">—</span></li>
           </ul>
         </div>
@@ -299,27 +352,7 @@
       <div class="mutedSmall" id="challengeHint" style="margin-top:10px">Source: Supabase</div>
     </div>
 
-    <!-- 3) Événements à venir -->
-    <div class="preview" id="previewMeetings" role="link" tabindex="0" title="Voir les événements">
-      <div class="previewTop">
-        <div>
-          <h3>Événements à venir</h3>
-          <div class="sub">Les 4 prochains meetings publiés</div>
-        </div>
-        <span class="previewBadge">→ Voir tous les événements</span>
-      </div>
-
-      <div class="eventsGrid" id="upcomingMeetings">
-        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
-        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
-        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
-        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
-      </div>
-
-      <div class="mutedSmall" id="meetingsHint" style="margin-top:10px">Source: Supabase</div>
-    </div>
-
-    <!-- 4) Clubs -->
+    <!-- BLOC 5 : Top 3 Clubs -->
     <div class="preview" id="previewClubs" role="link" tabindex="0" title="Voir le classement des clubs">
       <div class="previewTop">
         <div>
@@ -340,113 +373,78 @@
 
       <div class="mutedSmall" id="clubsHint" style="margin-top:10px">Source: Supabase</div>
     </div>
+
+    <!-- BLOC 6 : 3 Prochains Événements -->
+    <div class="preview" id="previewMeetings" role="link" tabindex="0" title="Voir les événements">
+      <div class="previewTop">
+        <div>
+          <h3>Événements à venir</h3>
+          <div class="sub">Les 3 prochains meetings publiés</div>
+        </div>
+        <span class="previewBadge">→ Voir tous les événements</span>
+      </div>
+
+      <div class="eventsGrid" id="upcomingMeetings">
+        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
+        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
+        <div class="eventCard"><p class="t">Chargement…</p><div class="m">—</div></div>
+      </div>
+
+      <div class="mutedSmall" id="meetingsHint" style="margin-top:10px">Source: Supabase</div>
+    </div>
   </section>
 
-  <!-- CONTENT -->
-  <div class="grid">
+  <!-- BLOC 7 : Qu'est-ce que les points MTB ? -->
+  <section class="card" style="margin-top:20px">
+    <h3 style="margin:0;">Qu'est-ce que les points MTB ?</h3>
+    <p class="muted" style="margin:8px 0 0 0;line-height:1.6;">
+      Les <strong>points MTB</strong> sont un système de classement pour les épreuves de VTT.
+      L'objectif : comparer des performances sur des courses très différentes, avec un calcul basé sur des critères objectifs :
+      <strong>distance</strong>, <strong>dénivelé</strong>, <strong>profil</strong> et <strong>terrain</strong>.
+    </p>
 
-    <!-- LEFT -->
-    <div class="card">
-      <h3 style="margin:0;">Qu’est-ce que les points MTB ?</h3>
-      <p class="muted" style="margin:8px 0 0 0;line-height:1.6;">
-        Les <strong>points MTB</strong> sont un système de classement pour les épreuves de VTT.
-        L’objectif : comparer des performances sur des courses très différentes, avec un calcul basé sur des critères objectifs :
-        <strong>distance</strong>, <strong>dénivelé</strong>, <strong>profil</strong> et <strong>terrain</strong>.
-      </p>
+    <h4 style="margin:14px 0 6px 0;">Pour les cyclistes</h4>
+    <p style="margin:0;line-height:1.6;">
+      Cumule des points selon tes résultats. Le classement utilise une <strong>fenêtre glissante de 24 mois</strong> et propose
+      des filtres par <strong>âge</strong>, <strong>sexe</strong> et <strong>discipline</strong>.
+    </p>
+    <ul class="clean">
+      <li>Comparer ton niveau sur des courses différentes</li>
+      <li>Suivre ta progression</li>
+      <li>Débloquer des badges du <strong>Challenge MTB Points</strong></li>
+    </ul>
 
-      <h4 style="margin:14px 0 6px 0;">Pour les cyclistes</h4>
-      <p style="margin:0;line-height:1.6;">
-        Cumule des points selon tes résultats. Le classement utilise une <strong>fenêtre glissante de 24 mois</strong> et propose
-        des filtres par <strong>âge</strong>, <strong>sexe</strong> et <strong>discipline</strong>.
-      </p>
-      <ul class="clean">
-        <li>Comparer ton niveau sur des courses différentes</li>
-        <li>Suivre ta progression</li>
-        <li>Débloquer des badges du <strong>Challenge MTB Points</strong></li>
-      </ul>
+    <h4 style="margin:14px 0 6px 0;">Pour les organisateurs</h4>
+    <p style="margin:0;line-height:1.6;">
+      Analyse ton parcours via la trace <strong>GPX</strong> : distance, D+, profil, et ScoreTech V2 (OSM).
+      Publie ensuite tes résultats et génère une fiche épreuve.
+    </p>
 
-      <h4 style="margin:14px 0 6px 0;">Pour les organisateurs</h4>
-      <p style="margin:0;line-height:1.6;">
-        Analyse ton parcours via la trace <strong>GPX</strong> : distance, D+, profil, et ScoreTech V2 (OSM).
-        Publie ensuite tes résultats et génère une fiche épreuve.
-      </p>
-
-      <div class="note">
-        ✅ Nouveau : une page dédiée au <strong>Challenge</strong> avec badges (500 / 750 / 1000 / 2000).
-      </div>
-
-      <footer>
-        Astuce : commence par créer une épreuve et importer un fichier GPX.
-        • <a href="contact.html" style="color:var(--blue);font-weight:950;text-decoration:none;">Contact</a>
-      </footer>
+    <div class="note">
+      ✅ Nouveau : une page dédiée au <strong>Challenge</strong> avec badges (500 / 750 / 1000 / 2000).
     </div>
 
-    <!-- RIGHT -->
-    <div class="card">
-      <div class="miniCard">
-        <h3>Espace Organisateur</h3>
-        <p>Créer une épreuve, analyser le GPX, importer les résultats, publier le classement.</p>
-        <div style="margin-top:10px">
-          <a class="btn2 primary" href="login.html">Accéder</a>
-        </div>
-        <div class="muted" style="margin-top:8px;font-size:12px;">Connexion requise</div>
-      </div>
+    <footer>
+      Astuce : commence par créer une épreuve et importer un fichier GPX.
+      • <a href="contact.html" style="color:var(--blue);font-weight:950;text-decoration:none;">Contact</a>
+    </footer>
+  </section>
 
-      <div style="height:12px"></div>
-
-      <div class="miniCard">
-        <h3>Espace Cycliste</h3>
-        <p>Consulter les épreuves, le classement public, et suivre les badges du challenge.</p>
-        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
-          <a class="btn2" href="public-ranking.html">Classement</a>
-          <a class="btn2" href="public-clubs.html">Clubs</a>
-          <a class="btn2" href="challengemtbpoints.html">Challenge</a>
-        </div>
-        <div class="muted" style="margin-top:8px;font-size:12px;">Accès public</div>
-      </div>
-
-      <div style="height:12px"></div>
-
-      <div class="miniCard">
-        <h3>Raccourcis</h3>
-        <p class="muted" style="margin:0 0 10px 0;">Pages clés du projet</p>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <a class="btn2" href="meetings.html">Événements</a>
-          <a class="btn2" href="public-clubs.html">Clubs</a>
-          <a class="btn2" href="reglement.html">Règlement</a>
-          <a class="btn2" href="methodologie.html">Méthodologie</a>
-          <a class="btn2" href="about.html">À propos</a>
-          <a class="btn2" href="contact.html">Contact</a>
-        </div>
-      </div>
-    </div>
-
-  </div>
 </div>
 
-<!-- Préviews Supabase -->
 <script type="module">
   import { supabase } from "./js/supabaseClient.js";
 
   const $ = (id) => document.getElementById(id);
+  const medals = ["🥇", "🥈", "🥉"];
 
-  const medals = ["🥇","🥈","🥉"];
-  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-
-  function bindOpen(el, href){
-    if (!el) return;
-    el.addEventListener("click", () => location.href = href);
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); location.href = href; }
-    });
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[m]));
   }
 
-  bindOpen($("previewRanking"), "public-ranking.html");
-  bindOpen($("previewChallenge"), "challengemtbpoints.html");
-  bindOpen($("previewMeetings"), "meetings.html");
-  bindOpen($("previewClubs"), "public-clubs.html");
-
-  function renderTopList(ul, rows, scoreKey="score", nameKey="name"){
+  function renderTopList(ul, rows, scoreKey = "score", nameKey = "name"){
     if (!ul) return;
     if (!rows || !rows.length){
       ul.innerHTML = `<li class="miniItem"><div class="left"><span class="medal">—</span><span class="name">Aucune donnée</span></div><span class="rightScore">—</span></li>`;
@@ -499,7 +497,8 @@
   }
 
   async function loadChallengePreview(){
-    const ul = $("challengeTop");
+    const menUl = $("challengeMen");
+    const womenUl = $("challengeWomen");
     const hint = $("challengeHint");
 
     const tryViews = [
@@ -514,16 +513,22 @@
           .from(t.view)
           .select("*")
           .order(t.scoreKey, { ascending: false })
-          .limit(10);
+          .limit(300);
 
         if (error) throw error;
 
         const rows = (data || []).map(r => ({
           name: r.name ?? `${r.last_name || ""} ${r.first_name || ""}`.trim(),
+          sex: r.sex ?? null,
           [t.scoreKey]: Number(r[t.scoreKey] ?? 0)
         }));
 
-        renderTopList(ul, rows, t.scoreKey);
+        const men = rows.filter(r => r.sex === "M").slice(0,3);
+        const women = rows.filter(r => r.sex === "F").slice(0,3);
+
+        renderTopList(menUl, men, t.scoreKey);
+        renderTopList(womenUl, women, t.scoreKey);
+
         if (hint) hint.textContent = `Source: Supabase (${t.view})`;
         return;
       } catch(e){
@@ -531,7 +536,8 @@
       }
     }
 
-    renderTopList(ul, [], "score");
+    renderTopList(menUl, [], "score");
+    renderTopList(womenUl, [], "score");
     if (hint) hint.textContent = "⚠️ Challenge indisponible (vue absente / RLS / config).";
   }
 
@@ -553,13 +559,13 @@
         .eq("is_published", true)
         .gte("date", iso)
         .order("date", { ascending: true })
-        .limit(4);
+        .limit(3);
 
       if (error) throw error;
 
       const meetings = data || [];
       if (!meetings.length){
-        box.innerHTML = `<div class="eventCard"><p class="t">Aucun événement à venir</p><div class="m">Publie un meeting pour l’afficher ici.</div></div>`;
+        box.innerHTML = `<div class="eventCard"><p class="t">Aucun événement à venir</p><div class="m">Publie un meeting pour l'afficher ici.</div></div>`;
         if (hint) hint.textContent = "Source: Supabase (meetings)";
         return;
       }
@@ -648,6 +654,11 @@
     }
   }
 
+  // Click handlers pour les previews
+  $("previewRanking")?.addEventListener("click", () => location.href = "public-ranking.html");
+  $("previewChallenge")?.addEventListener("click", () => location.href = "challengemtbpoints.html");
+  $("previewClubs")?.addEventListener("click", () => location.href = "public-clubs.html");
+  $("previewMeetings")?.addEventListener("click", () => location.href = "meetings.html");
 
   await loadRankingPreview();
   await loadChallengePreview();
@@ -657,7 +668,3 @@
 
 </body>
 </html>
-
-
-
-
