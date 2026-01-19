@@ -1,5 +1,7 @@
 // js/meeting-create.js
-// Création meeting (localStorage) — robuste GitHub Pages
+// Création meeting avec Supabase + fallback localStorage
+import { supabase } from "./supabaseClient.js";
+
 (function () {
   const $ = (id) => document.getElementById(id);
 
@@ -51,36 +53,8 @@
     return `${slugify(name)}-${Date.now()}`;
   }
 
-  // storage adapters (compat)
-  function readMeetings() {
-    if (typeof window.getMeetings === "function") return window.getMeetings();
-    if (typeof window.listMeetings === "function") return window.listMeetings();
-    try {
-      const raw = localStorage.getItem(KEY_MEETINGS);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch (_) {
-      return [];
-    }
-  }
-
-  function writeMeetings(arr) {
-    if (typeof window.saveMeetings === "function") return window.saveMeetings(arr);
-    localStorage.setItem(KEY_MEETINGS, JSON.stringify(arr || []));
-  }
-
-  function upsertMeetingLocal(meeting) {
-    if (typeof window.upsertMeeting === "function") return window.upsertMeeting(meeting);
-    const all = readMeetings();
-    const idx = all.findIndex((m) => m && m.id === meeting.id);
-    if (idx >= 0) all[idx] = meeting;
-    else all.unshift(meeting);
-    writeMeetings(all);
-    return meeting;
-  }
-
   function validate(name, startDateISO, endDateISO) {
-    if (!name) return "Le nom de l’événement est obligatoire.";
+    if (!name) return "Le nom de l'événement est obligatoire.";
     if (!startDateISO) return "La date de début est obligatoire.";
     const start = parseISODate(startDateISO);
     if (!start) return "Date de début invalide.";
@@ -99,6 +73,10 @@
     const endDate = toISODate($("mEndDate")?.value);
     const location = safeTrim($("mLocation")?.value) || null;
     const comment = safeTrim($("mComment")?.value) || null;
+    const externalUrl = safeTrim($("mUrl")?.value) || null;
+    const lat = safeTrim($("mLat")?.value) || null;
+    const lng = safeTrim($("mLng")?.value) || null;
+    const isPublished = $("mPublished")?.checked || false;
 
     const err = validate(name, date, endDate);
     if (err) throw new Error(err);
@@ -110,6 +88,10 @@
       endDate,
       location,
       comment,
+      externalUrl,
+      lat: lat ? Number(lat) : null,
+      lng: lng ? Number(lng) : null,
+      isPublished,
       raceIds: [],
       createdAt: new Date().toISOString()
     };
@@ -121,30 +103,125 @@
     $("mEndDate").value = "";
     $("mLocation").value = "";
     $("mComment").value = "";
+    $("mUrl").value = "";
+    $("mLat").value = "";
+    $("mLng").value = "";
+    $("mPublished").checked = true;
     showMsg("");
+  }
+
+  // Fallback localStorage pour GitHub Pages sans auth
+  function upsertMeetingLocal(meeting) {
+    try {
+      const raw = localStorage.getItem(KEY_MEETINGS);
+      const arr = raw ? JSON.parse(raw) : [];
+      const all = Array.isArray(arr) ? arr : [];
+      const idx = all.findIndex((m) => m && m.id === meeting.id);
+      if (idx >= 0) all[idx] = meeting;
+      else all.unshift(meeting);
+      localStorage.setItem(KEY_MEETINGS, JSON.stringify(all));
+      return meeting;
+    } catch(e) {
+      console.error("localStorage save failed:", e);
+      return meeting;
+    }
+  }
+
+  async function getCurrentUser() {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      return user;
+    } catch(e) {
+      console.warn("[meeting-create] getUser failed:", e);
+      return null;
+    }
   }
 
   async function createMeeting({ goCreateRace = false } = {}) {
     try {
       const meeting = buildMeetingFromForm();
-      upsertMeetingLocal(meeting);
+      showMsg("Création en cours...");
 
-      // enlève le fallback si on est là : le script a bien chargé
-      window.__fallbackCreateMeeting = null;
+      // Essayer Supabase d'abord
+      const user = await getCurrentUser();
+      
+      if (user) {
+        // ✅ UTILISER SUPABASE avec organizer_id
+        dbg(`Création Supabase avec user: ${user.id}`);
+        
+        const payload = {
+          id: meeting.id,
+          organizer_id: user.id,  // ← IMPORTANT : assigner l'organisateur !
+          name: meeting.name,
+          date: meeting.date,
+          end_date: meeting.endDate,
+          location: meeting.location,
+          comment: meeting.comment,
+          external_url: meeting.externalUrl,
+          lat: meeting.lat,
+          lng: meeting.lng,
+          is_published: meeting.isPublished,
+          race_ids: []
+        };
 
-      showMsg("✅ Événement créé. Redirection…");
-      dbg(`Meeting créé: ${meeting.id}`);
+        const { error } = await supabase.from("meetings").insert(payload);
+        
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw new Error(`Erreur Supabase: ${error.message}`);
+        }
 
-      // IMPORTANT: page de création d'épreuve = course-create.html (dans ton projet)
-      if (goCreateRace) {
-        location.href = `course-create.html?meetingId=${encodeURIComponent(meeting.id)}`;
+        showMsg("✅ Événement créé dans Supabase. Redirection...");
+        dbg(`Meeting créé: ${meeting.id}`);
       } else {
-        location.href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+        // Fallback localStorage si pas connecté
+        dbg("Pas d'utilisateur connecté, utilisation localStorage");
+        upsertMeetingLocal(meeting);
+        showMsg("✅ Événement créé localement. Redirection...");
       }
+
+      // Redirection
+      setTimeout(() => {
+        if (goCreateRace) {
+          location.href = `course-create.html?meetingId=${encodeURIComponent(meeting.id)}`;
+        } else {
+          location.href = `meeting.html?id=${encodeURIComponent(meeting.id)}`;
+        }
+      }, 800);
+
     } catch (e) {
       console.error(e);
       showMsg(`❌ ${e?.message || e}`);
     }
+  }
+
+  // Géolocalisation
+  const btnGeo = $("btnGeo");
+  if (btnGeo) {
+    btnGeo.addEventListener("click", () => {
+      const hint = $("geoHint");
+      if (!navigator.geolocation) {
+        if (hint) hint.textContent = "❌ Géolocalisation non disponible";
+        return;
+      }
+
+      if (hint) hint.textContent = "🔍 Localisation en cours...";
+      
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          if ($("mLat")) $("mLat").value = lat.toFixed(6);
+          if ($("mLng")) $("mLng").value = lng.toFixed(6);
+          if (hint) hint.textContent = `✅ Position: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        },
+        (err) => {
+          console.error("Geolocation error:", err);
+          if (hint) hint.textContent = `❌ Erreur: ${err.message}`;
+        }
+      );
+    });
   }
 
   // Wire UI
