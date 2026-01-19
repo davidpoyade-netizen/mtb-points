@@ -219,6 +219,11 @@
   const params = new URLSearchParams(location.search);
   const meetingId = params.get("id");
 
+  // Définir le href du bouton dès qu'on a l'ID (avant les vérifications)
+  if (meetingId) {
+    $("btnCreateRace").href = `course-create.html?meetingId=${encodeURIComponent(meetingId)}`;
+  }
+
   if (!meetingId) {
     $("meetingName").textContent = "❌ Aucun événement spécifié";
     $("meetingMeta").textContent = "Retourne au tableau de bord.";
@@ -274,9 +279,6 @@
   $("statusPill").innerHTML = meeting.isPublished 
     ? `<span class="dot ok"></span> Publié` 
     : `<span class="dot" style="background:#ea580c"></span> Brouillon`;
-
-  // CORRECTION: Set create race URL with course-create.html
-  $("btnCreateRace").href = `course-create.html?meetingId=${encodeURIComponent(meetingId)}`;
 
   // Load races for this meeting
   const allRaces = listRacesSafe();
