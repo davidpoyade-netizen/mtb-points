@@ -87,23 +87,99 @@ if (btnLogout) {
 }
 
 let meetings = [];
+let showAllMode = false;
 
 async function loadMeetings(){
-  const { user } = await requireOrganizerOrRedirect();
-  showMsg("Chargement…", "warn");
+  try {
+    const { user } = await requireOrganizerOrRedirect();
+    showMsg("Chargement…", "warn");
 
-  const { data, error } = await supabase
-    .from("meetings")
-    .select("id,name,date,end_date,location,external_url,comment,is_published,race_ids,created_at")
-    .eq("organizer_id", user.id)
-    .order("date", { ascending: false })
-    .order("created_at", { ascending: false });
+    console.log("[Dashboard] User ID:", user.id);
 
-  if (error) throw error;
+    // Charger les événements de l'utilisateur
+    const { data, error } = await supabase
+      .from("meetings")
+      .select("id,name,date,end_date,location,external_url,comment,is_published,race_ids,created_at,organizer_id")
+      .eq("organizer_id", user.id)
+      .order("date", { ascending: false })
+      .order("created_at", { ascending: false });
 
-  meetings = data || [];
-  showMsg("", "warn");
-  applyFilter();
+    if (error) {
+      console.error("[Dashboard] Supabase error:", error);
+      throw error;
+    }
+
+    console.log("[Dashboard] Found meetings:", data?.length || 0);
+
+    meetings = data || [];
+
+    // Si aucun événement trouvé, proposer d'afficher tous les événements
+    if (meetings.length === 0 && !showAllMode) {
+      showMsg("", "warn");
+      
+      // Vérifier s'il y a des événements sans organizer_id
+      const { data: allData, error: allError } = await supabase
+        .from("meetings")
+        .select("id,name,date,end_date,location,external_url,comment,is_published,race_ids,created_at,organizer_id")
+        .order("date", { ascending: false })
+        .limit(100);
+
+      if (!allError && allData && allData.length > 0) {
+        const orphanMeetings = allData.filter(m => !m.organizer_id);
+        console.log("[Dashboard] Found orphan meetings:", orphanMeetings.length);
+        
+        if (orphanMeetings.length > 0) {
+          showMsg(`Aucun événement trouvé avec votre compte. ${orphanMeetings.length} événement(s) existent sans organisateur assigné. Cliquez sur "Voir tous les événements" pour les afficher.`, "warn");
+          
+          // Ajouter un bouton pour voir tous les événements
+          if (!document.getElementById("btnShowAll")) {
+            const btn = document.createElement("button");
+            btn.id = "btnShowAll";
+            btn.className = "btn primary";
+            btn.textContent = "👁️ Voir tous les événements";
+            btn.style.marginTop = "10px";
+            btn.onclick = () => {
+              showAllMode = true;
+              loadAllMeetings();
+            };
+            msg.appendChild(btn);
+          }
+        } else {
+          showMsg("Aucun événement trouvé. Créez votre premier événement avec le bouton ci-dessus !", "warn");
+        }
+      } else {
+        showMsg("Aucun événement trouvé. Créez votre premier événement avec le bouton ci-dessus !", "warn");
+      }
+    } else {
+      showMsg("", "warn");
+    }
+
+    applyFilter();
+  } catch(e) {
+    console.error("[Dashboard] Load error:", e);
+    showMsg(`Erreur chargement: ${e?.message || e}`, "err");
+  }
+}
+
+async function loadAllMeetings(){
+  try {
+    showMsg("Chargement de tous les événements…", "warn");
+
+    const { data, error } = await supabase
+      .from("meetings")
+      .select("id,name,date,end_date,location,external_url,comment,is_published,race_ids,created_at,organizer_id")
+      .order("date", { ascending: false })
+      .limit(100);
+
+    if (error) throw error;
+
+    meetings = data || [];
+    showMsg(`Affichage de tous les événements (${meetings.length}). Note : certains n'ont peut-être pas d'organisateur assigné.`, "warn");
+    
+    applyFilter();
+  } catch(e) {
+    showMsg(`Erreur: ${e?.message || e}`, "err");
+  }
 }
 
 // ✅ Fonction de suppression
@@ -154,12 +230,28 @@ function render(items){
       ? `<a class="btn ghost" href="${esc(m.external_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 Site web</a>`
       : "";
 
+    // Afficher l'organizer_id pour le débogage si en mode "tous les événements"
+    const debugInfo = showAllMode && m.organizer_id 
+      ? `<div class="muted2" style="margin-top:6px;">🔧 Organizer ID: ${esc(m.organizer_id)}</div>`
+      : "";
+
+    const noOrganizerWarning = showAllMode && !m.organizer_id
+      ? `<div class="muted2" style="margin-top:6px;color:#dc2626;">⚠️ Cet événement n'a pas d'organisateur assigné</div>`
+      : "";
+
+    // Bouton pour s'assigner comme organisateur si l'événement n'en a pas
+    const assignBtn = showAllMode && !m.organizer_id
+      ? `<button class="btn primary" onclick="window.assignOrganizer('${esc(m.id)}', '${esc(m.name).replace(/'/g, "\\'")}')">👤 M'assigner comme organisateur</button>`
+      : "";
+
     return `
       <div class="item">
         <div class="topline">
           <div>
             <div class="title">${esc(m.name)}</div>
             <div class="meta">📅 ${dateDisplay} • 📍 ${esc(m.location || "—")} • ${pub}</div>
+            ${debugInfo}
+            ${noOrganizerWarning}
           </div>
           <span class="badge">🏁 ${n} épreuve${n>1?"s":""}</span>
         </div>
@@ -167,7 +259,8 @@ function render(items){
         ${m.comment ? `<div class="meta" style="margin-top:10px;color:#334155;border-top:1px dashed #e5e7eb;padding-top:10px">${esc(m.comment)}</div>` : ``}
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <a class="btn primary" href="meeting.html?id=${encodeURIComponent(m.id)}">👁️ Voir l'événement</a>
+          ${assignBtn}
+          <a class="btn ${!m.organizer_id && showAllMode ? '' : 'primary'}" href="meeting.html?id=${encodeURIComponent(m.id)}">👁️ Voir l'événement</a>
           <a class="btn" href="course-create.html?meetingId=${encodeURIComponent(m.id)}">+ Ajouter une épreuve</a>
           ${extLink}
           <button class="btn danger" onclick="window.deleteMeeting('${esc(m.id)}', '${esc(m.name).replace(/'/g, "\\'")}')">🗑️ Supprimer</button>
@@ -179,6 +272,35 @@ function render(items){
 
 // ✅ Exposer la fonction de suppression au scope global
 window.deleteMeeting = deleteMeeting;
+
+// ✅ Fonction pour assigner l'organisateur à un événement
+async function assignOrganizer(meetingId, meetingName){
+  if (!confirm(`Voulez-vous vous assigner comme organisateur de l'événement "${meetingName}" ?`)) {
+    return;
+  }
+
+  try {
+    const { user } = await requireOrganizerOrRedirect();
+    showMsg("Attribution en cours…", "warn");
+    
+    const { error } = await supabase
+      .from("meetings")
+      .update({ organizer_id: user.id })
+      .eq("id", meetingId);
+
+    if (error) throw error;
+
+    showMsg(`✅ Vous êtes maintenant l'organisateur de "${meetingName}"`, "ok");
+    
+    // Revenir au mode normal après l'assignation
+    showAllMode = false;
+    await loadMeetings();
+  } catch (e) {
+    showMsg(`❌ Erreur d'assignation : ${e?.message || e}`, "err");
+  }
+}
+
+window.assignOrganizer = assignOrganizer;
 
 function applyFilter(){
   const qq = normalize(q?.value || "");
