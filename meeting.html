@@ -205,11 +205,10 @@
   </div>
 </main>
 
-<script src="js/data.js"></script>
-<script src="js/storage.js"></script>
+<script type="module">
+import { supabase } from "./js/supabaseClient.js";
 
-<script>
-(function(){
+(async function(){
   const $ = (id) => document.getElementById(id);
 
   function esc(s){
@@ -230,28 +229,26 @@
     return;
   }
 
-  // Storage adapters
-  function findMeetingSafe(id){
-    if (typeof window.findMeeting === "function") return window.findMeeting(id);
-    if (typeof window.getMeeting === "function") return window.getMeeting(id);
+  // Charger l'événement depuis Supabase
+  let meeting = null;
+  try {
+    const { data, error } = await supabase
+      .from("meetings")
+      .select("*")
+      .eq("id", meetingId)
+      .single();
+    
+    if (error) throw error;
+    meeting = data;
+  } catch (e) {
+    console.warn("[meeting] Supabase failed, trying localStorage", e);
+    // Fallback localStorage
     try {
       const raw = localStorage.getItem("mtb.meetings.v1");
       const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr.find(m => m?.id === id) : null;
-    } catch(_){ return null; }
+      meeting = Array.isArray(arr) ? arr.find(m => m?.id === meetingId) : null;
+    } catch(_){ meeting = null; }
   }
-
-  function listRacesSafe(){
-    if (typeof window.listRaces === "function") return window.listRaces();
-    if (typeof window.getRaces === "function") return window.getRaces();
-    try {
-      const raw = localStorage.getItem("mtb.races.v1");
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch(_){ return []; }
-  }
-
-  const meeting = findMeetingSafe(meetingId);
 
   if (!meeting) {
     $("meetingName").textContent = "❌ Événement introuvable";
@@ -264,7 +261,7 @@
   $("meetingName").textContent = meeting.name || "Événement";
   
   const start = meeting.date || "—";
-  const end = meeting.endDate || null;
+  const end = meeting.end_date || meeting.endDate || null;
   const range = end ? `${start} → ${end}` : start;
   const location = meeting.location ? ` • 📍 ${meeting.location}` : "";
   
@@ -276,13 +273,31 @@
     $("meetingComment").style.display = "none";
   }
 
-  $("statusPill").innerHTML = meeting.isPublished 
+  const isPublished = meeting.is_published !== undefined ? meeting.is_published : meeting.isPublished;
+  $("statusPill").innerHTML = isPublished 
     ? `<span class="dot ok"></span> Publié` 
     : `<span class="dot" style="background:#ea580c"></span> Brouillon`;
 
-  // Load races for this meeting
-  const allRaces = listRacesSafe();
-  const races = allRaces.filter(r => r?.meetingId === meetingId || r?.eventGroupId === meetingId);
+  // Charger les races depuis Supabase
+  let races = [];
+  try {
+    const { data, error } = await supabase
+      .from("races")
+      .select("*")
+      .eq("meeting_id", meetingId)
+      .order("date", { ascending: true });
+    
+    if (error) throw error;
+    races = data || [];
+  } catch (e) {
+    console.warn("[meeting] Supabase races failed, trying localStorage", e);
+    // Fallback localStorage
+    try {
+      const raw = localStorage.getItem("mtb.races.v1");
+      const arr = raw ? JSON.parse(raw) : [];
+      races = Array.isArray(arr) ? arr.filter(r => r?.meetingId === meetingId || r?.eventGroupId === meetingId) : [];
+    } catch(_){ races = []; }
+  }
 
   $("countRaces").textContent = String(races.length);
 
@@ -301,11 +316,11 @@
 
   listEl.innerHTML = races.map(r => {
     const rDate = r.date || "—";
-    const disc = r.disc || r.discipline || "—";
+    const disc = r.discipline || r.disc || "—";
     const level = r.level || "";
-    const dist = r.distanceKm ? `${Number(r.distanceKm).toFixed(1)} km` : "—";
-    const dplus = r.dplusM ? `D+ ${Math.round(r.dplusM)} m` : "—";
-    const pub = r.isPublished === true;
+    const dist = r.distance_km || r.distanceKm ? `${Number(r.distance_km || r.distanceKm).toFixed(1)} km` : "—";
+    const dplus = r.dplus_m || r.dplusM ? `D+ ${Math.round(r.dplus_m || r.dplusM)} m` : "—";
+    const pub = (r.is_published !== undefined ? r.is_published : r.isPublished) === true;
 
     return `
       <div class="item">
