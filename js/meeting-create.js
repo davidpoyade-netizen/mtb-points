@@ -1,5 +1,6 @@
 // js/meeting-create.js
 // Création meeting avec Supabase + fallback localStorage
+// VERSION SIMPLIFIÉE : Sans lat/lng (pour bases Supabase sans ces colonnes)
 import { supabase } from "./supabaseClient.js";
 
 (function () {
@@ -74,8 +75,6 @@ import { supabase } from "./supabaseClient.js";
     const location = safeTrim($("mLocation")?.value) || null;
     const comment = safeTrim($("mComment")?.value) || null;
     const externalUrl = safeTrim($("mUrl")?.value) || null;
-    const lat = safeTrim($("mLat")?.value) || null;
-    const lng = safeTrim($("mLng")?.value) || null;
     const isPublished = $("mPublished")?.checked || false;
 
     const err = validate(name, date, endDate);
@@ -89,8 +88,6 @@ import { supabase } from "./supabaseClient.js";
       location,
       comment,
       externalUrl,
-      lat: lat ? Number(lat) : null,
-      lng: lng ? Number(lng) : null,
       isPublished,
       raceIds: [],
       createdAt: new Date().toISOString()
@@ -104,8 +101,8 @@ import { supabase } from "./supabaseClient.js";
     $("mLocation").value = "";
     $("mComment").value = "";
     $("mUrl").value = "";
-    $("mLat").value = "";
-    $("mLng").value = "";
+    if ($("mLat")) $("mLat").value = "";
+    if ($("mLng")) $("mLng").value = "";
     $("mPublished").checked = true;
     showMsg("");
   }
@@ -150,6 +147,7 @@ import { supabase } from "./supabaseClient.js";
         // ✅ UTILISER SUPABASE avec organizer_id
         dbg(`Création Supabase avec user: ${user.id}`);
         
+        // ⚠️ VERSION SIMPLIFIÉE : Sans lat/lng
         const payload = {
           id: meeting.id,
           organizer_id: user.id,  // ← IMPORTANT : assigner l'organisateur !
@@ -159,10 +157,9 @@ import { supabase } from "./supabaseClient.js";
           location: meeting.location,
           comment: meeting.comment,
           external_url: meeting.externalUrl,
-          lat: meeting.lat,
-          lng: meeting.lng,
           is_published: meeting.isPublished,
           race_ids: []
+          // lat et lng SUPPRIMÉS de cette version
         };
 
         const { error } = await supabase.from("meetings").insert(payload);
@@ -196,7 +193,7 @@ import { supabase } from "./supabaseClient.js";
     }
   }
 
-  // Géolocalisation
+  // Géolocalisation (stockée en localStorage seulement, pas dans Supabase)
   const btnGeo = $("btnGeo");
   if (btnGeo) {
     btnGeo.addEventListener("click", () => {
@@ -214,7 +211,7 @@ import { supabase } from "./supabaseClient.js";
           const lng = pos.coords.longitude;
           if ($("mLat")) $("mLat").value = lat.toFixed(6);
           if ($("mLng")) $("mLng").value = lng.toFixed(6);
-          if (hint) hint.textContent = `✅ Position: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          if (hint) hint.textContent = `✅ Position: ${lat.toFixed(4)}, ${lng.toFixed(4)} (non sauvegardée dans Supabase)`;
         },
         (err) => {
           console.error("Geolocation error:", err);
@@ -244,5 +241,5 @@ import { supabase } from "./supabaseClient.js";
     if (endEl && start) endEl.min = start;
   });
 
-  dbg("Script chargé ✅ prêt à créer un événement.");
+  dbg("Script chargé ✅ prêt à créer un événement (version sans lat/lng).");
 })();
