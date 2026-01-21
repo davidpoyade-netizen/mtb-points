@@ -1,89 +1,106 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Classement public — MTB Points</title>
+// public-ranking.js
+// MTB Points — Classement public
+// ✔ CSS Nature conservé
+// ✔ Musculaire / Électrique séparés
+// ✔ Hommes / Femmes séparés
+// ✔ XC-Global = XCC + XCO + XCR + XCM
 
-  <!-- CSS THEME NATURE (OBLIGATOIRE) -->
-  <link rel="stylesheet" href="css/style.css" />
-</head>
+import { supabase } from "./supabaseClient.js";
 
-<body>
-<header class="header">
-  <h1>MTB Points — Classement public</h1>
-  <nav class="nav">
-    <a href="index.html">Accueil</a>
-    <a href="public-ranking.html" class="active">Classement</a>
-    <a href="meetings.html">Événements</a>
-    <a href="reglement.html">Règlement</a>
-  </nav>
-</header>
+const TB = {
+  m_m: document.getElementById("tbody_m_m"),
+  m_f: document.getElementById("tbody_m_f"),
+  e_m: document.getElementById("tbody_e_m"),
+  e_f: document.getElementById("tbody_e_f"),
+};
 
-<main class="wrap">
+const TABS = document.getElementById("tabs");
 
-  <!-- Onglets disciplines -->
-  <section class="card">
-    <h2>Classements</h2>
-    <div class="tabs" id="tabs"></div>
-  </section>
+const DISCIPLINES = [
+  { key: "GLOBAL", label: "Global" },
+  { key: "XC-GLOBAL", label: "XC-Global" },
+  { key: "XCC", label: "XCC" },
+  { key: "XCO", label: "XCO" },
+  { key: "XCR", label: "XCR" },
+  { key: "XCM", label: "XCM" },
+  { key: "DH", label: "DH" },
+  { key: "Enduro", label: "Enduro" },
+  { key: "Gravel", label: "Gravel" },
+];
 
-  <!-- MUSCULAIRE -->
-  <section class="twoCols">
-    <div class="panel">
-      <div class="panelHead"><h3>🚵 Musculaire — Hommes</h3></div>
-      <div class="panelBody">
-        <table>
-          <thead>
-            <tr><th>#</th><th>Rider</th><th>Nation</th><th>Points</th></tr>
-          </thead>
-          <tbody id="tbody_m_m"></tbody>
-        </table>
-      </div>
-    </div>
+let ACTIVE = "GLOBAL";
 
-    <div class="panel">
-      <div class="panelHead"><h3>🚵 Musculaire — Femmes</h3></div>
-      <div class="panelBody">
-        <table>
-          <thead>
-            <tr><th>#</th><th>Rider</th><th>Nation</th><th>Points</th></tr>
-          </thead>
-          <tbody id="tbody_m_f"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+function esc(s){
+  return String(s ?? "")
+    .replace(/[&<>"']/g, m => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      "\"":"&quot;",
+      "'":"&#39;"
+    }[m]));
+}
 
-  <!-- ELECTRIQUE -->
-  <section class="twoCols" style="margin-top:16px">
-    <div class="panel">
-      <div class="panelHead"><h3>⚡ Assistance électrique — Hommes</h3></div>
-      <div class="panelBody">
-        <table>
-          <thead>
-            <tr><th>#</th><th>Rider</th><th>Nation</th><th>Points</th></tr>
-          </thead>
-          <tbody id="tbody_e_m"></tbody>
-        </table>
-      </div>
-    </div>
+function buildTabs(){
+  TABS.innerHTML = "";
+  DISCIPLINES.forEach(d => {
+    const b = document.createElement("button");
+    b.className = `tab ${d.key === ACTIVE ? "active" : ""}`;
+    b.textContent = d.label;
+    b.onclick = () => {
+      ACTIVE = d.key;
+      buildTabs();
+      load();
+    };
+    TABS.appendChild(b);
+  });
+}
 
-    <div class="panel">
-      <div class="panelHead"><h3>⚡ Assistance électrique — Femmes</h3></div>
-      <div class="panelBody">
-        <table>
-          <thead>
-            <tr><th>#</th><th>Rider</th><th>Nation</th><th>Points</th></tr>
-          </thead>
-          <tbody id="tbody_e_f"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+function clearTables(){
+  Object.values(TB).forEach(tb => tb.innerHTML = "");
+}
 
-</main>
+function addRow(tbody, r, i){
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${i + 1}</td>
+    <td>${esc(r.name)}</td>
+    <td>${esc(r.nationality || "—")}</td>
+    <td><strong>${r.score}</strong></td>
+  `;
+  tbody.appendChild(tr);
+}
 
-<script type="module" src="js/public-ranking.js"></script>
-</body>
-</html>
+async function load(){
+  clearTables();
+
+  const { data, error } = await supabase
+    .from("v_public_ranking")
+    .select("name, sex, ebike, discipline, score, nationality");
+
+  if (error){
+    console.error("public-ranking:", error);
+    return;
+  }
+
+  let rows = data || [];
+
+  // Filtrage discipline
+  if (ACTIVE === "XC-GLOBAL") {
+    rows = rows.filter(r =>
+      ["XCC", "XCO", "XCR", "XCM"].includes(r.discipline)
+    );
+  } else if (ACTIVE !== "GLOBAL") {
+    rows = rows.filter(r => r.discipline === ACTIVE);
+  }
+
+  rows.sort((a, b) => b.score - a.score);
+
+  rows.forEach((r, i) => {
+    const key = `${r.ebike ? "e" : "m"}_${r.sex === "F" ? "f" : "m"}`;
+    if (TB[key]) addRow(TB[key], r, i);
+  });
+}
+
+buildTabs();
+load();
