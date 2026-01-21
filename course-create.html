@@ -384,6 +384,8 @@
 <script src="js/gpx.js"></script>
 
 <script type="module">
+console.log("🚀 Script chargé, début de l'exécution");
+
 // Import Supabase
 let supabase = null;
 try {
@@ -395,9 +397,10 @@ try {
 }
 
 // ============================================================
-// ATTENDRE QUE LE DOM SOIT CHARGÉ (CORRECTION PRINCIPALE)
+// FONCTION PRINCIPALE
 // ============================================================
-document.addEventListener('DOMContentLoaded', async function() {
+async function initApp() {
+console.log("🎬 initApp() démarré");
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -1086,8 +1089,18 @@ if (btnReset) {
 }
 
 console.log("✅ Tous les event listeners traités");
+} // FIN initApp()
 
-}); // FIN DOMContentLoaded
+// ============================================================
+// DÉMARRAGE : Immédiat si DOM chargé, sinon attendre
+// ============================================================
+if (document.readyState === 'loading') {
+  console.log("⏳ DOM en cours de chargement, attente de DOMContentLoaded...");
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  console.log("✅ DOM déjà chargé, démarrage immédiat");
+  initApp();
+}
 
 </script>
 
