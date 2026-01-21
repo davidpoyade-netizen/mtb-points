@@ -1,12 +1,8 @@
-// js/course-create.js (ESM)
+// js/course-create.js (ESM) - VERSION CORRIGÉE
 // MTB Points — Création épreuve (organizer)
-// Exigences projet:
-// - Multi-tours (case + grille) NE JAMAIS SUPPRIMER
-// - Type de vélo: 3 options (musculaire/électrique/les deux)
-//   -> Si "les deux", le classement sera automatiquement séparé au niveau de l'affichage des résultats
-// - Analyse GPX/OSM obligatoire (via window.analyzeGPX de js/gpx.js)
-// - Ne pas afficher les scores (ils seront affichés dans race.html)
-// - Distance et D+ sont calculés automatiquement (pas de champs à saisir)
+// CORRECTIONS:
+// 1. isPublished: true par défaut (au lieu de false)
+// 2. Structure analysis_json pour Supabase (au lieu de gpx/techV2 séparés)
 
 import {
   loadMeetingsHybrid,
@@ -305,39 +301,59 @@ async function analyzeGpx() {
 
     const res = await window.analyzeGPX(f, {
       keepPoints: true,
-      // si tu veux basculer sur une autre URL:
-      // apiBase: "https://mtb-points.onrender.com",
       timeoutMs: 45000,
     });
 
+    console.log("✅ Analyse GPX terminée:", res);
+
+    // CORRECTION: Structure unifiée pour Supabase
     ANALYSIS = {
       fileName: f.name,
       analyzedAt: Date.now(),
-      distanceKm: res?.distanceKm ?? res?.meta?.stats?.distanceKm ?? null,
-      dplusM: res?.dplusM ?? res?.meta?.stats?.dplusM ?? null,
-      hasElevation: res?.hasElevation ?? res?.meta?.stats?.hasElevation ?? null,
+      
+      // Meta/stats (pour extraction facile)
+      meta: {
+        stats: {
+          distanceKm: res?.distanceKm ?? null,
+          dplusM: res?.dplusM ?? null,
+          hasElevation: res?.hasElevation ?? null,
+        }
+      },
 
-      // Tech V2 (serveur)
-      techV2: res?.techV2 ?? res?.tech ?? null,
-      surfaceEstimate: res?.surfaceEstimate ?? res?.tech?.surfaceEstimate ?? null,
+      // Points GPX (IMPORTANT pour le profil!)
+      points: res?.points ?? null,
 
-      // Phys (côté serveur si renvoyé, sinon on laisse null)
-      phys: res?.phys ?? null,
+      // Phys
+      phys: {
+        score: res?.phys?.score ?? null,
+        effort: res?.phys?.effort ?? null,
+        ipbOverall: res?.phys?.ipbOverall ?? null,
+      },
 
-      // score global (mrs)
+      // Tech V2
+      tech: {
+        techScoreV2: res?.techV2?.techScoreV2 ?? res?.tech?.techScoreV2 ?? null,
+        tech01: res?.techV2?.tech01 ?? res?.tech?.tech01 ?? null,
+        details: res?.techV2?.details ?? res?.tech?.details ?? null,
+        surfaceEstimate: res?.techV2?.surfaceEstimate ?? res?.tech?.surfaceEstimate ?? null,
+      },
+
+      // Score global (MRS)
       mrs: typeof res?.mrs === "number" ? res.mrs : null,
 
+      // Discipline
       discipline: res?.discipline ?? null,
 
-      // points: selon API
-      points: res?.points ?? null,
+      // Raw pour debug
       raw: res || null,
     };
 
-    setStatus("done", "Analyse terminée.", 100, "Tu peux enregistrer l’épreuve.");
+    console.log("📦 Structure ANALYSIS créée:", ANALYSIS);
+
+    setStatus("done", "Analyse terminée.", 100, "Tu peux enregistrer l'épreuve.");
     showMsg("Analyse GPX/OSM terminée.", true);
 
-    // petit hint : discipline auto si vide
+    // Pré-remplir la discipline si vide
     const disc = $("disc");
     if (disc && !disc.value && ANALYSIS?.discipline?.hint) {
       disc.value = ANALYSIS.discipline.hint;
@@ -356,12 +372,12 @@ async function analyzeGpx() {
 function validate() {
   if (ANALYZE_BUSY) return "Analyse en cours : attends la fin.";
   if (!$("meetingId")?.value) return "Événement obligatoire.";
-  if (!normalizeISODate($("date")?.value)) return "Date d’épreuve obligatoire.";
-  if (!$("name")?.value?.trim()) return "Nom d’épreuve obligatoire.";
+  if (!normalizeISODate($("date")?.value)) return "Date d'épreuve obligatoire.";
+  if (!$("name")?.value?.trim()) return "Nom d'épreuve obligatoire.";
 
   const f = $("gpxFile")?.files?.[0];
   if (!f) return "GPX obligatoire : sélectionne un fichier GPX.";
-  if (!ANALYSIS) return "Analyse GPX/OSM obligatoire : choisis un GPX et laisse l’analyse se terminer.";
+  if (!ANALYSIS) return "Analyse GPX/OSM obligatoire : choisis un GPX et laisse l'analyse se terminer.";
 
   return null;
 }
@@ -374,38 +390,33 @@ async function buildRace({ ebikeOverride = null, nameSuffix = "", idSalt = 0 } =
   const baseName = $("name").value.trim();
   const finalName = (baseName + (nameSuffix ? ` ${nameSuffix}` : "")).trim();
 
-  // Récupérer le type de vélo depuis les boutons radio
+  // Type de vélo
   const bikeType = document.querySelector('input[name="bikeType"]:checked')?.value || 'musculaire';
-  
-  // bikeType peut être: 'musculaire', 'electrique', ou 'both'
-  // Pour le champ ebike (boolean), on utilise:
-  // - false si musculaire uniquement
-  // - true si électrique uniquement
-  // - null ou 'both' si les deux sont autorisés (le classement sera séparé automatiquement)
-  let bikeTypeAllowed = bikeType; // On stocke la vraie valeur pour le classement
+  let bikeTypeAllowed = bikeType;
 
   const id = makeIdFromName(finalName);
   const finalId = idSalt ? `${id}-${idSalt}` : id;
 
-  return {
+  // CORRECTION: Structure pour Supabase avec analysis_json
+  const race = {
     id: finalId,
     name: finalName,
     date: normalizeISODate($("date").value),
     time: $("time").value || null,
 
-    // rattachement meeting
+    // Rattachement meeting
     eventGroupId: meetingId,
     meetingId,
     meetingName: meeting?.name || null,
 
-    // infos
+    // Infos course
     cutoffTime: $("cutoff").value.trim() || null,
     level: $("level").value || null,
-    disc: $("disc").value || null,
+    disc: $("disc").value || ANALYSIS?.discipline?.hint || null,
 
-    // NOUVEAU: on stocke le type de vélo autorisé
+    // Type vélo
     bikeTypeAllowed: bikeTypeAllowed,
-    ebike: bikeType === 'electrique', // pour compatibilité avec l'ancien système
+    ebike: bikeType === 'electrique',
     bikeWash: $("wash").value || null,
     mechAssist: $("mechanic").value || null,
     feeds: $("feeds").value || null,
@@ -413,30 +424,30 @@ async function buildRace({ ebikeOverride = null, nameSuffix = "", idSalt = 0 } =
 
     comment: $("comment").value.trim() || null,
 
-    // auto from analysis (pas de champs distance/d+)
-    distanceKm: ANALYSIS?.distanceKm ?? null,
-    dplusM: ANALYSIS?.dplusM ?? null,
-    surfaceEstimate: ANALYSIS?.surfaceEstimate ?? null,
+    // Métriques auto (depuis analysis)
+    distance_km: ANALYSIS?.meta?.stats?.distanceKm ?? null,
+    dplus_m: ANALYSIS?.meta?.stats?.dplusM ?? null,
 
-    // scores stockés mais NON affichés sur cette page
-    scorePhys: ANALYSIS?.phys?.score ?? null,
-    scoreTech: (typeof ANALYSIS?.techV2?.techScoreV2 === "number") ? ANALYSIS.techV2.techScoreV2 : (ANALYSIS?.techV2?.techScore ?? null),
-    scoreGlobal: ANALYSIS?.mrs ?? null,
+    // Scores (colonnes directes Supabase)
+    score_phys: ANALYSIS?.phys?.score ?? null,
+    score_tech: ANALYSIS?.tech?.techScoreV2 ?? null,
+    score_global: ANALYSIS?.mrs ?? null,
 
-    techV2: ANALYSIS?.techV2 ?? null,
+    // IMPORTANT: analysis_json avec TOUTE la structure
+    analysis_json: ANALYSIS,
 
-    gpx: {
-      fileName: ANALYSIS?.fileName || null,
-      hasElevation: ANALYSIS?.hasElevation ?? null,
-      // on peut stocker un échantillon ou rien selon tes besoins
-      points: ANALYSIS?.points ?? null,
-    },
-
+    // Multi-tours
     lapsByCategorySex: (lapsByCategorySex && Object.keys(lapsByCategorySex).length) ? lapsByCategorySex : null,
 
     createdAt: Date.now(),
-    isPublished: false,
+    
+    // 🔥 CORRECTION MAJEURE: Publication automatique!
+    is_published: true, // ✅ Au lieu de false
   };
+
+  console.log("🏁 Race créée (PUBLIÉE):", race);
+  
+  return race;
 }
 
 function afterSaveLinks(race) {
@@ -448,15 +459,19 @@ function afterSaveLinks(race) {
 }
 
 async function persistRace(race) {
+  console.log("💾 Sauvegarde de l'épreuve:", race);
+  
   // 1) insert race (supabase si connecté, sinon local)
   await addStoredEventHybrid(race);
 
-  // 2) push raceId into meeting (supabase si connecté, sinon local)
+  // 2) push raceId into meeting
   const meeting = await findMeetingHybrid(race.meetingId);
   if (meeting) {
     const updated = pushRaceId(meeting, race.id);
     await updateMeetingHybrid(updated);
   }
+  
+  console.log("✅ Épreuve sauvegardée avec succès");
 }
 
 async function saveSingle({ thenNew = false } = {}) {
@@ -473,14 +488,14 @@ async function saveSingle({ thenNew = false } = {}) {
     const race = await buildRace();
     await persistRace(race);
 
-    showMsg(`Épreuve créée : <b>${esc(race.name)}</b>`, true);
+    showMsg(`Épreuve créée et <b>PUBLIÉE</b> : <b>${esc(race.name)}</b>`, true);
     afterSaveLinks(race);
 
     if (thenNew) {
-      setTimeout(() => resetForm(true), 80);
+      setTimeout(() => resetForm(true), 800);
     }
   } catch (e) {
-    console.warn(e);
+    console.error("❌ Erreur sauvegarde:", e);
     showMsg(`Enregistrement impossible : ${esc(e?.message || "erreur")}`, false);
   }
 }
@@ -491,6 +506,7 @@ function resetForm(keepMeeting = true) {
 
   ["name", "cutoff", "time", "comment"].forEach((id) => { const el = $(id); if (el) el.value = ""; });
   ["level", "disc", "wash", "mechanic", "feeds"].forEach((id) => { const el = $(id); if (el) el.value = ""; });
+  
   // Réinitialiser les boutons radio
   const musculaireRadio = $("bikeMusculaire");
   if (musculaireRadio) musculaireRadio.checked = true;
@@ -506,7 +522,6 @@ function resetForm(keepMeeting = true) {
 
   const b1 = $("btnViewRace");
   if (b1) { b1.style.display = "none"; b1.href = "#"; }
-  if (b2) { b2.style.display = "none"; b2.href = "#"; }
 
   showMsg("");
 
@@ -514,6 +529,49 @@ function resetForm(keepMeeting = true) {
     $("meetingId").value = keepMid;
     applyMeetingDefaults(keepMid);
     $("date").value = keepDate;
+  }
+}
+
+async function saveAndDuplicate() {
+  const err = validate();
+  if (err) {
+    showMsg(esc(err), false);
+    return;
+  }
+
+  const bikeType = document.querySelector('input[name="bikeType"]:checked')?.value || 'musculaire';
+
+  if (bikeType !== 'both') {
+    showMsg("Duplication activée uniquement si tu coches 'Les deux' pour le type de vélo.", false);
+    return;
+  }
+
+  try {
+    // Race musculaire
+    const raceMuscu = await buildRace({ ebikeOverride: false, nameSuffix: "(Musculaire)", idSalt: 1 });
+    raceMuscu.bikeTypeAllowed = 'musculaire';
+    raceMuscu.ebike = false;
+    await persistRace(raceMuscu);
+
+    // Race électrique
+    const raceElec = await buildRace({ ebikeOverride: true, nameSuffix: "(E-bike)", idSalt: 2 });
+    raceElec.bikeTypeAllowed = 'electrique';
+    raceElec.ebike = true;
+    await persistRace(raceElec);
+
+    showMsg(`2 épreuves créées et <b>PUBLIÉES</b> : ${esc(raceMuscu.name)} + ${esc(raceElec.name)}`, true);
+    
+    const b1 = $("btnViewRace");
+    if (b1) {
+      b1.href = `meeting.html?id=${encodeURIComponent(raceMuscu.meetingId)}`;
+      b1.textContent = "📋 Voir l'événement";
+      b1.style.display = "inline-flex";
+    }
+
+    setTimeout(() => resetForm(true), 800);
+  } catch (e) {
+    console.error(e);
+    showMsg(`Duplication impossible : ${esc(e?.message || "erreur")}`, false);
   }
 }
 
