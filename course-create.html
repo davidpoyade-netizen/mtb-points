@@ -631,10 +631,17 @@ async function loadMeetingInfo() {
     back.href = `meeting.html?id=${encodeURIComponent(MEETING.id)}`;
   }
 
-  // Pré-remplir la date
+  // Pré-remplir la date de l'épreuve avec la date de l'événement
   const dateEl = $("date");
-  if (dateEl && MEETING.date) {
-    dateEl.value = MEETING.date;
+  if (dateEl) {
+    if (MEETING.date) {
+      dateEl.value = MEETING.date;
+      console.log("📅 Date pré-remplie:", MEETING.date);
+    } else {
+      console.warn("⚠️ Pas de date dans l'événement");
+    }
+  } else {
+    console.error("❌ Input date introuvable");
   }
 
   console.log("✅ Meeting chargé:", MEETING);
@@ -969,9 +976,13 @@ function resetForm(keepMeeting=true){
   showMsg("");
   hideSaveStatus();
   
-  if (keepMeeting && MEETING){
+  // Toujours garder la date de l'événement
+  if (keepMeeting && MEETING && MEETING.date){
     const dateEl = $("date");
-    if (dateEl && MEETING.date) dateEl.value = MEETING.date;
+    if (dateEl) {
+      dateEl.value = MEETING.date;
+      console.log("📅 Date restaurée après reset:", MEETING.date);
+    }
   }
 }
 
