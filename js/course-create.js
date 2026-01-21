@@ -3,7 +3,7 @@
 // CORRECTIONS:
 // 1. isPublished: true par défaut (au lieu de false)
 // 2. Structure analysis_json pour Supabase (au lieu de gpx/techV2 séparés)
-
+import { calculateDiscipline } from './discipline-calculator.js';
 import {
   loadMeetingsHybrid,
   findMeetingHybrid,
