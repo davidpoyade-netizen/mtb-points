@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Créer une épreuve — MTB Points</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/theme-nature.css?v=10" />
   <style>
     :root{
       --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
@@ -138,7 +139,7 @@
   </style>
 </head>
 
-<body>
+<body class="theme-nature">
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points</h1>
@@ -1009,25 +1010,82 @@ await loadMeetingInfo();
 renderAgeRows();
 initMultiToggle();
 
-$("btnPickAnalyze")?.addEventListener("click", function() {
-  showMsg("");
-  const inp = $("gpxFile");
-  if (inp) {
-    inp.value = "";
-    inp.click();
-  }
-});
+const btnPickAnalyze = $("btnPickAnalyze");
+const gpxFileInput = $("gpxFile");
+const btnClearGPX = $("btnClearGPX");
+const btnSave = $("btnSave");
+const btnSaveAndNew = $("btnSaveAndNew");
+const btnReset = $("btnReset");
 
-$("gpxFile")?.addEventListener("change", async function() {
-  const f = this.files?.[0];
-  $("pickedFileName").textContent = f ? ("✓ Fichier sélectionné : " + f.name) : "";
-  if (f) await analyzeGpx();
-});
+console.log("🔍 Vérification des éléments:");
+console.log("  - btnPickAnalyze:", btnPickAnalyze ? "✅" : "❌");
+console.log("  - gpxFileInput:", gpxFileInput ? "✅" : "❌");
+console.log("  - btnClearGPX:", btnClearGPX ? "✅" : "❌");
+console.log("  - btnSave:", btnSave ? "✅" : "❌");
+console.log("  - btnSaveAndNew:", btnSaveAndNew ? "✅" : "❌");
+console.log("  - btnReset:", btnReset ? "✅" : "❌");
 
-$("btnClearGPX")?.addEventListener("click", () => { clearGpx(); showMsg(""); });
-$("btnSave")?.addEventListener("click", ()=> saveSingle(false));
-$("btnSaveAndNew")?.addEventListener("click", ()=> saveSingle(true));
-$("btnReset")?.addEventListener("click", ()=> resetForm(true));
+if (btnPickAnalyze) {
+  btnPickAnalyze.addEventListener("click", function() {
+    console.log("🖱️ Click sur btnPickAnalyze");
+    showMsg("");
+    const inp = $("gpxFile");
+    if (inp) {
+      inp.value = "";
+      inp.click();
+    } else {
+      console.error("❌ Input GPX introuvable");
+    }
+  });
+  console.log("✅ Event listener btnPickAnalyze attaché");
+} else {
+  console.error("❌ btnPickAnalyze introuvable");
+}
+
+if (gpxFileInput) {
+  gpxFileInput.addEventListener("change", async function() {
+    const f = this.files?.[0];
+    console.log("📁 Fichier sélectionné:", f?.name);
+    $("pickedFileName").textContent = f ? ("✓ Fichier sélectionné : " + f.name) : "";
+    if (f) await analyzeGpx();
+  });
+  console.log("✅ Event listener gpxFileInput attaché");
+}
+
+if (btnClearGPX) {
+  btnClearGPX.addEventListener("click", () => { 
+    console.log("🗑️ Clear GPX clicked");
+    clearGpx(); 
+    showMsg(""); 
+  });
+  console.log("✅ Event listener btnClearGPX attaché");
+}
+
+if (btnSave) {
+  btnSave.addEventListener("click", ()=> {
+    console.log("💾 Save clicked");
+    saveSingle(false);
+  });
+  console.log("✅ Event listener btnSave attaché");
+}
+
+if (btnSaveAndNew) {
+  btnSaveAndNew.addEventListener("click", ()=> {
+    console.log("💾+ SaveAndNew clicked");
+    saveSingle(true);
+  });
+  console.log("✅ Event listener btnSaveAndNew attaché");
+}
+
+if (btnReset) {
+  btnReset.addEventListener("click", ()=> {
+    console.log("🔄 Reset clicked");
+    resetForm(true);
+  });
+  console.log("✅ Event listener btnReset attaché");
+}
+
+console.log("✅ Tous les event listeners traités");
 
 }); // FIN DOMContentLoaded
 
