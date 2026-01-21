@@ -34,6 +34,37 @@
     .kpi .big{font-size:22px;font-weight:1000}
     .kpi .sub{font-size:12px;color:var(--muted);margin-top:2px}
 
+    /* Indicateur de difficulté sur 5 */
+    .difficulty-indicator{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-top:14px;
+      padding:14px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.9);
+      border:1px solid var(--border);
+    }
+    .difficulty-stars{
+      display:flex;
+      gap:4px;
+      font-size:24px;
+    }
+    .star{
+      color:#cbd5e1;
+      transition: color 0.2s;
+    }
+    .star.filled{color:#f59e0b}
+    .difficulty-label{
+      font-weight:1000;
+      font-size:16px;
+    }
+    .difficulty-desc{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
     .pill2{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;
@@ -125,7 +156,7 @@
         <div class="btnRow noPrint">
           <a class="btn" id="btnBack" href="meetings.html">← Retour</a>
           <button class="btn primary" id="btnPdfTop" type="button">📄 PDF / impression</button>
-          <button class="btn" id="btnPublish" type="button" style="display:none">✅ Publier l’épreuve</button>
+          <button class="btn" id="btnPublish" type="button" style="display:none">✅ Publier l'épreuve</button>
         </div>
       </div>
 
@@ -141,6 +172,23 @@
         <div class="kpi">
           <div class="big" id="kpiTech">—</div>
           <div class="sub">Score TechScore V2</div>
+        </div>
+      </div>
+
+      <!-- NOUVEAU : Indicateur de difficulté sur 5 -->
+      <div class="difficulty-indicator" id="difficultyBox" style="display:none">
+        <div>
+          <div class="difficulty-stars" id="difficultyStars">
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div class="difficulty-label" id="difficultyLabel">—</div>
+          <div class="difficulty-desc" id="difficultyDesc">—</div>
         </div>
       </div>
 
@@ -178,7 +226,7 @@
 
     <h3 class="sectionTitle" style="margin-top:18px;">Actions</h3>
     <div class="btnRow noPrint">
-      <a class="btn" id="btnOpenMeeting" href="#" style="display:none;">Voir l’événement</a>
+      <a class="btn" id="btnOpenMeeting" href="#" style="display:none;">Voir l'événement</a>
       <a class="btn" id="btnCreateSibling" href="#" style="display:none;">Créer une autre épreuve</a>
       <button class="btn" id="btnPdfBottom" type="button">📄 PDF / impression</button>
     </div>
@@ -281,8 +329,60 @@
   }
 
   function extractPoints(row){
-    const pts = row?.gpx?.points || row?.analysis_json?.points || null;
-    return Array.isArray(pts) ? pts : null;
+    // Extraction améliorée des points GPX depuis différentes sources
+    const pts = 
+      row?.gpx?.points || 
+      row?.analysis_json?.points || 
+      row?.analysis_json?.meta?.points ||
+      row?.analysis?.points ||
+      row?.points ||
+      null;
+    
+    console.log("Points GPX extraits:", pts ? pts.length : 0);
+    return Array.isArray(pts) && pts.length > 0 ? pts : null;
+  }
+
+  // NOUVELLE FONCTION : Calculer le niveau de difficulté sur 5 étoiles
+  function calculateDifficultyLevel(globalScore){
+    const g = Number(globalScore);
+    if (!Number.isFinite(g) || g < 0) return null;
+    
+    // Conversion du score global (0-100) en niveau sur 5
+    // 0-20: 1 étoile (Facile)
+    // 20-40: 2 étoiles (Modéré) 
+    // 40-60: 3 étoiles (Exigeant)
+    // 60-80: 4 étoiles (Difficile)
+    // 80-100: 5 étoiles (Extrême)
+    
+    if (g < 20) return { level: 1, label: "Facile", desc: "Accessible aux débutants" };
+    if (g < 40) return { level: 2, label: "Modéré", desc: "Bonne condition physique recommandée" };
+    if (g < 60) return { level: 3, label: "Exigeant", desc: "Entraînement régulier nécessaire" };
+    if (g < 80) return { level: 4, label: "Difficile", desc: "Très bon niveau requis" };
+    return { level: 5, label: "Extrême", desc: "Réservé aux experts très entraînés" };
+  }
+
+  function renderDifficulty(globalScore){
+    const diff = calculateDifficultyLevel(globalScore);
+    const box = $("difficultyBox");
+    const stars = $("difficultyStars");
+    const label = $("difficultyLabel");
+    const desc = $("difficultyDesc");
+    
+    if (!diff || !box) return;
+    
+    box.style.display = "flex";
+    label.textContent = diff.label;
+    desc.textContent = `${diff.desc} (${Math.round(globalScore)}/100)`;
+    
+    // Remplir les étoiles
+    const starElems = stars.querySelectorAll(".star");
+    starElems.forEach((star, idx) => {
+      if (idx < diff.level) {
+        star.classList.add("filled");
+      } else {
+        star.classList.remove("filled");
+      }
+    });
   }
 
   // Leaflet map
@@ -321,13 +421,21 @@
     }
 
     if (LINE){ MAP.removeLayer(LINE); LINE = null; }
-    LINE = L.polyline(latlngs, { weight: 4, opacity: 0.9 }).addTo(MAP);
-    try{ MAP.fitBounds(LINE.getBounds(), { padding: [18,18] }); }catch(_){}
+    LINE = L.polyline(latlngs, { weight: 4, opacity: 0.9, color: '#2f6f3e' }).addTo(MAP);
+    try{ 
+      MAP.fitBounds(LINE.getBounds(), { padding: [18,18] });
+      // Ajouter markers départ/arrivée
+      L.marker(latlngs[0]).addTo(MAP).bindPopup("Départ");
+      L.marker(latlngs[latlngs.length - 1]).addTo(MAP).bindPopup("Arrivée");
+    }catch(e){
+      console.warn("Erreur affichage carte:", e);
+    }
     if (hint) hint.textContent = `${latlngs.length.toLocaleString("fr-FR")} points tracés.`;
   }
 
   // Elevation profile (repères km tous les 5 km)
   function ensureCanvasResolution(canvas){
+    if (!canvas) return;
     const cssH = 360;
     const rect = canvas.getBoundingClientRect();
     const w = Math.max(320, Math.floor(rect.width || 900));
@@ -338,6 +446,8 @@
   }
 
   function drawElevation(canvas, points){
+    if (!canvas) return;
+    
     const ctx = canvas.getContext("2d");
     const hint = $("elevHint");
 
@@ -348,6 +458,8 @@
     const latlngs = (points || [])
       .map(p => [Number(p.lat), Number(p.lon ?? p.lng)])
       .filter(([la, lo]) => Number.isFinite(la) && Number.isFinite(lo));
+
+    console.log("Profil - Points d'altitude:", eles.length, "Points GPS:", latlngs.length);
 
     if (eles.length < 10 || latlngs.length < 10){
       ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -464,19 +576,33 @@
       p.textContent = row.comment;
     }
 
-    // KPI
-    const g = Number(row?.score_global);
-    const p = Number(row?.score_phys);
-    const t = Number(row?.score_tech);
+    // KPI - Extraction améliorée des scores
+    const g = Number(row?.score_global ?? row?.globalScore ?? row?.analysis_json?.mrs ?? row?.analysis?.mrs);
+    const p = Number(row?.score_phys ?? row?.physScore ?? row?.analysis_json?.phys?.score ?? row?.analysis?.phys?.score);
+    const t = Number(row?.score_tech ?? row?.techScore ?? row?.techScoreV2 ?? 
+                     row?.analysis_json?.tech?.techScoreV2 ?? row?.analysis_json?.techV2?.techScoreV2 ??
+                     row?.analysis?.tech?.techScoreV2 ?? row?.analysis?.techV2?.techScoreV2);
+
+    console.log("Scores extraits - Global:", g, "Phys:", p, "Tech:", t);
 
     $("kpiGlobal").textContent = Number.isFinite(g) ? String(Math.round(g)) : "—";
     $("kpiPhys").textContent   = Number.isFinite(p) ? String(Math.round(p)) : "—";
     $("kpiTech").textContent   = Number.isFinite(t) ? String(Math.round(t)) : "—";
 
-    $("kpiDisc").textContent = row?.disc ? String(row.disc) : "Discipline —";
+    // NOUVEAU : Afficher le niveau de difficulté
+    if (Number.isFinite(g)) {
+      renderDifficulty(g);
+    }
+
+    $("kpiDisc").textContent = row?.discipline ?? row?.disc ? String(row.discipline ?? row.disc) : "Discipline —";
     $("kpiBike").textContent = (row?.ebike === true) ? "Vélo : E-bike" : (row?.ebike === false ? "Vélo : Musculaire" : "Vélo : —");
-    $("kpiDist").textContent = "Distance : " + fmtKm(row?.distance_km);
-    $("kpiDplus").textContent = "D+ : " + fmtM(row?.dplus_m);
+    
+    // Distance/D+ - extraction améliorée
+    const distKm = Number(row?.distance_km ?? row?.distanceKm ?? row?.analysis_json?.meta?.stats?.distanceKm ?? row?.analysis?.stats?.distanceKm);
+    const dplusM = Number(row?.dplus_m ?? row?.dplusM ?? row?.analysis_json?.meta?.stats?.dplusM ?? row?.analysis?.stats?.dplusM);
+    
+    $("kpiDist").textContent = "Distance : " + fmtKm(distKm);
+    $("kpiDplus").textContent = "D+ : " + fmtM(dplusM);
 
     const isPub = !!row?.is_published;
     $("kpiPublish").textContent = isPub ? "Publié" : "Brouillon";
@@ -541,9 +667,9 @@
 
   async function main(){
     if (!raceId){
-      setStatus(false, "ID d’épreuve manquant");
+      setStatus(false, "ID d'épreuve manquant");
       $("raceName").textContent = "Épreuve introuvable";
-      $("raceMeta").textContent = "Aucun id=... dans l’URL";
+      $("raceMeta").textContent = "Aucun id=... dans l'URL";
       $("dataSource").textContent = "—";
       return;
     }
@@ -557,8 +683,8 @@
         setStatus(false, "Introuvable / non publiée");
         $("raceName").textContent = "Épreuve introuvable";
         $("raceMeta").textContent = authed
-          ? "Connecté, mais l’épreuve est introuvable ou bloquée par RLS."
-          : "Non connecté : l’épreuve n’est pas publiée (ou introuvable).";
+          ? "Connecté, mais l'épreuve est introuvable ou bloquée par RLS."
+          : "Non connecté : l'épreuve n'est pas publiée (ou introuvable).";
         return;
       }
 
