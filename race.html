@@ -4,15 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fiche épreuve — MTB Points</title>
-
-  <!-- CSS -->
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/theme-nature.css" />
-
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-
-  <!-- QR Code -->
   <script src="https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js"></script>
 
   <style>
@@ -34,7 +28,7 @@
     .kpi .big{font-size:22px;font-weight:1000}
     .kpi .sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-    /* Indicateur de difficulté sur 5 */
+    /* Indicateur de difficulté */
     .difficulty-indicator{
       display:flex;
       align-items:center;
@@ -50,19 +44,63 @@
       gap:4px;
       font-size:24px;
     }
-    .star{
-      color:#cbd5e1;
-      transition: color 0.2s;
-    }
+    .star{color:#cbd5e1;transition:color 0.2s}
     .star.filled{color:#f59e0b}
-    .difficulty-label{
-      font-weight:1000;
-      font-size:16px;
+    .difficulty-label{font-weight:1000;font-size:16px}
+    .difficulty-desc{font-size:13px;color:var(--muted);margin-top:2px}
+
+    /* NOUVEAU : Barres de surface OSM */
+    .surface-bars{
+      margin-top:14px;
+      padding:14px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.9);
+      border:1px solid var(--border);
     }
-    .difficulty-desc{
+    .surface-title{
+      font-weight:600;
+      margin-bottom:10px;
+      color:#334155;
+    }
+    .surface-bar-container{
+      display:flex;
+      height:32px;
+      border-radius:8px;
+      overflow:hidden;
+      margin-bottom:10px;
+      box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .surface-bar{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:600;
+      font-size:12px;
+      transition:all 0.3s;
+    }
+    .surface-bar:hover{
+      filter:brightness(1.1);
+    }
+    .surface-bar.road{background:#3b82f6}
+    .surface-bar.track{background:#f59e0b}
+    .surface-bar.single{background:#10b981}
+    .surface-legend{
+      display:flex;
+      gap:15px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .surface-legend-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
       font-size:13px;
-      color:var(--muted);
-      margin-top:2px;
+    }
+    .surface-legend-dot{
+      width:12px;
+      height:12px;
+      border-radius:3px;
     }
 
     .pill2{
@@ -171,11 +209,11 @@
         </div>
         <div class="kpi">
           <div class="big" id="kpiTech">—</div>
-          <div class="sub">Score TechScore V2</div>
+          <div class="sub">Score technique V2</div>
         </div>
       </div>
 
-      <!-- NOUVEAU : Indicateur de difficulté sur 5 -->
+      <!-- Indicateur de difficulté sur 5 étoiles -->
       <div class="difficulty-indicator" id="difficultyBox" style="display:none">
         <div>
           <div class="difficulty-stars" id="difficultyStars">
@@ -189,6 +227,28 @@
         <div style="flex:1">
           <div class="difficulty-label" id="difficultyLabel">—</div>
           <div class="difficulty-desc" id="difficultyDesc">—</div>
+        </div>
+      </div>
+
+      <!-- NOUVEAU : Barres de surface OSM -->
+      <div class="surface-bars" id="surfaceBox" style="display:none">
+        <div class="surface-title">🌍 Revêtement du parcours (analyse OSM)</div>
+        <div class="surface-bar-container" id="surfaceBarContainer">
+          <!-- Rempli dynamiquement -->
+        </div>
+        <div class="surface-legend">
+          <div class="surface-legend-item">
+            <div class="surface-legend-dot" style="background:#3b82f6"></div>
+            <span id="roadLabel">Route : —</span>
+          </div>
+          <div class="surface-legend-item">
+            <div class="surface-legend-dot" style="background:#f59e0b"></div>
+            <span id="trackLabel">Piste large : —</span>
+          </div>
+          <div class="surface-legend-item">
+            <div class="surface-legend-dot" style="background:#10b981"></div>
+            <span id="singleLabel">Monotrace : —</span>
+          </div>
         </div>
       </div>
 
@@ -233,7 +293,7 @@
 
     <footer class="siteFooter">
       <div class="brand">
-        <img src="img/mtbpoints-logo.png" alt="MTB Points" onerror="this.style.display='none'"/>
+        <!-- Logo retiré pour éviter l'erreur 404 -->
         <div>
           <div style="font-weight:1000">Retrouvez vos résultats sur www.mtbpoint.fr</div>
           <div class="muted small">Scannez pour ouvrir cette fiche</div>
@@ -303,20 +363,17 @@
   }
 
   async function fetchRaceProper(id){
-    // 1) Si connecté -> table races (preview même si non publiée)
     const authed = await isAuthed();
     if (authed){
       const { data, error } = await supabase.from("races").select("*").eq("id", id).maybeSingle();
       if (!error && data) return { row: data, source: "races (preview organisateur)", authed: true };
     }
 
-    // 2) Public -> vue v_public_races si elle existe
     try{
       const { data, error } = await supabase.from("v_public_races").select("*").eq("id", id).maybeSingle();
       if (!error && data) return { row: data, source: "v_public_races (public)", authed: false };
     }catch(_){}
 
-    // 3) Fallback public -> table races filtrée publiée
     const { data, error } = await supabase
       .from("races")
       .select("*")
@@ -328,31 +385,93 @@
     return { row: null, source: authed ? "races (preview)" : "public", authed };
   }
 
+  // EXTRACTION ROBUSTE DES DONNÉES
   function extractPoints(row){
-    // Extraction améliorée des points GPX depuis différentes sources
-    const pts = 
-      row?.gpx?.points || 
-      row?.analysis_json?.points || 
-      row?.analysis_json?.meta?.points ||
-      row?.analysis?.points ||
-      row?.points ||
-      null;
+    console.log("🔍 Extraction points depuis:", row);
     
-    console.log("Points GPX extraits:", pts ? pts.length : 0);
-    return Array.isArray(pts) && pts.length > 0 ? pts : null;
+    // Essayer TOUTES les sources possibles
+    const sources = [
+      row?.analysis_json?.points,
+      row?.gpx?.points,
+      row?.analysis?.points,
+      row?.points
+    ];
+    
+    for (const pts of sources) {
+      if (Array.isArray(pts) && pts.length > 0) {
+        console.log("✅ Points trouvés:", pts.length);
+        return pts;
+      }
+    }
+    
+    console.error("❌ Aucun point GPX trouvé dans:", {
+      analysis_json: row?.analysis_json,
+      gpx: row?.gpx
+    });
+    return null;
   }
 
-  // NOUVELLE FONCTION : Calculer le niveau de difficulté sur 5 étoiles
+  function extractScores(row){
+    console.log("🔍 Extraction scores depuis:", row);
+    
+    // Score global - toutes les sources possibles
+    const globalSources = [
+      row?.score_global,
+      row?.globalScore,
+      row?.analysis_json?.mrs,
+      row?.analysis?.mrs,
+      row?.mrs
+    ];
+    const globalScore = globalSources.find(v => Number.isFinite(Number(v)));
+    
+    // Score physique
+    const physSources = [
+      row?.score_phys,
+      row?.physScore,
+      row?.analysis_json?.phys?.score,
+      row?.analysis?.phys?.score,
+      row?.phys?.score
+    ];
+    const physScore = physSources.find(v => Number.isFinite(Number(v)));
+    
+    // Score technique
+    const techSources = [
+      row?.score_tech,
+      row?.techScore,
+      row?.techScoreV2,
+      row?.analysis_json?.tech?.techScoreV2,
+      row?.analysis_json?.techV2?.techScoreV2,
+      row?.analysis?.tech?.techScoreV2,
+      row?.tech?.techScoreV2
+    ];
+    const techScore = techSources.find(v => Number.isFinite(Number(v)));
+    
+    const scores = {
+      global: Number(globalScore),
+      phys: Number(physScore),
+      tech: Number(techScore)
+    };
+    
+    console.log("📊 Scores extraits:", scores);
+    return scores;
+  }
+
+  function extractSurfaces(row){
+    // Surfaces OSM pour les barres
+    const surfaceSources = [
+      row?.analysis_json?.tech?.surfaceEstimate,
+      row?.analysis_json?.techV2?.surfaceEstimate,
+      row?.analysis_json?.surfaceEstimate,
+      row?.analysis?.tech?.surfaceEstimate,
+      row?.surfaceEstimate
+    ];
+    
+    return surfaceSources.find(v => v && typeof v === 'object') || null;
+  }
+
   function calculateDifficultyLevel(globalScore){
     const g = Number(globalScore);
     if (!Number.isFinite(g) || g < 0) return null;
-    
-    // Conversion du score global (0-100) en niveau sur 5
-    // 0-20: 1 étoile (Facile)
-    // 20-40: 2 étoiles (Modéré) 
-    // 40-60: 3 étoiles (Exigeant)
-    // 60-80: 4 étoiles (Difficile)
-    // 80-100: 5 étoiles (Extrême)
     
     if (g < 20) return { level: 1, label: "Facile", desc: "Accessible aux débutants" };
     if (g < 40) return { level: 2, label: "Modéré", desc: "Bonne condition physique recommandée" };
@@ -374,7 +493,6 @@
     label.textContent = diff.label;
     desc.textContent = `${diff.desc} (${Math.round(globalScore)}/100)`;
     
-    // Remplir les étoiles
     const starElems = stars.querySelectorAll(".star");
     starElems.forEach((star, idx) => {
       if (idx < diff.level) {
@@ -385,7 +503,73 @@
     });
   }
 
-  // Leaflet map
+  // NOUVEAU : Rendu des barres de surface OSM
+  function renderSurfaceBars(surfaces){
+    const box = $("surfaceBox");
+    const container = $("surfaceBarContainer");
+    
+    if (!surfaces || typeof surfaces !== 'object') {
+      console.log("⚠️ Pas de données de surface OSM");
+      return;
+    }
+    
+    console.log("🌍 Surfaces OSM:", surfaces);
+    
+    // Normaliser les noms de clés
+    const road = Number(surfaces.road || surfaces.route || 0);
+    const track = Number(surfaces.track || surfaces.wideTrack || surfaces.piste || 0);
+    const single = Number(surfaces.single || surfaces.singletrack || surfaces.monotrace || 0);
+    
+    const total = road + track + single;
+    
+    if (total === 0) {
+      console.log("⚠️ Total des surfaces = 0");
+      return;
+    }
+    
+    // Calculer les pourcentages
+    const roadPct = Math.round((road / total) * 100);
+    const trackPct = Math.round((track / total) * 100);
+    const singlePct = Math.max(0, 100 - roadPct - trackPct);
+    
+    console.log("📊 Pourcentages:", { roadPct, trackPct, singlePct });
+    
+    // Afficher la box
+    box.style.display = "block";
+    
+    // Créer les barres
+    container.innerHTML = "";
+    
+    if (roadPct > 0) {
+      const bar = document.createElement("div");
+      bar.className = "surface-bar road";
+      bar.style.width = roadPct + "%";
+      bar.textContent = roadPct + "%";
+      container.appendChild(bar);
+    }
+    
+    if (trackPct > 0) {
+      const bar = document.createElement("div");
+      bar.className = "surface-bar track";
+      bar.style.width = trackPct + "%";
+      bar.textContent = trackPct + "%";
+      container.appendChild(bar);
+    }
+    
+    if (singlePct > 0) {
+      const bar = document.createElement("div");
+      bar.className = "surface-bar single";
+      bar.style.width = singlePct + "%";
+      bar.textContent = singlePct + "%";
+      container.appendChild(bar);
+    }
+    
+    // Mettre à jour les labels
+    $("roadLabel").textContent = `Route : ${roadPct}%`;
+    $("trackLabel").textContent = `Piste large : ${trackPct}%`;
+    $("singleLabel").textContent = `Monotrace : ${singlePct}%`;
+  }
+
   let MAP = null;
   let LINE = null;
 
@@ -424,7 +608,6 @@
     LINE = L.polyline(latlngs, { weight: 4, opacity: 0.9, color: '#2f6f3e' }).addTo(MAP);
     try{ 
       MAP.fitBounds(LINE.getBounds(), { padding: [18,18] });
-      // Ajouter markers départ/arrivée
       L.marker(latlngs[0]).addTo(MAP).bindPopup("Départ");
       L.marker(latlngs[latlngs.length - 1]).addTo(MAP).bindPopup("Arrivée");
     }catch(e){
@@ -433,7 +616,6 @@
     if (hint) hint.textContent = `${latlngs.length.toLocaleString("fr-FR")} points tracés.`;
   }
 
-  // Elevation profile (repères km tous les 5 km)
   function ensureCanvasResolution(canvas){
     if (!canvas) return;
     const cssH = 360;
@@ -459,7 +641,7 @@
       .map(p => [Number(p.lat), Number(p.lon ?? p.lng)])
       .filter(([la, lo]) => Number.isFinite(la) && Number.isFinite(lo));
 
-    console.log("Profil - Points d'altitude:", eles.length, "Points GPS:", latlngs.length);
+    console.log("📈 Profil - Points d'altitude:", eles.length, "Points GPS:", latlngs.length);
 
     if (eles.length < 10 || latlngs.length < 10){
       ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -467,7 +649,6 @@
       return;
     }
 
-    // distance cumulée (km) via haversine
     const dist = [0];
     let total = 0;
     for (let i=1;i<latlngs.length;i++){
@@ -491,7 +672,6 @@
     const minE = Math.min(...eles), maxE = Math.max(...eles);
     const maxD = dist[dist.length-1] || 1;
 
-    // grille km (tous les 5 km)
     ctx.lineWidth = 1;
     ctx.strokeStyle = "rgba(40,60,40,0.18)";
     ctx.fillStyle = "rgba(40,60,40,0.65)";
@@ -511,13 +691,11 @@
     ctx.textAlign="left";
     ctx.fillText("km", mL, mT+h+6);
 
-    // labels altitude min/max
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     ctx.fillText(Math.round(maxE)+" m", mL-8, mT);
     ctx.fillText(Math.round(minE)+" m", mL-8, mT+h);
 
-    // courbe
     ctx.strokeStyle = "rgba(47,111,62,0.95)";
     ctx.lineWidth = 2;
 
@@ -529,7 +707,6 @@
     }
     ctx.stroke();
 
-    // remplissage léger
     ctx.globalAlpha = 0.15;
     ctx.fillStyle = "rgba(47,111,62,1)";
     ctx.lineTo(mL+w, mT+h);
@@ -561,7 +738,8 @@
   function renderUI(row, authed){
     CURRENT_RACE = row;
 
-    // Header
+    console.log("🎨 Rendu UI avec:", row);
+
     $("raceName").textContent = row?.name || "Épreuve";
 
     const meta = [];
@@ -576,30 +754,27 @@
       p.textContent = row.comment;
     }
 
-    // KPI - Extraction améliorée des scores
-    const g = Number(row?.score_global ?? row?.globalScore ?? row?.analysis_json?.mrs ?? row?.analysis?.mrs);
-    const p = Number(row?.score_phys ?? row?.physScore ?? row?.analysis_json?.phys?.score ?? row?.analysis?.phys?.score);
-    const t = Number(row?.score_tech ?? row?.techScore ?? row?.techScoreV2 ?? 
-                     row?.analysis_json?.tech?.techScoreV2 ?? row?.analysis_json?.techV2?.techScoreV2 ??
-                     row?.analysis?.tech?.techScoreV2 ?? row?.analysis?.techV2?.techScoreV2);
+    // EXTRACTION ROBUSTE DES SCORES
+    const scores = extractScores(row);
 
-    console.log("Scores extraits - Global:", g, "Phys:", p, "Tech:", t);
+    $("kpiGlobal").textContent = Number.isFinite(scores.global) ? String(Math.round(scores.global)) : "—";
+    $("kpiPhys").textContent   = Number.isFinite(scores.phys) ? String(Math.round(scores.phys)) : "—";
+    $("kpiTech").textContent   = Number.isFinite(scores.tech) ? String(Math.round(scores.tech)) : "—";
 
-    $("kpiGlobal").textContent = Number.isFinite(g) ? String(Math.round(g)) : "—";
-    $("kpiPhys").textContent   = Number.isFinite(p) ? String(Math.round(p)) : "—";
-    $("kpiTech").textContent   = Number.isFinite(t) ? String(Math.round(t)) : "—";
-
-    // NOUVEAU : Afficher le niveau de difficulté
-    if (Number.isFinite(g)) {
-      renderDifficulty(g);
+    // Difficulté
+    if (Number.isFinite(scores.global)) {
+      renderDifficulty(scores.global);
     }
+
+    // NOUVEAU : Surfaces OSM
+    const surfaces = extractSurfaces(row);
+    renderSurfaceBars(surfaces);
 
     $("kpiDisc").textContent = row?.discipline ?? row?.disc ? String(row.discipline ?? row.disc) : "Discipline —";
     $("kpiBike").textContent = (row?.ebike === true) ? "Vélo : E-bike" : (row?.ebike === false ? "Vélo : Musculaire" : "Vélo : —");
     
-    // Distance/D+ - extraction améliorée
-    const distKm = Number(row?.distance_km ?? row?.distanceKm ?? row?.analysis_json?.meta?.stats?.distanceKm ?? row?.analysis?.stats?.distanceKm);
-    const dplusM = Number(row?.dplus_m ?? row?.dplusM ?? row?.analysis_json?.meta?.stats?.dplusM ?? row?.analysis?.stats?.dplusM);
+    const distKm = Number(row?.distance_km ?? row?.distanceKm ?? row?.analysis_json?.meta?.stats?.distanceKm);
+    const dplusM = Number(row?.dplus_m ?? row?.dplusM ?? row?.analysis_json?.meta?.stats?.dplusM);
     
     $("kpiDist").textContent = "Distance : " + fmtKm(distKm);
     $("kpiDplus").textContent = "D+ : " + fmtM(dplusM);
@@ -607,7 +782,6 @@
     const isPub = !!row?.is_published;
     $("kpiPublish").textContent = isPub ? "Publié" : "Brouillon";
 
-    // Links meeting
     const mid = row?.meeting_id || null;
     $("btnBack").href = mid ? `meeting.html?id=${encodeURIComponent(mid)}` : "meetings.html";
     if (mid){
@@ -619,20 +793,18 @@
       cs.style.display = "inline-flex";
     }
 
-    // Publish button
     const btnPub = $("btnPublish");
     const msgPub = $("publishMsg");
     btnPub.style.display = (authed && !isPub) ? "inline-flex" : "none";
     msgPub.textContent = (authed && !isPub) ? "Cette épreuve est en brouillon (preview). Publie-la pour la rendre visible publiquement." : (isPub ? "✅ Épreuve publiée" : "");
 
-    // Map + profile
+    // EXTRACTION ROBUSTE DES POINTS
     const pts = extractPoints(row);
     renderMap(pts);
     const canvas = $("elevCanvas");
     ensureCanvasResolution(canvas);
     drawElevation(canvas, pts || []);
 
-    // QR
     renderQr(raceId);
   }
 
@@ -654,7 +826,6 @@
       btn.style.display = "none";
       $("kpiPublish").textContent = "Publié";
 
-      // refresh row
       const { row, authed } = await fetchRaceProper(raceId);
       if (row) renderUI(row, authed);
     }catch(e){
