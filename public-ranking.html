@@ -5,38 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Classement public — MTB Points</title>
 
-  <!-- ✅ CSS Nature global -->
-  <link rel="stylesheet" href="./css/style.css" />
+  <!-- ✅ Base + Thème nature (comme reglement.html) -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/theme-nature.css?v=8" />
 
-  <!-- ✅ On garde ton style de page (base) et on ajoute juste ce qu’il faut -->
   <style>
-    /* On conserve l’esprit de ta page actuelle, mais sans casser le thème global */
+    /* On garde ton layout, mais on laisse le thème nature faire le job via variables + body.theme-nature */
     .wrap{max-width:1280px;margin:22px auto;padding:0 16px}
-    .card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2,22px);padding:18px;box-shadow:var(--shadow);}
+
     .hero{
       border-radius:22px;padding:18px;border:1px solid var(--border);
       background:
-        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
-        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.10), transparent 60%),
-        #fff;
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.14), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(34,197,94,.10), transparent 60%),
+        var(--card);
     }
     .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
     .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
-    .hero p{margin:6px 0 0 0;line-height:1.55;color:#334155}
+    .muted{color:var(--muted)}
 
     .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
+      background:rgba(255,255,255,.85);font-weight:900;font-size:12px;white-space:nowrap;
     }
+
     .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
     .tab{
-      border:1px solid var(--border);background:#fff;border-radius:999px;
-      padding:8px 12px;font-weight:1000;font-size:13px;cursor:pointer;
+      border:1px solid var(--border);background:rgba(255,255,255,.85);
+      border-radius:999px;padding:8px 12px;font-weight:1000;font-size:13px;cursor:pointer;
       transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .tab:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
-    .tab.active{background:#eff6ff;border-color:#bfdbfe;color:var(--blue2)}
+    .tab:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#cfe0d0}
+    .tab.active{background:rgba(47,111,62,.12);border-color:rgba(47,111,62,.25);color:var(--blue2)}
 
     .filters{
       margin-top:12px;
@@ -48,82 +50,65 @@
       .filters{grid-template-columns: 1fr 1fr;}
       .filters .spanAll{grid-column:1/-1}
     }
+    label{display:block;font-weight:900;font-size:12px;margin-bottom:6px}
+    input,select{
+      width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;
+      background:rgba(255,255,255,.9);outline:none;font-size:14px;color:var(--text)
+    }
 
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
-      text-decoration:none;white-space:nowrap;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      background:rgba(255,255,255,.9);cursor:pointer;font-weight:1000;color:var(--text);
       width:100%;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#cfe0d0}
     .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
 
-    .twoCols{
-      margin-top:12px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
+    .twoCols{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media(max-width:980px){ .twoCols{grid-template-columns:1fr} }
 
     .panel{
       border:1px solid var(--border);
       border-radius:18px;
-      background:#fff;
+      background:var(--card);
       box-shadow:0 2px 10px rgba(0,0,0,.04);
       overflow:hidden;
     }
     .panelHead{
-      padding:12px 14px;
-      border-bottom:1px solid var(--border);
+      padding:12px 14px;border-bottom:1px solid var(--border);
       display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;
-      background:#f8fafc;
+      background:rgba(47,111,62,.06);
     }
     .panelHead h3{margin:0;font-size:14px;letter-spacing:-.1px}
-    .panelBody{padding:0}
-
     table{width:100%;border-collapse:separate;border-spacing:0}
     thead th{
-      position:sticky;top:0;background:#fff;z-index:1;
+      position:sticky;top:0;background:rgba(255,255,255,.92);z-index:1;
       text-align:left;font-size:12px;color:#475569;padding:10px 12px;
       border-bottom:1px solid var(--border);white-space:nowrap;
     }
-    tbody td{
-      padding:10px 12px;border-bottom:1px solid var(--border);
-      font-size:13px;vertical-align:top;
-    }
-    tbody tr:hover td{background:#fbfdff}
+    tbody td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:top}
+    tbody tr:hover td{background:rgba(255,255,255,.55)}
     tbody tr:last-child td{border-bottom:0}
-
     .rank{font-weight:1000}
     .name{font-weight:1000}
     .small{font-size:12px;color:var(--muted)}
     .points{font-weight:1000;font-variant-numeric:tabular-nums;white-space:nowrap}
-    .empty{
-      padding:14px;border-top:1px dashed var(--border);
-      color:var(--muted);
-    }
 
-    .sectionTitle{
-      margin:18px 0 8px 0;
-      font-size:14px;
-      font-weight:1000;
-      color:#0f172a;
-    }
+    .empty{padding:14px;border-top:1px dashed var(--border);color:var(--muted)}
   </style>
 </head>
 
-<body>
+<body class="theme-nature">
+
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points — Classement public</h1>
     <span class="pill"><span id="pillCount">0</span> riders</span>
   </div>
 
-  <nav class="nav">
+  <nav>
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html" class="active">Classement</a>
     <a href="meetings.html">Événements</a>
@@ -139,8 +124,7 @@
         <div style="min-width:280px;flex:1">
           <h2>Classement — Musculaire & Assistance électrique</h2>
           <p class="muted">
-            Onglets discipline + filtres. Affichage séparé : <b>Musculaire</b> / <b>Assistance électrique</b>,
-            avec <b>Hommes</b> et <b>Femmes</b>.
+            Classements séparés : <b>Musculaire</b> / <b>Assistance électrique</b> • <b>Hommes</b> / <b>Femmes</b>.
           </p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -206,32 +190,18 @@
 
       <div class="spanAll" style="grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px;">
         <div class="muted">Affichage : <strong id="countShown">0</strong> riders</div>
-        <div class="muted">Astuce : renseigne sexe + année de naissance dans profiles/résultats pour un tri parfait.</div>
+        <div class="muted">Astuce : renseigne sexe + année de naissance pour un tri parfait.</div>
       </div>
     </div>
 
-    <!-- ============================ -->
-    <!-- MUSCULAIRE (H/F)            -->
-    <!-- ============================ -->
-    <div class="sectionTitle">Musculaire</div>
+    <!-- MUSCULAIRE -->
+    <h3 style="margin:16px 0 8px 0;">Musculaire</h3>
     <div class="twoCols">
       <section class="panel">
-        <div class="panelHead">
-          <h3>👨 Hommes</h3>
-          <span class="pill"><span id="countMM">0</span></span>
-        </div>
+        <div class="panelHead"><h3>👨 Hommes</h3><span class="pill"><span id="countMM">0</span></span></div>
         <div class="panelBody">
           <table>
-            <thead>
-              <tr>
-                <th style="width:56px;">#</th>
-                <th>Rider</th>
-                <th style="width:150px;">Âge</th>
-                <th style="width:120px;">Nation</th>
-                <th style="width:110px;">Points</th>
-                <th style="width:90px;">Courses</th>
-              </tr>
-            </thead>
+            <thead><tr><th style="width:56px;">#</th><th>Rider</th><th style="width:120px;">Nation</th><th style="width:110px;">Points</th></tr></thead>
             <tbody id="tbodyMM"></tbody>
           </table>
           <div id="emptyMM" class="empty" style="display:none;">Aucun homme musculaire avec ces filtres.</div>
@@ -239,22 +209,10 @@
       </section>
 
       <section class="panel">
-        <div class="panelHead">
-          <h3>👩 Femmes</h3>
-          <span class="pill"><span id="countMF">0</span></span>
-        </div>
+        <div class="panelHead"><h3>👩 Femmes</h3><span class="pill"><span id="countMF">0</span></span></div>
         <div class="panelBody">
           <table>
-            <thead>
-              <tr>
-                <th style="width:56px;">#</th>
-                <th>Rider</th>
-                <th style="width:150px;">Âge</th>
-                <th style="width:120px;">Nation</th>
-                <th style="width:110px;">Points</th>
-                <th style="width:90px;">Courses</th>
-              </tr>
-            </thead>
+            <thead><tr><th style="width:56px;">#</th><th>Rider</th><th style="width:120px;">Nation</th><th style="width:110px;">Points</th></tr></thead>
             <tbody id="tbodyMF"></tbody>
           </table>
           <div id="emptyMF" class="empty" style="display:none;">Aucune femme musculaire avec ces filtres.</div>
@@ -262,28 +220,14 @@
       </section>
     </div>
 
-    <!-- ============================ -->
-    <!-- ASSISTANCE ELECTRIQUE (H/F)  -->
-    <!-- ============================ -->
-    <div class="sectionTitle">Assistance électrique</div>
+    <!-- E-BIKE -->
+    <h3 style="margin:16px 0 8px 0;">Assistance électrique</h3>
     <div class="twoCols">
       <section class="panel">
-        <div class="panelHead">
-          <h3>👨 Hommes (AE)</h3>
-          <span class="pill"><span id="countEM">0</span></span>
-        </div>
+        <div class="panelHead"><h3>👨 Hommes (AE)</h3><span class="pill"><span id="countEM">0</span></span></div>
         <div class="panelBody">
           <table>
-            <thead>
-              <tr>
-                <th style="width:56px;">#</th>
-                <th>Rider</th>
-                <th style="width:150px;">Âge</th>
-                <th style="width:120px;">Nation</th>
-                <th style="width:110px;">Points</th>
-                <th style="width:90px;">Courses</th>
-              </tr>
-            </thead>
+            <thead><tr><th style="width:56px;">#</th><th>Rider</th><th style="width:120px;">Nation</th><th style="width:110px;">Points</th></tr></thead>
             <tbody id="tbodyEM"></tbody>
           </table>
           <div id="emptyEM" class="empty" style="display:none;">Aucun homme AE avec ces filtres.</div>
@@ -291,22 +235,10 @@
       </section>
 
       <section class="panel">
-        <div class="panelHead">
-          <h3>👩 Femmes (AE)</h3>
-          <span class="pill"><span id="countEF">0</span></span>
-        </div>
+        <div class="panelHead"><h3>👩 Femmes (AE)</h3><span class="pill"><span id="countEF">0</span></span></div>
         <div class="panelBody">
           <table>
-            <thead>
-              <tr>
-                <th style="width:56px;">#</th>
-                <th>Rider</th>
-                <th style="width:150px;">Âge</th>
-                <th style="width:120px;">Nation</th>
-                <th style="width:110px;">Points</th>
-                <th style="width:90px;">Courses</th>
-              </tr>
-            </thead>
+            <thead><tr><th style="width:56px;">#</th><th>Rider</th><th style="width:120px;">Nation</th><th style="width:110px;">Points</th></tr></thead>
             <tbody id="tbodyEF"></tbody>
           </table>
           <div id="emptyEF" class="empty" style="display:none;">Aucune femme AE avec ces filtres.</div>
@@ -317,7 +249,6 @@
   </div>
 </main>
 
-<!-- ✅ Supabase (module) -->
 <script type="module" src="js/public-ranking.js"></script>
 </body>
 </html>
