@@ -1,8 +1,6 @@
 // server/index.js
 // MTB Points — API GPX/OSM (Render)
-// - POST /api/analyze-gpx        => GPX + OSM (hybrid) avec timeout + fallback
-// - POST /api/analyze-gpx-lite   => GPX-only (debug/backup)
-// - Validation stricte: altitude obligatoire + distance mini 3 km
+// ✅ CORS CORRIGÉ
 
 import express from "express";
 import cors from "cors";
@@ -46,12 +44,11 @@ function isNetworkishError(msg) {
 }
 
 function validateGpx(points, stats) {
-  // --- critères MTB Points (stricts) ---
-  const MIN_DISTANCE_KM = 3.0;      // ✅ demandé
+  const MIN_DISTANCE_KM = 3.0;
   const MIN_POINTS = 30;
-  const MIN_ELE_RATIO = 0.80;       // 80% des points doivent avoir <ele>
-  const MIN_PTS_PER_KM = 5;         // densité minimale
-  const MIN_DPLUS_M = 10;           // optionnel mais utile contre "plat"
+  const MIN_ELE_RATIO = 0.80;
+  const MIN_PTS_PER_KM = 5;
+  const MIN_DPLUS_M = 10;
 
   if (!points || points.length < 2) {
     return { ok: false, status: 400, error: "Aucun point <trkpt> exploitable." };
@@ -97,7 +94,6 @@ function validateGpx(points, stats) {
     };
   }
 
-  // Densité de points (anti 10 km / 12 points)
   const density = distKm > 0 ? totalPts / distKm : totalPts;
   if (density < MIN_PTS_PER_KM) {
     return {
@@ -107,7 +103,6 @@ function validateGpx(points, stats) {
     };
   }
 
-  // Optionnel mais recommandé: refuse les GPX "plats" suspects
   const dplus = Number(stats?.dplusM ?? 0);
   if (!Number.isFinite(dplus) || dplus < MIN_DPLUS_M) {
     return {
@@ -121,22 +116,48 @@ function validateGpx(points, stats) {
 }
 
 /* ------------------------------ CORS ------------------------------ */
+// ✅ CORRECTION : Configuration CORS simplifiée et robuste
 
-const ALLOWED_ORIGINS = new Set([
+const ALLOWED_ORIGINS = [
   "https://davidpoyade-netizen.github.io",
   "https://www.davidpoyade-netizen.github.io",
   "http://localhost:5500",
   "http://127.0.0.1:5500",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-]);
+];
 
+// ✅ Option 1 : CORS simple (RECOMMANDÉ)
+app.use(
+  cors({
+    origin: ALLOWED_ORIGINS,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
+    maxAge: 86400,
+  })
+);
+
+// ✅ Gérer explicitement les requêtes OPTIONS (preflight)
+app.options("*", cors());
+
+/* 
+// ✅ Option 2 : Si Option 1 ne marche pas, utilise celle-ci (plus permissive)
 app.use(
   cors({
     origin: (origin, cb) => {
+      // Pas d'origin = requête same-origin ou curl → accepter
       if (!origin) return cb(null, true);
-      if (ALLOWED_ORIGINS.has(origin)) return cb(null, true);
-      return cb(new Error(`CORS blocked for origin: ${origin}`));
+      
+      // Vérifier si l'origin est autorisée
+      if (ALLOWED_ORIGINS.includes(origin)) {
+        console.log("✅ CORS allowed for:", origin);
+        return cb(null, true);
+      }
+      
+      // Origin non autorisée
+      console.warn("❌ CORS blocked for:", origin);
+      return cb(null, false); // ← IMPORTANT : cb(null, false) pas cb(new Error(...))
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -146,6 +167,7 @@ app.use(
 );
 
 app.options("*", cors());
+*/
 
 /* --------------------------- Body parser --------------------------- */
 
@@ -160,7 +182,6 @@ app.use(
 
 app.get("/", (_, res) => res.status(200).send("MTB Points API OK"));
 app.get("/api/health", (_, res) => res.json({ ok: true }));
-app.get("/health", (_, res) => res.json({ ok: true }));
 
 /* ------------------------- Friendly GET --------------------------- */
 
@@ -246,11 +267,11 @@ app.post("/api/analyze-gpx", async (req, res) => {
 
     const stats = computeStatsFromPoints(points);
 
-    // ✅ Validation stricte (distance >= 3 km + altitude + qualité)
+    // ✅ Validation stricte
     const v = validateGpx(points, stats);
     if (!v.ok) return res.status(v.status).json({ ok: false, error: v.error });
 
-    // ✅ Overpass/OSM optimisé (moins de requêtes + parallélisation + cache)
+    // ✅ Overpass/OSM optimisé
     const OSM_TIMEOUT_MS = 25000;
 
     let tech = null;
@@ -275,7 +296,6 @@ app.post("/api/analyze-gpx", async (req, res) => {
       tech = { techScoreV2: null, details: { error: String(e?.message || e) } };
     }
 
-    // surfaceEstimate : préfère moteur (si présent), sinon fallback
     const surfaceEstimate =
       tech?.surfaceEstimate ??
       computeSurfaceEstimateFromOsmSamples(tech?.details?.osmSamples || []) ??
@@ -293,7 +313,6 @@ app.post("/api/analyze-gpx", async (req, res) => {
       ok: true,
       tech: {
         ...tech,
-        // osmOk = vrai seulement si Overpass a répondu ET techScoreV2 a été produit
         osmOk: osmOk && tech?.techScoreV2 != null,
         surfaceEstimate,
       },
@@ -321,6 +340,7 @@ app.post("/api/analyze-gpx", async (req, res) => {
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8787;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`[mtb-points] API listening on 0.0.0.0:${PORT}`);
+  console.log(`[mtb-points] Allowed CORS origins:`, ALLOWED_ORIGINS);
   console.log(`[mtb-points] GET  /api/health`);
   console.log(`[mtb-points] POST /api/analyze-gpx (Content-Type: application/gpx+xml)`);
   console.log(`[mtb-points] POST /api/analyze-gpx-lite (GPX only)`);
