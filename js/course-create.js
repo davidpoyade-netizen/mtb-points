@@ -319,7 +319,66 @@ async function analyzeGpx() {
           hasElevation: res?.hasElevation ?? null,
         }
       },
+// Après avoir extrait distanceKm et dplusM de l'analyse
+const distanceKm = res?.distanceKm ?? null;
+const dplusM = res?.dplusM ?? null;
 
+// NOUVEAU: Calcul automatique de la discipline
+let suggestedDiscipline = null;
+if (distanceKm && dplusM) {
+  suggestedDiscipline = calculateDiscipline(distanceKm, dplusM);
+  console.log("🏁 Discipline suggérée:", suggestedDiscipline);
+  
+  // Remplir automatiquement le champ discipline si vide
+  const disciplineSelect = document.getElementById('discipline');
+  if (disciplineSelect && suggestedDiscipline.code) {
+    // Si l'option existe dans le select, la sélectionner
+    const option = Array.from(disciplineSelect.options).find(
+      opt => opt.value === suggestedDiscipline.code
+    );
+    if (option) {
+      disciplineSelect.value = suggestedDiscipline.code;
+    } else {
+      // Sinon créer une option personnalisée
+      const newOption = document.createElement('option');
+      newOption.value = suggestedDiscipline.code;
+      newOption.textContent = suggestedDiscipline.name;
+      newOption.selected = true;
+      disciplineSelect.appendChild(newOption);
+    }
+    
+    // Afficher un message informatif
+    const confidencePercent = Math.round((suggestedDiscipline.confidence || 1) * 100);
+    const confidenceEmoji = confidencePercent >= 90 ? "✅" : confidencePercent >= 70 ? "👍" : "⚠️";
+    
+    // Créer un élément d'info sous le select
+    let infoDiv = document.getElementById('discipline-suggestion-info');
+    if (!infoDiv) {
+      infoDiv = document.createElement('div');
+      infoDiv.id = 'discipline-suggestion-info';
+      infoDiv.style.cssText = 'margin-top:8px;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:13px;';
+      disciplineSelect.parentElement.appendChild(infoDiv);
+    }
+    
+    infoDiv.innerHTML = `
+      ${confidenceEmoji} <strong>Discipline suggérée :</strong> ${suggestedDiscipline.name}<br>
+      <span style="color:#64748b;">${suggestedDiscipline.description} (${confidencePercent}% de confiance)</span><br>
+      <span style="color:#64748b;font-size:12px;">Basé sur ${distanceKm.toFixed(1)} km et ${Math.round(dplusM)} m D+. Vous pouvez modifier si nécessaire.</span>
+    `;
+  }
+}
+ANALYSIS = {
+  fileName: f.name,
+  analyzedAt: Date.now(),
+  
+  // ... autres champs ...
+  
+  // NOUVEAU: Discipline suggérée
+  suggestedDiscipline: suggestedDiscipline,
+  
+  // ... reste des champs ...
+};
+    
       // Points GPX (IMPORTANT pour le profil!)
       points: res?.points ?? null,
 
@@ -386,7 +445,16 @@ async function buildRace({ ebikeOverride = null, nameSuffix = "", idSalt = 0 } =
   const meetingId = $("meetingId").value;
   const meeting = await findMeetingHybrid(meetingId);
   const lapsByCategorySex = collectLapsByCategorySex();
-
+function buildRace() {
+  const disciplineSelect = document.getElementById('discipline');
+  const selectedDiscipline = disciplineSelect?.value || ANALYSIS?.suggestedDiscipline?.code || null;
+  
+  return {
+    // ... autres champs ...
+    discipline: selectedDiscipline,
+    // ... autres champs ...
+  };
+}
   const baseName = $("name").value.trim();
   const finalName = (baseName + (nameSuffix ? ` ${nameSuffix}` : "")).trim();
 
