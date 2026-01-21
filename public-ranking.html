@@ -3,771 +3,657 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Classement — MTB Points</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/theme-nature.css">
+  <title>Classement public — MTB Points</title>
+  <link rel="stylesheet" href="./css/style.css" />
   <style>
-    /* Onglets de discipline */
-    .disciplineTabs {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 4px 0;
-      margin-bottom: 20px;
-      border-bottom: 2px solid var(--border);
+    :root{
+      --bg:#f4f4f4;--card:#ffffff;--text:#0f172a;--muted:#667085;--border:#e5e7eb;
+      --blue:#2563eb;--blue2:#1d4ed8;--shadow:0 10px 30px rgba(2,6,23,.10);
+      --r:22px;--ok:#16a34a;--warn:#ea580c;--err:#dc2626;
     }
-    
-    .disciplineTabs button {
-      padding: 10px 16px;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-weight: 900;
-      font-size: 13px;
-      cursor: pointer;
-      border-radius: 10px 10px 0 0;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-      position: relative;
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+    .muted{color:var(--muted)}
+    header.header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(255,255,255,.90);
+      backdrop-filter:saturate(180%) blur(8px);
+      border-bottom:1px solid var(--border);
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     }
-    
-    .disciplineTabs button:hover {
-      background: rgba(47, 111, 62, 0.08);
-      color: var(--text);
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{text-decoration:none;padding:8px 10px;border-radius:10px;color:var(--blue);font-weight:900;font-size:13px}
+    nav a:hover{background:#eff6ff}
+    nav a.active{background:#eff6ff;color:var(--blue2)}
+
+    .wrap{max-width:1280px;margin:22px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+
+    .hero{
+      border-radius:22px;padding:18px;border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(37,99,235,.14), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(16,185,129,.10), transparent 60%),
+        #fff;
     }
-    
-    .disciplineTabs button.active {
-      background: var(--blue);
-      color: #fff;
-      box-shadow: 0 -2px 8px rgba(47, 111, 62, 0.15);
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
+    .hero p{margin:6px 0 0 0;line-height:1.55;color:#334155}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
     }
-    
-    body.theme-nature .disciplineTabs button.active {
-      background: linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
+
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .tab{
+      border:1px solid var(--border);background:#fff;border-radius:999px;
+      padding:8px 12px;font-weight:1000;font-size:13px;cursor:pointer;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    
-    /* Grille de colonnes pour les 4 classements */
-    .rankingGrid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-top: 20px;
+    .tab:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .tab.active{background:#eff6ff;border-color:#bfdbfe;color:var(--blue2)}
+
+    .filters{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1.2fr 220px 220px 160px 160px 180px;
+      gap:10px;align-items:end;
     }
-    
-    @media(max-width: 1400px) {
-      .rankingGrid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    @media(max-width:1200px){
+      .filters{grid-template-columns: 1fr 1fr; }
+      .filters .spanAll{grid-column:1/-1}
     }
-    
-    @media(max-width: 768px) {
-      .rankingGrid {
-        grid-template-columns: 1fr;
-      }
+    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
+    input,select{
+      width:100%;
+      padding:10px;margin-top:6px;
+      border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:14px;
     }
-    
-    /* Titres de groupes */
-    .groupTitle {
-      grid-column: span 2;
-      text-align: center;
-      font-weight: 1100;
-      font-size: 14px;
-      color: var(--blue);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 12px;
-      background: rgba(47, 111, 62, 0.08);
-      border-radius: 12px;
-      border: 1px solid rgba(47, 111, 62, 0.2);
-      margin-bottom: -8px;
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      width:100%;
     }
-    
-    @media(max-width: 1400px) {
-      .groupTitle {
-        grid-column: span 2;
-      }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
+    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
+    .btn.ghost{background:#f8fafc}
+
+    .twoCols{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
     }
-    
-    @media(max-width: 768px) {
-      .groupTitle {
-        grid-column: span 1;
-      }
+    @media(max-width:980px){ .twoCols{grid-template-columns:1fr} }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+      overflow:hidden;
     }
-    
-    .rankingColumn {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--r2);
-      padding: 16px;
-      box-shadow: var(--shadow);
+    .panelHead{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;
+      background:#f8fafc;
     }
-    
-    body.theme-nature .rankingColumn {
-      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.80));
-      border: 1px solid rgba(40,60,40,.16);
+    .panelHead h3{margin:0;font-size:14px;letter-spacing:-.1px}
+    .panelBody{padding:0}
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
     }
-    
-    .rankingColumn h3 {
-      margin: 0 0 12px 0;
-      font-size: 15px;
-      color: var(--blue);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 8px;
+    thead th{
+      position:sticky;top:0;
+      background:#fff;
+      z-index:1;
+      text-align:left;
+      font-size:12px;
+      color:#475569;
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
     }
-    
-    body.theme-nature .rankingColumn h3 {
-      color: var(--blue);
+    tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      font-size:13px;
+      vertical-align:top;
     }
-    
-    .rankingColumn .icon {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      background: var(--blue);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 900;
+    tbody tr:hover td{background:#fbfdff}
+    tbody tr:last-child td{border-bottom:0}
+    .rank{font-weight:1000}
+    .name{font-weight:1000}
+    .small{font-size:12px;color:var(--muted)}
+    .points{
+      font-weight:1000;
+      font-variant-numeric:tabular-nums;
+      white-space:nowrap;
     }
-    
-    /* Liste de cyclistes */
-    .riderList {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+    .empty{
+      padding:14px;
+      border-top:1px dashed var(--border);
+      color:var(--muted);
     }
-    
-    .riderItem {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 8px;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      transition: background 0.15s ease;
-    }
-    
-    .riderItem:hover {
-      background: rgba(47, 111, 62, 0.05);
-    }
-    
-    .riderItem:last-child {
-      border-bottom: none;
-    }
-    
-    .riderRank {
-      font-weight: 1000;
-      font-size: 14px;
-      color: var(--muted2);
-      min-width: 28px;
-    }
-    
-    .riderRank.top1 { color: #fbbf24; }
-    .riderRank.top2 { color: #94a3b8; }
-    .riderRank.top3 { color: #d97706; }
-    
-    .riderInfo {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .riderName {
-      font-weight: 900;
-      font-size: 13px;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .riderTeam {
-      font-size: 11px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .riderPoints {
-      font-weight: 1000;
-      font-size: 14px;
-      color: var(--blue);
-      min-width: 50px;
-      text-align: right;
-    }
-    
-    body.theme-nature .riderPoints {
-      color: var(--blue);
-    }
-    
-    .emptyState {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    
-    /* Filtres compacts */
-    .compactFilters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    
-    .compactFilters label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 900;
-    }
-    
-    .compactFilters select,
-    .compactFilters input {
-      width: auto;
-      min-width: 120px;
-      padding: 8px 10px;
-      margin-top: 0;
-    }
-    
-    /* Recherche */
-    .searchBox {
-      flex: 1;
-      max-width: 300px;
-      position: relative;
-    }
-    
-    .searchBox input {
-      width: 100%;
-      padding: 8px 32px 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: rgba(255,255,255,.82);
-      font-size: 13px;
-    }
-    
-    .searchBox input:focus {
-      outline: none;
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(47,111,62,.1);
-    }
-    
-    .searchBox .clearBtn {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      padding: 4px;
-      font-size: 14px;
-      display: none;
-    }
-    
-    .searchBox .clearBtn:hover {
-      color: var(--text);
-    }
-    
-    .searchBox.hasValue .clearBtn {
-      display: block;
-    }
-    
-    /* Highlight pour la recherche */
-    .riderItem.highlighted {
-      background: rgba(251, 191, 36, 0.15);
-      border: 1px solid rgba(251, 191, 36, 0.3);
-      border-radius: 8px;
-      margin: 2px 0;
+    a:focus, button:focus, input:focus, select:focus{
+      outline:3px solid rgba(37,99,235,.25);
+      outline-offset:2px;
     }
   </style>
 </head>
-<body class="theme-nature">
 
+<body>
 <header class="header">
-  <div class="brandRow">
-    <div class="brandLogo">
-      <img src="img/mtbpoints-coins.png" alt="MTB Points">
-    </div>
-    <h1 style="margin:0">Classement MTB Points</h1>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <h1>MTB Points — Classement public</h1>
+    <span class="pill"><span class="dot ok"></span><span id="pillCount">0</span> riders</span>
   </div>
-  
-  <nav class="nav">
+
+  <nav>
     <a href="index.html">Accueil</a>
-    <a href="meetings.html">Événements</a>
     <a href="public-ranking.html" class="active">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html">Challenge</a>
+    <a href="about.html">À propos</a>
   </nav>
-  
-  <div class="headerRight">
-    <span class="pill" id="periodPill">
-      <span class="dot ok" id="periodDot"></span>
-      <span id="periodLabel">24 mois</span>
-    </span>
-    <span class="muted" id="lastUpdate">—</span>
-  </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
   <div class="card">
-    <div class="heroTop">
-      <div>
-        <h2 style="font-size: 24px; margin: 0;">Classement MTB Points</h2>
-        <div class="muted" style="margin-top: 6px;">
-          Classements par discipline, catégorie et type de vélo
+    <section class="hero">
+      <div class="heroTop">
+        <div style="min-width:280px;flex:1">
+          <h2>Classement — Hommes / Femmes</h2>
+          <p class="muted">
+            Le classement cumule les points par rider (d’après <code>mtb.results.v1</code>).
+            Choisis une vue en haut (Général / discipline) et filtre à gauche.
+          </p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="pill"><span class="dot"></span><span id="pillMode">Général</span></span>
+          <span class="pill"><span class="dot"></span><span id="pillRows">0</span> résultats</span>
         </div>
       </div>
-      <div class="heroActions">
-        <button class="btn ghost" id="resetBtn" type="button">Réinitialiser</button>
-        <button class="btn primary" id="refreshBtn" type="button">Recalculer</button>
+
+      <div class="tabs" id="tabs"></div>
+    </section>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="spanAll" style="grid-column:1/2">
+        <label for="q">Recherche rider</label>
+        <input id="q" type="text" placeholder="Nom, email, nationalité…" />
+      </div>
+
+      <div>
+        <label for="nat">Nationalité</label>
+        <select id="nat"><option value="">Toutes</option></select>
+      </div>
+
+      <div>
+        <label for="cat">Catégorie</label>
+        <select id="cat"><option value="">Toutes</option></select>
+      </div>
+
+      <div>
+        <label for="ageMin">Âge min</label>
+        <input id="ageMin" type="number" min="0" placeholder="ex: 18" />
+      </div>
+
+      <div>
+        <label for="ageMax">Âge max</label>
+        <input id="ageMax" type="number" min="0" placeholder="ex: 49" />
+      </div>
+
+      <div>
+        <label for="minPts">Points min</label>
+        <input id="minPts" type="number" min="0" placeholder="ex: 100" />
+      </div>
+
+      <div>
+        <label for="sortBy">Tri</label>
+        <select id="sortBy">
+          <option value="points_desc">Points ↓</option>
+          <option value="points_asc">Points ↑</option>
+          <option value="name_asc">Nom A→Z</option>
+        </select>
+      </div>
+
+      <div>
+        <button class="btn primary" id="btnReset" type="button">Réinitialiser</button>
+      </div>
+
+      <div class="spanAll" style="grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px;">
+        <div class="muted">Affichage : <strong id="countShown">0</strong> riders</div>
+        <div class="muted">Astuce : pour enrichir le classement, ajoute <code>sexe</code>/<code>age</code>/<code>nationality</code> dans l’import.</div>
       </div>
     </div>
 
-    <!-- Filtres compacts -->
-    <div class="compactFilters" style="margin-top: 20px;">
-      <!-- Recherche -->
-      <div class="searchBox">
-        <input 
-          type="text" 
-          id="searchRider" 
-          placeholder="🔍 Rechercher un rider..." 
-          autocomplete="off"
-        />
-        <button class="clearBtn" id="clearSearch" type="button">✕</button>
-      </div>
-      
-      <label>
-        <span>Catégorie d'âge:</span>
-        <select id="age">
-          <option value="ALL">Toutes</option>
-          <option value="U7">U7</option>
-          <option value="U9">U9</option>
-          <option value="U11">U11</option>
-          <option value="U13">U13</option>
-          <option value="U15">U15</option>
-          <option value="U17">U17</option>
-          <option value="U19">U19</option>
-          <option value="U23">U23</option>
-          <option value="U23PLUS">U23+</option>
-          <option value="SENIOR">Seniors</option>
-          <option value="M1">Masters 1</option>
-          <option value="M2">Masters 2</option>
-          <option value="M3">Masters 3</option>
-        </select>
-      </label>
+    <!-- Two columns H/F -->
+    <div class="twoCols">
+      <section class="panel">
+        <div class="panelHead">
+          <h3>👨 Hommes</h3>
+          <span class="pill"><span class="dot"></span><span id="countM">0</span></span>
+        </div>
+        <div class="panelBody">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:56px;">#</th>
+                <th>Rider</th>
+                <th style="width:150px;">Cat / Âge</th>
+                <th style="width:120px;">Nation</th>
+                <th style="width:110px;">Points</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyM"></tbody>
+          </table>
+          <div id="emptyM" class="empty" style="display:none;">Aucun rider homme avec ces filtres.</div>
+        </div>
+      </section>
 
-      <label>
-        <span>Nationalité:</span>
-        <select id="nationality">
-          <option value="ALL">Toutes</option>
-          <option value="FR">France</option>
-          <option value="BE">Belgique</option>
-          <option value="CH">Suisse</option>
-          <option value="IT">Italie</option>
-          <option value="ES">Espagne</option>
-          <option value="DE">Allemagne</option>
-          <option value="GB">Royaume-Uni</option>
-          <option value="NL">Pays-Bas</option>
-          <option value="PT">Portugal</option>
-          <option value="CA">Canada</option>
-          <option value="US">États-Unis</option>
-        </select>
-      </label>
-
-      <label>
-        <span>Période:</span>
-        <select id="period">
-          <option value="24M" selected>24 mois (glissant)</option>
-          <option value="YEAR">Année</option>
-        </select>
-      </label>
-
-      <label>
-        <span>Année:</span>
-        <select id="year" disabled>
-          <option value="">—</option>
-        </select>
-      </label>
-
-      <label>
-        <span>Résultats retenus:</span>
-        <select id="topN">
-          <option value="5" selected>Top 5</option>
-          <option value="8">Top 8</option>
-          <option value="999">Tous</option>
-        </select>
-      </label>
+      <section class="panel">
+        <div class="panelHead">
+          <h3>👩 Femmes</h3>
+          <span class="pill"><span class="dot"></span><span id="countF">0</span></span>
+        </div>
+        <div class="panelBody">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:56px;">#</th>
+                <th>Rider</th>
+                <th style="width:150px;">Cat / Âge</th>
+                <th style="width:120px;">Nation</th>
+                <th style="width:110px;">Points</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyF"></tbody>
+          </table>
+          <div id="emptyF" class="empty" style="display:none;">Aucune rider femme avec ces filtres.</div>
+        </div>
+      </section>
     </div>
 
-    <!-- Onglets de discipline -->
-    <div class="disciplineTabs">
-      <button class="active" data-discipline="GLOBAL">Global</button>
-      <button data-discipline="XCC">XCC</button>
-      <button data-discipline="XCO">XCO</button>
-      <button data-discipline="XCM">XCM (Raid/Marathon/Ultra)</button>
-      <button data-discipline="DH">DH</button>
-      <button data-discipline="Enduro">Enduro</button>
-      <button data-discipline="Gravel">Gravel</button>
-      <button data-discipline="Club">Club</button>
-    </div>
-
-    <!-- Grille de classements (4 colonnes avec titres de groupe) -->
-    <div class="rankingGrid">
-      <!-- Titre Musculaire -->
-      <div class="groupTitle">🚴 MUSCULAIRE</div>
-      <!-- Titre Assistance Électrique -->
-      <div class="groupTitle">⚡ ASSISTANCE ÉLECTRIQUE</div>
-      
-      <!-- Hommes Musculaire -->
-      <div class="rankingColumn">
-        <h3>
-          <span class="icon">♂</span>
-          Hommes
-        </h3>
-        <ul class="riderList" id="rankingMenMuscular">
-          <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
-        </ul>
-      </div>
-
-      <!-- Femmes Musculaire -->
-      <div class="rankingColumn">
-        <h3>
-          <span class="icon">♀</span>
-          Femmes
-        </h3>
-        <ul class="riderList" id="rankingWomenMuscular">
-          <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
-        </ul>
-      </div>
-
-      <!-- Hommes Électrique -->
-      <div class="rankingColumn">
-        <h3>
-          <span class="icon">♂</span>
-          Hommes
-        </h3>
-        <ul class="riderList" id="rankingMenElectric">
-          <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
-        </ul>
-      </div>
-
-      <!-- Femmes Électrique -->
-      <div class="rankingColumn">
-        <h3>
-          <span class="icon">♀</span>
-          Femmes
-        </h3>
-        <ul class="riderList" id="rankingWomenElectric">
-          <li class="emptyState">Cliquez sur "Recalculer" pour générer le classement</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="muted" style="margin-top: 16px; font-size: 12px;">
-      Note : les points sont calculés à partir des résultats importés et de la valeur de difficulté des épreuves (analyse GPX).
-    </div>
   </div>
-</div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
 
 <script>
-  // Configuration
-  let currentDiscipline = 'GLOBAL';
-  let allRiders = {}; // Stockage de tous les riders pour la recherche
-  
-  // Gestion des onglets de discipline
-  const disciplineTabs = document.querySelectorAll('.disciplineTabs button');
-  disciplineTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      disciplineTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentDiscipline = tab.dataset.discipline;
-      
-      // Afficher différent contenu pour l'onglet Club
-      if (currentDiscipline === 'Club') {
-        showClubRanking();
-      } else {
-        showRiderRanking();
-      }
-    });
-  });
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const esc = (s)=>String(s??"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const num = (x)=>{ const n = Number(String(x??"").replace(",", ".").trim()); return Number.isFinite(n) ? n : null; };
 
-  // Gestion de la période/année
-  const period = document.getElementById("period");
-  const year = document.getElementById("year");
-  const pillLabel = document.getElementById("periodLabel");
-  const pillDot = document.getElementById("periodDot");
-
-  function fillYears() {
-    const now = new Date();
-    const y = now.getFullYear();
-    year.innerHTML = "";
-    for (let i = y; i >= y - 6; i--) {
-      const opt = document.createElement("option");
-      opt.value = String(i);
-      opt.textContent = String(i);
-      year.appendChild(opt);
-    }
-  }
-  fillYears();
-  year.value = String(new Date().getFullYear());
-
-  function updatePeriodUI(){
-    const isYear = period.value === "YEAR";
-    year.disabled = !isYear;
-    if (isYear) {
-      pillLabel.textContent = `Année ${year.value || ""}`.trim();
-      pillDot.className = "dot warn";
-    } else {
-      pillLabel.textContent = "24 mois";
-      pillDot.className = "dot ok";
-    }
+  // -------------------------
+  // Load local datasets
+  // -------------------------
+  function safeJson(key){
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(_){ return null; }
   }
 
-  period.addEventListener("change", updatePeriodUI);
-  year.addEventListener("change", updatePeriodUI);
-  updatePeriodUI();
+  function listRacesSafe(){
+    if (typeof window.listRaces === "function") return window.listRaces();
+    if (typeof window.getRaces === "function") return window.getRaces();
+    const arr = safeJson("mtb.races.v1");
+    return Array.isArray(arr) ? arr : [];
+  }
 
-  // Gestion de la recherche
-  const searchInput = document.getElementById("searchRider");
-  const clearSearchBtn = document.getElementById("clearSearch");
-  const searchBox = document.querySelector(".searchBox");
+  function listMeetingsSafe(){
+    if (typeof window.listMeetings === "function") return window.listMeetings();
+    if (typeof window.getMeetings === "function") return window.getMeetings();
+    const arr = safeJson("mtb.meetings.v1");
+    return Array.isArray(arr) ? arr : [];
+  }
 
-  searchInput.addEventListener("input", (e) => {
-    const query = e.target.value.toLowerCase().trim();
-    
-    if (query) {
-      searchBox.classList.add("hasValue");
-      highlightRiders(query);
-    } else {
-      searchBox.classList.remove("hasValue");
-      clearHighlights();
+  function listResultsSafe(){
+    if (typeof window.listResults === "function") return window.listResults();
+    if (typeof window.getResults === "function") return window.getResults();
+    const arr = safeJson("mtb.results.v1");
+    return Array.isArray(arr) ? arr : [];
+  }
+
+  // -------------------------
+  // Normalization helpers
+  // -------------------------
+  function pick(obj, keys){
+    for (const k of keys){
+      if (obj && obj[k] != null && String(obj[k]).trim() !== "") return obj[k];
     }
-  });
+    return null;
+  }
 
-  clearSearchBtn.addEventListener("click", () => {
-    searchInput.value = "";
-    searchBox.classList.remove("hasValue");
-    clearHighlights();
-  });
+  function normSex(v){
+    const s = String(v||"").trim().toLowerCase();
+    if (!s) return null;
+    if (["m","h","homme","male","masculin"].includes(s)) return "M";
+    if (["f","femme","female","feminin","féminin"].includes(s)) return "F";
+    return null;
+  }
 
-  function highlightRiders(query) {
-    const allLists = document.querySelectorAll('.riderList');
-    let foundCount = 0;
-    
-    allLists.forEach(list => {
-      const items = list.querySelectorAll('.riderItem');
-      items.forEach(item => {
-        const nameEl = item.querySelector('.riderName');
-        if (nameEl) {
-          const name = nameEl.textContent.toLowerCase();
-          if (name.includes(query)) {
-            item.classList.add('highlighted');
-            foundCount++;
-            // Scroll vers le premier résultat
-            if (foundCount === 1) {
-              item.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          } else {
-            item.classList.remove('highlighted');
-          }
-        }
+  function normalizeResult(r){
+    return {
+      id: r?.id ?? null,
+      raceId: r?.raceId ?? r?.race_id ?? r?.eventId ?? null,
+      points: num(r?.points ?? r?.score ?? r?.mtbPoints) ?? 0,
+
+      riderEmail: (pick(r, ["riderEmail","email","mail","e-mail"]) || "").toString().trim().toLowerCase() || null,
+      riderName: (pick(r, ["riderName","name","nom","prenom","prénom","athlete","coureur"]) || "").toString().trim() || null,
+
+      sex: normSex(pick(r, ["sex","gender","sexe"])),
+      age: num(pick(r, ["age","âge"])),
+
+      category: (pick(r, ["category","cat","categorie","catégorie"]) || "").toString().trim() || null,
+      nationality: (pick(r, ["nationality","nation","country","pays"]) || "").toString().trim() || null,
+    };
+  }
+
+  function normalizeRace(r){
+    return {
+      id: r?.id ?? null,
+      name: r?.name ?? r?.title ?? "Épreuve",
+      disc: (r?.disc ?? r?.discipline ?? "").toString().trim(),
+      ebike: (r?.ebike ?? r?.isEbike ?? r?.eBike ?? null),
+      date: r?.date ?? r?.startDate ?? null,
+      meetingId: r?.meetingId ?? r?.meeting_id ?? null
+    };
+  }
+
+  function isEbike(v){
+    if (v == null) return null;
+    const s = String(v).trim().toLowerCase();
+    if (s === "1" || s === "true" || s === "yes") return true;
+    if (s === "0" || s === "false" || s === "no") return false;
+    return null;
+  }
+
+  // -------------------------
+  // Tabs / modes
+  // -------------------------
+  const MODES = [
+    { key:"general", label:"Général", discs:null, ebike:null },
+
+    // XC = somme XCC+XCO+XCR+XCM (classements séparés musculaire / assistance)
+    { key:"xc_global_m", label:"XC-Global musculaire", discs:["XCC","XCO","XCR","XCM"], ebike:false },
+    { key:"xc_global_e", label:"XC-Global assistance électrique", discs:["XCC","XCO","XCR","XCM"], ebike:true },
+
+    // Détail XC
+    { key:"xcc", label:"XCC", discs:["XCC"], ebike:null },
+    { key:"xco", label:"XCO", discs:["XCO"], ebike:null },
+    { key:"xcr", label:"XCR", discs:["XCR"], ebike:null },
+    { key:"xcm", label:"XCM", discs:["XCM"], ebike:null },
+
+    { key:"dh", label:"DH", discs:["DH"], ebike:null },
+    { key:"enduro", label:"Enduro", discs:["Enduro"], ebike:null },
+    { key:"gravel", label:"Gravel", discs:["Gravel"], ebike:null },
+  ];
+
+  let ACTIVE_MODE = "general";
+
+  function buildTabs(){
+    const root = $("tabs");
+    root.innerHTML = "";
+    for (const m of MODES){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = `tab ${m.key === ACTIVE_MODE ? "active" : ""}`;
+      b.textContent = m.label;
+      b.addEventListener("click", ()=>{
+        ACTIVE_MODE = m.key;
+        buildTabs();
+        renderAll();
       });
-    });
+      root.appendChild(b);
+    }
   }
 
-  function clearHighlights() {
-    const highlighted = document.querySelectorAll('.riderItem.highlighted');
-    highlighted.forEach(item => item.classList.remove('highlighted'));
+  // -------------------------
+  // Aggregate riders
+  // -------------------------
+  const races = listRacesSafe().map(normalizeRace);
+  const meetings = listMeetingsSafe();
+  const results = listResultsSafe().map(normalizeResult).filter(x => x.raceId);
+
+  const racesById = new Map(races.map(r => [r.id, r]));
+
+  $("pillRows").textContent = String(results.length);
+
+  function modeFilter(res){
+    const mode = MODES.find(x => x.key === ACTIVE_MODE) || MODES[0];
+    if (!mode) return true;
+
+    const race = racesById.get(res.raceId);
+    if (!race) return (mode.key === "general");
+
+    // Compat: anciennes données avec disc='XC' -> XC-Global
+    if (String(race.disc||'').trim().toUpperCase() === 'XC') {
+      race.disc = 'XCO'; // valeur neutre, sera acceptée par XC-Global (et évite de casser d'anciennes courses)
+    } // si pas de race info, on ne peut pas filtrer discipline => only general
+    // Filtre discipline (discs = liste de disciplines acceptées)
+    if (mode.discs){
+      const d = String(race.disc||"").trim().toUpperCase();
+      const ok = mode.discs.map(x=>String(x).toUpperCase()).includes(d);
+      if (!ok) return false;
+    }
+
+    if (mode.ebike !== null){
+      const e = isEbike(race.ebike);
+      if (e === null) return false;
+      if (e !== mode.ebike) return false;
+    }
+    return true;
   }
 
-  // Fonction pour créer un élément de classement
-  function createRiderItem(rider, rank) {
-    const li = document.createElement('li');
-    li.className = 'riderItem';
-    
-    let rankClass = 'riderRank';
-    if (rank === 1) rankClass += ' top1';
-    else if (rank === 2) rankClass += ' top2';
-    else if (rank === 3) rankClass += ' top3';
-    
-    li.innerHTML = `
-      <div class="${rankClass}">${rank}</div>
-      <div class="riderInfo">
-        <div class="riderName">${rider.name || 'Inconnu'}</div>
-        <div class="riderTeam">${rider.team || '—'} ${rider.nationality ? '· ' + rider.nationality : ''}</div>
-      </div>
-      <div class="riderPoints">${rider.points || 0}</div>
-    `;
-    
-    return li;
+  function riderKey(res){
+    // priorité email, sinon nom
+    return res.riderEmail ? `email:${res.riderEmail}` : `name:${(res.riderName||"").toLowerCase()}`;
   }
 
-  // Fonction pour créer un élément de classement club
-  function createClubItem(club, rank) {
-    const li = document.createElement('li');
-    li.className = 'riderItem';
-    
-    let rankClass = 'riderRank';
-    if (rank === 1) rankClass += ' top1';
-    else if (rank === 2) rankClass += ' top2';
-    else if (rank === 3) rankClass += ' top3';
-    
-    li.innerHTML = `
-      <div class="${rankClass}">${rank}</div>
-      <div class="riderInfo">
-        <div class="riderName">${club.name || 'Inconnu'}</div>
-        <div class="riderTeam">${club.riders || 0} riders · ${club.country || '—'}</div>
-      </div>
-      <div class="riderPoints">${club.points || 0}</div>
-    `;
-    
-    return li;
-  }
+  function aggregateRiders(){
+    const map = new Map();
 
-  // Fonction d'affichage classement riders
-  function showRiderRanking() {
-    // Réafficher la grille normale
-    document.querySelector('.rankingGrid').style.display = 'grid';
-    refreshRankings();
-  }
+    for (const r of results){
+      if (!modeFilter(r)) continue;
 
-  // Fonction d'affichage classement clubs
-  function showClubRanking() {
-    const demoClubs = [
-      { name: 'Team Maures VTT', riders: 45, country: 'FR', points: 12500 },
-      { name: 'VC Ollioules', riders: 38, country: 'FR', points: 11200 },
-      { name: 'BMC Racing Team', riders: 32, country: 'CH', points: 10800 },
-      { name: 'Scott-SRAM MTB Racing', riders: 28, country: 'US', points: 9500 },
-      { name: 'Trek Factory Racing', riders: 25, country: 'US', points: 8900 },
-      { name: 'Canyon CLLCTV', riders: 30, country: 'DE', points: 8200 },
-      { name: 'Specialized Racing', riders: 22, country: 'US', points: 7800 },
-      { name: 'Santa Cruz Syndicate', riders: 18, country: 'US', points: 7200 }
-    ];
+      const key = riderKey(r);
+      if (!key || key.endsWith(":")) continue;
 
-    const lists = {
-      menMuscular: document.getElementById('rankingMenMuscular'),
-      womenMuscular: document.getElementById('rankingWomenMuscular'),
-      menElectric: document.getElementById('rankingMenElectric'),
-      womenElectric: document.getElementById('rankingWomenElectric')
-    };
-
-    // Pour l'onglet club, on affiche tous les clubs dans chaque colonne
-    Object.keys(lists).forEach(key => {
-      const list = lists[key];
-      list.innerHTML = '';
-      
-      demoClubs.forEach((club, index) => {
-        list.appendChild(createClubItem(club, index + 1));
-      });
-    });
-
-    document.getElementById('lastUpdate').textContent = `Mis à jour le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
-  }
-
-  // Fonction de rafraîchissement des classements
-  function refreshRankings() {
-    // Données de démonstration
-    const demoData = {
-      menMuscular: [
-        { name: 'Jean Dupont', team: 'Team Maures VTT', nationality: 'FR', points: 1250 },
-        { name: 'Pierre Martin', team: 'VC Ollioules', nationality: 'FR', points: 1180 },
-        { name: 'Marc Lefebvre', team: 'BMC Racing', nationality: 'CH', points: 1050 },
-        { name: 'Luc Bernard', team: 'Scott-SRAM', nationality: 'US', points: 980 },
-        { name: 'Paul Durand', team: 'Trek Factory', nationality: 'FR', points: 920 },
-        { name: 'Antoine Rousseau', team: 'Canyon CLLCTV', nationality: 'DE', points: 890 },
-        { name: 'Thomas Blanc', team: 'Specialized', nationality: 'FR', points: 850 },
-        { name: 'Nicolas Petit', team: 'Santa Cruz', nationality: 'US', points: 820 }
-      ],
-      womenMuscular: [
-        { name: 'Sophie Dubois', team: 'Team Maures VTT', nationality: 'FR', points: 1100 },
-        { name: 'Marie Lambert', team: 'VC Ollioules', nationality: 'FR', points: 1050 },
-        { name: 'Julie Moreau', team: 'Canyon CLLCTV', nationality: 'DE', points: 980 },
-        { name: 'Anne Petit', team: 'Trek Factory', nationality: 'US', points: 910 },
-        { name: 'Claire Roux', team: 'Specialized Racing', nationality: 'FR', points: 850 },
-        { name: 'Isabelle Laurent', team: 'BMC Racing', nationality: 'CH', points: 820 },
-        { name: 'Nathalie Bonnet', team: 'Scott-SRAM', nationality: 'US', points: 780 },
-        { name: 'Camille Fournier', team: 'Santa Cruz', nationality: 'US', points: 750 }
-      ],
-      menElectric: [
-        { name: 'Antoine Garnier', team: 'E-Bike Pro Team', nationality: 'FR', points: 950 },
-        { name: 'Thomas Rousseau', team: 'Team Maures VTT', nationality: 'FR', points: 920 },
-        { name: 'Nicolas Blanc', team: 'VC Ollioules', nationality: 'FR', points: 880 },
-        { name: 'David Simon', team: 'Lapierre E-Team', nationality: 'FR', points: 820 },
-        { name: 'Alexandre Michel', team: 'Focus E-Racing', nationality: 'DE', points: 780 },
-        { name: 'Julien Morel', team: 'Specialized E-MTB', nationality: 'BE', points: 750 },
-        { name: 'François Girard', team: 'Trek E-Factory', nationality: 'CH', points: 720 },
-        { name: 'Sébastien Roux', team: 'Canyon E-Team', nationality: 'FR', points: 690 }
-      ],
-      womenElectric: [
-        { name: 'Isabelle Laurent', team: 'E-Bike Pro Team', nationality: 'FR', points: 890 },
-        { name: 'Nathalie Bonnet', team: 'Team Maures VTT', nationality: 'FR', points: 860 },
-        { name: 'Camille Fournier', team: 'VC Ollioules', nationality: 'FR', points: 810 },
-        { name: 'Émilie Girard', team: 'Specialized E-Team', nationality: 'BE', points: 770 },
-        { name: 'Céline Morel', team: 'Trek E-Factory', nationality: 'CH', points: 720 },
-        { name: 'Aurélie Blanc', team: 'Focus E-Racing', nationality: 'DE', points: 690 },
-        { name: 'Valérie Simon', team: 'Canyon E-Team', nationality: 'FR', points: 660 },
-        { name: 'Sandrine Petit', team: 'Lapierre E-Team', nationality: 'FR', points: 630 }
-      ]
-    };
-
-    // Stocker tous les riders pour la recherche
-    allRiders = demoData;
-
-    // Remplir les colonnes
-    const lists = {
-      menMuscular: document.getElementById('rankingMenMuscular'),
-      womenMuscular: document.getElementById('rankingWomenMuscular'),
-      menElectric: document.getElementById('rankingMenElectric'),
-      womenElectric: document.getElementById('rankingWomenElectric')
-    };
-
-    Object.keys(lists).forEach(key => {
-      const list = lists[key];
-      list.innerHTML = '';
-      
-      if (demoData[key] && demoData[key].length > 0) {
-        demoData[key].forEach((rider, index) => {
-          list.appendChild(createRiderItem(rider, index + 1));
+      if (!map.has(key)){
+        map.set(key, {
+          key,
+          name: r.riderName || (r.riderEmail || "Rider"),
+          email: r.riderEmail,
+          sex: r.sex || null,
+          age: r.age ?? null,
+          category: r.category || null,
+          nationality: r.nationality || null,
+          points: 0,
+          rows: 0
         });
-      } else {
-        list.innerHTML = '<li class="emptyState">Aucun cycliste dans cette catégorie</li>';
       }
-    });
+      const it = map.get(key);
 
-    // Mise à jour de la date
-    document.getElementById('lastUpdate').textContent = `Mis à jour le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+      // enrichissement “best effort” si certaines lignes manquent
+      it.name = it.name || r.riderName || it.email || "Rider";
+      it.sex = it.sex || r.sex || null;
+      it.age = (it.age == null && r.age != null) ? r.age : it.age;
+      it.category = it.category || r.category || null;
+      it.nationality = it.nationality || r.nationality || null;
+
+      it.points += (num(r.points) ?? 0);
+      it.rows += 1;
+    }
+
+    const arr = Array.from(map.values()).map(x => ({
+      ...x,
+      points: Math.round(x.points)
+    }));
+
+    return arr;
   }
 
-  // Gestionnaires d'événements
-  document.getElementById('refreshBtn').addEventListener('click', () => {
-    if (currentDiscipline === 'Club') {
-      showClubRanking();
-    } else {
-      refreshRankings();
+  // -------------------------
+  // Filters UI
+  // -------------------------
+  function fillFilterOptions(riders){
+    // nationalités / catégories
+    const nats = Array.from(new Set(riders.map(r=> (r.nationality||"").trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+    const cats = Array.from(new Set(riders.map(r=> (r.category||"").trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+
+    const natSel = $("nat");
+    const catSel = $("cat");
+
+    const keepNat = natSel.value;
+    const keepCat = catSel.value;
+
+    natSel.innerHTML = `<option value="">Toutes</option>` + nats.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+    catSel.innerHTML = `<option value="">Toutes</option>` + cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+
+    if (keepNat) natSel.value = keepNat;
+    if (keepCat) catSel.value = keepCat;
+  }
+
+  function applyFilters(riders){
+    const q = ($("q").value || "").trim().toLowerCase();
+    const nat = ($("nat").value || "").trim();
+    const cat = ($("cat").value || "").trim();
+    const ageMin = num($("ageMin").value);
+    const ageMax = num($("ageMax").value);
+    const minPts = num($("minPts").value) ?? 0;
+
+    return riders.filter(r=>{
+      if (q){
+        const txt = `${r.name||""} ${r.email||""} ${r.nationality||""} ${r.category||""}`.toLowerCase();
+        if (!txt.includes(q)) return false;
+      }
+      if (nat && (r.nationality||"") !== nat) return false;
+      if (cat && (r.category||"") !== cat) return false;
+      if ((r.points ?? 0) < minPts) return false;
+
+      if (ageMin != null){
+        if (r.age == null) return false;
+        if (r.age < ageMin) return false;
+      }
+      if (ageMax != null){
+        if (r.age == null) return false;
+        if (r.age > ageMax) return false;
+      }
+      return true;
+    });
+  }
+
+  function sortRiders(arr){
+    const s = $("sortBy").value || "points_desc";
+    const a = arr.slice();
+    a.sort((x,y)=>{
+      if (s === "points_desc") return (y.points||0) - (x.points||0);
+      if (s === "points_asc") return (x.points||0) - (y.points||0);
+      if (s === "name_asc") return String(x.name||"").toLowerCase().localeCompare(String(y.name||"").toLowerCase());
+      return 0;
+    });
+    return a;
+  }
+
+  // -------------------------
+  // Render two tables
+  // -------------------------
+  function renderTable(tbodyId, emptyId, list){
+    const tb = $(tbodyId);
+    const empty = $(emptyId);
+    tb.innerHTML = "";
+
+    if (!list.length){
+      empty.style.display = "block";
+      return;
     }
-  });
-  
-  document.getElementById('resetBtn').addEventListener('click', () => {
-    document.getElementById('age').value = 'ALL';
-    document.getElementById('nationality').value = 'ALL';
-    document.getElementById('period').value = '24M';
-    document.getElementById('topN').value = '5';
-    searchInput.value = '';
-    searchBox.classList.remove('hasValue');
-    clearHighlights();
-    updatePeriodUI();
+    empty.style.display = "none";
+
+    list.forEach((r, idx)=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="rank">${idx + 1}</td>
+        <td>
+          <div class="name">${esc(r.name || "Rider")}</div>
+          <div class="small">${r.email ? esc(r.email) : "—"}</div>
+        </td>
+        <td>
+          <div><b>${esc(r.category || "—")}</b></div>
+          <div class="small">Âge : ${r.age != null ? esc(String(r.age)) : "—"}</div>
+        </td>
+        <td>${esc(r.nationality || "—")}</td>
+        <td class="points">${esc(String(r.points ?? 0))} pts</td>
+      `;
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderAll(){
+    const mode = MODES.find(x=>x.key===ACTIVE_MODE) || MODES[0];
+    $("pillMode").textContent = mode.label;
+
+    const ridersAgg = aggregateRiders();
+    $("pillCount").textContent = String(ridersAgg.length);
+
+    // Fill filter options from current dataset
+    fillFilterOptions(ridersAgg);
+
+    let riders = applyFilters(ridersAgg);
+    riders = sortRiders(riders);
+
+    // Split M/F (si pas de sexe => on ne l’affiche pas ici)
+    const men = riders.filter(r => r.sex === "M");
+    const women = riders.filter(r => r.sex === "F");
+
+    $("countShown").textContent = String(riders.length);
+    $("countM").textContent = String(men.length);
+    $("countF").textContent = String(women.length);
+
+    renderTable("tbodyM", "emptyM", men);
+    renderTable("tbodyF", "emptyF", women);
+  }
+
+  // Reset
+  $("btnReset").addEventListener("click", ()=>{
+    $("q").value = "";
+    $("nat").value = "";
+    $("cat").value = "";
+    $("ageMin").value = "";
+    $("ageMax").value = "";
+    $("minPts").value = "";
+    $("sortBy").value = "points_desc";
+    renderAll();
   });
 
-  // Initialisation au chargement
-  // refreshRankings(); // Décommentez pour charger automatiquement
+  ["q","nat","cat","ageMin","ageMax","minPts","sortBy"].forEach(id=>{
+    $(id).addEventListener("input", renderAll);
+    $(id).addEventListener("change", renderAll);
+  });
+
+  buildTabs();
+  renderAll();
+
+})();
 </script>
-
 </body>
 </html>
+
