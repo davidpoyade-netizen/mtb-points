@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Événements – MTB Points</title>
-
-  <!-- ✅ IMPORTANT : ajuste le chemin si ton CSS n'est pas à la racine -->
-  <link rel="stylesheet" href="./style.css" />
+ link rel="stylesheet" href="./css/style.css" />
+<link rel="stylesheet" href="./css/theme-nature.css" />
 </head>
 <body>
   <main class="container">
+    <body class="theme-nature">
     <header style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
       <div>
         <h1 style="margin:0;">Événements</h1>
@@ -20,7 +20,9 @@
         <a class="btn" href="index.html">🏠 Accueil</a>
       </div>
     </header>
-
+<div id="app-header"></div>
+</body>)
+<script type="module" src="./js/header.js"></script>
     <section class="card" style="margin-top:14px;">
       <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
         <input id="q" type="search" placeholder="Rechercher un événement (nom, lieu)..." style="flex:1 1 360px;" />
