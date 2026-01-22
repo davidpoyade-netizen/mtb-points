@@ -1,13 +1,13 @@
 <header class="header">
   <div class="brandRow">
     <div class="brandLogo">
-      <!-- optionnel : logo -->
+      <!-- Optionnel : logo -->
       <!-- <img src="assets/logo.png" alt="MTB Points" /> -->
     </div>
     <h1>MTB Points</h1>
   </div>
 
-  <nav class="nav">
+  <nav class="nav" aria-label="Navigation">
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
@@ -17,9 +17,17 @@
     <a href="help.html">Aide</a>
   </nav>
 
-  <div class="headerRight">
+  <div class="headerRight" id="authArea">
     <a class="btn ghost" href="contact.html">Contact</a>
     <a class="btn ghost" href="about.html">À propos</a>
-    <a class="btn primary" href="login.html">Connexion</a>
+
+    <!-- Liens affichés seulement si connecté (JS) -->
+    <a class="btn ghost" id="linkOrganizer" href="organizer-dashboard.html" style="display:none;">Organisateur</a>
+    <a class="btn ghost" id="linkAdmin" href="admin.html" style="display:none;">Admin</a>
+
+    <a class="btn ghost" id="linkAccount" href="rider-profile.html" style="display:none;">Mon compte</a>
+
+    <button class="btn primary" id="btnLogin" type="button">Connexion</button>
+    <button class="btn ghost" id="btnLogout" type="button" style="display:none;">Déconnexion</button>
   </div>
 </header>
