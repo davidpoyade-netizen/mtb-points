@@ -1,53 +1,39 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <title>Événements – MTB Points</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <h1>Événements</h1>
+<script type="module">
+  import { supabase } from "./js/supabaseClient.js";
 
-  <div id="meetingsList">Chargement…</div>
+  async function loadMeetings() {
+    const container = document.getElementById("meetingsList");
+    if (!container) return;
 
-  <script type="module">
-    import { supabase } from "./js/supabaseClient.js";
+    const { data, error } = await supabase
+      .from("meetings")
+      .select("*")
+      .order("date", { ascending: false });
 
-    async function loadMeetings() {
-      const container = document.getElementById("meetingsList");
-
-      const { data, error } = await supabase
-        .from("meetings")
-        .select("*")
-        .order("start_date", { ascending: false });
-
-      if (error) {
-        console.error(error);
-        container.textContent = "❌ Erreur de chargement";
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        container.textContent = "Aucun événement";
-        return;
-      }
-
-      container.innerHTML = "";
-
-      data.forEach((m) => {
-        const div = document.createElement("div");
-        div.className = "meeting-card";
-        div.innerHTML = `
-          <h3>${m.name}</h3>
-          <p>${m.location} (${m.country})</p>
-          <p>${m.start_date} → ${m.end_date}</p>
-          <a href="races.html?meeting_id=${m.id}">Voir les épreuves</a>
-        `;
-        container.appendChild(div);
-      });
+    if (error) {
+      console.error("[meetings] supabase error:", error);
+      container.textContent = "❌ Erreur de chargement : " + error.message;
+      return;
     }
 
-    loadMeetings();
-  </script>
-</body>
-</html>
+    if (!data || data.length === 0) {
+      container.textContent = "Aucun événement";
+      return;
+    }
+
+    container.innerHTML = "";
+    data.forEach((m) => {
+      const div = document.createElement("div");
+      div.className = "meeting-card";
+      div.innerHTML = `
+        <h3>${m.name ?? ""}</h3>
+        <p>${m.location ?? ""}${m.country ? " (" + m.country + ")" : ""}</p>
+        <p>${m.date ?? ""}${m.end_date ? " → " + m.end_date : ""}</p>
+        <a href="races.html?meeting_id=${encodeURIComponent(m.id)}">Voir les épreuves</a>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  loadMeetings();
+</script>
