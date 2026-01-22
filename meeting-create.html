@@ -2,146 +2,124 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Créer un événement – MTB Points</title>
-  <link rel="stylesheet" href="./css/style.css" />
-  <link rel="stylesheet" href="./css/theme-nature.css?v=10" />
-  <style>
-    .muted{color:#667085}
-    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    @media(max-width:900px){.row2,.row3{grid-template-columns:1fr}}
-    .mini{font-size:12px;color:#667085;margin-top:6px}
-    .geoBox{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
-    .geoBox > div{flex:1;min-width:170px}
-    .emptyLike{border:1px solid #e5e7eb;background:#f8fafc;border-radius:14px;padding:12px}
-  </style>
+
+  <!-- ⚠️ Ajuste si ton CSS n'est pas à la racine -->
+  <link rel="stylesheet" href="./style.css" />
 </head>
 
-<body class="theme-nature">
-<header class="header">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points – Créer un événement</h1>
-    <span class="pill"><span class="dot ok"></span> Organizer</span>
-  </div>
+<body>
+  <main class="container">
+    <h1>Créer un événement</h1>
 
-  <nav class="nav">
-    <a href="index.html">Accueil</a>
-    <a href="public-ranking.html">Classement</a>
-    <a href="meetings.html" class="active">Événements</a>
-    <a href="events.html">Épreuves</a>
-    <a href="organizer-dashboard.html">Dashboard</a>
-    <a href="login.html">Connexion</a>
-  </nav>
-
-  <div class="headerRight">
-    <a class="btn ghost" href="organizer-dashboard.html">← Retour au dashboard</a>
-  </div>
-</header>
-
-<main class="wrap">
-  <div class="card">
-
-    <section class="hero">
-      <div class="heroTop">
-        <div style="min-width:280px;flex:1">
-          <h2>Nouvel événement</h2>
-          <div class="heroMeta">
-            Champs minimum : <b>Nom + date de début</b>.
-            Les épreuves créées depuis l'événement seront automatiquement rattachées, avec une date par défaut dans la plage.
-          </div>
-          <div id="msg" class="heroDesc" style="display:none;"></div>
+    <section class="card">
+      <div class="grid">
+        <div class="field">
+          <label for="mName">Nom de l’événement *</label>
+          <input id="mName" type="text" placeholder="Ex: Transriviera VTT" required />
         </div>
-        <div class="heroActions">
-          <span class="pill"><span class="dot"></span> Multi-jours OK</span>
-          <span class="pill"><span class="dot"></span> Lieu + géoloc</span>
-          <span class="pill"><span class="dot"></span> URL événement</span>
+
+        <div class="field">
+          <label for="mDate">Date de début *</label>
+          <input id="mDate" type="date" required />
+        </div>
+
+        <div class="field">
+          <label for="mEndDate">Date de fin (optionnelle)</label>
+          <input id="mEndDate" type="date" />
+        </div>
+
+        <div class="field">
+          <label for="mCountry">Pays (optionnel)</label>
+          <input id="mCountry" type="text" placeholder="FR" />
+        </div>
+
+        <!-- 📍 Point de rendez-vous -->
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="mLocation">Point de rendez-vous (adresse) *</label>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input
+              id="mLocation"
+              type="text"
+              placeholder="Tape une adresse (autocomplétion)…"
+              autocomplete="off"
+              required
+              style="flex: 1 1 360px;"
+            />
+            <button id="btnGeo" type="button">📍 Utiliser ma position</button>
+          </div>
+
+          <!-- Dropdown d'autocomplétion -->
+          <div id="addrSuggest" class="suggest" style="display:none;"></div>
+
+          <small class="hint">
+            Astuce : commence à taper, puis choisis une suggestion. Tu peux aussi utiliser ta position.
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="mLat">Latitude (auto)</label>
+          <input id="mLat" type="text" placeholder="ex: 43.7745" readonly />
+        </div>
+
+        <div class="field">
+          <label for="mLng">Longitude (auto)</label>
+          <input id="mLng" type="text" placeholder="ex: 7.4978" readonly />
+        </div>
+
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="mComment">Commentaire (optionnel)</label>
+          <textarea id="mComment" rows="4" placeholder="Infos organisateur, retrait dossards, etc."></textarea>
+        </div>
+
+        <div class="field" style="grid-column: 1 / -1; display:flex; align-items:center; gap:10px;">
+          <input id="mPublished" type="checkbox" checked />
+          <label for="mPublished" style="margin:0;">Publier l’événement</label>
         </div>
       </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+        <button id="btnCreate" type="button">✅ Créer l’événement</button>
+        <button id="btnCreateAndRace" type="button">✅ Créer + ajouter une épreuve</button>
+        <button id="btnReset" type="button">↩️ Réinitialiser</button>
+      </div>
+
+      <div id="msg" style="display:none;"></div>
     </section>
+  </main>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">Informations</h3>
+  <!-- ⚠️ Ajuste si tes JS ne sont pas dans /js -->
+  <script type="module" src="./js/meeting-create.js"></script>
 
-    <div class="filters" style="grid-template-columns:1fr 1fr; align-items:start;">
-      <div class="spanAll" style="grid-column:1/-1">
-        <label for="mName">Nom de l'événement *</label>
-        <input id="mName" type="text" placeholder="Ex: Enduro des Alpes – 2026" />
-      </div>
-
-      <div>
-        <label for="mDate">Date début *</label>
-        <input id="mDate" type="date" />
-        <div class="mini">La date par défaut des épreuves = date de début.</div>
-      </div>
-
-      <div>
-        <label for="mEndDate">Date fin (optionnel)</label>
-        <input id="mEndDate" type="date" />
-        <div class="mini">Laisse vide si l'événement dure 1 jour.</div>
-      </div>
-
-      <div class="spanAll" style="grid-column:1/-1">
-        <label for="mLocation">Lieu</label>
-        <input id="mLocation" type="text" placeholder="Ex: Briançon (05)" />
-        <div class="mini">Tu peux remplir automatiquement les coordonnées via le bouton "Géolocaliser".</div>
-      </div>
-
-      <div class="spanAll" style="grid-column:1/-1">
-        <div class="geoBox">
-          <div>
-            <label for="mLat">Latitude</label>
-            <input id="mLat" type="number" step="0.000001" placeholder="ex: 43.700000" />
-          </div>
-          <div>
-            <label for="mLng">Longitude</label>
-            <input id="mLng" type="number" step="0.000001" placeholder="ex: 7.250000" />
-          </div>
-          <div style="flex:0 0 auto;min-width:240px">
-            <button class="btn" id="btnGeo" type="button">📍 Géolocaliser</button>
-            <div class="mini" id="geoHint">Utilise le GPS du navigateur (si autorisé).</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="spanAll" style="grid-column:1/-1">
-        <label for="mUrl">Lien URL vers l'événement (inscription, site…)</label>
-        <input id="mUrl" type="url" placeholder="Ex: https://www.engage-sports.com/..." />
-        <div class="mini">Optionnel, mais affiché sur la fiche événement + fiche épreuve.</div>
-      </div>
-
-      <div class="spanAll" style="grid-column:1/-1">
-        <label for="mComment">Description / Commentaire</label>
-        <textarea id="mComment" rows="3" placeholder="Ex: manche officielle, parcours montagneux, programme multi-jours..."></textarea>
-      </div>
-
-      <div>
-        <label for="mPublished">Publié</label>
-        <div style="margin-top:8px;display:flex;gap:10px;align-items:center">
-          <input id="mPublished" type="checkbox" checked style="width:auto;margin:0;transform:scale(1.1)" />
-          <span class="mini" style="margin:0">Visible publiquement</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="hintRow" style="margin-top:14px;">
-      <div class="muted">* Champs obligatoires</div>
-      <div class="muted">Astuce : tu peux créer l'événement puis enchaîner sur la création d'épreuve.</div>
-    </div>
-
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
-      <button class="btn primary" id="btnCreate" type="button">Créer l'événement</button>
-      <button class="btn" id="btnCreateAndRace" type="button">Créer + ajouter une épreuve</button>
-      <button class="btn ghost" id="btnReset" type="button">Réinitialiser</button>
-    </div>
-
-    <div class="emptyLike" style="margin-top:16px;">
-      Après création, tu seras redirigé vers la fiche événement.
-      Si tu choisis <b>"Créer + ajouter une épreuve"</b>, tu seras redirigé vers <b>course-create.html</b> avec l'événement déjà sélectionné.
-    </div>
-
-  </div>
-</main>
-
-<script type="module" src="js/meeting-create.js"></script>
-</body>
-</html>
+  <!-- Mini CSS (pour les suggestions) : si tu veux, déplace dans style.css -->
+  <style>
+    .suggest{
+      position: relative;
+      margin-top: 6px;
+      border: 1px solid rgba(40,60,40,.18);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(6px);
+      max-height: 260px;
+    }
+    .suggest .item{
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(40,60,40,.08);
+      font-size: 14px;
+      line-height: 1.2;
+    }
+    .suggest .item:last-child{border-bottom:none;}
+    .suggest .item:hover{
+      background: rgba(22,163,74,.10);
+    }
+    .hint{opacity:.8; display:block; margin-top:6px;}
+    .container{max-width:980px; margin:0 auto; padding:20px;}
+    .card{padding:18px; border-radius:18px; border:1px solid rgba(40,60,40,.12);}
+    .grid{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px;}
+    @media(max-width:760px){ .grid{grid-template-columns:1fr;} }
+    .field label{display:block; margin-bottom:6px;}
+    .field input,.field textarea{width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(40,60,40,.18);}
+    button{padding:1
