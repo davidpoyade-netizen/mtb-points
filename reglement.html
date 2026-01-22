@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MTB Points — Règlement officiel</title>
-
-  <!-- Base + Thème nature -->
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/theme-nature.css?v=8" />
 
@@ -56,7 +54,7 @@
   <p>
     MTB Points est un système de classement destiné à évaluer la difficulté des épreuves de VTT
     et à classer les cyclistes selon leurs performances, sur le modèle des systèmes de points utilisés
-    en sports d’endurance.
+    en sports d'endurance.
   </p>
 </section>
 
@@ -79,12 +77,12 @@
   <p>
     MTB Points distingue plusieurs disciplines VTT.
     Pour les formats Cross-Country (XC), une classification automatique indicative
-    peut être proposée à partir de l’analyse du fichier GPX.
+    peut être proposée à partir de l'analyse du fichier GPX.
   </p>
 
   <div class="box callout">
     <b>Principe fondamental</b><br>
-    La discipline finale d’une épreuve reste <b>déclarée par l’organisateur</b>.
+    La discipline finale d'une épreuve reste <b>déclarée par l'organisateur</b>.
     Les outils automatiques constituent une aide à la classification et ne sont pas contractuels.
   </div>
 
@@ -104,7 +102,7 @@
       <tr><td>XCC</td><td>Short Track</td><td>&lt; 10 km</td><td>&lt; 300 m</td><td>Format court et explosif</td></tr>
       <tr><td>XCO</td><td>Olympique</td><td>20–35 km</td><td>600–1200 m</td><td>Format olympique</td></tr>
       <tr><td>XCR</td><td>XC longue distance</td><td>30–55 km</td><td>800–1800 m</td><td>Endurance renforcée</td></tr>
-      <tr><td>XCM</td><td>Marathon</td><td>≥ 60 km</td><td>≥ 1500 m</td><td>Marathon VTT</td></tr>
+      <tr><td>XCM</td><td>Marathon</td><td>60–99 km</td><td>1500–2999 m</td><td>Marathon VTT</td></tr>
       <tr><td>XCM Ultra</td><td>Ultra</td><td>≥ 100 km</td><td>≥ 3000 m</td><td>Ultra-endurance</td></tr>
     </tbody>
   </table>
@@ -113,7 +111,7 @@
   <ul>
     <li>Analyse distance et dénivelé du GPX</li>
     <li>Comparaison aux seuils de référence</li>
-    <li>Suggestion d’une discipline avec niveau de confiance</li>
+    <li>Suggestion d'une discipline avec niveau de confiance</li>
     <li>Ajustement manuel toujours possible</li>
   </ul>
 
@@ -123,6 +121,64 @@
     <li><b>DH</b> : descente chronométrée</li>
     <li><b>Gravel</b> : endurance sur terrain mixte</li>
   </ul>
+</section>
+
+<!-- 2 TER. CATEGORIES D'EPREUVE -->
+<section class="card" id="categories">
+  <h2 class="section">2 ter. Catégories d'épreuve</h2>
+
+  <p>
+    Chaque épreuve est classée selon son niveau de compétitivité.
+    Cette catégorie pondère le score MRS de l'épreuve.
+  </p>
+
+  <table class="discipline-table">
+    <thead>
+      <tr>
+        <th>Catégorie</th>
+        <th>Description</th>
+        <th>Coefficient</th>
+        <th>Exemples</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Locale</b></td>
+        <td>Compétition locale ou club</td>
+        <td>×0.70</td>
+        <td>Course club, rando chronométrée</td>
+      </tr>
+      <tr>
+        <td><b>Régionale</b></td>
+        <td>Épreuve régionale ou inter-clubs</td>
+        <td>×0.85</td>
+        <td>Championnat régional, circuit régional</td>
+      </tr>
+      <tr>
+        <td><b>Nationale</b></td>
+        <td>Épreuve nationale</td>
+        <td>×1.00</td>
+        <td>Championnat national, Coupe de France</td>
+      </tr>
+      <tr>
+        <td><b>Internationale</b></td>
+        <td>Épreuve internationale</td>
+        <td>×1.15</td>
+        <td>Course UCI, compétition européenne</td>
+      </tr>
+      <tr>
+        <td><b>Mondiale</b></td>
+        <td>Coupe du Monde / Jeux Olympiques</td>
+        <td>×1.30</td>
+        <td>Coupe du Monde UCI, Jeux Olympiques, Championnats du Monde</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="box callout">
+    <b>Calcul des points coureurs</b><br>
+    <code>Points = MRS × Coefficient_Catégorie × Performance_Relative</code>
+  </div>
 </section>
 
 <!-- 3. ELIGIBILITE -->
@@ -148,11 +204,11 @@
 <section class="card" id="points">
   <h2 class="section">5. Attribution des points</h2>
   <p>
-    Les points dépendent du MRS, du niveau de l’épreuve et de la performance relative au vainqueur.
+    Les points dépendent du MRS, de la catégorie de l'épreuve et de la performance relative au vainqueur.
   </p>
 
   <div class="box callout">
-    <code>Pₑ = clamp(round(200 × (MRS/100)^1.20 × M_level), 0, 200)</code>
+    <code>P₁ = clamp(round(200 × (MRS/100)^1.20 × M_catégorie), 0, 200)</code>
   </div>
 
   <ul>
@@ -167,6 +223,8 @@
   <ul>
     <li>Classement glissant 24 mois (Top N)</li>
     <li>Classement par année civile</li>
+    <li>Classements par discipline : Global, XC-Global, XCC, XCO, XCR, XCM, XCM Ultra, DH, Enduro, Gravel</li>
+    <li>Classements séparés : Musculaire / E-bike</li>
   </ul>
 </section>
 
@@ -208,7 +266,7 @@
   </ul>
 
   <div class="box callout">
-    Les 3 meilleurs d’un challenge peuvent recevoir une récompense physique.
+    Les 3 meilleurs d'un challenge peuvent recevoir une récompense physique.
   </div>
 </section>
 

@@ -49,7 +49,7 @@
     .difficulty-label{font-weight:1000;font-size:16px}
     .difficulty-desc{font-size:13px;color:var(--muted);margin-top:2px}
 
-    /* Barres de surface OSM */
+    /* ✅ Barres de surface OSM */
     .surface-bars{
       margin-top:14px;
       padding:14px;
@@ -80,9 +80,9 @@
       transition:all 0.3s;
     }
     .surface-bar:hover{filter:brightness(1.1)}
-    .surface-bar.road{background:#3b82f6}
-    .surface-bar.track{background:#f59e0b}
-    .surface-bar.single{background:#10b981}
+    .surface-bar.road{background:#3b82f6} /* Route */
+    .surface-bar.track{background:#f59e0b} /* Piste large */
+    .surface-bar.single{background:#10b981} /* Mono-trace */
     .surface-legend{
       display:flex;
       gap:15px;
@@ -101,7 +101,7 @@
       border-radius:3px;
     }
 
-    /* ✅ NOUVEAU: Profil altimétrique avec Chart.js */
+    /* Profil altimétrique */
     .elevation-section{
       margin-top:18px;
       padding:18px;
@@ -225,7 +225,7 @@
       </div>
     </div>
 
-    <!-- Difficulté -->
+    <!-- Difficulté (calculée automatiquement) -->
     <div class="difficulty-indicator" id="difficultyBox" style="display:none">
       <div class="difficulty-stars" id="difficultyStars"></div>
       <div style="flex:1">
@@ -234,9 +234,9 @@
       </div>
     </div>
 
-    <!-- Surfaces OSM -->
+    <!-- ✅ Barres de surface OSM -->
     <div class="surface-bars" id="surfaceBox" style="display:none">
-      <div class="surface-title">Répartition des surfaces (OSM)</div>
+      <div class="surface-title">Répartition des surfaces (analyse OSM)</div>
       <div class="surface-bar-container" id="surfaceBarContainer"></div>
       <div class="surface-legend" id="surfaceLegend"></div>
     </div>
@@ -250,7 +250,7 @@
 
   <!-- Scores -->
   <section class="panel" style="margin-top:18px">
-    <h3 style="margin:0 0 12px 0;font-size:16px">Scores officiels</h3>
+    <h3 style="margin:0 0 12px 0;font-size:16px">Scores officiels MTB Points</h3>
     <div class="kpis">
       <div class="kpi">
         <div class="muted">Physique</div>
@@ -270,7 +270,7 @@
     </div>
   </section>
 
-  <!-- ✅ NOUVEAU: Profil altimétrique avec Chart.js -->
+  <!-- Profil altimétrique -->
   <section class="panel elevation-section" id="elevationSection">
     <h3>📊 Profil altimétrique</h3>
     <div id="elevationContent">
@@ -323,42 +323,39 @@
   }
 
   // ============================================================================
-  // EXTRACTION DES POINTS GPX (multiple sources)
+  // EXTRACTION DES POINTS GPX
   // ============================================================================
   function extractPoints(race) {
     if (!race) return null;
 
-    // Source 1: race.gpx.points (NOUVEAU format corrigé)
     if (race.gpx?.points && Array.isArray(race.gpx.points) && race.gpx.points.length > 0) {
       console.log(`✅ ${race.gpx.points.length} points GPX trouvés dans race.gpx.points`);
       return race.gpx.points;
     }
 
-    // Source 2: race.gpx_points (format Supabase)
     if (race.gpx_points && Array.isArray(race.gpx_points) && race.gpx_points.length > 0) {
       console.log(`✅ ${race.gpx_points.length} points GPX trouvés dans race.gpx_points`);
       return race.gpx_points;
     }
 
-    // Source 3: race.points (ancien format)
     if (race.points && Array.isArray(race.points) && race.points.length > 0) {
       console.log(`✅ ${race.points.length} points GPX trouvés dans race.points`);
       return race.points;
     }
 
-    console.warn("⚠️  Aucun point GPX disponible pour cette épreuve");
+    console.warn("⚠️  Aucun point GPX disponible");
     return null;
   }
 
   // ============================================================================
-  // FETCH RACE (Supabase + localStorage fallback)
+  // FETCH RACE
   // ============================================================================
   async function fetchRaceProper(id) {
     let row = null;
     let source = "—";
     let authed = false;
 
-    // 1) Essayer Supabase
+    // 1) Supabase
     try {
       const { data: { user }, error: authErr } = await supabase.auth.getUser();
       authed = !authErr && user;
@@ -378,7 +375,7 @@
       console.warn("Supabase non disponible:", e.message);
     }
 
-    // 2) Fallback: localStorage
+    // 2) localStorage
     if (typeof window.findStoredEvent === "function") {
       row = window.findStoredEvent(id);
       if (row) {
@@ -387,7 +384,6 @@
       }
     }
 
-    // 3) Fallback manuel localStorage
     try {
       const events = JSON.parse(localStorage.getItem("vtt_events_v1") || "[]");
       row = events.find(e => e.id === id);
@@ -414,6 +410,7 @@
       📅 ${row.date || "—"} 
       ${row.startTime ? `• 🕐 ${row.startTime}` : ""} 
       • 🚴 ${row.disc || "—"}
+      ${row.category ? `• 📊 ${getCategoryLabel(row.category)}` : ""}
       ${row.ebike ? " • ⚡ E-bike autorisé" : ""}
     `;
 
@@ -437,12 +434,12 @@
 
     $("scoreGlobal").textContent = row.globalScore ?? row.mrs ?? "—";
 
-    // Difficulté (si disponible)
-    if (row.difficulty) {
-      renderDifficulty(row.difficulty);
+    // Difficulté (calculée automatiquement)
+    if (row.difficulty || row.level) {
+      renderDifficulty(row.difficulty || calculateDifficulty(row));
     }
 
-    // Surfaces OSM (si disponible)
+    // ✅ Surfaces OSM
     if (row.techV2?.surfaceEstimate || row.surfaceEstimate) {
       renderSurfaces(row.techV2?.surfaceEstimate || row.surfaceEstimate);
     }
@@ -452,7 +449,7 @@
       $("adminActions").style.display = "block";
     }
 
-    // ✅ Profil altimétrique (NOUVEAU avec Chart.js)
+    // Profil altimétrique
     renderElevationProfile(row);
 
     // Carte
@@ -463,7 +460,137 @@
   }
 
   // ============================================================================
-  // PROFIL ALTIMÉTRIQUE (Chart.js)
+  // CATÉGORIE D'ÉPREUVE
+  // ============================================================================
+  function getCategoryLabel(cat) {
+    const labels = {
+      "locale": "Locale",
+      "regionale": "Régionale",
+      "nationale": "Nationale",
+      "internationale": "Internationale",
+      "mondiale": "Mondiale"
+    };
+    return labels[cat] || cat;
+  }
+
+  // ============================================================================
+  // DIFFICULTÉ
+  // ============================================================================
+  function calculateDifficulty(race) {
+    // Calcul simple basé sur distance + D+
+    const dist = race.distanceKm || 0;
+    const dplus = race.dplusM || 0;
+    const ratio = dplus / (dist || 1);
+    
+    if (ratio > 60) return 5;
+    if (ratio > 45) return 4;
+    if (ratio > 30) return 3;
+    if (ratio > 15) return 2;
+    return 1;
+  }
+
+  function renderDifficulty(difficulty) {
+    const box = $("difficultyBox");
+    const stars = $("difficultyStars");
+    const label = $("difficultyLabel");
+    const desc = $("difficultyDesc");
+
+    if (!difficulty || typeof difficulty !== "number") return;
+
+    box.style.display = "flex";
+    
+    const level = Math.min(5, Math.max(1, Math.round(difficulty)));
+    stars.innerHTML = Array.from({ length: 5 }, (_, i) => 
+      `<span class="star ${i < level ? "filled" : ""}">★</span>`
+    ).join("");
+
+    const labels = ["Facile", "Modéré", "Difficile", "Très difficile", "Extrême"];
+    label.textContent = labels[level - 1] || "Modéré";
+    desc.textContent = `Niveau de difficulté: ${level}/5 (calculé automatiquement)`;
+  }
+
+  // ============================================================================
+  // ✅ SURFACES OSM (route, piste large, mono-trace)
+  // ============================================================================
+  function renderSurfaces(estimate) {
+    const box = $("surfaceBox");
+    const container = $("surfaceBarContainer");
+    const legend = $("surfaceLegend");
+
+    if (!estimate) return;
+
+    const { roadPct, trackPct, singlePct } = estimate;
+    if (roadPct == null && trackPct == null && singlePct == null) return;
+
+    box.style.display = "block";
+
+    // Barre
+    const r = roadPct || 0;
+    const t = trackPct || 0;
+    const s = singlePct || 0;
+
+    container.innerHTML = "";
+    
+    if (r > 0) {
+      const bar = document.createElement("div");
+      bar.className = "surface-bar road";
+      bar.style.width = r + "%";
+      bar.textContent = r.toFixed(0) + "%";
+      container.appendChild(bar);
+    }
+    
+    if (t > 0) {
+      const bar = document.createElement("div");
+      bar.className = "surface-bar track";
+      bar.style.width = t + "%";
+      bar.textContent = t.toFixed(0) + "%";
+      container.appendChild(bar);
+    }
+    
+    if (s > 0) {
+      const bar = document.createElement("div");
+      bar.className = "surface-bar single";
+      bar.style.width = s + "%";
+      bar.textContent = s.toFixed(0) + "%";
+      container.appendChild(bar);
+    }
+
+    // Légende
+    legend.innerHTML = "";
+    
+    if (r > 0) {
+      const item = document.createElement("div");
+      item.className = "surface-legend-item";
+      item.innerHTML = `
+        <div class="surface-legend-dot" style="background:#3b82f6"></div>
+        Route: ${r.toFixed(1)}%
+      `;
+      legend.appendChild(item);
+    }
+    
+    if (t > 0) {
+      const item = document.createElement("div");
+      item.className = "surface-legend-item";
+      item.innerHTML = `
+        <div class="surface-legend-dot" style="background:#f59e0b"></div>
+        Piste large: ${t.toFixed(1)}%
+      `;
+      legend.appendChild(item);
+    }
+    
+    if (s > 0) {
+      const item = document.createElement("div");
+      item.className = "surface-legend-item";
+      item.innerHTML = `
+        <div class="surface-legend-dot" style="background:#10b981"></div>
+        Mono-trace: ${s.toFixed(1)}%
+      `;
+      legend.appendChild(item);
+    }
+  }
+
+  // ============================================================================
+  // PROFIL ALTIMÉTRIQUE
   // ============================================================================
   function renderElevationProfile(race) {
     const section = $("elevationSection");
@@ -488,13 +615,11 @@
       return;
     }
 
-    // Détruire le graphique précédent si existant
     if (elevationChart) {
       elevationChart.destroy();
       elevationChart = null;
     }
 
-    // Créer le profil avec elevation-profile.js
     if (typeof window.MTBElevation !== "undefined") {
       elevationChart = window.MTBElevation.createElevationProfile("elevationChart", points, {
         title: `Profil: ${race.name || "Épreuve"}`,
@@ -548,7 +673,6 @@
     }
 
     try {
-      // Créer la carte
       const map = L.map(container).setView([points[0].lat, points[0].lon], 13);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -556,7 +680,6 @@
         maxZoom: 18
       }).addTo(map);
 
-      // Tracer la ligne
       const latlngs = points.map(p => [p.lat, p.lon]);
       const polyline = L.polyline(latlngs, {
         color: "rgb(31, 122, 77)",
@@ -564,80 +687,21 @@
         opacity: 0.8
       }).addTo(map);
 
-      // Marqueurs départ/arrivée
       L.marker([points[0].lat, points[0].lon]).addTo(map)
         .bindPopup("<b>Départ</b>");
       
       L.marker([points[points.length - 1].lat, points[points.length - 1].lon]).addTo(map)
         .bindPopup("<b>Arrivée</b>");
 
-      // Ajuster la vue
       map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
 
       info.textContent = `${points.length} points GPS • ${(race.distanceKm || 0).toFixed(2)} km`;
 
     } catch (e) {
       console.error("Erreur carte:", e);
-      container.innerHTML = "<div style='padding:40px;text-align:center;color:#ef4444'>Erreur lors du chargement de la carte</div>";
+      container.innerHTML = "<div style='padding:40px;text-align:center;color:#ef4444'>Erreur Leaflet</div>";
       info.textContent = "Erreur Leaflet";
     }
-  }
-
-  // ============================================================================
-  // DIFFICULTÉ
-  // ============================================================================
-  function renderDifficulty(difficulty) {
-    const box = $("difficultyBox");
-    const stars = $("difficultyStars");
-    const label = $("difficultyLabel");
-    const desc = $("difficultyDesc");
-
-    if (!difficulty || typeof difficulty !== "number") return;
-
-    box.style.display = "flex";
-    
-    const level = Math.min(5, Math.max(1, Math.round(difficulty)));
-    stars.innerHTML = Array.from({ length: 5 }, (_, i) => 
-      `<span class="star ${i < level ? "filled" : ""}">★</span>`
-    ).join("");
-
-    const labels = ["Facile", "Modéré", "Difficile", "Très difficile", "Extrême"];
-    label.textContent = labels[level - 1] || "Modéré";
-    desc.textContent = `Niveau de difficulté: ${level}/5`;
-  }
-
-  // ============================================================================
-  // SURFACES OSM
-  // ============================================================================
-  function renderSurfaces(estimate) {
-    const box = $("surfaceBox");
-    const container = $("surfaceBarContainer");
-    const legend = $("surfaceLegend");
-
-    if (!estimate) return;
-
-    const { roadPct, trackPct, singlePct } = estimate;
-    if (roadPct == null && trackPct == null && singlePct == null) return;
-
-    box.style.display = "block";
-
-    // Barre
-    const r = roadPct || 0;
-    const t = trackPct || 0;
-    const s = singlePct || 0;
-
-    container.innerHTML = `
-      ${r > 0 ? `<div class="surface-bar road" style="width:${r}%">${r.toFixed(0)}%</div>` : ""}
-      ${t > 0 ? `<div class="surface-bar track" style="width:${t}%">${t.toFixed(0)}%</div>` : ""}
-      ${s > 0 ? `<div class="surface-bar single" style="width:${s}%">${s.toFixed(0)}%</div>` : ""}
-    `;
-
-    // Légende
-    legend.innerHTML = `
-      ${r > 0 ? `<div class="surface-legend-item"><div class="surface-legend-dot" style="background:#3b82f6"></div>Route: ${r.toFixed(1)}%</div>` : ""}
-      ${t > 0 ? `<div class="surface-legend-item"><div class="surface-legend-dot" style="background:#f59e0b"></div>Chemin: ${t.toFixed(1)}%</div>` : ""}
-      ${s > 0 ? `<div class="surface-legend-item"><div class="surface-legend-dot" style="background:#10b981"></div>Single: ${s.toFixed(1)}%</div>` : ""}
-    `;
   }
 
   // ============================================================================
@@ -688,7 +752,6 @@
       $("kpiPublish").textContent = "Publié";
       $("kpiPublishSub").textContent = "Visible publiquement";
 
-      // Recharger
       const { row, authed } = await fetchRaceProper(raceId);
       if (row) renderUI(row, authed);
 
@@ -735,8 +798,8 @@
         setStatus(false, "Introuvable / non publiée");
         $("raceName").textContent = "Épreuve introuvable";
         $("raceMeta").textContent = authed
-          ? "Connecté, mais l'épreuve est introuvable ou bloquée par RLS."
-          : "Non connecté : l'épreuve n'est pas publiée (ou introuvable).";
+          ? "Connecté, mais l'épreuve est introuvable."
+          : "Non connecté : l'épreuve n'est pas publiée.";
         return;
       }
 
@@ -755,7 +818,6 @@
     }
   }
 
-  // Responsive
   window.addEventListener("resize", () => {
     if (elevationChart) {
       elevationChart.resize();
