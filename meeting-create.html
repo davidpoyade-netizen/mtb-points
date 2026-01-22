@@ -5,124 +5,129 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Créer un événement – MTB Points</title>
 
-  <!-- Ajuste si ton CSS est ailleurs -->
-  <link rel="stylesheet" href="./style.css" />
+  <!-- ✅ Tes 2 CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/theme-nature.css" />
 </head>
 
-<body>
-  <main class="container">
-    <h1>Créer un événement</h1>
+<body class="theme-nature">
+  <!-- ✅ Header commun -->
+  <header class="siteHeader" style="position:sticky; top:0; z-index:50;">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 0;">
+      <a href="index.html" class="brand" style="text-decoration:none;">
+        <strong>MTB Points</strong>
+      </a>
 
-    <section class="card">
-      <div class="grid">
-        <div class="field">
-          <label for="mName">Nom de l’événement *</label>
-          <input id="mName" type="text" placeholder="Ex: Transriviera VTT" required />
+      <nav class="nav" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+        <a class="btn" href="index.html">Accueil</a>
+        <a class="btn" href="public-ranking.html">Classement</a>
+        <a class="btn" href="meetings.html">Événements</a>
+        <a class="btn" href="challenge.html">Challenge</a>
+        <a class="btn" href="reglement.html">Règlement</a>
+        <a class="btn" href="methodologie.html">Méthodologie</a>
+        <a class="btn" href="aide.html">Aide</a>
+        <a class="btn" href="contact.html">Contact</a>
+        <a class="btn" href="about.html">À propos</a>
+        <a class="btn primary" href="login.html">Connexion</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="max-width:980px; margin:0 auto; padding:18px 16px;">
+    <section class="card" style="padding:16px; border-radius:18px;">
+      <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+        <div>
+          <h1 style="margin:0;">Créer un événement</h1>
+          <p style="margin:6px 0 0; opacity:.8;">
+            Renseigne le nom, les dates, et le point de rendez-vous (adresse complète ou ville/CP).
+          </p>
         </div>
-
-        <div class="field">
-          <label for="mDate">Date de début *</label>
-          <input id="mDate" type="date" required />
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn" href="meetings.html">← Retour événements</a>
         </div>
+      </div>
 
-        <div class="field">
-          <label for="mEndDate">Date de fin (optionnelle)</label>
-          <input id="mEndDate" type="date" />
-        </div>
+      <hr style="margin:14px 0; opacity:.25;" />
 
-        <!-- ✅ On garde le champ pays, mais il sera optionnel et le JS gère si la colonne n'existe pas -->
-        <div class="field">
-          <label for="mCountry">Pays (optionnel)</label>
-          <input id="mCountry" type="text" placeholder="FR" />
-        </div>
+      <!-- ✅ Messages -->
+      <div id="msg" class="empty" style="display:none; margin:10px 0;"></div>
 
-        <!-- ✅ Champ URL du site web de l'événement -->
-        <div class="field" style="grid-column: 1 / -1;">
-          <label for="mUrl">Site web de l’événement (URL)</label>
-          <input id="mUrl" type="url" placeholder="https://..." />
-          <small class="hint">Optionnel. Si la colonne n’existe pas en base, le JS n’empêchera pas la création.</small>
-        </div>
-
-        <!-- 📍 Point de rendez-vous -->
-        <div class="field" style="grid-column: 1 / -1;">
-          <label for="mLocation">Point de rendez-vous (adresse) *</label>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <input
-              id="mLocation"
-              type="text"
-              placeholder="Tape une adresse (autocomplétion)…"
-              autocomplete="off"
-              required
-              style="flex: 1 1 360px;"
-            />
-            <button id="btnGeo" type="button">📍 Utiliser ma position</button>
+      <!-- ✅ Form -->
+      <form id="meetingForm" autocomplete="on">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="field">
+            <label for="mName"><strong>Nom de l’événement *</strong></label>
+            <input id="mName" type="text" placeholder="Ex: TransRiviera VTT" required />
           </div>
 
-          <div id="addrSuggest" class="suggest" style="display:none;"></div>
-          <small class="hint">Astuce : tape 3 lettres min, ou utilise ta position.</small>
+          <div class="field">
+            <label for="mPublished"><strong>Publication</strong></label>
+            <label style="display:flex; align-items:center; gap:10px; user-select:none; margin-top:8px;">
+              <input id="mPublished" type="checkbox" checked />
+              Publier immédiatement
+            </label>
+          </div>
+
+          <div class="field">
+            <label for="mDate"><strong>Date début *</strong></label>
+            <input id="mDate" type="date" required />
+          </div>
+
+          <div class="field">
+            <label for="mEndDate"><strong>Date fin</strong> (optionnel)</label>
+            <input id="mEndDate" type="date" />
+          </div>
         </div>
 
-        <div class="field">
-          <label for="mLat">Latitude (auto)</label>
-          <input id="mLat" type="text" readonly />
+        <div class="field" style="margin-top:12px;">
+          <label for="mLocation"><strong>Point de rendez-vous</strong></label>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <div style="flex:1 1 420px; position:relative;">
+              <input
+                id="mLocation"
+                type="text"
+                placeholder="Adresse complète OU ville + code postal (ex: 'Place Masséna, Nice' ou '06300 Nice')"
+                autocomplete="street-address"
+              />
+              <!-- Suggestions -->
+              <div
+                id="addrSuggest"
+                style="display:none; position:absolute; left:0; right:0; top:calc(100% + 6px);
+                       background:rgba(255,255,255,.98); border:1px solid rgba(40,60,40,.18);
+                       border-radius:14px; overflow:hidden; box-shadow:0 10px 20px rgba(0,0,0,.08);"
+              ></div>
+            </div>
+
+            <button class="btn" type="button" id="btnGeo">📍 Utiliser ma position</button>
+          </div>
+          <div id="geoHint" style="margin-top:8px; font-size:13px; opacity:.8;"></div>
         </div>
 
-        <div class="field">
-          <label for="mLng">Longitude (auto)</label>
-          <input id="mLng" type="text" readonly />
+        <div class="field" style="margin-top:12px;">
+          <label for="mUrl"><strong>Site web de l’événement</strong> (optionnel)</label>
+          <input id="mUrl" type="url" placeholder="https://..." />
         </div>
 
-        <div class="field" style="grid-column: 1 / -1;">
-          <label for="mComment">Commentaire (optionnel)</label>
-          <textarea id="mComment" rows="4" placeholder="Infos organisateur, retrait dossards, etc."></textarea>
+        <div class="field" style="margin-top:12px;">
+          <label for="mComment"><strong>Commentaire</strong> (optionnel)</label>
+          <textarea id="mComment" rows="4" placeholder="Infos pratiques : parking, retrait des dossards, etc."></textarea>
         </div>
 
-        <div class="field" style="grid-column: 1 / -1; display:flex; align-items:center; gap:10px;">
-          <input id="mPublished" type="checkbox" checked />
-          <label for="mPublished" style="margin:0;">Publier l’événement</label>
+        <!-- lat/lng (non envoyés à Supabase par défaut) -->
+        <input id="mLat" type="hidden" />
+        <input id="mLng" type="hidden" />
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+          <button class="btn primary" id="btnCreate" type="submit">✅ Créer l’événement</button>
+          <button class="btn" id="btnCreateAndRace" type="button">➕ Créer + créer une épreuve</button>
+          <button class="btn" id="btnReset" type="button">↩️ Réinitialiser</button>
         </div>
-      </div>
 
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
-        <button id="btnCreate" type="button">✅ Créer l’événement</button>
-        <button id="btnCreateAndRace" type="button">✅ Créer + ajouter une épreuve</button>
-        <button id="btnReset" type="button">↩️ Réinitialiser</button>
-      </div>
-
-      <div id="msg" style="display:none;"></div>
+        <div id="debug" style="margin-top:12px; font-size:12px; opacity:.75;"></div>
+      </form>
     </section>
   </main>
 
-  <script type="module" src="./js/meeting-create.js"></script>
-
-  <style>
-    .suggest{
-      position: relative;
-      margin-top: 6px;
-      border: 1px solid rgba(40,60,40,.18);
-      border-radius: 14px;
-      overflow: hidden;
-      background: rgba(255,255,255,.88);
-      backdrop-filter: blur(6px);
-      max-height: 260px;
-    }
-    .suggest .item{
-      padding: 10px 12px;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(40,60,40,.08);
-      font-size: 14px;
-      line-height: 1.2;
-    }
-    .suggest .item:last-child{border-bottom:none;}
-    .suggest .item:hover{ background: rgba(22,163,74,.10); }
-    .hint{opacity:.8; display:block; margin-top:6px;}
-    .container{max-width:980px; margin:0 auto; padding:20px;}
-    .card{padding:18px; border-radius:18px; border:1px solid rgba(40,60,40,.12);}
-    .grid{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px;}
-    @media(max-width:760px){ .grid{grid-template-columns:1fr;} }
-    .field label{display:block; margin-bottom:6px;}
-    .field input,.field textarea{width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(40,60,40,.18);}
-    button{padding:10px 12px; border-radius:14px; border:1px solid rgba(40,60,40,.18); cursor:pointer;}
-  </style>
+  <script type="module" src="js/meeting-create.js"></script>
 </body>
 </html>
