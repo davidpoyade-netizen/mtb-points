@@ -2,309 +2,52 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Événements — MTB Points</title>
-
-  <link rel="stylesheet" href="./css/style.css" />
-  <link rel="stylesheet" href="./css/theme-nature.css?v=10" />
-
-  <style>
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
-    a{color:inherit}
-    .wrap{max-width:1280px;margin:22px auto;padding:0 16px}
-    .muted{color:var(--muted)}
-    header.header{position:sticky;top:0;z-index:20;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .brandLogo{width:44px;height:44px;border-radius:14px;overflow:hidden;border:1px solid rgba(40,60,40,.18);box-shadow:0 12px 22px rgba(15,23,42,.18);background:#fff}
-    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
-    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
-    nav.nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    nav.nav a{text-decoration:none;padding:8px 10px;border-radius:10px;font-weight:950;font-size:13px;color:var(--blue)}
-    nav.nav a:hover{background:rgba(47,111,62,.10)}
-    nav.nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
-    .headerRight{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
-    .hero{border-radius:22px;padding:18px;border:1px solid var(--border);background:radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));box-shadow:var(--shadow2)}
-    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .hero h2{margin:0;font-size:22px;letter-spacing:-.2px}
-    .heroMeta{margin-top:8px;color:#223024;line-height:1.6}
-    .heroActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .sectionTitle{margin:18px 0 10px 0;font-size:14px;letter-spacing:-.05px}
-    .filters{margin-top:10px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr 180px;gap:10px;align-items:end}
-    @media(max-width:1100px){.filters{grid-template-columns:1fr 1fr}.filters .spanAll{grid-column:1/-1 !important}}
-    label{display:block;font-weight:1000;font-size:12px;color:var(--text)}
-    input,select{width:100%;padding:10px;margin-top:6px;border:1px solid rgba(40,60,40,.20);border-radius:12px;background:rgba(255,255,255,.82);font-size:14px}
-    input:focus,select:focus{outline:3px solid rgba(47,111,62,.20);outline-offset:2px}
-    .hintRow{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:2px}
-    .list{display:grid;gap:12px}
-    .item{border:1px solid rgba(40,60,40,.14);background:rgba(255,255,255,.82);border-radius:20px;padding:14px;box-shadow:0 2px 12px rgba(15,23,42,.06);transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;display:block;text-decoration:none}
-    .item:hover{transform:translateY(-1px);box-shadow:0 16px 26px rgba(15,23,42,.10);border-color:rgba(47,111,62,.25)}
-    .topline{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .title{font-weight:1100;font-size:16px;letter-spacing:-.15px}
-    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.75);font-weight:1000;font-size:12px;white-space:nowrap}
-    .metaLine{margin-top:8px;color:#223024;font-size:13px;line-height:1.5}
-    .miniRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
-    .empty{margin-top:12px;border:1px dashed var(--border);background:rgba(255,255,255,.72);border-radius:18px;padding:12px;color:var(--muted)}
-  </style>
+  <title>Événements – MTB Points</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
+<body>
+  <h1>Événements</h1>
 
-<body class="theme-nature">
-<header class="header">
-  <div class="brandRow">
-    <div class="brandLogo" title="MTB Points">
-      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <h1>MTB Points — Événements</h1>
-      <span class="pill"><span class="dot"></span> <span id="countMeetings">0</span> événement(s)</span>
-    </div>
-  </div>
-  <nav class="nav">
-    <a href="index.html">Accueil</a>
-    <a href="public-ranking.html">Classement</a>
-    <a href="meetings.html" class="active">Événements</a>
-    <a href="login.html">Connexion</a>
-  </nav>
-  <div class="headerRight">
-    <a class="btn" href="organizer-dashboard.html">Espace organisateur</a>
-  </div>
-</header>
+  <div id="meetingsList">Chargement…</div>
 
-<main class="wrap">
-  <div class="card">
-    <section class="hero">
-      <div class="heroTop">
-        <div style="min-width:280px;flex:1">
-          <h2>Tous les événements VTT</h2>
-          <div class="heroMeta">
-            Découvre tous les événements et courses VTT.
-            Clique sur un événement pour voir ses épreuves.
-          </div>
-        </div>
-        <div class="heroActions">
-          <span class="pill"><span class="dot ok"></span> Liste publique</span>
-        </div>
-      </div>
-    </section>
+  <script type="module">
+    import { supabase } from "./js/supabaseClient.js";
 
-    <h3 class="sectionTitle">Filtres & tri</h3>
-    <div class="filters">
-      <div class="spanAll" style="grid-column:1/2">
-        <label for="q">Recherche</label>
-        <input id="q" type="text" placeholder="Nom, lieu..." />
-      </div>
-      <div>
-        <label for="discFilter">Discipline</label>
-        <select id="discFilter">
-          <option value="">Toutes</option>
-          <option value="XC">XC</option>
-          <option value="Enduro">Enduro</option>
-          <option value="DH">DH</option>
-          <option value="Marathon">Marathon</option>
-          <option value="Ultra">Ultra</option>
-          <option value="Gravel">Gravel</option>
-        </select>
-      </div>
-      <div>
-        <label for="fromDate">À partir du</label>
-        <input id="fromDate" type="date" />
-      </div>
-      <div>
-        <label for="toDate">Jusqu'au</label>
-        <input id="toDate" type="date" />
-      </div>
-      <div>
-        <label for="sortBy">Tri</label>
-        <select id="sortBy">
-          <option value="date_asc">Date croissante ↑</option>
-          <option value="date_desc">Date décroissante ↓</option>
-          <option value="name_asc">Nom A→Z</option>
-          <option value="races_desc">Épreuves ↓</option>
-        </select>
-      </div>
-      <div>
-        <button class="btn primary" id="btnReset" type="button">Réinitialiser</button>
-      </div>
-      <div class="hintRow">
-        <div>Résultats : <strong id="countFiltered">0</strong></div>
-        <div class="muted">💡 Clique sur un événement pour voir ses épreuves</div>
-      </div>
-    </div>
+    async function loadMeetings() {
+      const container = document.getElementById("meetingsList");
 
-    <h3 class="sectionTitle">Liste des événements</h3>
-    <div id="meetings" class="list" style="margin-top:12px;"></div>
-    <div id="emptyBox" class="empty" style="display:none;">Aucun événement trouvé.</div>
-  </div>
-</main>
+      const { data, error } = await supabase
+        .from("meetings")
+        .select("*")
+        .order("start_date", { ascending: false });
 
-<script type="module">
-import { supabase } from "./js/supabaseClient.js";
+      if (error) {
+        console.error(error);
+        container.textContent = "❌ Erreur de chargement";
+        return;
+      }
 
-const $ = (id) => document.getElementById(id);
+      if (!data || data.length === 0) {
+        container.textContent = "Aucun événement";
+        return;
+      }
 
-function esc(s){
-  return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+      container.innerHTML = "";
 
-async function loadMeetings(){
-  try {
-    // ✅ Charger les meetings avec leurs races pour filtrer par discipline
-    const { data: meetings, error: mErr } = await supabase
-      .from("meetings")
-      .select("id,name,date,end_date,location,comment,race_ids,external_url")
-      .eq("is_published", true)
-      .order("date", { ascending: true })
-      .limit(500);
+      data.forEach((m) => {
+        const div = document.createElement("div");
+        div.className = "meeting-card";
+        div.innerHTML = `
+          <h3>${m.name}</h3>
+          <p>${m.location} (${m.country})</p>
+          <p>${m.start_date} → ${m.end_date}</p>
+          <a href="races.html?meeting_id=${m.id}">Voir les épreuves</a>
+        `;
+        container.appendChild(div);
+      });
+    }
 
-    if (mErr) throw mErr;
-
-    // Charger les races pour extraire les disciplines
-    const { data: races, error: rErr } = await supabase
-      .from("races")
-      .select("id,meeting_id,discipline")
-      .eq("is_published", true);
-
-    if (rErr) throw rErr;
-
-    // Associer disciplines aux meetings
-    return (meetings || []).map(m => {
-      const meetingRaces = (races || []).filter(r => r.meeting_id === m.id);
-      const disciplines = [...new Set(meetingRaces.map(r => r.discipline).filter(Boolean))];
-      return { ...m, disciplines };
-    });
-
-  } catch (e) {
-    console.warn("[meetings] Supabase failed, fallback localStorage", e);
-    try {
-      const raw = localStorage.getItem("mtb.meetings.v1");
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr.filter(m => m.isPublished !== false).map(m => ({...m, disciplines: []})) : [];
-    } catch { return []; }
-  }
-}
-
-let allMeetings = [];
-
-function inRange(meeting, fromISO, toISO){
-  const start = meeting.date || null;
-  const end = meeting.end_date || meeting.date || null;
-  if (!start) return true;
-  const s = start;
-  const e = end || start;
-  if (fromISO && e < fromISO) return false;
-  if (toISO && s > toISO) return false;
-  return true;
-}
-
-function applyFilters(){
-  const q = ($("q").value || "").trim().toLowerCase();
-  const disc = ($("discFilter").value || "").trim();
-  const fromISO = ($("fromDate").value || "").trim();
-  const toISO = ($("toDate").value || "").trim();
-  const sortBy = $("sortBy").value || "date_asc";
-
-  let filtered = allMeetings.slice();
-
-  if (q){
-    filtered = filtered.filter(m => {
-      const txt = `${m.name||""} ${m.location||""} ${m.comment||""}`.toLowerCase();
-      return txt.includes(q);
-    });
-  }
-
-  // ✅ Filtre par discipline
-  if (disc){
-    filtered = filtered.filter(m => 
-      Array.isArray(m.disciplines) && m.disciplines.includes(disc)
-    );
-  }
-
-  filtered = filtered.filter(m => inRange(m, fromISO || null, toISO || null));
-
-  filtered.sort((a,b) => {
-    const ad = a.date || "";
-    const bd = b.date || "";
-    const an = (a.name || "").toLowerCase();
-    const bn = (b.name || "").toLowerCase();
-    const ar = Array.isArray(a.race_ids) ? a.race_ids.length : 0;
-    const br = Array.isArray(b.race_ids) ? b.race_ids.length : 0;
-
-    // ✅ Date croissante par défaut
-    if (sortBy === "date_asc") return ad.localeCompare(bd);
-    if (sortBy === "date_desc") return bd.localeCompare(ad);
-    if (sortBy === "name_asc") return an.localeCompare(bn);
-    if (sortBy === "races_desc") return br - ar;
-    return 0;
-  });
-
-  render(filtered);
-}
-
-function render(list){
-  $("countMeetings").textContent = String(allMeetings.length);
-  $("countFiltered").textContent = String(list.length);
-
-  const root = $("meetings");
-  const empty = $("emptyBox");
-
-  if (!list.length){
-    root.innerHTML = "";
-    empty.style.display = "block";
-    return;
-  }
-  empty.style.display = "none";
-
-  root.innerHTML = list.map(m => {
-    const dateDisplay = m.end_date 
-      ? `${esc(m.date || "—")} → ${esc(m.end_date)}`
-      : esc(m.date || "—");
-    
-    const racesCount = Array.isArray(m.race_ids) ? m.race_ids.length : 0;
-    const discDisplay = Array.isArray(m.disciplines) && m.disciplines.length 
-      ? ` • 🏷️ ${m.disciplines.join(", ")}`
-      : "";
-
-    const extLink = m.external_url 
-      ? ` • <a href="${esc(m.external_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--blue);">🔗 Site web</a>`
-      : "";
-
-    return `
-      <a class="item" href="meeting.html?id=${encodeURIComponent(m.id)}">
-        <div class="topline">
-          <div>
-            <div class="title">${esc(m.name || "Événement")}</div>
-            <div class="metaLine">
-              📅 ${dateDisplay}
-              ${m.location ? ` • 📍 ${esc(m.location)}` : ""}
-              • 🏁 ${racesCount} épreuve${racesCount > 1 ? "s" : ""}${discDisplay}${extLink}
-            </div>
-          </div>
-          <span class="badge">👁️ Voir</span>
-        </div>
-        ${m.comment ? `<div class="muted" style="margin-top:10px;font-size:12px;line-height:1.5;">${esc(m.comment)}</div>` : ""}
-      </a>
-    `;
-  }).join("");
-}
-
-[$("q"), $("discFilter"), $("fromDate"), $("toDate"), $("sortBy")].forEach(el => 
-  el.addEventListener(el.tagName === "SELECT" ? "change" : "input", applyFilters)
-);
-
-$("btnReset").addEventListener("click", () => {
-  $("q").value = "";
-  $("discFilter").value = "";
-  $("fromDate").value = "";
-  $("toDate").value = "";
-  $("sortBy").value = "date_asc";
-  applyFilters();
-});
-
-(async () => {
-  allMeetings = await loadMeetings();
-  applyFilters();
-})();
-</script>
+    loadMeetings();
+  </script>
 </body>
 </html>
