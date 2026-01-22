@@ -1,0 +1,17 @@
+{
+  "race_id": "uuid-ou-text-id-selon-ton-schema",
+  "rows": [
+    {
+      "email": "rider@mail.com",
+      "first_name": "Paul",
+      "last_name": "Martin",
+      "sex": "M",
+      "birth_date": "1990-05-12",
+      "birth_year": 1990,
+      "nationality": "FR",
+      "team": "Team Nice",
+      "points": 123,
+      "rank": 12
+    }
+  ]
+}
