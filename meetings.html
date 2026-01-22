@@ -4,38 +4,43 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Événements – MTB Points</title>
- link rel="stylesheet" href="./css/style.css" />
-<link rel="stylesheet" href="./css/theme-nature.css" />
+
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/theme-nature.css" />
 </head>
-<body>
-  <main class="container">
-    <body class="theme-nature">
-    <header style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
-      <div>
-        <h1 style="margin:0;">Événements</h1>
-        <p style="margin:6px 0 0; opacity:.8;">Liste des événements publiés</p>
+
+<body class="theme-nature">
+  <!-- Header commun injecté -->
+  <div id="app-header"></div>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="heroTop" style="align-items:flex-end;">
+        <div>
+          <h2 style="margin:0;">Événements</h2>
+          <div class="heroDesc">Liste des événements publiés</div>
+        </div>
+        <div class="heroActions">
+          <a class="btn primary" href="meeting-create.html">➕ Créer un événement</a>
+          <a class="btn" href="index.html">🏠 Accueil</a>
+        </div>
       </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a class="btn" href="meeting-create.html">➕ Créer un événement</a>
-        <a class="btn" href="index.html">🏠 Accueil</a>
-      </div>
-    </header>
-<div id="app-header"></div>
-</body>)
-<script type="module" src="./js/header.js"></script>
-    <section class="card" style="margin-top:14px;">
-      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-        <input id="q" type="search" placeholder="Rechercher un événement (nom, lieu)..." style="flex:1 1 360px;" />
+
+      <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <input id="q" type="search" placeholder="Rechercher un événement (nom, lieu)…" style="flex:1 1 360px;" />
         <label style="display:flex; align-items:center; gap:8px; user-select:none;">
           <input id="onlyPublished" type="checkbox" checked />
           Publiés uniquement
         </label>
       </div>
 
-      <div id="status" style="margin-top:12px; opacity:.85;">Chargement…</div>
-      <div id="meetingsList" style="margin-top:12px; display:grid; gap:12px;"></div>
+      <div id="status" class="hintRow" style="margin-top:12px;">Chargement…</div>
+      <div id="meetingsList" class="list"></div>
     </section>
   </main>
+
+  <!-- Header loader (auth + active link) -->
+  <script type="module" src="./js/header.js"></script>
 
   <script type="module">
     import { supabase } from "./js/supabaseClient.js";
@@ -52,7 +57,6 @@
     }
 
     function fmtDate(d) {
-      // d est stocké en date côté DB (YYYY-MM-DD). On l'affiche tel quel, simple.
       return d ? String(d) : "";
     }
 
@@ -65,9 +69,11 @@
       status.textContent = "Chargement…";
       list.innerHTML = "";
 
+      // ⚠️ IMPORTANT: ta table meetings n'a PAS forcément "country"
+      // On ne sélectionne que les colonnes sûres: id,name,location,date,end_date,is_published
       let query = supabase
         .from("meetings")
-        .select("id,name,location,country,date,end_date,is_published")
+        .select("id,name,location,date,end_date,is_published")
         .order("date", { ascending: false });
 
       if (onlyPublished) query = query.eq("is_published", true);
@@ -82,43 +88,34 @@
 
       const rows = (data || []).filter((m) => {
         if (!q) return true;
-        const hay = `${m.name ?? ""} ${m.location ?? ""} ${m.country ?? ""}`.toLowerCase();
+        const hay = `${m.name ?? ""} ${m.location ?? ""}`.toLowerCase();
         return hay.includes(q);
       });
 
       if (rows.length === 0) {
         status.textContent = "Aucun événement.";
+        list.innerHTML = `<div class="empty">Aucun événement trouvé.</div>`;
         return;
       }
 
       status.textContent = `${rows.length} événement(s)`;
 
       rows.forEach((m) => {
-        const card = document.createElement("div");
-        card.className = "meeting-card";
-        card.style.border = "1px solid rgba(40,60,40,.14)";
-        card.style.borderRadius = "18px";
-        card.style.padding = "14px";
-        card.style.background = "rgba(255,255,255,.75)";
-
-        const where = [m.location, m.country].filter(Boolean).join(" · ");
+        const aWhere = m.location ? `📍 ${escapeHtml(m.location)}` : "📍 Lieu non précisé";
         const when = `${fmtDate(m.date)}${m.end_date ? " → " + fmtDate(m.end_date) : ""}`;
 
+        const card = document.createElement("a");
+        card.className = "item";
+        card.href = `races.html?meeting_id=${encodeURIComponent(m.id)}`;
         card.innerHTML = `
-          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-            <div>
-              <h3 style="margin:0;">${escapeHtml(m.name || "")}</h3>
-              <div style="margin-top:6px; opacity:.85;">
-                <div>📍 ${escapeHtml(where || "Lieu non précisé")}</div>
-                <div>📅 ${escapeHtml(when || "Date non précisée")}</div>
-              </div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-              <span style="font-size:12px; opacity:.75;">
-                ${m.is_published ? "✅ Publié" : "⏳ Brouillon"}
-              </span>
-              <a class="btn" href="races.html?meeting_id=${encodeURIComponent(m.id)}">Voir les épreuves</a>
-            </div>
+          <div class="topline">
+            <div class="title">${escapeHtml(m.name || "")}</div>
+            <span class="badge">${m.is_published ? "✅ Publié" : "⏳ Brouillon"}</span>
+          </div>
+          <div class="metaLine">${aWhere}</div>
+          <div class="metaLine">📅 ${escapeHtml(when || "Date non précisée")}</div>
+          <div class="miniRow">
+            <span class="miniPill">Voir les épreuves →</span>
           </div>
         `;
         list.appendChild(card);
@@ -130,13 +127,5 @@
 
     loadMeetings();
   </script>
-
-  <!-- mini styles boutons (si pas déjà dans ton CSS thème nature) -->
-  <style>
-    .container{max-width:980px; margin:0 auto; padding:20px;}
-    .card{padding:16px; border-radius:18px; border:1px solid rgba(40,60,40,.12);}
-    .btn{display:inline-block; padding:10px 12px; border-radius:14px; border:1px solid rgba(40,60,40,.18); text-decoration:none; color:inherit;}
-    input[type="search"]{padding:10px 12px; border-radius:14px; border:1px solid rgba(40,60,40,.18);}
-  </style>
 </body>
 </html>
