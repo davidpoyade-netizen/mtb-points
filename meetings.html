@@ -1,39 +1,140 @@
-<script type="module">
-  import { supabase } from "./js/supabaseClient.js";
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Événements – MTB Points</title>
 
-  async function loadMeetings() {
-    const container = document.getElementById("meetingsList");
-    if (!container) return;
+  <!-- ✅ IMPORTANT : ajuste le chemin si ton CSS n'est pas à la racine -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="container">
+    <header style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
+      <div>
+        <h1 style="margin:0;">Événements</h1>
+        <p style="margin:6px 0 0; opacity:.8;">Liste des événements publiés</p>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn" href="meeting-create.html">➕ Créer un événement</a>
+        <a class="btn" href="index.html">🏠 Accueil</a>
+      </div>
+    </header>
 
-    const { data, error } = await supabase
-      .from("meetings")
-      .select("*")
-      .order("date", { ascending: false });
+    <section class="card" style="margin-top:14px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <input id="q" type="search" placeholder="Rechercher un événement (nom, lieu)..." style="flex:1 1 360px;" />
+        <label style="display:flex; align-items:center; gap:8px; user-select:none;">
+          <input id="onlyPublished" type="checkbox" checked />
+          Publiés uniquement
+        </label>
+      </div>
 
-    if (error) {
-      console.error("[meetings] supabase error:", error);
-      container.textContent = "❌ Erreur de chargement : " + error.message;
-      return;
+      <div id="status" style="margin-top:12px; opacity:.85;">Chargement…</div>
+      <div id="meetingsList" style="margin-top:12px; display:grid; gap:12px;"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { supabase } from "./js/supabaseClient.js";
+
+    const $ = (id) => document.getElementById(id);
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
-    if (!data || data.length === 0) {
-      container.textContent = "Aucun événement";
-      return;
+    function fmtDate(d) {
+      // d est stocké en date côté DB (YYYY-MM-DD). On l'affiche tel quel, simple.
+      return d ? String(d) : "";
     }
 
-    container.innerHTML = "";
-    data.forEach((m) => {
-      const div = document.createElement("div");
-      div.className = "meeting-card";
-      div.innerHTML = `
-        <h3>${m.name ?? ""}</h3>
-        <p>${m.location ?? ""}${m.country ? " (" + m.country + ")" : ""}</p>
-        <p>${m.date ?? ""}${m.end_date ? " → " + m.end_date : ""}</p>
-        <a href="races.html?meeting_id=${encodeURIComponent(m.id)}">Voir les épreuves</a>
-      `;
-      container.appendChild(div);
-    });
-  }
+    async function loadMeetings() {
+      const status = $("status");
+      const list = $("meetingsList");
+      const q = ($("q")?.value || "").trim().toLowerCase();
+      const onlyPublished = !!$("onlyPublished")?.checked;
 
-  loadMeetings();
-</script>
+      status.textContent = "Chargement…";
+      list.innerHTML = "";
+
+      let query = supabase
+        .from("meetings")
+        .select("id,name,location,country,date,end_date,is_published")
+        .order("date", { ascending: false });
+
+      if (onlyPublished) query = query.eq("is_published", true);
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("[meetings] supabase error:", error);
+        status.textContent = "❌ Erreur : " + error.message;
+        return;
+      }
+
+      const rows = (data || []).filter((m) => {
+        if (!q) return true;
+        const hay = `${m.name ?? ""} ${m.location ?? ""} ${m.country ?? ""}`.toLowerCase();
+        return hay.includes(q);
+      });
+
+      if (rows.length === 0) {
+        status.textContent = "Aucun événement.";
+        return;
+      }
+
+      status.textContent = `${rows.length} événement(s)`;
+
+      rows.forEach((m) => {
+        const card = document.createElement("div");
+        card.className = "meeting-card";
+        card.style.border = "1px solid rgba(40,60,40,.14)";
+        card.style.borderRadius = "18px";
+        card.style.padding = "14px";
+        card.style.background = "rgba(255,255,255,.75)";
+
+        const where = [m.location, m.country].filter(Boolean).join(" · ");
+        const when = `${fmtDate(m.date)}${m.end_date ? " → " + fmtDate(m.end_date) : ""}`;
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+            <div>
+              <h3 style="margin:0;">${escapeHtml(m.name || "")}</h3>
+              <div style="margin-top:6px; opacity:.85;">
+                <div>📍 ${escapeHtml(where || "Lieu non précisé")}</div>
+                <div>📅 ${escapeHtml(when || "Date non précisée")}</div>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+              <span style="font-size:12px; opacity:.75;">
+                ${m.is_published ? "✅ Publié" : "⏳ Brouillon"}
+              </span>
+              <a class="btn" href="races.html?meeting_id=${encodeURIComponent(m.id)}">Voir les épreuves</a>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    $("q")?.addEventListener("input", () => loadMeetings());
+    $("onlyPublished")?.addEventListener("change", () => loadMeetings());
+
+    loadMeetings();
+  </script>
+
+  <!-- mini styles boutons (si pas déjà dans ton CSS thème nature) -->
+  <style>
+    .container{max-width:980px; margin:0 auto; padding:20px;}
+    .card{padding:16px; border-radius:18px; border:1px solid rgba(40,60,40,.12);}
+    .btn{display:inline-block; padding:10px 12px; border-radius:14px; border:1px solid rgba(40,60,40,.18); text-decoration:none; color:inherit;}
+    input[type="search"]{padding:10px 12px; border-radius:14px; border:1px solid rgba(40,60,40,.18);}
+  </style>
+</body>
+</html>
