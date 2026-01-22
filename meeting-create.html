@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Créer un événement – MTB Points</title>
 
-  <!-- ⚠️ Ajuste si ton CSS n'est pas à la racine -->
+  <!-- Ajuste si ton CSS est ailleurs -->
   <link rel="stylesheet" href="./style.css" />
 </head>
 
@@ -30,9 +30,17 @@
           <input id="mEndDate" type="date" />
         </div>
 
+        <!-- ✅ On garde le champ pays, mais il sera optionnel et le JS gère si la colonne n'existe pas -->
         <div class="field">
           <label for="mCountry">Pays (optionnel)</label>
           <input id="mCountry" type="text" placeholder="FR" />
+        </div>
+
+        <!-- ✅ Champ URL du site web de l'événement -->
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="mUrl">Site web de l’événement (URL)</label>
+          <input id="mUrl" type="url" placeholder="https://..." />
+          <small class="hint">Optionnel. Si la colonne n’existe pas en base, le JS n’empêchera pas la création.</small>
         </div>
 
         <!-- 📍 Point de rendez-vous -->
@@ -50,22 +58,18 @@
             <button id="btnGeo" type="button">📍 Utiliser ma position</button>
           </div>
 
-          <!-- Dropdown d'autocomplétion -->
           <div id="addrSuggest" class="suggest" style="display:none;"></div>
-
-          <small class="hint">
-            Astuce : commence à taper, puis choisis une suggestion. Tu peux aussi utiliser ta position.
-          </small>
+          <small class="hint">Astuce : tape 3 lettres min, ou utilise ta position.</small>
         </div>
 
         <div class="field">
           <label for="mLat">Latitude (auto)</label>
-          <input id="mLat" type="text" placeholder="ex: 43.7745" readonly />
+          <input id="mLat" type="text" readonly />
         </div>
 
         <div class="field">
           <label for="mLng">Longitude (auto)</label>
-          <input id="mLng" type="text" placeholder="ex: 7.4978" readonly />
+          <input id="mLng" type="text" readonly />
         </div>
 
         <div class="field" style="grid-column: 1 / -1;">
@@ -89,10 +93,8 @@
     </section>
   </main>
 
-  <!-- ⚠️ Ajuste si tes JS ne sont pas dans /js -->
   <script type="module" src="./js/meeting-create.js"></script>
 
-  <!-- Mini CSS (pour les suggestions) : si tu veux, déplace dans style.css -->
   <style>
     .suggest{
       position: relative;
@@ -112,9 +114,7 @@
       line-height: 1.2;
     }
     .suggest .item:last-child{border-bottom:none;}
-    .suggest .item:hover{
-      background: rgba(22,163,74,.10);
-    }
+    .suggest .item:hover{ background: rgba(22,163,74,.10); }
     .hint{opacity:.8; display:block; margin-top:6px;}
     .container{max-width:980px; margin:0 auto; padding:20px;}
     .card{padding:18px; border-radius:18px; border:1px solid rgba(40,60,40,.12);}
@@ -122,4 +122,7 @@
     @media(max-width:760px){ .grid{grid-template-columns:1fr;} }
     .field label{display:block; margin-bottom:6px;}
     .field input,.field textarea{width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(40,60,40,.18);}
-    button{padding:1
+    button{padding:10px 12px; border-radius:14px; border:1px solid rgba(40,60,40,.18); cursor:pointer;}
+  </style>
+</body>
+</html>
