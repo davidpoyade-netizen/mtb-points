@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test API MTB Points v2.0</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 { font-size: 28px; margin-bottom: 10px; }
+    .header p { opacity: 0.9; }
+    .content { padding: 30px; }
+    
+    .section {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #495057;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .input-group {
+      margin-bottom: 15px;
+    }
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #495057;
+      font-size: 14px;
+    }
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .input-group input:focus,
+    .input-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-secondary:hover { background: #5a6268; }
+    
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      display: none;
+    }
+    .status.loading {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      color: #856404;
+      display: block;
+    }
+    .status.success {
+      background: #d4edda;
+      border: 2px solid #28a745;
+      color: #155724;
+      display: block;
+    }
+    .status.error {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+      color: #721c24;
+      display: block;
+    }
+    
+    .result {
+      background: #f8f9fa;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-success { background: #28a745; color: white; }
+    .badge-danger { background: #dc3545; color: white; }
+    .badge-info { background: #17a2b8; color: white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧪 Test API MTB Points v2.0</h1>
+      <p>Diagnostic et vérification de l'API avec récupération des points GPX</p>
+    </div>
+    
+    <div class="content">
+      <!-- Test 1: Health Check -->
+      <div class="section">
+        <h2>
+          <span>✅</span>
+          Test 1: Health Check
+        </h2>
+        <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">
+          Vérifie que l'API est accessible et répond correctement.
+        </p>
+        <div class="input-group">
+          <label>URL de l'API</label>
+          <input type="text" id="apiUrl" value="https://mtb-points.onrender.com" />
+        </div>
+        <button class="btn btn-primary" onclick="testHealth()">
+          <span id="healthSpinner"></span>
+          Tester /health
+        </button>
+        <div id="healthStatus" class="status"></div>
+        <div id="healthResult" class="result" style="display: none;"></div>
+      </div>
+
+      <!-- Test 2: Analyze GPX -->
+      <div class="section">
+        <h2>
+          <span>📊</span>
+          Test 2: Analyser un GPX
+        </h2>
+        <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">
+          Upload un fichier GPX et vérifie que les points sont renvoyés dans la réponse.
+        </p>
+        <div class="input-group">
+          <label>Fichier GPX (avec altitude obligatoire)</label>
+          <input type="file" id="gpxFile" accept=".gpx,application/gpx+xml" />
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="testAnalyze()">
+            <span id="analyzeSpinner"></span>
+            Analyser le GPX
+          </button>
+          <button class="btn btn-secondary" onclick="testAnalyzeLite()">
+            Analyser (Lite - sans OSM)
+          </button>
+        </div>
+        <div id="analyzeStatus" class="status"></div>
+        <div id="analyzeResult" class="result" style="display: none;"></div>
+      </div>
+
+      <!-- Test 3: CORS -->
+      <div class="section">
+        <h2>
+          <span>🔒</span>
+          Test 3: Vérification CORS
+        </h2>
+        <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">
+          Vérifie que les requêtes CORS sont acceptées depuis cette origine.
+        </p>
+        <div style="background: #fff; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+          <strong>Origin actuelle:</strong> <code id="currentOrigin"></code>
+        </div>
+        <button class="btn btn-primary" onclick="testCORS()">
+          <span id="corsSpinner"></span>
+          Tester CORS
+        </button>
+        <div id="corsStatus" class="status"></div>
+      </div>
+
+      <!-- Résumé -->
+      <div class="section" style="background: #e7f3ff; border-color: #0066cc;">
+        <h2 style="color: #0066cc;">
+          <span>ℹ️</span>
+          Informations
+        </h2>
+        <div style="font-size: 14px; line-height: 1.8; color: #495057;">
+          <p><strong>API attendue:</strong> https://mtb-points.onrender.com</p>
+          <p><strong>Endpoints:</strong></p>
+          <ul style="margin-left: 20px; margin-top: 8px;">
+            <li><code>GET /health</code> - Health check</li>
+            <li><code>POST /api/analyze-gpx</code> - Analyse complète (avec OSM)</li>
+            <li><code>POST /api/analyze-gpx-lite</code> - Analyse basique (sans OSM)</li>
+          </ul>
+          <p style="margin-top: 10px;"><strong>Points GPX:</strong> La réponse doit contenir <code>"points": [...]</code></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Afficher l'origin actuelle
+    document.getElementById('currentOrigin').textContent = window.location.origin;
+
+    function showStatus(elementId, type, message) {
+      const el = document.getElementById(elementId);
+      el.className = `status ${type}`;
+      el.innerHTML = message;
+    }
+
+    function showResult(elementId, data) {
+      const el = document.getElementById(elementId);
+      el.style.display = 'block';
+      el.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function testHealth() {
+      const apiUrl = document.getElementById('apiUrl').value.replace(/\/+$/, '');
+      const spinner = document.getElementById('healthSpinner');
+      
+      spinner.className = 'spinner';
+      showStatus('healthStatus', 'loading', '⏳ Connexion à l\'API...');
+      document.getElementById('healthResult').style.display = 'none';
+
+      try {
+        const response = await fetch(`${apiUrl}/health`);
+        const data = await response.json();
+        
+        spinner.className = '';
+        
+        if (response.ok && data.ok) {
+          showStatus('healthStatus', 'success', `✅ API accessible! Version: ${data.version || 'inconnue'}`);
+          showResult('healthResult', data);
+        } else {
+          showStatus('healthStatus', 'error', `❌ Erreur: ${data.error || 'Réponse invalide'}`);
+          showResult('healthResult', data);
+        }
+      } catch (error) {
+        spinner.className = '';
+        showStatus('healthStatus', 'error', `❌ Erreur réseau: ${error.message}`);
+      }
+    }
+
+    async function testAnalyze() {
+      await analyzeGPX('/api/analyze-gpx');
+    }
+
+    async function testAnalyzeLite() {
+      await analyzeGPX('/api/analyze-gpx-lite');
+    }
+
+    async function analyzeGPX(endpoint) {
+      const apiUrl = document.getElementById('apiUrl').value.replace(/\/+$/, '');
+      const fileInput = document.getElementById('gpxFile');
+      const spinner = document.getElementById('analyzeSpinner');
+      
+      if (!fileInput.files || !fileInput.files[0]) {
+        showStatus('analyzeStatus', 'error', '❌ Sélectionne un fichier GPX');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      spinner.className = 'spinner';
+      showStatus('analyzeStatus', 'loading', `⏳ Analyse en cours (${file.name})...`);
+      document.getElementById('analyzeResult').style.display = 'none';
+
+      try {
+        const gpxText = await file.text();
+        const response = await fetch(`${apiUrl}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/gpx+xml' },
+          body: gpxText
+        });
+
+        const data = await response.json();
+        spinner.className = '';
+
+        if (response.ok && data.ok) {
+          const pointsCount = Array.isArray(data.points) ? data.points.length : 0;
+          const hasPoints = pointsCount > 0;
+          
+          let message = `✅ Analyse réussie! `;
+          if (hasPoints) {
+            message += `<span class="badge badge-success">${pointsCount} points GPX récupérés</span>`;
+          } else {
+            message += `<span class="badge badge-danger">Aucun point dans la réponse</span>`;
+          }
+          
+          message += `<br>Distance: ${data.meta?.stats?.distanceKm?.toFixed(2)} km`;
+          message += ` • D+: ${data.meta?.stats?.dplusM?.toFixed(0)} m`;
+          
+          if (data.tech?.techScoreV2 != null) {
+            message += ` • TechScore: ${data.tech.techScoreV2}`;
+          }
+
+          showStatus('analyzeStatus', hasPoints ? 'success' : 'error', message);
+          showResult('analyzeResult', data);
+        } else {
+          showStatus('analyzeStatus', 'error', `❌ Erreur: ${data.error || 'Réponse invalide'}`);
+          showResult('analyzeResult', data);
+        }
+      } catch (error) {
+        spinner.className = '';
+        showStatus('analyzeStatus', 'error', `❌ Erreur: ${error.message}`);
+      }
+    }
+
+    async function testCORS() {
+      const apiUrl = document.getElementById('apiUrl').value.replace(/\/+$/, '');
+      const spinner = document.getElementById('corsSpinner');
+      
+      spinner.className = 'spinner';
+      showStatus('corsStatus', 'loading', '⏳ Test CORS en cours...');
+
+      try {
+        const response = await fetch(`${apiUrl}/api/health`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        spinner.className = '';
+
+        if (response.ok) {
+          showStatus('corsStatus', 'success', '✅ CORS OK! L\'API accepte les requêtes depuis cette origine.');
+        } else {
+          showStatus('corsStatus', 'error', `❌ CORS bloqué (Status: ${response.status})`);
+        }
+      } catch (error) {
+        spinner.className = '';
+        
+        if (error.message.includes('CORS')) {
+          showStatus('corsStatus', 'error', 
+            `❌ CORS bloqué! L'origine <code>${window.location.origin}</code> n'est pas autorisée.<br>` +
+            `Ajoute cette origine dans ALLOWED_ORIGINS du fichier index.js`
+          );
+        } else {
+          showStatus('corsStatus', 'error', `❌ Erreur: ${error.message}`);
+        }
+      }
+    }
+
+    // Auto-test au chargement
+    window.addEventListener('load', () => {
+      console.log('🧪 Page de test chargée');
+      console.log('Origin:', window.location.origin);
+    });
+  </script>
+</body>
+</html>

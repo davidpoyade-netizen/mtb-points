@@ -49,7 +49,7 @@
     .difficulty-label{font-weight:1000;font-size:16px}
     .difficulty-desc{font-size:13px;color:var(--muted);margin-top:2px}
 
-    /* NOUVEAU : Barres de surface OSM */
+    /* Barres de surface OSM */
     .surface-bars{
       margin-top:14px;
       padding:14px;
@@ -79,9 +79,7 @@
       font-size:12px;
       transition:all 0.3s;
     }
-    .surface-bar:hover{
-      filter:brightness(1.1);
-    }
+    .surface-bar:hover{filter:brightness(1.1)}
     .surface-bar.road{background:#3b82f6}
     .surface-bar.track{background:#f59e0b}
     .surface-bar.single{background:#10b981}
@@ -98,720 +96,583 @@
       font-size:13px;
     }
     .surface-legend-dot{
-      width:12px;
-      height:12px;
+      width:14px;
+      height:14px;
       border-radius:3px;
     }
 
-    .pill2{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
+    /* ✅ NOUVEAU: Profil altimétrique avec Chart.js */
+    .elevation-section{
+      margin-top:18px;
+      padding:18px;
+      border-radius:16px;
+      background:rgba(255,255,255,0.9);
       border:1px solid var(--border);
-      background:rgba(255,255,255,0.75);
-      font-weight:1000;font-size:12px
     }
-    .pill2 .dot{width:8px;height:8px;border-radius:999px;background:var(--ok)}
-
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 12px;border-radius:12px;text-decoration:none;
-      border:1px solid var(--border);background:#fff;
-      font-weight:1000;color:var(--text);cursor:pointer
+    .elevation-section h3{
+      margin:0 0 14px 0;
+      font-size:16px;
+      font-weight:900;
+      color:#334155;
     }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(2,6,23,.10)}
-    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-
-    .muted{color:var(--muted)}
-    .small{font-size:12px}
-
-    #map{height:360px;border-radius:16px;border:1px solid var(--border);background:#fff}
-    #elevCanvas{width:100%;height:360px;border-radius:16px;border:1px solid var(--border);background:#fff}
-
-    footer.siteFooter{
-      margin-top:18px;padding:14px;border-radius:18px;border:1px solid var(--border);
-      background:rgba(255,255,255,0.72);
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap
+    #elevationChart{
+      max-width:100%;
+      height:350px;
+      background:white;
+      border-radius:12px;
     }
-    footer.siteFooter .brand{display:flex;align-items:center;gap:10px}
-    footer.siteFooter img{
-      width:44px;height:44px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;object-fit:cover
+    @media(max-width:768px){
+      #elevationChart{height:280px}
     }
-    #qr{
-      width:96px;height:96px;
+    .elevation-no-data{
+      padding:40px;
+      text-align:center;
+      color:var(--muted);
+      font-size:14px;
+      border:2px dashed var(--border);
+      border-radius:12px;
+      background:rgba(255,255,255,0.5);
+    }
+
+    /* Map */
+    #mapContainer{
+      height:420px;
+      border-radius:16px;
+      overflow:hidden;
       border:1px solid var(--border);
-      border-radius:14px;
-      background:#fff;
-      padding:6px;
-      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    }
+    @media(max-width:900px){#mapContainer{height:350px}}
+
+    /* QR Code */
+    #qrContainer{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      padding:16px;
+      background:rgba(255,255,255,0.9);
+      border-radius:12px;
+      border:1px solid var(--border);
+    }
+    #qrcode{
+      padding:10px;
+      background:white;
+      border-radius:8px;
     }
 
-    @media print{
-      .noPrint{display:none !important}
-      .wrap{max-width:100%;margin:0;padding:0}
-      .card{box-shadow:none}
-      body{background:#fff}
-      a{color:#000;text-decoration:none}
+    .badge{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      text-transform:uppercase;
     }
+    .badge-success{background:#10b981;color:white}
+    .badge-warning{background:#f59e0b;color:white}
+    .badge-info{background:#3b82f6;color:white}
   </style>
 </head>
 
 <body class="theme-nature">
-
-<header class="header noPrint">
+<header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <h1>MTB Points — Fiche épreuve</h1>
-    <span class="pill2">
-      <span class="dot" id="statusDot"></span>
-      <span id="statusText">Chargement…</span>
-    </span>
-    <span class="pill2" title="Source des données">
-      <span class="dot" style="background:rgba(15,23,42,1)"></span>
-      <span id="dataSource">—</span>
-    </span>
+    <h1>MTB Points</h1>
+    <span class="pill" id="dataSource">—</span>
   </div>
 
-  <nav class="nav">
+  <nav>
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
-    <a href="organizer-dashboard.html">Organisateur</a>
+    <a href="races.html" class="active">Épreuves</a>
+    <a href="login.html">Connexion</a>
   </nav>
+
+  <div class="btnRow">
+    <button class="btn2" id="btnBack" onclick="history.back()">← Retour</button>
+  </div>
 </header>
 
 <main class="wrap">
-  <div class="card">
-
-    <section class="hero">
-      <div class="row">
-        <div style="min-width:260px;flex:1">
-          <h2 id="raceName" style="margin:0 0 6px 0;">—</h2>
-          <div class="muted" id="raceMeta">—</div>
-          <p class="muted" id="raceComment" style="display:none;margin:10px 0 0 0;line-height:1.55"></p>
-        </div>
-
-        <div class="btnRow noPrint">
-          <a class="btn" id="btnBack" href="meetings.html">← Retour</a>
-          <button class="btn primary" id="btnPdfTop" type="button">📄 PDF / impression</button>
-          <button class="btn" id="btnPublish" type="button" style="display:none">✅ Publier l'épreuve</button>
-        </div>
+  <!-- Hero -->
+  <section class="hero panel">
+    <div class="row">
+      <div style="flex:1;min-width:280px">
+        <h2 id="raceName">Chargement…</h2>
+        <div class="muted" id="raceMeta" style="margin-top:8px">—</div>
       </div>
+      <div id="qrContainer" style="min-width:150px"></div>
+    </div>
 
-      <div class="kpis">
-        <div class="kpi">
-          <div class="big" id="kpiGlobal">—</div>
-          <div class="sub">Score global</div>
-        </div>
-        <div class="kpi">
-          <div class="big" id="kpiPhys">—</div>
-          <div class="sub">Score physique</div>
-        </div>
-        <div class="kpi">
-          <div class="big" id="kpiTech">—</div>
-          <div class="sub">Score technique V2</div>
-        </div>
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi">
+        <div class="muted">Distance</div>
+        <div class="big" id="kpiDist">—</div>
+        <div class="sub">kilomètres</div>
       </div>
-
-      <!-- Indicateur de difficulté sur 5 étoiles -->
-      <div class="difficulty-indicator" id="difficultyBox" style="display:none">
-        <div>
-          <div class="difficulty-stars" id="difficultyStars">
-            <span class="star">★</span>
-            <span class="star">★</span>
-            <span class="star">★</span>
-            <span class="star">★</span>
-            <span class="star">★</span>
-          </div>
-        </div>
-        <div style="flex:1">
-          <div class="difficulty-label" id="difficultyLabel">—</div>
-          <div class="difficulty-desc" id="difficultyDesc">—</div>
-        </div>
+      <div class="kpi">
+        <div class="muted">D+</div>
+        <div class="big" id="kpiDplus">—</div>
+        <div class="sub">mètres</div>
       </div>
-
-      <!-- NOUVEAU : Barres de surface OSM -->
-      <div class="surface-bars" id="surfaceBox" style="display:none">
-        <div class="surface-title">🌍 Revêtement du parcours (analyse OSM)</div>
-        <div class="surface-bar-container" id="surfaceBarContainer">
-          <!-- Rempli dynamiquement -->
-        </div>
-        <div class="surface-legend">
-          <div class="surface-legend-item">
-            <div class="surface-legend-dot" style="background:#3b82f6"></div>
-            <span id="roadLabel">Route : —</span>
-          </div>
-          <div class="surface-legend-item">
-            <div class="surface-legend-dot" style="background:#f59e0b"></div>
-            <span id="trackLabel">Piste large : —</span>
-          </div>
-          <div class="surface-legend-item">
-            <div class="surface-legend-dot" style="background:#10b981"></div>
-            <span id="singleLabel">Monotrace : —</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="muted small" id="publishMsg" style="margin-top:10px;"></div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px">
-        <span class="pill2"><span class="dot" style="background:rgba(47,111,62,1)"></span><span id="kpiDisc">—</span></span>
-        <span class="pill2"><span class="dot" style="background:rgba(120,76,36,1)"></span><span id="kpiBike">—</span></span>
-        <span class="pill2"><span class="dot" style="background:rgba(15,23,42,1)"></span><span id="kpiDist">—</span></span>
-        <span class="pill2"><span class="dot" style="background:rgba(234,88,12,1)"></span><span id="kpiDplus">—</span></span>
-        <span class="pill2"><span class="dot" style="background:rgba(148,163,184,1)"></span><span id="kpiPublish">—</span></span>
-      </div>
-    </section>
-
-    <h3 class="sectionTitle" style="margin-top:18px;">Parcours</h3>
-    <div class="grid2">
-      <div class="panel">
-        <div class="row" style="justify-content:space-between;">
-          <h3 style="margin:0;font-size:14px;">Carte</h3>
-          <span class="pill2"><span class="dot" style="background:rgba(47,111,62,1)"></span><span>GPX</span></span>
-        </div>
-        <div id="map" style="margin-top:10px;"></div>
-        <div class="muted small" style="margin-top:8px;" id="mapHint">—</div>
-      </div>
-
-      <div class="panel">
-        <div class="row" style="justify-content:space-between;">
-          <h3 style="margin:0;font-size:14px;">Profil altimétrique</h3>
-          <span class="pill2"><span class="dot" style="background:rgba(120,76,36,1)"></span><span>D+</span></span>
-        </div>
-        <canvas id="elevCanvas" width="900" height="360" style="margin-top:10px;"></canvas>
-        <div class="muted small" style="margin-top:8px;" id="elevHint">—</div>
+      <div class="kpi">
+        <div class="muted">Statut</div>
+        <div class="big" id="kpiPublish">—</div>
+        <div class="sub" id="kpiPublishSub">—</div>
       </div>
     </div>
 
-    <h3 class="sectionTitle" style="margin-top:18px;">Actions</h3>
-    <div class="btnRow noPrint">
-      <a class="btn" id="btnOpenMeeting" href="#" style="display:none;">Voir l'événement</a>
-      <a class="btn" id="btnCreateSibling" href="#" style="display:none;">Créer une autre épreuve</a>
-      <button class="btn" id="btnPdfBottom" type="button">📄 PDF / impression</button>
+    <!-- Difficulté -->
+    <div class="difficulty-indicator" id="difficultyBox" style="display:none">
+      <div class="difficulty-stars" id="difficultyStars"></div>
+      <div style="flex:1">
+        <div class="difficulty-label" id="difficultyLabel">—</div>
+        <div class="difficulty-desc" id="difficultyDesc">—</div>
+      </div>
     </div>
 
-    <footer class="siteFooter">
-      <div class="brand">
-        <!-- Logo retiré pour éviter l'erreur 404 -->
-        <div>
-          <div style="font-weight:1000">Retrouvez vos résultats sur www.mtbpoint.fr</div>
-          <div class="muted small">Scannez pour ouvrir cette fiche</div>
-          <div class="muted small" id="qrUrlText">—</div>
-        </div>
-      </div>
-      <div id="qr"></div>
-    </footer>
+    <!-- Surfaces OSM -->
+    <div class="surface-bars" id="surfaceBox" style="display:none">
+      <div class="surface-title">Répartition des surfaces (OSM)</div>
+      <div class="surface-bar-container" id="surfaceBarContainer"></div>
+      <div class="surface-legend" id="surfaceLegend"></div>
+    </div>
 
-  </div>
+    <!-- Actions organisateur -->
+    <div id="adminActions" style="margin-top:14px;display:none">
+      <button class="btn2 primary" id="btnPublish">📢 Publier l'épreuve</button>
+      <span id="publishMsg" style="margin-left:10px;color:var(--muted)"></span>
+    </div>
+  </section>
+
+  <!-- Scores -->
+  <section class="panel" style="margin-top:18px">
+    <h3 style="margin:0 0 12px 0;font-size:16px">Scores officiels</h3>
+    <div class="kpis">
+      <div class="kpi">
+        <div class="muted">Physique</div>
+        <div class="big" id="scorePhys">—</div>
+        <div class="sub" id="scorePhysSub">Effort • IPB</div>
+      </div>
+      <div class="kpi">
+        <div class="muted">Technique</div>
+        <div class="big" id="scoreTech">—</div>
+        <div class="sub" id="scoreTechSub">TechScoreV2 (OSM)</div>
+      </div>
+      <div class="kpi">
+        <div class="muted">Global (MRS)</div>
+        <div class="big" id="scoreGlobal">—</div>
+        <div class="sub">0.55 Phys + 0.45 Tech</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ✅ NOUVEAU: Profil altimétrique avec Chart.js -->
+  <section class="panel elevation-section" id="elevationSection">
+    <h3>📊 Profil altimétrique</h3>
+    <div id="elevationContent">
+      <canvas id="elevationChart"></canvas>
+    </div>
+  </section>
+
+  <!-- Carte -->
+  <section class="panel" style="margin-top:18px">
+    <h3 style="margin:0 0 12px 0;font-size:16px">🗺️ Tracé GPS</h3>
+    <div id="mapContainer"></div>
+    <div class="muted" style="margin-top:8px;font-size:12px" id="mapInfo">—</div>
+  </section>
+
+  <!-- Export PDF -->
+  <section class="panel" style="margin-top:18px">
+    <h3 style="margin:0 0 12px 0;font-size:16px">📄 Export PDF</h3>
+    <div class="btnRow">
+      <button class="btn2" id="pdfCoureur">👤 Fiche coureur</button>
+      <button class="btn2" id="pdfOrga">🏢 Fiche organisateur</button>
+    </div>
+  </section>
+
 </main>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/supabase-init.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/pdf-export.js"></script>
+<script src="js/elevation-profile.js"></script>
 
-<script type="module">
-  import { supabase } from "./js/supabaseClient.js";
-
+<script>
   const $ = (id) => document.getElementById(id);
-  const raceId = new URLSearchParams(location.search).get("id");
+  const params = new URLSearchParams(location.search);
+  const raceId = params.get("id");
+  
   let CURRENT_RACE = null;
+  let elevationChart = null;
 
-  function setStatus(ok, text){
-    $("statusText").textContent = text || "";
-    const dot = $("statusDot");
-    if (dot) dot.style.background = ok ? "var(--ok)" : "var(--err)";
+  function setStatus(ok, msg) {
+    console.log(ok ? `✅ ${msg}` : `❌ ${msg}`);
   }
 
-  function fmtKm(n){
-    const v = Number(n);
-    return Number.isFinite(v) ? (Math.round(v*10)/10) + " km" : "—";
-  }
-  function fmtM(n){
-    const v = Number(n);
-    return Number.isFinite(v) ? Math.round(v) + " m" : "—";
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (m) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
   }
 
-  function buildPdfTitle(race){
-    const safe = (s) => String(s || "").trim().replace(/[\\/:*?"<>|]+/g, "-");
-    const name = safe(race?.name || "epreuve");
-    const date = safe(race?.date || "");
-    return `MTB-Points_Fiche-epreuve_${name}${date ? "_" + date : ""}`;
-  }
+  // ============================================================================
+  // EXTRACTION DES POINTS GPX (multiple sources)
+  // ============================================================================
+  function extractPoints(race) {
+    if (!race) return null;
 
-  function setupPdfButtons(getRaceFn){
-    const btnTop = $("btnPdfTop");
-    const btnBottom = $("btnPdfBottom");
-    const handler = () => {
-      const race = typeof getRaceFn === "function" ? getRaceFn() : null;
-      const prevTitle = document.title;
-      document.title = buildPdfTitle(race);
-      setTimeout(() => {
-        window.print();
-        setTimeout(()=>{ document.title = prevTitle; }, 250);
-      }, 250);
-    };
-    btnTop?.addEventListener("click", handler);
-    btnBottom?.addEventListener("click", handler);
-  }
-
-  async function isAuthed(){
-    try{
-      const { data } = await supabase.auth.getSession();
-      return !!data?.session;
-    }catch{
-      return false;
-    }
-  }
-
-  async function fetchRaceProper(id){
-    const authed = await isAuthed();
-    if (authed){
-      const { data, error } = await supabase.from("races").select("*").eq("id", id).maybeSingle();
-      if (!error && data) return { row: data, source: "races (preview organisateur)", authed: true };
+    // Source 1: race.gpx.points (NOUVEAU format corrigé)
+    if (race.gpx?.points && Array.isArray(race.gpx.points) && race.gpx.points.length > 0) {
+      console.log(`✅ ${race.gpx.points.length} points GPX trouvés dans race.gpx.points`);
+      return race.gpx.points;
     }
 
-    try{
-      const { data, error } = await supabase.from("v_public_races").select("*").eq("id", id).maybeSingle();
-      if (!error && data) return { row: data, source: "v_public_races (public)", authed: false };
-    }catch(_){}
-
-    const { data, error } = await supabase
-      .from("races")
-      .select("*")
-      .eq("id", id)
-      .eq("is_published", true)
-      .maybeSingle();
-    if (!error && data) return { row: data, source: "races (public publié)", authed: false };
-
-    return { row: null, source: authed ? "races (preview)" : "public", authed };
-  }
-
-  // EXTRACTION ROBUSTE DES DONNÉES
-  function extractPoints(row){
-    console.log("🔍 Extraction points depuis:", row);
-    
-    // Essayer TOUTES les sources possibles
-    const sources = [
-      row?.analysis_json?.points,
-      row?.gpx?.points,
-      row?.analysis?.points,
-      row?.points
-    ];
-    
-    for (const pts of sources) {
-      if (Array.isArray(pts) && pts.length > 0) {
-        console.log("✅ Points trouvés:", pts.length);
-        return pts;
-      }
+    // Source 2: race.gpx_points (format Supabase)
+    if (race.gpx_points && Array.isArray(race.gpx_points) && race.gpx_points.length > 0) {
+      console.log(`✅ ${race.gpx_points.length} points GPX trouvés dans race.gpx_points`);
+      return race.gpx_points;
     }
-    
-    console.error("❌ Aucun point GPX trouvé dans:", {
-      analysis_json: row?.analysis_json,
-      gpx: row?.gpx
-    });
+
+    // Source 3: race.points (ancien format)
+    if (race.points && Array.isArray(race.points) && race.points.length > 0) {
+      console.log(`✅ ${race.points.length} points GPX trouvés dans race.points`);
+      return race.points;
+    }
+
+    console.warn("⚠️  Aucun point GPX disponible pour cette épreuve");
     return null;
   }
 
-  function extractScores(row){
-    console.log("🔍 Extraction scores depuis:", row);
-    
-    // Score global - toutes les sources possibles
-    const globalSources = [
-      row?.score_global,
-      row?.globalScore,
-      row?.analysis_json?.mrs,
-      row?.analysis?.mrs,
-      row?.mrs
-    ];
-    const globalScore = globalSources.find(v => Number.isFinite(Number(v)));
-    
-    // Score physique
-    const physSources = [
-      row?.score_phys,
-      row?.physScore,
-      row?.analysis_json?.phys?.score,
-      row?.analysis?.phys?.score,
-      row?.phys?.score
-    ];
-    const physScore = physSources.find(v => Number.isFinite(Number(v)));
-    
-    // Score technique
-    const techSources = [
-      row?.score_tech,
-      row?.techScore,
-      row?.techScoreV2,
-      row?.analysis_json?.tech?.techScoreV2,
-      row?.analysis_json?.techV2?.techScoreV2,
-      row?.analysis?.tech?.techScoreV2,
-      row?.tech?.techScoreV2
-    ];
-    const techScore = techSources.find(v => Number.isFinite(Number(v)));
-    
-    const scores = {
-      global: Number(globalScore),
-      phys: Number(physScore),
-      tech: Number(techScore)
-    };
-    
-    console.log("📊 Scores extraits:", scores);
-    return scores;
+  // ============================================================================
+  // FETCH RACE (Supabase + localStorage fallback)
+  // ============================================================================
+  async function fetchRaceProper(id) {
+    let row = null;
+    let source = "—";
+    let authed = false;
+
+    // 1) Essayer Supabase
+    try {
+      const { data: { user }, error: authErr } = await supabase.auth.getUser();
+      authed = !authErr && user;
+
+      const { data, error } = await supabase
+        .from("races")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (!error && data) {
+        row = data;
+        source = authed ? "Supabase (preview)" : "Supabase (public)";
+        return { row, source, authed };
+      }
+    } catch (e) {
+      console.warn("Supabase non disponible:", e.message);
+    }
+
+    // 2) Fallback: localStorage
+    if (typeof window.findStoredEvent === "function") {
+      row = window.findStoredEvent(id);
+      if (row) {
+        source = "localStorage";
+        return { row, source, authed: false };
+      }
+    }
+
+    // 3) Fallback manuel localStorage
+    try {
+      const events = JSON.parse(localStorage.getItem("vtt_events_v1") || "[]");
+      row = events.find(e => e.id === id);
+      if (row) {
+        source = "localStorage (fallback)";
+        return { row, source, authed: false };
+      }
+    } catch (e) {
+      console.error("Erreur localStorage:", e);
+    }
+
+    return { row: null, source: "Non trouvé", authed };
   }
 
-  function extractSurfaces(row){
-    // Surfaces OSM pour les barres
-    const surfaceSources = [
-      row?.analysis_json?.tech?.surfaceEstimate,
-      row?.analysis_json?.techV2?.surfaceEstimate,
-      row?.analysis_json?.surfaceEstimate,
-      row?.analysis?.tech?.surfaceEstimate,
-      row?.surfaceEstimate
-    ];
-    
-    return surfaceSources.find(v => v && typeof v === 'object') || null;
+  // ============================================================================
+  // RENDER UI
+  // ============================================================================
+  function renderUI(row, authed) {
+    CURRENT_RACE = row;
+
+    // Nom et meta
+    $("raceName").textContent = row.name || "Sans nom";
+    $("raceMeta").innerHTML = `
+      📅 ${row.date || "—"} 
+      ${row.startTime ? `• 🕐 ${row.startTime}` : ""} 
+      • 🚴 ${row.disc || "—"}
+      ${row.ebike ? " • ⚡ E-bike autorisé" : ""}
+    `;
+
+    // KPIs
+    $("kpiDist").textContent = row.distanceKm ? row.distanceKm.toFixed(2) : "—";
+    $("kpiDplus").textContent = row.dplusM ? Math.round(row.dplusM) : "—";
+    $("kpiPublish").textContent = row.is_published ? "Publié" : "Brouillon";
+    $("kpiPublishSub").textContent = row.is_published ? "Visible publiquement" : "Privé";
+
+    // Scores
+    $("scorePhys").textContent = row.physScore ?? "—";
+    $("scorePhysSub").textContent = row.phys?.effort 
+      ? `Effort: ${row.phys.effort} • IPB: ${row.phys.ipbOverall ?? "—"}`
+      : "—";
+
+    const techScore = row.techV2?.techScoreV2 ?? row.techScore ?? null;
+    $("scoreTech").textContent = techScore ?? "—";
+    $("scoreTechSub").textContent = techScore 
+      ? "TechScoreV2 (OSM + bonus GPX)"
+      : "Indisponible";
+
+    $("scoreGlobal").textContent = row.globalScore ?? row.mrs ?? "—";
+
+    // Difficulté (si disponible)
+    if (row.difficulty) {
+      renderDifficulty(row.difficulty);
+    }
+
+    // Surfaces OSM (si disponible)
+    if (row.techV2?.surfaceEstimate || row.surfaceEstimate) {
+      renderSurfaces(row.techV2?.surfaceEstimate || row.surfaceEstimate);
+    }
+
+    // Actions admin
+    if (authed && !row.is_published) {
+      $("adminActions").style.display = "block";
+    }
+
+    // ✅ Profil altimétrique (NOUVEAU avec Chart.js)
+    renderElevationProfile(row);
+
+    // Carte
+    renderMap(row);
+
+    // QR Code
+    renderQr(raceId);
   }
 
-  function calculateDifficultyLevel(globalScore){
-    const g = Number(globalScore);
-    if (!Number.isFinite(g) || g < 0) return null;
-    
-    if (g < 20) return { level: 1, label: "Facile", desc: "Accessible aux débutants" };
-    if (g < 40) return { level: 2, label: "Modéré", desc: "Bonne condition physique recommandée" };
-    if (g < 60) return { level: 3, label: "Exigeant", desc: "Entraînement régulier nécessaire" };
-    if (g < 80) return { level: 4, label: "Difficile", desc: "Très bon niveau requis" };
-    return { level: 5, label: "Extrême", desc: "Réservé aux experts très entraînés" };
+  // ============================================================================
+  // PROFIL ALTIMÉTRIQUE (Chart.js)
+  // ============================================================================
+  function renderElevationProfile(race) {
+    const section = $("elevationSection");
+    const content = $("elevationContent");
+    const canvas = $("elevationChart");
+
+    if (!race) {
+      section.style.display = "none";
+      return;
+    }
+
+    const points = extractPoints(race);
+
+    if (!points || points.length < 2) {
+      content.innerHTML = `
+        <div class="elevation-no-data">
+          <div style="font-size:48px;margin-bottom:12px">📊</div>
+          <div style="font-weight:600;margin-bottom:6px">Profil altimétrique indisponible</div>
+          <div>Cette épreuve n'a pas de données GPX avec altitude.</div>
+        </div>
+      `;
+      return;
+    }
+
+    // Détruire le graphique précédent si existant
+    if (elevationChart) {
+      elevationChart.destroy();
+      elevationChart = null;
+    }
+
+    // Créer le profil avec elevation-profile.js
+    if (typeof window.MTBElevation !== "undefined") {
+      elevationChart = window.MTBElevation.createElevationProfile("elevationChart", points, {
+        title: `Profil: ${race.name || "Épreuve"}`,
+        lineColor: "rgb(31, 122, 77)",
+        fillColor: "rgba(31, 122, 77, 0.15)",
+        maxPoints: 500
+      });
+
+      if (!elevationChart) {
+        content.innerHTML = `
+          <div class="elevation-no-data">
+            <div style="font-size:36px;margin-bottom:8px">⚠️</div>
+            <div>Erreur lors de la création du profil</div>
+          </div>
+        `;
+      }
+    } else {
+      content.innerHTML = `
+        <div class="elevation-no-data">
+          <div style="font-size:36px;margin-bottom:8px">⚠️</div>
+          <div>elevation-profile.js non chargé</div>
+        </div>
+      `;
+    }
   }
 
-  function renderDifficulty(globalScore){
-    const diff = calculateDifficultyLevel(globalScore);
+  // ============================================================================
+  // CARTE LEAFLET
+  // ============================================================================
+  function renderMap(race) {
+    const container = $("mapContainer");
+    const info = $("mapInfo");
+
+    if (!race) {
+      container.innerHTML = "<div style='padding:40px;text-align:center;color:#94a3b8'>Aucune donnée</div>";
+      info.textContent = "—";
+      return;
+    }
+
+    const points = extractPoints(race);
+
+    if (!points || points.length < 2) {
+      container.innerHTML = `
+        <div style="padding:40px;text-align:center;color:#94a3b8">
+          <div style="font-size:36px;margin-bottom:10px">🗺️</div>
+          <div>Tracé GPS indisponible</div>
+        </div>
+      `;
+      info.textContent = "Aucun point GPX";
+      return;
+    }
+
+    try {
+      // Créer la carte
+      const map = L.map(container).setView([points[0].lat, points[0].lon], 13);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+      }).addTo(map);
+
+      // Tracer la ligne
+      const latlngs = points.map(p => [p.lat, p.lon]);
+      const polyline = L.polyline(latlngs, {
+        color: "rgb(31, 122, 77)",
+        weight: 4,
+        opacity: 0.8
+      }).addTo(map);
+
+      // Marqueurs départ/arrivée
+      L.marker([points[0].lat, points[0].lon]).addTo(map)
+        .bindPopup("<b>Départ</b>");
+      
+      L.marker([points[points.length - 1].lat, points[points.length - 1].lon]).addTo(map)
+        .bindPopup("<b>Arrivée</b>");
+
+      // Ajuster la vue
+      map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
+
+      info.textContent = `${points.length} points GPS • ${(race.distanceKm || 0).toFixed(2)} km`;
+
+    } catch (e) {
+      console.error("Erreur carte:", e);
+      container.innerHTML = "<div style='padding:40px;text-align:center;color:#ef4444'>Erreur lors du chargement de la carte</div>";
+      info.textContent = "Erreur Leaflet";
+    }
+  }
+
+  // ============================================================================
+  // DIFFICULTÉ
+  // ============================================================================
+  function renderDifficulty(difficulty) {
     const box = $("difficultyBox");
     const stars = $("difficultyStars");
     const label = $("difficultyLabel");
     const desc = $("difficultyDesc");
-    
-    if (!diff || !box) return;
-    
+
+    if (!difficulty || typeof difficulty !== "number") return;
+
     box.style.display = "flex";
-    label.textContent = diff.label;
-    desc.textContent = `${diff.desc} (${Math.round(globalScore)}/100)`;
     
-    const starElems = stars.querySelectorAll(".star");
-    starElems.forEach((star, idx) => {
-      if (idx < diff.level) {
-        star.classList.add("filled");
-      } else {
-        star.classList.remove("filled");
-      }
-    });
+    const level = Math.min(5, Math.max(1, Math.round(difficulty)));
+    stars.innerHTML = Array.from({ length: 5 }, (_, i) => 
+      `<span class="star ${i < level ? "filled" : ""}">★</span>`
+    ).join("");
+
+    const labels = ["Facile", "Modéré", "Difficile", "Très difficile", "Extrême"];
+    label.textContent = labels[level - 1] || "Modéré";
+    desc.textContent = `Niveau de difficulté: ${level}/5`;
   }
 
-  // NOUVEAU : Rendu des barres de surface OSM
-  function renderSurfaceBars(surfaces){
+  // ============================================================================
+  // SURFACES OSM
+  // ============================================================================
+  function renderSurfaces(estimate) {
     const box = $("surfaceBox");
     const container = $("surfaceBarContainer");
-    
-    if (!surfaces || typeof surfaces !== 'object') {
-      console.log("⚠️ Pas de données de surface OSM");
-      return;
-    }
-    
-    console.log("🌍 Surfaces OSM:", surfaces);
-    
-    // Normaliser les noms de clés
-    const road = Number(surfaces.road || surfaces.route || 0);
-    const track = Number(surfaces.track || surfaces.wideTrack || surfaces.piste || 0);
-    const single = Number(surfaces.single || surfaces.singletrack || surfaces.monotrace || 0);
-    
-    const total = road + track + single;
-    
-    if (total === 0) {
-      console.log("⚠️ Total des surfaces = 0");
-      return;
-    }
-    
-    // Calculer les pourcentages
-    const roadPct = Math.round((road / total) * 100);
-    const trackPct = Math.round((track / total) * 100);
-    const singlePct = Math.max(0, 100 - roadPct - trackPct);
-    
-    console.log("📊 Pourcentages:", { roadPct, trackPct, singlePct });
-    
-    // Afficher la box
+    const legend = $("surfaceLegend");
+
+    if (!estimate) return;
+
+    const { roadPct, trackPct, singlePct } = estimate;
+    if (roadPct == null && trackPct == null && singlePct == null) return;
+
     box.style.display = "block";
-    
-    // Créer les barres
-    container.innerHTML = "";
-    
-    if (roadPct > 0) {
-      const bar = document.createElement("div");
-      bar.className = "surface-bar road";
-      bar.style.width = roadPct + "%";
-      bar.textContent = roadPct + "%";
-      container.appendChild(bar);
-    }
-    
-    if (trackPct > 0) {
-      const bar = document.createElement("div");
-      bar.className = "surface-bar track";
-      bar.style.width = trackPct + "%";
-      bar.textContent = trackPct + "%";
-      container.appendChild(bar);
-    }
-    
-    if (singlePct > 0) {
-      const bar = document.createElement("div");
-      bar.className = "surface-bar single";
-      bar.style.width = singlePct + "%";
-      bar.textContent = singlePct + "%";
-      container.appendChild(bar);
-    }
-    
-    // Mettre à jour les labels
-    $("roadLabel").textContent = `Route : ${roadPct}%`;
-    $("trackLabel").textContent = `Piste large : ${trackPct}%`;
-    $("singleLabel").textContent = `Monotrace : ${singlePct}%`;
+
+    // Barre
+    const r = roadPct || 0;
+    const t = trackPct || 0;
+    const s = singlePct || 0;
+
+    container.innerHTML = `
+      ${r > 0 ? `<div class="surface-bar road" style="width:${r}%">${r.toFixed(0)}%</div>` : ""}
+      ${t > 0 ? `<div class="surface-bar track" style="width:${t}%">${t.toFixed(0)}%</div>` : ""}
+      ${s > 0 ? `<div class="surface-bar single" style="width:${s}%">${s.toFixed(0)}%</div>` : ""}
+    `;
+
+    // Légende
+    legend.innerHTML = `
+      ${r > 0 ? `<div class="surface-legend-item"><div class="surface-legend-dot" style="background:#3b82f6"></div>Route: ${r.toFixed(1)}%</div>` : ""}
+      ${t > 0 ? `<div class="surface-legend-item"><div class="surface-legend-dot" style="background:#f59e0b"></div>Chemin: ${t.toFixed(1)}%</div>` : ""}
+      ${s > 0 ? `<div class="surface-legend-item"><div class="surface-legend-dot" style="background:#10b981"></div>Single: ${s.toFixed(1)}%</div>` : ""}
+    `;
   }
 
-  let MAP = null;
-  let LINE = null;
+  // ============================================================================
+  // QR CODE
+  // ============================================================================
+  function renderQr(id) {
+    const container = $("qrContainer");
+    if (!id) return;
 
-  function initMap(){
-    if (MAP) return MAP;
-    MAP = L.map("map", { scrollWheelZoom: false });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap"
-    }).addTo(MAP);
-    return MAP;
-  }
-
-  function renderMap(points){
-    const hint = $("mapHint");
-    initMap();
-
-    if (!Array.isArray(points) || points.length < 2){
-      if (LINE){ MAP.removeLayer(LINE); LINE = null; }
-      MAP.setView([46.7, 2.4], 6);
-      if (hint) hint.textContent = "Trace GPX non disponible (points manquants).";
-      return;
-    }
-
-    const latlngs = points
-      .map(p => [Number(p.lat), Number(p.lon ?? p.lng)])
-      .filter(([la, lo]) => Number.isFinite(la) && Number.isFinite(lo));
-
-    if (latlngs.length < 2){
-      if (hint) hint.textContent = "Trace GPX non exploitable (lat/lon manquants).";
-      MAP.setView([46.7, 2.4], 6);
-      return;
-    }
-
-    if (LINE){ MAP.removeLayer(LINE); LINE = null; }
-    LINE = L.polyline(latlngs, { weight: 4, opacity: 0.9, color: '#2f6f3e' }).addTo(MAP);
-    try{ 
-      MAP.fitBounds(LINE.getBounds(), { padding: [18,18] });
-      L.marker(latlngs[0]).addTo(MAP).bindPopup("Départ");
-      L.marker(latlngs[latlngs.length - 1]).addTo(MAP).bindPopup("Arrivée");
-    }catch(e){
-      console.warn("Erreur affichage carte:", e);
-    }
-    if (hint) hint.textContent = `${latlngs.length.toLocaleString("fr-FR")} points tracés.`;
-  }
-
-  function ensureCanvasResolution(canvas){
-    if (!canvas) return;
-    const cssH = 360;
-    const rect = canvas.getBoundingClientRect();
-    const w = Math.max(320, Math.floor(rect.width || 900));
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    canvas.width  = Math.floor(w * dpr);
-    canvas.height = Math.floor(cssH * dpr);
-    canvas.style.height = cssH + "px";
-  }
-
-  function drawElevation(canvas, points){
-    if (!canvas) return;
+    const url = `${location.origin}${location.pathname}?id=${id}`;
     
-    const ctx = canvas.getContext("2d");
-    const hint = $("elevHint");
+    container.innerHTML = `
+      <div id="qrcode"></div>
+      <div style="font-size:11px;color:#64748b;text-align:center;max-width:150px">
+        Scanne pour voir cette épreuve
+      </div>
+    `;
 
-    const eles = (points || [])
-      .map(p => Number(p.ele ?? p.elevation ?? p.alt ?? p.altitude))
-      .filter(x => Number.isFinite(x));
-
-    const latlngs = (points || [])
-      .map(p => [Number(p.lat), Number(p.lon ?? p.lng)])
-      .filter(([la, lo]) => Number.isFinite(la) && Number.isFinite(lo));
-
-    console.log("📈 Profil - Points d'altitude:", eles.length, "Points GPS:", latlngs.length);
-
-    if (eles.length < 10 || latlngs.length < 10){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      if (hint) hint.textContent = "Profil non disponible (altitudes manquantes dans le GPX).";
-      return;
-    }
-
-    const dist = [0];
-    let total = 0;
-    for (let i=1;i<latlngs.length;i++){
-      const [a1,o1]=latlngs[i-1], [a2,o2]=latlngs[i];
-      const R = 6371000;
-      const toRad = (d)=>d*Math.PI/180;
-      const dLat = toRad(a2-a1), dLon = toRad(o2-o1);
-      const s1 = Math.sin(dLat/2), s2 = Math.sin(dLon/2);
-      const A = s1*s1 + Math.cos(toRad(a1))*Math.cos(toRad(a2))*s2*s2;
-      const c = 2*Math.atan2(Math.sqrt(A), Math.sqrt(1-A));
-      total += R*c;
-      dist.push(total/1000);
-    }
-
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0,0,W,H);
-
-    const mL=46, mR=18, mT=18, mB=34;
-    const w = W-mL-mR, h=H-mT-mB;
-
-    const minE = Math.min(...eles), maxE = Math.max(...eles);
-    const maxD = dist[dist.length-1] || 1;
-
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(40,60,40,0.18)";
-    ctx.fillStyle = "rgba(40,60,40,0.65)";
-    ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
-
-    const stepKm = 5;
-    for (let km=0; km<=maxD; km+=stepKm){
-      const x = mL + (km/maxD)*w;
-      ctx.beginPath();
-      ctx.moveTo(x, mT);
-      ctx.lineTo(x, mT+h);
-      ctx.stroke();
-      ctx.fillText(String(km), x, mT+h+6);
-    }
-    ctx.textAlign="left";
-    ctx.fillText("km", mL, mT+h+6);
-
-    ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
-    ctx.fillText(Math.round(maxE)+" m", mL-8, mT);
-    ctx.fillText(Math.round(minE)+" m", mL-8, mT+h);
-
-    ctx.strokeStyle = "rgba(47,111,62,0.95)";
-    ctx.lineWidth = 2;
-
-    ctx.beginPath();
-    for (let i=0;i<eles.length && i<dist.length;i++){
-      const x = mL + (dist[i]/maxD)*w;
-      const y = mT + (1 - ((eles[i]-minE)/(maxE-minE || 1)))*h;
-      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    }
-    ctx.stroke();
-
-    ctx.globalAlpha = 0.15;
-    ctx.fillStyle = "rgba(47,111,62,1)";
-    ctx.lineTo(mL+w, mT+h);
-    ctx.lineTo(mL, mT+h);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    if (hint) hint.textContent =
-      `Altitude: ${Math.round(minE)}–${Math.round(maxE)} m • Distance: ${Math.round(maxD*10)/10} km • Repères tous les 5 km.`;
-  }
-
-  function renderQr(raceId){
-    const url = `https://www.mtbpoint.fr/race.html?id=${encodeURIComponent(raceId)}`;
-    const box = $("qr");
-    const txt = $("qrUrlText");
-    if (txt) txt.textContent = url;
-    if (!box || !window.QRCode) return;
-
-    box.innerHTML = "";
-    new window.QRCode(box, {
+    new QRCode(document.getElementById("qrcode"), {
       text: url,
-      width: 96,
-      height: 96,
-      correctLevel: window.QRCode.CorrectLevel.M
+      width: 120,
+      height: 120,
+      colorDark: "#1f7a4d",
+      colorLight: "#ffffff"
     });
   }
 
-  function renderUI(row, authed){
-    CURRENT_RACE = row;
-
-    console.log("🎨 Rendu UI avec:", row);
-
-    $("raceName").textContent = row?.name || "Épreuve";
-
-    const meta = [];
-    if (row?.date) meta.push("📅 " + row.date);
-    if (row?.time) meta.push("🕒 " + row.time);
-    if (row?.meeting_name) meta.push("🏁 " + row.meeting_name);
-    $("raceMeta").textContent = meta.join(" • ") || "—";
-
-    if (row?.comment){
-      const p = $("raceComment");
-      p.style.display = "block";
-      p.textContent = row.comment;
-    }
-
-    // EXTRACTION ROBUSTE DES SCORES
-    const scores = extractScores(row);
-
-    $("kpiGlobal").textContent = Number.isFinite(scores.global) ? String(Math.round(scores.global)) : "—";
-    $("kpiPhys").textContent   = Number.isFinite(scores.phys) ? String(Math.round(scores.phys)) : "—";
-    $("kpiTech").textContent   = Number.isFinite(scores.tech) ? String(Math.round(scores.tech)) : "—";
-
-    // Difficulté
-    if (Number.isFinite(scores.global)) {
-      renderDifficulty(scores.global);
-    }
-
-    // NOUVEAU : Surfaces OSM
-    const surfaces = extractSurfaces(row);
-    renderSurfaceBars(surfaces);
-
-    $("kpiDisc").textContent = row?.discipline ?? row?.disc ? String(row.discipline ?? row.disc) : "Discipline —";
-    $("kpiBike").textContent = (row?.ebike === true) ? "Vélo : E-bike" : (row?.ebike === false ? "Vélo : Musculaire" : "Vélo : —");
-    
-    const distKm = Number(row?.distance_km ?? row?.distanceKm ?? row?.analysis_json?.meta?.stats?.distanceKm);
-    const dplusM = Number(row?.dplus_m ?? row?.dplusM ?? row?.analysis_json?.meta?.stats?.dplusM);
-    
-    $("kpiDist").textContent = "Distance : " + fmtKm(distKm);
-    $("kpiDplus").textContent = "D+ : " + fmtM(dplusM);
-
-    const isPub = !!row?.is_published;
-    $("kpiPublish").textContent = isPub ? "Publié" : "Brouillon";
-
-    const mid = row?.meeting_id || null;
-    $("btnBack").href = mid ? `meeting.html?id=${encodeURIComponent(mid)}` : "meetings.html";
-    if (mid){
-      const om = $("btnOpenMeeting");
-      const cs = $("btnCreateSibling");
-      om.href = `meeting.html?id=${encodeURIComponent(mid)}`;
-      cs.href = `course-create.html?meetingId=${encodeURIComponent(mid)}`;
-      om.style.display = "inline-flex";
-      cs.style.display = "inline-flex";
-    }
-
-    const btnPub = $("btnPublish");
-    const msgPub = $("publishMsg");
-    btnPub.style.display = (authed && !isPub) ? "inline-flex" : "none";
-    msgPub.textContent = (authed && !isPub) ? "Cette épreuve est en brouillon (preview). Publie-la pour la rendre visible publiquement." : (isPub ? "✅ Épreuve publiée" : "");
-
-    // EXTRACTION ROBUSTE DES POINTS
-    const pts = extractPoints(row);
-    renderMap(pts);
-    const canvas = $("elevCanvas");
-    ensureCanvasResolution(canvas);
-    drawElevation(canvas, pts || []);
-
-    renderQr(raceId);
-  }
-
-  async function publishRace(){
+  // ============================================================================
+  // PUBLICATION
+  // ============================================================================
+  async function publishRace() {
     const btn = $("btnPublish");
     const msg = $("publishMsg");
-    try{
+    
+    try {
       btn.disabled = true;
       msg.textContent = "Publication…";
 
@@ -825,19 +686,39 @@
       msg.textContent = "✅ Publiée !";
       btn.style.display = "none";
       $("kpiPublish").textContent = "Publié";
+      $("kpiPublishSub").textContent = "Visible publiquement";
 
+      // Recharger
       const { row, authed } = await fetchRaceProper(raceId);
       if (row) renderUI(row, authed);
-    }catch(e){
+
+    } catch (e) {
       console.error(e);
-      msg.textContent = "❌ Impossible de publier (droits/RLS).";
-    }finally{
+      msg.textContent = "❌ Erreur de publication";
+    } finally {
       btn.disabled = false;
     }
   }
 
-  async function main(){
-    if (!raceId){
+  // ============================================================================
+  // PDF EXPORT
+  // ============================================================================
+  function setupPdfButtons(getRace) {
+    if (typeof window.exportRaceAsPdf === "function") {
+      $("pdfCoureur")?.addEventListener("click", () => {
+        window.exportRaceAsPdf(getRace(), "coureur");
+      });
+      $("pdfOrga")?.addEventListener("click", () => {
+        window.exportRaceAsPdf(getRace(), "orga");
+      });
+    }
+  }
+
+  // ============================================================================
+  // MAIN
+  // ============================================================================
+  async function main() {
+    if (!raceId) {
       setStatus(false, "ID d'épreuve manquant");
       $("raceName").textContent = "Épreuve introuvable";
       $("raceMeta").textContent = "Aucun id=... dans l'URL";
@@ -845,12 +726,12 @@
       return;
     }
 
-    try{
+    try {
       setStatus(true, "Chargement…");
       const { row, source, authed } = await fetchRaceProper(raceId);
       $("dataSource").textContent = source;
 
-      if (!row){
+      if (!row) {
         setStatus(false, "Introuvable / non publiée");
         $("raceName").textContent = "Épreuve introuvable";
         $("raceMeta").textContent = authed
@@ -860,25 +741,25 @@
       }
 
       renderUI(row, authed);
-      setupPdfButtons(()=>CURRENT_RACE);
+      setupPdfButtons(() => CURRENT_RACE);
       $("btnPublish")?.addEventListener("click", publishRace);
 
       setStatus(true, authed ? "OK (preview)" : "OK");
-    }catch(e){
+
+    } catch (e) {
       console.error(e);
       setStatus(false, "Erreur");
       $("raceName").textContent = "Erreur de chargement";
-      $("raceMeta").textContent = e?.message ? String(e.message) : "Erreur Supabase / RLS";
+      $("raceMeta").textContent = e?.message || "Erreur";
       $("dataSource").textContent = "Erreur";
     }
   }
 
+  // Responsive
   window.addEventListener("resize", () => {
-    const canvas = $("elevCanvas");
-    if (!canvas) return;
-    ensureCanvasResolution(canvas);
-    const pts = extractPoints(CURRENT_RACE);
-    if (pts) drawElevation(canvas, pts);
+    if (elevationChart) {
+      elevationChart.resize();
+    }
   });
 
   main();
