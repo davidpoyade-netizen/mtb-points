@@ -36,10 +36,7 @@ async function requireUser() {
   return data.user;
 }
 
-/**
- * Autocomplete + reverse geocoding via Nominatim (OSM).
- * ⚠️ Gratuit mais quota limité — on debouce et on limite les résultats.
- */
+/** ---------- Adresse (OSM/Nominatim) ---------- **/
 
 let acTimer = null;
 let lastQuery = "";
@@ -53,8 +50,7 @@ function debounce(fn, delay = 350) {
   };
 }
 
-function shortAddressFromNominatimAddress(addr) {
-  // Choix: ville + CP + pays (propre pour un événement)
+function shortAddress(addr) {
   const city =
     addr.city || addr.town || addr.village || addr.municipality || addr.county || "";
   const postcode = addr.postcode || "";
@@ -66,7 +62,7 @@ async function nominatimSearch(query) {
   const url =
     `https://nominatim.openstreetmap.org/search?format=jsonv2` +
     `&q=${encodeURIComponent(query)}` +
-    `&addressdetails=1&limit=6&countrycodes=fr,it,mc,es,be,ch,de,gb`; // adapte si tu veux
+    `&addressdetails=1&limit=6`;
 
   const res = await fetch(url, { headers: { "Accept": "application/json" } });
   if (!res.ok) throw new Error("Search Nominatim impossible (" + res.status + ")");
@@ -84,6 +80,15 @@ async function nominatimReverse(lat, lng) {
   return await res.json();
 }
 
+function escapeHtml(str) {
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function renderSuggestions(items) {
   const box = $("addrSuggest");
   if (!box) return;
@@ -97,7 +102,7 @@ function renderSuggestions(items) {
   box.innerHTML = items
     .map((it, idx) => {
       const title = it.display_name || "Adresse";
-      const small = it?.address ? shortAddressFromNominatimAddress(it.address) : "";
+      const small = it?.address ? shortAddress(it.address) : "";
       return `
         <div class="item" data-idx="${idx}">
           <div>${escapeHtml(title)}</div>
@@ -109,7 +114,6 @@ function renderSuggestions(items) {
 
   box.style.display = "block";
 
-  // Click handler (delegation)
   box.onclick = (e) => {
     const item = e.target.closest(".item");
     if (!item) return;
@@ -119,50 +123,32 @@ function renderSuggestions(items) {
 
     suppressSuggest = true;
 
-    // Remplit
     const lat = Number(it.lat);
     const lon = Number(it.lon);
 
     if ($("mLat")) $("mLat").value = isFinite(lat) ? lat.toFixed(6) : "";
     if ($("mLng")) $("mLng").value = isFinite(lon) ? lon.toFixed(6) : "";
 
-    // Adresse courte dans le champ
-    const shortAddr = it.address ? shortAddressFromNominatimAddress(it.address) : (it.display_name || "");
-    if ($("mLocation")) $("mLocation").value = shortAddr;
+    const addr = it.address ? shortAddress(it.address) : (it.display_name || "");
+    if ($("mLocation")) $("mLocation").value = addr;
 
-    // cache
     box.style.display = "none";
     box.innerHTML = "";
     lastResults = [];
 
-    // réautoriser la saisie
     setTimeout(() => (suppressSuggest = false), 0);
   };
 }
 
-function escapeHtml(str) {
-  return String(str || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 const runAutocomplete = debounce(async () => {
   const input = $("mLocation");
-  if (!input) return;
+  if (!input || suppressSuggest) return;
 
   const q = input.value.trim();
-  if (suppressSuggest) return;
-
-  // seuil minimal
   if (q.length < 3) {
     renderSuggestions([]);
     return;
   }
-
-  // pas de spam
   if (q === lastQuery) return;
   lastQuery = q;
 
@@ -171,42 +157,77 @@ const runAutocomplete = debounce(async () => {
     lastResults = results || [];
     renderSuggestions(lastResults);
   } catch (e) {
-    // silencieux côté UI pour ne pas gêner la saisie
     console.warn("[meeting-create] autocomplete error:", e);
     renderSuggestions([]);
   }
 }, 400);
 
 function hideSuggestionsLater() {
-  setTimeout(() => {
-    const box = $("addrSuggest");
-    if (box) {
-      box.style.display = "none";
-      box.innerHTML = "";
-    }
-  }, 150);
+  setTimeout(() => renderSuggestions([]), 150);
 }
 
-function getPayload() {
+/** ---------- Supabase insert robuste ---------- **/
+
+function getRawFormData() {
   const name = $("mName")?.value?.trim() || "";
   const date = $("mDate")?.value || "";
   const end_date = $("mEndDate")?.value || null;
 
   const location = $("mLocation")?.value?.trim() || "";
   const country = $("mCountry")?.value?.trim() || null;
+
+  const external_url = $("mUrl")?.value?.trim() || null;
+
   const comment = $("mComment")?.value?.trim() || null;
   const is_published = !!$("mPublished")?.checked;
-
-  const lat = $("mLat")?.value ? Number($("mLat").value) : null;
-  const lng = $("mLng")?.value ? Number($("mLng").value) : null;
 
   if (!name) throw new Error("Nom de l'événement obligatoire.");
   if (!date) throw new Error("Date de début obligatoire.");
   if (!location) throw new Error("Point de rendez-vous (localisation) obligatoire.");
 
-  // Schema meetings (Supabase.sql): date / end_date / location / country / comment / is_published
-  // lat/lng ne sont pas dans la table => on ne les insère pas (à moins d'ajouter des colonnes)
-  return { name, date, end_date, location, country, comment, is_published };
+  return { name, date, end_date, location, country, external_url, comment, is_published };
+}
+
+function normalizeUrl(u) {
+  if (!u) return null;
+  // autorise https://… ou http://…
+  if (/^https?:\/\//i.test(u)) return u;
+  // si l'utilisateur met "www.xxx.com" => on préfixe
+  if (/^www\./i.test(u)) return "https://" + u;
+  return u; // laisse tel quel si autre format
+}
+
+async function insertMeetingWithFallback(row) {
+  // On tente d’insérer avec country + external_url.
+  // Si la DB n’a pas ces colonnes, PostgREST renvoie “Could not find the 'X' column…”.
+  // => On enlève ces champs et on retente 1 fois.
+
+  const attempt = async (payload) => supabase.from("meetings").insert([payload]);
+
+  let payload = { ...row };
+
+  // normalise URL
+  payload.external_url = normalizeUrl(payload.external_url);
+
+  let res = await attempt(payload);
+  if (!res.error) return res;
+
+  const msg = res.error.message || "";
+
+  // fallback si colonnes absentes
+  const missingCountry = msg.includes("Could not find the 'country' column");
+  const missingUrl = msg.includes("Could not find the 'external_url' column");
+
+  if (missingCountry || missingUrl) {
+    if (missingCountry) delete payload.country;
+    if (missingUrl) delete payload.external_url;
+
+    // Re-tentative
+    res = await attempt(payload);
+    return res;
+  }
+
+  return res;
 }
 
 async function createMeeting({ goToRaceCreate = false } = {}) {
@@ -214,15 +235,23 @@ async function createMeeting({ goToRaceCreate = false } = {}) {
     showMsg("Enregistrement en cours…", "info");
 
     const user = await requireUser();
-    const payload = getPayload();
+    const form = getRawFormData();
     const id = genId("meeting_");
 
-    const { error } = await supabase.from("meetings").insert([{
+    const row = {
       id,
       organizer_id: user.id,
-      ...payload
-    }]);
+      name: form.name,
+      date: form.date,
+      end_date: form.end_date,
+      location: form.location,
+      country: form.country,         // peut être ignoré si colonne absente
+      external_url: form.external_url, // peut être ignoré si colonne absente
+      comment: form.comment,
+      is_published: form.is_published
+    };
 
+    const { error } = await insertMeetingWithFallback(row);
     if (error) throw error;
 
     showMsg("✅ Événement créé avec succès.", "ok");
@@ -246,18 +275,12 @@ function bindUI() {
   const btnGeo = $("btnGeo");
   const locInput = $("mLocation");
 
-  if (!btnCreate || !btnCreateAndRace) {
-    console.error("❌ Boutons introuvables (btnCreate / btnCreateAndRace)");
-    showMsg("❌ UI invalide : boutons introuvables", "err");
-    return;
-  }
-
-  btnCreate.addEventListener("click", () => createMeeting({ goToRaceCreate: false }));
-  btnCreateAndRace.addEventListener("click", () => createMeeting({ goToRaceCreate: true }));
+  if (btnCreate) btnCreate.addEventListener("click", () => createMeeting({ goToRaceCreate: false }));
+  if (btnCreateAndRace) btnCreateAndRace.addEventListener("click", () => createMeeting({ goToRaceCreate: true }));
 
   if (btnReset) {
     btnReset.addEventListener("click", () => {
-      ["mName","mDate","mEndDate","mLocation","mLat","mLng","mCountry","mComment"].forEach(id => {
+      ["mName","mDate","mEndDate","mLocation","mLat","mLng","mCountry","mUrl","mComment"].forEach(id => {
         const el = $(id);
         if (el) el.value = "";
       });
@@ -268,7 +291,7 @@ function bindUI() {
     });
   }
 
-  // Autocomplétion
+  // Autocomplete
   if (locInput) {
     locInput.addEventListener("input", runAutocomplete);
     locInput.addEventListener("blur", hideSuggestionsLater);
@@ -277,7 +300,7 @@ function bindUI() {
     });
   }
 
-  // Géolocalisation + reverse
+  // Geo + reverse
   if (btnGeo) {
     btnGeo.addEventListener("click", () => {
       if (!navigator.geolocation) {
@@ -297,9 +320,7 @@ function bindUI() {
             showMsg("Position trouvée… recherche de l’adresse…", "info");
 
             const rev = await nominatimReverse(latitude, longitude);
-
-            // adresse courte
-            const addr = rev?.address ? shortAddressFromNominatimAddress(rev.address) : (rev?.display_name || "");
+            const addr = rev?.address ? shortAddress(rev.address) : (rev?.display_name || "");
             if ($("mLocation")) $("mLocation").value = addr;
 
             showMsg("✅ Adresse remplie automatiquement.", "ok");
@@ -317,13 +338,12 @@ function bindUI() {
     });
   }
 
-  // Ferme les suggestions si on clique ailleurs
+  // Click outside: close suggestions
   document.addEventListener("click", (e) => {
     const box = $("addrSuggest");
     if (!box) return;
     if (e.target === box || box.contains(e.target) || e.target === locInput) return;
-    box.style.display = "none";
-    box.innerHTML = "";
+    renderSuggestions([]);
   });
 }
 
