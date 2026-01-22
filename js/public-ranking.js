@@ -15,6 +15,7 @@ const pillMode = $("pillMode");
 const pillRows = $("pillRows");
 const pillCount = $("pillCount");
 
+// Dans js/public-ranking.js, ligne ~30
 const DISCIPLINES = [
   { key: "GLOBAL", label: "Global" },
   { key: "XC-GLOBAL", label: "XC-Global" },
@@ -22,6 +23,7 @@ const DISCIPLINES = [
   { key: "XCO", label: "XCO" },
   { key: "XCR", label: "XCR" },
   { key: "XCM", label: "XCM" },
+  { key: "XCM Ultra", label: "XCM Ultra" },  // ✅ AJOUTER CETTE LIGNE
   { key: "DH", label: "DH" },
   { key: "Enduro", label: "Enduro" },
   { key: "Gravel", label: "Gravel" },
@@ -368,3 +370,4 @@ function bind(){
   await loadForMode();
   renderAll();
 })();
+
