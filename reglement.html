@@ -7,10 +7,10 @@
 
   <!-- Base + Thème nature (le thème DOIT être après) -->
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/theme-nature.css?v=9" />
+  <link rel="stylesheet" href="css/theme-nature.css?v=10" />
 
   <style>
-    /* Page-specific only */
+    /* Page-specific only: layout & components */
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
     a{color:inherit}
@@ -24,6 +24,7 @@
     }
     header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
 
+    /* Logo coins */
     .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .brandLogo{
       width:44px;height:44px;border-radius:14px;overflow:hidden;
@@ -131,7 +132,7 @@
     .tocTitle{font-weight:1000}
     .tocHint{color:var(--muted);font-size:12px}
 
-    /* Tables (disciplines) */
+    /* Tables */
     .discipline-table{
       width:100%;
       border-collapse:collapse;
@@ -163,7 +164,7 @@
     </div>
   </div>
 
-  <!-- ✅ Nouveau header demandé -->
+  <!-- Nouveau header demandé -->
   <nav>
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
@@ -211,28 +212,28 @@
     <div class="tocGrid">
       <a class="tocLink" href="#objet"><span class="tocTitle">1. Objet</span><span class="tocHint">But & principe</span></a>
       <a class="tocLink" href="#definitions"><span class="tocTitle">2. Définitions</span><span class="tocHint">Termes clés</span></a>
-      <a class="tocLink" href="#disciplines"><span class="tocTitle">2 bis. Disciplines</span><span class="tocHint">XC auto + autres</span></a>
-      <a class="tocLink" href="#eligibilite"><span class="tocTitle">3. Éligibilité</span><span class="tocHint">Conditions</span></a>
-      <a class="tocLink" href="#mrs"><span class="tocTitle">4. Score Épreuve (MRS)</span><span class="tocHint">Difficulté</span></a>
-      <a class="tocLink" href="#points-coureur"><span class="tocTitle">5. Points coureur</span><span class="tocHint">Attribution</span></a>
-      <a class="tocLink" href="#classements"><span class="tocTitle">6. Classements</span><span class="tocHint">24 mois / Année</span></a>
-      <a class="tocLink" href="#import"><span class="tocTitle">7. Résultats & Import</span><span class="tocHint">Format</span></a>
-      <a class="tocLink" href="#controle"><span class="tocTitle">8. Contrôle & Modération</span><span class="tocHint">Anti-abus</span></a>
-      <a class="tocLink" href="#litiges"><span class="tocTitle">9. Litiges</span><span class="tocHint">Procédure</span></a>
-      <a class="tocLink" href="#challenges"><span class="tocTitle">10. Challenges</span><span class="tocHint">Badges</span></a>
-      <a class="tocLink" href="#evolution"><span class="tocTitle">11. Évolution</span><span class="tocHint">Mises à jour</span></a>
-      <a class="tocLink" href="#organisateurs"><span class="tocTitle">12. Organisateurs</span><span class="tocHint">Obligations</span></a>
-      <a class="tocLink" href="#responsabilite"><span class="tocTitle">13. Responsabilité</span><span class="tocHint">Limitation</span></a>
-      <a class="tocLink" href="#donnees"><span class="tocTitle">14. Données & RGPD</span><span class="tocHint">Vie privée</span></a>
+      <a class="tocLink" href="#disciplines"><span class="tocTitle">3. Disciplines</span><span class="tocHint">XC + autres</span></a>
+      <a class="tocLink" href="#eligibilite"><span class="tocTitle">4. Éligibilité</span><span class="tocHint">Conditions</span></a>
+      <a class="tocLink" href="#mrs"><span class="tocTitle">5. Score Épreuve</span><span class="tocHint">MRS</span></a>
+      <a class="tocLink" href="#points-coureur"><span class="tocTitle">6. Points coureur</span><span class="tocHint">Attribution</span></a>
+      <a class="tocLink" href="#classements"><span class="tocTitle">7. Classements</span><span class="tocHint">24 mois / Année</span></a>
+      <a class="tocLink" href="#import"><span class="tocTitle">8. Résultats & Import</span><span class="tocHint">Format</span></a>
+      <a class="tocLink" href="#controle"><span class="tocTitle">9. Contrôle</span><span class="tocHint">Modération</span></a>
+      <a class="tocLink" href="#litiges"><span class="tocTitle">10. Litiges</span><span class="tocHint">Procédure</span></a>
+      <a class="tocLink" href="#challenges"><span class="tocTitle">11. Challenges</span><span class="tocHint">Badges</span></a>
+      <a class="tocLink" href="#evolution"><span class="tocTitle">12. Évolution</span><span class="tocHint">Mises à jour</span></a>
+      <a class="tocLink" href="#organisateurs"><span class="tocTitle">13. Organisateurs</span><span class="tocHint">Obligations</span></a>
+      <a class="tocLink" href="#responsabilite"><span class="tocTitle">14. Responsabilité</span><span class="tocHint">Limitation</span></a>
+      <a class="tocLink" href="#donnees"><span class="tocTitle">15. Données & RGPD</span><span class="tocHint">Vie privée</span></a>
     </div>
 
     <div class="box callout" style="margin-top:14px;">
       <div style="font-weight:1000;">À retenir</div>
       <ul style="margin:8px 0 0 18px;">
         <li>Une <b>épreuve</b> doit avoir une <b>date</b> et une <b>trace GPX</b> analysable.</li>
-        <li>Les classements sont <b>séparés</b> par discipline / sexe / âge / type de vélo.</li>
+        <li>Les épreuves sont <b>toutes rattachées</b> à un <b>événement</b>.</li>
+        <li>Les classements sont <b>séparés</b> par discipline / sexe / âge (UCI) / type de vélo.</li>
         <li>Les non-finishers (<code>DNF/DNS/OT/DSQ</code>) reçoivent <b>0 point</b>.</li>
-        <li>La discipline <b>reste déclarée par l’organisateur</b> ; l’automatique est une <b>aide</b>.</li>
       </ul>
     </div>
   </section>
@@ -253,95 +254,73 @@
     </div>
   </section>
 
-  <!-- 2. DEFINITIONS -->
- <section class="card" id="definitions">
-  <h2 class="section">2. Définitions</h2>
+  <!-- 2. DEFINITIONS (corrigées meeting/race + âge UCI) -->
+  <section class="card" id="definitions">
+    <h2 class="section">2. Définitions</h2>
 
-  <ul>
-    <li>
-      <b>Épreuve (Race)</b> : course VTT définie par un format, une date et un parcours,
-      <b>obligatoirement rattachée à un événement</b>.
-    </li>
+    <ul>
+      <li>
+        <b>Épreuve (Race)</b> : course VTT définie par un format, une date et un parcours,
+        <b>obligatoirement rattachée à un événement</b>.
+      </li>
 
-    <li>
-      <b>Événement (Meeting)</b> : entité organisatrice regroupant
-      <b>une ou plusieurs épreuves</b> (ex. différents formats ou distances),
-      se déroulant sur une même période et sous une organisation commune.
-    </li>
+      <li>
+        <b>Événement (Meeting)</b> : entité organisatrice regroupant
+        <b>une ou plusieurs épreuves</b> (ex. différents formats ou distances),
+        se déroulant sur une même période et sous une organisation commune.
+      </li>
 
-    <li>
-      <b>Trace GPX</b> : fichier de parcours servant aux calculs automatiques
-      (distance, dénivelé positif, profils altimétriques et scores).
-    </li>
+      <li><b>Trace GPX</b> : fichier de parcours servant aux calculs automatiques (distance, D+, profils, scores).</li>
 
-    <li>
-      <b>MRS</b> : <i>MTB Race Score</i>, score global de difficulté de l’épreuve,
-      exprimé sur une échelle de 0 à 100.
-    </li>
+      <li><b>MRS</b> : <i>MTB Race Score</i>, score global de difficulté de l’épreuve, sur 100.</li>
 
-    <li>
-      <b>ScorePhys</b> : score physique basé principalement sur la distance,
-      le dénivelé positif (D+) et la sévérité des pentes.
-    </li>
+      <li><b>ScorePhys</b> : score physique basé sur distance, D+ et sévérité des pentes.</li>
 
-    <li>
-      <b>ScoreTech</b> : score technique basé sur l’analyse du terrain et du tracé
-      (sinuosité, type de voies, technicité), issu notamment des données GPX et OSM
-      (voir Méthodologie).
-    </li>
+      <li><b>ScoreTech</b> : score technique basé sur sinuosité + terrain (analyse GPX/OSM, voir méthodologie).</li>
 
-    <li>
-      <b>Statuts de résultat</b> :
-      <ul>
-        <li><code>FIN</code> : finisher (temps valide et dans la barrière horaire)</li>
-        <li><code>DNF</code> : abandon</li>
-        <li><code>DNS</code> : non-partant</li>
-        <li><code>OT</code> : hors barrière horaire</li>
-        <li><code>DSQ</code> : disqualifié</li>
-      </ul>
-    </li>
+      <li>
+        <b>Statuts</b> :
+        <ul>
+          <li><code>FIN</code> : finisher (temps valide et dans la barrière horaire)</li>
+          <li><code>DNF</code> : abandon</li>
+          <li><code>DNS</code> : non-partant</li>
+          <li><code>OT</code> : hors barrière horaire</li>
+          <li><code>DSQ</code> : disqualifié</li>
+        </ul>
+      </li>
 
-    <li>
-      <b>Catégories d’âge</b> : les catégories d’âge utilisées par MTB Points sont
-      <b>celles définies par l’Union Cycliste Internationale (UCI)</b>.
-      Elles sont déterminées <b>uniquement à partir de l’année de naissance</b> du coureur,
-      indépendamment de la date exacte de l’épreuve.
-    </li>
+      <li>
+        <b>Catégories d’âge</b> : les catégories d’âge utilisées par MTB Points sont <b>celles définies par l’UCI</b>.
+        Elles sont déterminées <b>uniquement à partir de l’année de naissance</b> du coureur, indépendamment de la date exacte de l’épreuve.
+      </li>
 
-    <li>
-      <b>Seniors et Masters (UCI)</b> :
-      <ul>
-        <li>
-          <b>Seniors</b> : catégories Élite, U23 et Seniors,
-          conformément aux règlements UCI en vigueur.
-        </li>
-        <li>
-          <b>Masters</b> : catégories Master (Master 1 à Master 8 ou équivalent),
-          définies par tranches d’âge selon les règles UCI.
-        </li>
-      </ul>
-    </li>
-  </ul>
-</section>
+      <li>
+        <b>Seniors et Masters (UCI)</b> :
+        <ul>
+          <li><b>Seniors</b> : catégories Élite, U23 et Seniors selon les règles UCI en vigueur.</li>
+          <li><b>Masters</b> : catégories Master (Master 1 à Master 8 ou équivalent) définies par tranches d’âge selon les règles UCI.</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
 
-
-  <!-- 2 bis. DISCIPLINES (fusion + encadrement juridique) -->
+  <!-- 3. DISCIPLINES (XCR -> XC Raid, + XCE, + XC Relais) -->
   <section class="card" id="disciplines">
-    <h2 class="section">2 bis. Disciplines et classification des épreuves</h2>
+    <h2 class="section">3. Disciplines et classification des épreuves</h2>
 
     <p>
-      MTB Points distingue plusieurs disciplines VTT. Pour les formats Cross-Country (XC), une <b>classification automatique</b>
-      basée sur la <b>distance</b> et le <b>dénivelé positif (D+)</b> peut être proposée à partir de l’analyse GPX.
+      MTB Points distingue plusieurs disciplines VTT. Pour les formats Cross-Country (XC),
+      une <b>suggestion automatique</b> peut être proposée à partir de l’analyse GPX (distance et D+).
     </p>
 
     <div class="box callout">
       <b>Principe fondamental</b><br>
       La discipline finale d’une épreuve reste <b>déclarée par l’organisateur</b>.
       La suggestion automatique constitue une <b>aide à la décision</b> (non contractuelle).
-      En cas de désaccord, la déclaration de l’organisateur prévaut, sous réserve de modération (section 8).
+      En cas de désaccord, la déclaration de l’organisateur prévaut, sous réserve de contrôle/modération (section 9).
     </div>
 
-    <h3>2 bis.1 Catégories XC (référentiel indicatif)</h3>
+    <h3>3.1 Catégories Cross-Country (XC)</h3>
 
     <table class="discipline-table">
       <thead>
@@ -354,105 +333,374 @@
         </tr>
       </thead>
       <tbody>
-      <h3>2 bis.1 Catégories Cross-Country (XC)</h3>
 
-<table class="discipline-table">
-  <thead>
-    <tr>
-      <th>Discipline</th>
-      <th>Nom conseillé</th>
-      <th>Distance</th>
-      <th>D+ typique</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
+        <tr>
+          <td><b>XCE</b></td>
+          <td>Eliminator</td>
+          <td>0,5 – 2 km</td>
+          <td>&lt; 100 m</td>
+          <td>Format très court et explosif, manches éliminatoires (quarts/demies/finales).</td>
+        </tr>
 
-    <tr>
-      <td><b>XCE</b></td>
-      <td>Eliminator</td>
-      <td>0,5 – 2 km</td>
-      <td>&lt; 100 m</td>
-      <td>
-        Format très court et explosif, courses par manches éliminatoires
-        (quarts, demies, finales), principalement en milieu urbain ou fermé.
-      </td>
-    </tr>
+        <tr>
+          <td><b>XCC</b></td>
+          <td>Short Track</td>
+          <td>5 – 10 km</td>
+          <td>&lt; 300 m</td>
+          <td>Format court et intense, souvent en support d’une course XCO.</td>
+        </tr>
 
-    <tr>
-      <td><b>XCC</b></td>
-      <td>Short Track</td>
-      <td>5 – 10 km</td>
-      <td>&lt; 300 m</td>
-      <td>
-        Format court et intense, départ groupé, effort explosif,
-        souvent support d’une course XCO.
-      </td>
-    </tr>
+        <tr>
+          <td><b>XCO</b></td>
+          <td>Olympique</td>
+          <td>20 – 35 km</td>
+          <td>600 – 1 200 m</td>
+          <td>Format olympique standard, équilibre technique et endurance, souvent en boucles.</td>
+        </tr>
 
-    <tr>
-      <td><b>XCO</b></td>
-      <td>Olympique</td>
-      <td>20 – 35 km</td>
-      <td>600 – 1 200 m</td>
-      <td>
-        Format olympique standard, équilibre entre technique et endurance,
-        parcours en boucles.
-      </td>
-    </tr>
+        <tr>
+          <td><b>XC Relais</b></td>
+          <td>Relais par équipes</td>
+          <td>Variable (boucles)</td>
+          <td>Variable</td>
+          <td>Course par équipes en relais successifs sur circuit commun. Classement principalement par équipe.</td>
+        </tr>
 
-    <tr>
-      <td><b>XC Relais</b></td>
-      <td>Relais par équipes</td>
-      <td>Variable (boucles)</td>
-      <td>Variable</td>
-      <td>
-        Format par équipes avec relais successifs sur un circuit commun.
-        Le classement est établi par équipe ; les points individuels peuvent
-        être attribués selon des règles spécifiques définies par MTB Points.
-      </td>
-    </tr>
+        <tr>
+          <td><b>XC Raid</b></td>
+          <td>Longue distance / Raid</td>
+          <td>30 – 55 km</td>
+          <td>800 – 1 800 m</td>
+          <td>Longue distance en une étape, souvent appelé « raid VTT » (évite confusion avec XC Relais).</td>
+        </tr>
 
-    <tr>
-      <td><b>XC Raid</b></td>
-      <td>Longue distance / Raid</td>
-      <td>30 – 55 km</td>
-      <td>800 – 1 800 m</td>
-      <td>
-        Format longue distance en une seule étape,
-        effort soutenu et continu, souvent appelé « raid VTT ».
-      </td>
-    </tr>
+        <tr>
+          <td><b>XCM</b></td>
+          <td>Marathon</td>
+          <td>≥ 60 km</td>
+          <td>≥ 1 500 m</td>
+          <td>Marathon VTT, forte exigence d’endurance (3h-6h d’effort).</td>
+        </tr>
 
-    <tr>
-      <td><b>XCM</b></td>
-      <td>Marathon</td>
-      <td>≥ 60 km</td>
-      <td>≥ 1 500 m</td>
-      <td>
-        Format marathon, forte exigence d’endurance,
-        durée typique de 3 à 6 heures.
-      </td>
-    </tr>
+        <tr>
+          <td><b>XCM Ultra</b></td>
+          <td>Ultra</td>
+          <td>≥ 100 km</td>
+          <td>≥ 3 000 m</td>
+          <td>Ultra-endurance, réservé aux très entraînés (&gt; 6h d’effort).</td>
+        </tr>
 
-    <tr>
-      <td><b>XCM Ultra</b></td>
-      <td>Ultra</td>
-      <td>≥ 100 km</td>
-      <td>≥ 3 000 m</td>
-      <td>
-        Ultra-endurance, épreuves très longues,
-        réservées aux cyclistes très entraînés.
-      </td>
-    </tr>
+      </tbody>
+    </table>
 
-  </tbody>
-</table>
-
-
-    <h3>2 bis.2 Comment fonctionne la suggestion automatique ?</h3>
+    <h3>3.2 Fonctionnement de la suggestion automatique (indicatif)</h3>
     <div class="box">
-      <b>Processus</b>
       <ol>
-        <li>Analyse du fichier GPX : <b>distance</b> et <b>D+</b></li>
-        <
+        <li>Analyse du GPX (distance & D+)</li>
+        <li>Application du référentiel ci-dessus</li>
+        <li>Suggestion d’une discipline et d’un niveau de confiance (si activé)</li>
+        <li>Modification manuelle possible par l’organisateur</li>
+      </ol>
+    </div>
+
+    <h3>3.3 Autres disciplines (sélection manuelle)</h3>
+    <ul>
+      <li><b>Enduro</b> : épreuves à spéciales chronométrées, liaisons non chronométrées</li>
+      <li><b>DH</b> : descente chronométrée</li>
+      <li><b>Gravel</b> : endurance sur terrain mixte (routes/pistes/chemins)</li>
+    </ul>
+
+    <div class="box callout">
+      <b>Note</b><br>
+      La suggestion automatique s’applique prioritairement aux formats XC.
+      Pour Enduro, DH et Gravel, la discipline est déclarée manuellement par l’organisateur.
+    </div>
+  </section>
+
+  <!-- 4. ELIGIBILITE -->
+  <section class="card" id="eligibilite">
+    <h2 class="section">4. Éligibilité</h2>
+    <ul>
+      <li>Les points ne sont attribués que pour des épreuves disposant d’une <b>date</b> et d’une <b>trace GPX analysable</b>.</li>
+      <li>Les résultats doivent être importés par un organisateur (ou validés après modération).</li>
+      <li>Le classement est séparé par discipline, sexe, catégorie d’âge (UCI) et type de vélo (<b>musculaire</b> vs <b>assistance électrique</b>).</li>
+    </ul>
+
+    <div class="box callout">
+      <b>Catégories d’âge (UCI)</b><br>
+      La catégorie d’âge d’un coureur est déterminée automatiquement à partir de son <b>année de naissance</b>.
+      Toute erreur de saisie des informations de profil peut entraîner une catégorie erronée jusqu’à correction.
+    </div>
+  </section>
+
+  <!-- 5. MRS -->
+  <section class="card" id="mrs">
+    <h2 class="section">5. Score Épreuve (MRS)</h2>
+    <p>
+      Le score global de difficulté (<b>MRS</b>) est calculé à partir d’un score physique et d’un score technique.
+      Les détails de calcul et paramètres sont décrits dans
+      <a href="methodologie.html" style="color:var(--blue);font-weight:1000;text-decoration:none">Méthodologie</a>.
+    </p>
+    <div class="box callout">
+      <div style="font-weight:1000;">Niveau de l’épreuve</div>
+      <p style="margin:8px 0 0 0;">
+        L’organisateur déclare un niveau :
+        <span class="pill">Locale</span>
+        <span class="pill">Régionale</span>
+        <span class="pill">Nationale</span>
+        <span class="pill">Internationale</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- 6. POINTS -->
+  <section class="card" id="points-coureur">
+    <h2 class="section">6. Points coureur</h2>
+    <p>
+      Chaque épreuve distribue une quantité maximale de points <b>P<sub>e</sub></b> (vainqueur) dérivée du MRS,
+      bornée entre 0 et 200.
+    </p>
+
+    <div class="box callout">
+      <div style="font-weight:1000;">Valeur maximale (vainqueur)</div>
+      <p style="margin:10px 0 0 0;">
+        <code>P_e = clamp(round(200 × (MRS/100)^1.20) × M_level, 0, 200)</code>
+      </p>
+      <div class="muted" style="margin-top:10px;">
+        <b>M_level</b> (niveau) : Locale=0.8, Régionale=1.0, Nationale=1.2, Internationale=1.5.
+      </div>
+    </div>
+
+    <h3>6.1 Règle finishers / abandons</h3>
+    <div class="box">
+      <p style="margin:0;">
+        <b>FIN :</b> minimum <b>5 points</b> par finisher.<br/>
+        <b>DNF / OT / DNS / DSQ :</b> <b>0 point</b>.
+      </p>
+    </div>
+
+    <h3>6.2 Attribution par performance au temps</h3>
+    <p>
+      Pour un finisher <i>i</i> dans une catégorie donnée (discipline/sexe/âge/type vélo), on définit :
+      <code>t_i</code> = temps du coureur, et <code>t*</code> = meilleur temps (référence).
+    </p>
+
+    <div class="box callout">
+      <p style="margin:0 0 8px 0;"><code>r = t_i / t*</code></p>
+      <p style="margin:0;"><code>Points(i,e) = max(5, round(P_e' × r^(−k)))</code></p>
+      <div class="muted" style="margin-top:10px;">
+        <b>k = 3.0</b> (par défaut). <b>P_e'</b> peut intégrer un correctif de faible participation si activé.
+      </div>
+    </div>
+
+    <div class="box callout">
+      <b>Cas XC Relais</b><br>
+      Les épreuves <b>XC Relais</b> sont principalement classées <b>par équipe</b>.
+      L’attribution de points individuels peut être :
+      (a) désactivée, ou (b) appliquée selon une règle spécifique (ex. points identiques à chaque relayeur),
+      selon le paramétrage MTB Points / organisateur.
+    </div>
+  </section>
+
+  <!-- 7. CLASSEMENTS -->
+  <section class="card" id="classements">
+    <h2 class="section">7. Classements</h2>
+    <p>Deux modes de classement sont proposés :</p>
+    <ul>
+      <li><b>Classement glissant 24 mois</b> (par défaut)</li>
+      <li><b>Classement par année civile</b> (ex. 2025, 2026…)</li>
+    </ul>
+
+    <h3>7.1 Fenêtre 24 mois (Top N)</h3>
+    <div class="box callout">
+      <code>MTB_Points(i,C) = somme des Top N résultats de i dans C sur 24 mois</code>
+      <div class="muted" style="margin-top:8px;">N=5 par défaut (paramétrable).</div>
+    </div>
+
+    <h3>7.2 Classement par année</h3>
+    <div class="box">
+      <code>MTB_Points_Year(i,C,Y) = somme des Top N résultats de i dans C sur l’année Y</code>
+    </div>
+
+    <p class="muted">
+      Les classements sont distincts pour <b>musculaire</b> et <b>assistance électrique</b>.
+    </p>
+  </section>
+
+  <!-- 8. IMPORT -->
+  <section class="card" id="import">
+    <h2 class="section">8. Résultats & Import</h2>
+    <p>
+      Les résultats sont importés via un fichier (CSV, et à terme XLSX).
+      Colonnes recommandées :
+    </p>
+    <ul>
+      <li>Nom / Prénom (ou Nom complet)</li>
+      <li>Sexe</li>
+      <li>Catégorie âge (UCI, calculée via année de naissance si possible)</li>
+      <li>Nationalité</li>
+      <li>Team</li>
+      <li>Type vélo (musculaire / assistance électrique)</li>
+      <li>Temps (<code>HH:MM:SS</code>)</li>
+      <li>Statut (<code>FIN/DNF/DNS/OT/DSQ</code>)</li>
+    </ul>
+    <div class="box callout">
+      <b>Règle :</b> un temps valide implique <code>FIN</code> sauf indication contraire.
+      Tout statut non-finisher entraîne 0 point.
+    </div>
+  </section>
+
+  <!-- 9. CONTROLE -->
+  <section class="card" id="controle">
+    <h2 class="section">9. Contrôle & Modération</h2>
+    <ul>
+      <li>Un compte administrateur peut supprimer ou dépublier une épreuve en cas d’abus (fausse trace, faux résultats).</li>
+      <li>Les modifications majeures (GPX, distance, D+) peuvent être journalisées et nécessiter un recalcul.</li>
+      <li>Les incohérences (catégorie, discipline, type vélo) peuvent entraîner correction/modération.</li>
+    </ul>
+    <div class="box">
+      <div style="font-weight:1000;">Traçabilité (recommandé)</div>
+      <div class="muted" style="margin-top:6px;">
+        Conserver l’empreinte du GPX (hash) + date d’import résultats + identité de l’organisateur.
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. LITIGES -->
+  <section class="card" id="litiges">
+    <h2 class="section">10. Litiges</h2>
+    <p>Un litige peut être ouvert en cas d’erreur de résultat, de catégorie, de statut ou d’épreuve (GPX).</p>
+    <div class="box callout">
+      <div style="font-weight:1000;">Procédure</div>
+      <ul style="margin:8px 0 0 18px;">
+        <li>Demande motivée (preuve : lien officiel, capture, document organisateur).</li>
+        <li>Analyse par l’organisateur, puis par modération si nécessaire.</li>
+        <li>Décision : correction / maintien / suppression des points.</li>
+      </ul>
+    </div>
+    <p class="muted">En cas de fraude avérée : suppression des résultats concernés + éventuel bannissement.</p>
+  </section>
+
+  <!-- 11. CHALLENGES -->
+  <section class="card" id="challenges">
+    <h2 class="section">11. Challenges & Badges</h2>
+    <p>
+      MTB Points propose plusieurs challenges visant à valoriser la <b>performance</b>, la <b>régularité</b> et l’<b>endurance</b>.
+    </p>
+    <ul>
+      <li>Challenge MTB Points (points)</li>
+      <li>Challenge Engagement (nombre de courses terminées)</li>
+      <li>Challenge Endurance (distance)</li>
+      <li>Challenge Dénivelé (D+)</li>
+    </ul>
+    <div class="box callout">
+      <b>Récompenses physiques (option)</b><br>
+      À la fin d’une saison, les meilleurs d’un challenge peuvent recevoir une récompense physique,
+      sous réserve de validation des résultats et application anti-fraude.
+    </div>
+  </section>
+
+  <!-- 12. EVOLUTION -->
+  <section class="card" id="evolution">
+    <h2 class="section">12. Évolution du règlement</h2>
+
+    <p>Le présent règlement est susceptible d’évoluer afin de prendre en compte :</p>
+    <ul>
+      <li>l’amélioration des algorithmes de calcul (ScorePhys, ScoreTech, MRS),</li>
+      <li>l’évolution des disciplines, formats de course et pratiques,</li>
+      <li>les retours des organisateurs et des participants,</li>
+      <li>les contraintes techniques, réglementaires ou de sécurité.</li>
+    </ul>
+
+    <div class="box callout">
+      <b>Principe de non-rétroactivité</b><br>
+      Toute modification s’applique <b>uniquement aux épreuves organisées après sa date de publication</b>.
+      Les résultats et classements déjà validés ne sont pas modifiés rétroactivement, sauf en cas de
+      <b>correction d’erreur manifeste</b> ou de <b>fraude avérée</b>.
+    </div>
+
+    <p class="muted">
+      La version en vigueur est celle publiée sur le site MTB Points.
+      La date de dernière mise à jour est indiquée en bas de page.
+    </p>
+  </section>
+
+  <!-- 13. ORGANISATEURS -->
+  <section class="card" id="organisateurs">
+    <h2 class="section">13. Obligations des organisateurs</h2>
+
+    <p>En publiant un événement et ses épreuves sur MTB Points, l’organisateur s’engage à :</p>
+    <ul>
+      <li>fournir des informations exactes (nom, date, discipline, type de vélo, barrière horaire si applicable),</li>
+      <li>importer des résultats fidèles aux classements officiels,</li>
+      <li>fournir une trace GPX représentative du parcours réellement proposé,</li>
+      <li>corriger, sur demande motivée, toute erreur matérielle (nom, temps, statut) dans des délais raisonnables.</li>
+    </ul>
+
+    <div class="box callout">
+      <b>Sanctions / modération</b><br>
+      En cas de publication manifestement trompeuse (GPX incohérent, résultats faux, abus répétés),
+      MTB Points peut : (1) dépublier l’épreuve, (2) annuler les points, (3) limiter ou suspendre l’accès organisateur.
+    </div>
+  </section>
+
+  <!-- 14. RESPONSABILITE -->
+  <section class="card" id="responsabilite">
+    <h2 class="section">14. Limitation de responsabilité</h2>
+
+    <p>
+      MTB Points fournit un service de calcul, d’affichage et de classement à titre informatif.
+      Malgré le soin apporté, des erreurs (données importées, profils, GPX, analyse automatique) peuvent survenir.
+    </p>
+
+    <div class="box callout">
+      <b>Principe</b><br>
+      MTB Points ne saurait être tenu responsable :
+      <ul style="margin:8px 0 0 18px;">
+        <li>des erreurs ou omissions provenant des données fournies par les organisateurs ou participants,</li>
+        <li>des conséquences sportives, financières ou d’image liées à un classement,</li>
+        <li>des indisponibilités techniques temporaires (hébergement, API, analyse GPX/OSM).</li>
+      </ul>
+    </div>
+
+    <p class="muted">
+      En toute hypothèse, la responsabilité éventuelle de MTB Points est limitée aux dommages directs,
+      à l’exclusion des dommages indirects, conformément au droit applicable.
+    </p>
+  </section>
+
+  <!-- 15. DONNEES & RGPD -->
+  <section class="card" id="donnees">
+    <h2 class="section">15. Données personnelles & RGPD</h2>
+
+    <p>
+      MTB Points traite des données nécessaires au fonctionnement du service (profil, résultats, classements).
+      Les données publiques (ex. nom, prénom, nationalité, club, résultats, points) peuvent être affichées sur les pages de classement.
+    </p>
+
+    <div class="box callout">
+      <b>Droits des utilisateurs</b><br>
+      Conformément au RGPD, chaque utilisateur peut demander l’accès, la rectification, l’opposition,
+      la limitation ou la suppression de ses données, dans les limites légales et techniques.
+    </div>
+
+    <p class="muted">
+      Les organisateurs sont responsables des données qu’ils importent (résultats) et doivent disposer des droits nécessaires
+      pour les publier. En cas de demande motivée, MTB Points peut masquer certaines informations publiques.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  MTB Points — Règlement • Dernière mise à jour : <span id="lastUpdateFoot">—</span>
+</footer>
+
+<script>
+  const d = new Date().toLocaleDateString("fr-FR");
+  document.getElementById("lastUpdate").textContent = d;
+  document.getElementById("lastUpdateFoot").textContent = d;
+</script>
+
+</body>
+</html>
