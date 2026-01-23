@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MTB Points — Aide</title>
+
+  <!-- Base + Thème (le thème DOIT être après) -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme-nature.css?v=1">
+
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
+    a{color:inherit}
+
+    header.header{
+      position:sticky;top:0;z-index:20;
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      font-weight:900;font-size:13px;color:var(--blue);
+    }
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:rgba(255,255,255,.75);cursor:pointer;font-weight:900;font-size:12px;
+    }
+    .lang .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(15,23,42,.10)}
+
+    .wrap{max-width:980px;margin:22px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin:14px 0;
+    }
+    .hero{
+      border-radius:22px;padding:18px;border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 260px at 96% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.80));
+      box-shadow:var(--shadow2);
+    }
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .muted{color:var(--muted);line-height:1.6}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
+      font-weight:1000;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
+
+    .faq{margin-top:10px;display:grid;gap:10px}
+    details{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:rgba(255,255,255,.80);
+      padding:10px 12px;
+      box-shadow:0 2px 10px rgba(15,23,42,.06);
+    }
+    summary{cursor:pointer;font-weight:1000}
+    summary::-webkit-details-marker{display:none}
+    .qa{margin-top:8px;color:#223024;line-height:1.65;font-size:14px}
+
+    .btn2{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:14px;text-decoration:none;
+      border:1px solid var(--border);background:rgba(255,255,255,.78);
+      font-weight:950;color:var(--text);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(15,23,42,.12);border-color:rgba(47,111,62,.25)}
+    .btn2.primary{background:linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));border-color:rgba(37,90,49,1);color:#fff}
+  </style>
+</head>
+
+<body class="theme-nature">
+
+<header class="header">
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1 id="t_title">MTB Points — Aide</h1>
+      <span class="pill"><span class="dot ok"></span><span id="t_pill">Guides & FAQ</span></span>
+    </div>
+  </div>
+
+  <nav>
+    <a href="index.html" id="nav_home">Accueil</a>
+    <a href="public-ranking.html" id="nav_rank">Classement</a>
+    <a href="meetings.html" id="nav_events">Événements</a>
+    <a href="challengemtbpoints.html" id="nav_challenge">Challenge</a>
+    <a href="reglement.html" id="nav_rules">Règlement</a>
+    <a href="methodologie.html" id="nav_method">Méthodologie</a>
+    <a href="help.html" class="active" id="nav_help">Aide</a>
+    <a href="contact.html" id="nav_contact">Contact</a>
+  </nav>
+
+  <div class="lang">
+    <button class="btn" type="button" data-lang="fr">FR</button>
+    <button class="btn" type="button" data-lang="en">EN</button>
+    <button class="btn" type="button" data-lang="de">DE</button>
+    <button class="btn" type="button" data-lang="it">IT</button>
+    <button class="btn" type="button" data-lang="es">ES</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card hero">
+    <h2 id="t_h2">Besoin d’aide ?</h2>
+    <p class="muted" id="t_intro" style="margin:10px 0 0 0;">
+      Ici tu trouveras les réponses aux questions fréquentes (riders et organisateurs),
+      ainsi que les liens rapides pour créer un compte, publier une épreuve et importer des résultats.
+    </p>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+      <a class="btn2 primary" href="login.html" id="t_cta_login">Connexion</a>
+      <a class="btn2" href="retrouve-moi.html" id="t_cta_findme">Retrouve-moi dans le classement</a>
+      <a class="btn2" href="meetings.html" id="t_cta_events">Voir les événements</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="grid">
+      <div>
+        <h3 id="t_quicklinks" style="margin:0 0 10px 0;">Liens rapides</h3>
+        <ul class="muted" style="margin:0;padding-left:18px;line-height:1.7">
+          <li><a href="public-ranking.html" id="t_link_rank">Voir le classement</a></li>
+          <li><a href="meetings.html" id="t_link_events">Voir les événements</a></li>
+          <li><a href="methodologie.html" id="t_link_method">Comprendre les scores (Méthodologie)</a></li>
+          <li><a href="reglement.html" id="t_link_rules">Lire le règlement</a></li>
+          <li><a href="contact.html" id="t_link_contact">Contacter MTB Points</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 id="t_support" style="margin:0 0 10px 0;">Support</h3>
+        <div class="muted" id="t_support_text" style="line-height:1.7">
+          Un problème de classement, de nom, de nationalité, ou de catégorie ?
+          Utilise la page <b>Retrouve-moi</b> pour retrouver ton profil public et déposer une demande de correction.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3 id="t_faq_title" style="margin:0 0 10px 0;">FAQ</h3>
+
+    <div class="faq">
+      <details open>
+        <summary id="t_q1">Pourquoi je ne me vois pas dans le classement ?</summary>
+        <div class="qa" id="t_a1">
+          Le classement dépend des résultats importés et des champs (nom, sexe, âge, nationalité…).
+          Si ton nom est mal orthographié ou si l’email n’est pas le même, tu peux apparaître sous une autre “entrée”.
+          Va sur <b>Retrouve-moi</b> pour rechercher et faire une demande de correction.
+        </div>
+      </details>
+
+      <details>
+        <summary id="t_q2">Pourquoi mon score / mes points semblent “bizarres” ?</summary>
+        <div class="qa" id="t_a2">
+          Les points sont calculés à partir des scores d’épreuve (physique + technique) et de la performance.
+          La partie technique est basée sur OSM + bonus GPX capé. Vérifie la Méthodologie pour le détail.
+        </div>
+      </details>
+
+      <details>
+        <summary id="t_q3">Je suis organisateur : comment publier mes épreuves ?</summary>
+        <div class="qa" id="t_a3">
+          Crée un événement, puis crée les épreuves, importe le GPX, puis importe les résultats.
+          Si tu bloques (RLS / permissions), on regardera demain ensemble côté Supabase.
+        </div>
+      </details>
+
+      <details>
+        <summary id="t_q4">Comment corriger mon nom / club / nationalité ?</summary>
+        <div class="qa" id="t_a4">
+          Utilise la page <b>Retrouve-moi</b> : tu recherches ton entrée, tu copies le lien, puis tu envoies la correction.
+        </div>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // i18n minimal (FR/EN/DE/IT/ES) – sans dépendances
+  const I18N = {
+    fr: {
+      title: "MTB Points — Aide",
+      pill: "Guides & FAQ",
+      h2: "Besoin d’aide ?",
+      intro: "Ici tu trouveras les réponses aux questions fréquentes (riders et organisateurs), ainsi que les liens rapides pour créer un compte, publier une épreuve et importer des résultats.",
+      cta_login: "Connexion",
+      cta_findme: "Retrouve-moi dans le classement",
+      cta_events: "Voir les événements",
+      quicklinks: "Liens rapides",
+      link_rank: "Voir le classement",
+      link_events: "Voir les événements",
+      link_method: "Comprendre les scores (Méthodologie)",
+      link_rules: "Lire le règlement",
+      link_contact: "Contacter MTB Points",
+      support: "Support",
+      support_text: "Un problème de classement, de nom, de nationalité, ou de catégorie ? Utilise la page Retrouve-moi pour retrouver ton profil public et déposer une demande de correction.",
+      faq_title: "FAQ",
+      q1: "Pourquoi je ne me vois pas dans le classement ?",
+      a1: "Le classement dépend des résultats importés et des champs (nom, sexe, âge, nationalité…). Si ton nom est mal orthographié ou si l’email n’est pas le même, tu peux apparaître sous une autre “entrée”. Va sur Retrouve-moi pour rechercher et faire une demande de correction.",
+      q2: "Pourquoi mon score / mes points semblent “bizarres” ?",
+      a2: "Les points sont calculés à partir des scores d’épreuve (physique + technique) et de la performance. La partie technique est basée sur OSM + bonus GPX capé. Vérifie la Méthodologie pour le détail.",
+      q3: "Je suis organisateur : comment publier mes épreuves ?",
+      a3: "Crée un événement, puis crée les épreuves, importe le GPX, puis importe les résultats. Si tu bloques (RLS / permissions), on regardera demain ensemble côté Supabase.",
+      q4: "Comment corriger mon nom / club / nationalité ?",
+      a4: "Utilise la page Retrouve-moi : tu recherches ton entrée, tu copies le lien, puis tu envoies la correction."
+    },
+    en: {
+      title: "MTB Points — Help",
+      pill: "Guides & FAQ",
+      h2: "Need help?",
+      intro: "Find answers to common questions (riders & organizers) and quick links to create an account, publish a race and import results.",
+      cta_login: "Login",
+      cta_findme: "Find me in the ranking",
+      cta_events: "View events",
+      quicklinks: "Quick links",
+      link_rank: "Open ranking",
+      link_events: "Open events",
+      link_method: "How scores work (Methodology)",
+      link_rules: "Rules",
+      link_contact: "Contact MTB Points",
+      support: "Support",
+      support_text: "Wrong name, nationality, category or ranking issue? Use “Find me” to locate your public entry and request a correction.",
+      faq_title: "FAQ",
+      q1: "Why can’t I see myself in the ranking?",
+      a1: "The ranking depends on imported results and fields (name, sex, age, nationality…). If your name/email differs, you might appear under another entry. Use “Find me” to search and request a fix.",
+      q2: "Why do my score/points look strange?",
+      a2: "Points are computed from race difficulty (physical + technical) and performance. Technical part uses OSM + capped GPX bonus. See Methodology for details.",
+      q3: "I’m an organizer: how do I publish my races?",
+      a3: "Create an event, create races, import GPX, then import results. If blocked (RLS/permissions), we’ll fix Supabase together tomorrow.",
+      q4: "How can I correct my name/team/nationality?",
+      a4: "Use “Find me”: search your entry, copy the link, then submit the correction."
+    },
+    de: {
+      title: "MTB Points — Hilfe",
+      pill: "Guides & FAQ",
+      h2: "Brauchst du Hilfe?",
+      intro: "Hier findest du Antworten auf häufige Fragen (Rider & Organisatoren) sowie schnelle Links für Konto, Rennen und Result-Import.",
+      cta_login: "Login",
+      cta_findme: "Finde mich im Ranking",
+      cta_events: "Events ansehen",
+      quicklinks: "Schnellzugriff",
+      link_rank: "Ranking öffnen",
+      link_events: "Events öffnen",
+      link_method: "So funktionieren die Scores",
+      link_rules: "Regeln",
+      link_contact: "Kontakt",
+      support: "Support",
+      support_text: "Problem mit Name/Nation/Kategorie/Ranking? Nutze „Finde mich“, um deinen Eintrag zu finden und eine Korrektur anzufragen.",
+      faq_title: "FAQ",
+      q1: "Warum sehe ich mich nicht im Ranking?",
+      a1: "Das Ranking hängt von importierten Ergebnissen und Feldern ab. Bei abweichendem Namen/Email kannst du unter einem anderen Eintrag erscheinen. Nutze „Finde mich“.",
+      q2: "Warum wirken Score/Punkte komisch?",
+      a2: "Punkte basieren auf Schwierigkeit (physisch + technisch) und Performance. Technik: OSM + gedeckelter GPX-Bonus.",
+      q3: "Ich bin Organisator: wie veröffentliche ich Rennen?",
+      a3: "Event erstellen, Rennen erstellen, GPX importieren, Ergebnisse importieren. Bei RLS/Permissions schauen wir morgen Supabase an.",
+      q4: "Wie korrigiere ich Name/Team/Nation?",
+      a4: "„Finde mich“ nutzen: Eintrag suchen, Link kopieren, Korrektur senden."
+    },
+    it: {
+      title: "MTB Points — Aiuto",
+      pill: "Guide & FAQ",
+      h2: "Serve aiuto?",
+      intro: "Qui trovi risposte alle domande frequenti (rider e organizzatori) e link rapidi per account, gare e import risultati.",
+      cta_login: "Accesso",
+      cta_findme: "Trovami in classifica",
+      cta_events: "Vedi eventi",
+      quicklinks: "Link rapidi",
+      link_rank: "Apri classifica",
+      link_events: "Apri eventi",
+      link_method: "Come funzionano i punteggi",
+      link_rules: "Regolamento",
+      link_contact: "Contatto",
+      support: "Supporto",
+      support_text: "Problemi di nome/nazione/categoria/classifica? Usa “Trovami” per trovare la voce pubblica e richiedere una correzione.",
+      faq_title: "FAQ",
+      q1: "Perché non mi vedo in classifica?",
+      a1: "La classifica dipende dai risultati importati e dai campi. Se nome/email differiscono, potresti apparire come un’altra voce. Usa “Trovami”.",
+      q2: "Perché punteggio/punti sembrano strani?",
+      a2: "I punti dipendono dalla difficoltà gara (fisico + tecnico) e dalla performance. Tecnico: OSM + bonus GPX con cap.",
+      q3: "Sono organizzatore: come pubblico le gare?",
+      a3: "Crea evento, crea gare, importa GPX, importa risultati. Se blocchi RLS/permessi, domani sistemiamo Supabase.",
+      q4: "Come correggo nome/club/nazione?",
+      a4: "Usa “Trovami”: cerca la voce, copia il link, invia la correzione."
+    },
+    es: {
+      title: "MTB Points — Ayuda",
+      pill: "Guías & FAQ",
+      h2: "¿Necesitas ayuda?",
+      intro: "Aquí encontrarás respuestas a preguntas frecuentes (riders y organizadores) y enlaces rápidos para cuenta, pruebas e importación.",
+      cta_login: "Iniciar sesión",
+      cta_findme: "Encuéntrame en el ranking",
+      cta_events: "Ver eventos",
+      quicklinks: "Enlaces rápidos",
+      link_rank: "Abrir ranking",
+      link_events: "Abrir eventos",
+      link_method: "Cómo funcionan los scores",
+      link_rules: "Reglamento",
+      link_contact: "Contacto",
+      support: "Soporte",
+      support_text: "¿Problema con nombre/nacionalidad/categoría/ranking? Usa “Encuéntrame” para localizar tu entrada pública y pedir corrección.",
+      faq_title: "FAQ",
+      q1: "¿Por qué no me veo en el ranking?",
+      a1: "El ranking depende de resultados importados y campos. Si nombre/email difieren, puedes aparecer como otra entrada. Usa “Encuéntrame”.",
+      q2: "¿Por qué mi score/puntos parecen raros?",
+      a2: "Los puntos se calculan por dificultad (físico + técnico) y rendimiento. Técnico: OSM + bonus GPX con tope.",
+      q3: "Soy organizador: ¿cómo publico mis pruebas?",
+      a3: "Crea evento, crea pruebas, importa GPX, importa resultados. Si hay RLS/permisos, mañana lo arreglamos en Supabase.",
+      q4: "¿Cómo corrijo mi nombre/club/nacionalidad?",
+      a4: "Usa “Encuéntrame”: busca tu entrada, copia el enlace y envía la corrección."
+    }
+  };
+
+  function setLang(lang){
+    const d = I18N[lang] || I18N.fr;
+    document.documentElement.lang = lang;
+    document.title = d.title;
+
+    const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+    set("t_title", d.title);
+    set("t_pill", d.pill);
+    set("t_h2", d.h2);
+    set("t_intro", d.intro);
+    set("t_cta_login", d.cta_login);
+    set("t_cta_findme", d.cta_findme);
+    set("t_cta_events", d.cta_events);
+
+    set("t_quicklinks", d.quicklinks);
+    set("t_link_rank", d.link_rank);
+    set("t_link_events", d.link_events);
+    set("t_link_method", d.link_method);
+    set("t_link_rules", d.link_rules);
+    set("t_link_contact", d.link_contact);
+
+    set("t_support", d.support);
+    set("t_support_text", d.support_text);
+
+    set("t_faq_title", d.faq_title);
+    set("t_q1", d.q1); set("t_a1", d.a1);
+    set("t_q2", d.q2); set("t_a2", d.a2);
+    set("t_q3", d.q3); set("t_a3", d.a3);
+    set("t_q4", d.q4); set("t_a4", d.a4);
+
+    localStorage.setItem("mtb.lang", lang); // (demain on supprimera ce localStorage dans toute l’app)
+  }
+
+  // default
+  const saved = localStorage.getItem("mtb.lang");
+  setLang(saved || "fr");
+
+  document.querySelectorAll("[data-lang]").forEach(btn=>{
+    btn.addEventListener("click", ()=> setLang(btn.getAttribute("data-lang")));
+  });
+</script>
+
+</body>
+</html>
