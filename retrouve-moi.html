@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MTB Points — Retrouve-moi</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme-nature.css?v=1">
+
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
+    a{color:inherit}
+
+    header.header{
+      position:sticky;top:0;z-index:20;
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:10px;
+      font-weight:900;font-size:13px;color:var(--blue);
+    }
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+
+    .lang{display:flex;gap:8px;align-items:center}
+    .lang .btn{
+      padding:8px 10px;border-radius:10px;border:1px solid var(--border);
+      background:rgba(255,255,255,.75);cursor:pointer;font-weight:900;font-size:12px;
+    }
+
+    .wrap{max-width:980px;margin:22px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin:14px 0;
+    }
+    .hero{
+      border-radius:22px;padding:18px;border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 260px at 96% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.80));
+      box-shadow:var(--shadow2);
+    }
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .muted{color:var(--muted);line-height:1.6}
+
+    .form{
+      display:grid;
+      grid-template-columns:1.2fr 1fr 1fr;
+      gap:10px;
+      align-items:end;
+      margin-top:12px;
+    }
+    @media(max-width:900px){.form{grid-template-columns:1fr}}
+    label{display:block;font-weight:1000;font-size:12px}
+    input,select,textarea{
+      width:100%;
+      padding:10px;margin-top:6px;
+      border:1px solid rgba(40,60,40,.20);
+      border-radius:12px;
+      background:rgba(255,255,255,.82);
+      font-size:14px;
+    }
+
+    .btn2{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:14px;text-decoration:none;
+      border:1px solid var(--border);background:rgba(255,255,255,.78);
+      font-weight:950;color:var(--text);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      cursor:pointer;
+    }
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 12px 22px rgba(15,23,42,.12);border-color:rgba(47,111,62,.25)}
+    .btn2.primary{background:linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));border-color:rgba(37,90,49,1);color:#fff}
+
+    .box{
+      margin-top:12px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:rgba(255,255,255,.80);
+      padding:12px;
+      box-shadow:0 2px 10px rgba(15,23,42,.06);
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
+      font-weight:1000;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+  </style>
+</head>
+
+<body class="theme-nature">
+
+<header class="header">
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1 id="t_title">MTB Points — Retrouve-moi</h1>
+      <span class="pill"><span class="dot ok"></span><span id="t_pill">Rider lookup</span></span>
+    </div>
+  </div>
+
+  <nav>
+    <a href="index.html" id="nav_home">Accueil</a>
+    <a href="public-ranking.html" id="nav_rank">Classement</a>
+    <a href="meetings.html" id="nav_events">Événements</a>
+    <a href="help.html" id="nav_help">Aide</a>
+    <a href="retrouve-moi.html" class="active" id="nav_findme">Retrouve-moi</a>
+    <a href="contact.html" id="nav_contact">Contact</a>
+  </nav>
+
+  <div class="lang">
+    <button class="btn" type="button" data-lang="fr">FR</button>
+    <button class="btn" type="button" data-lang="en">EN</button>
+    <button class="btn" type="button" data-lang="de">DE</button>
+    <button class="btn" type="button" data-lang="it">IT</button>
+    <button class="btn" type="button" data-lang="es">ES</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card hero">
+    <h2 id="t_h2">Retrouve ton profil dans le classement</h2>
+    <p class="muted" id="t_intro" style="margin:10px 0 0 0;">
+      Tape ton nom, email ou nationalité : on te génère un lien direct vers la page <b>Classement</b> avec la recherche pré-remplie.
+      (Demain, on ajoutera la “réclamation” qui enregistre une demande dans Supabase.)
+    </p>
+
+    <div class="form">
+      <div>
+        <label for="q" id="t_q_label">Recherche (nom / email)</label>
+        <input id="q" type="text" placeholder="Ex: Poyade / david@email.com" />
+      </div>
+
+      <div>
+        <label for="nat" id="t_nat_label">Nationalité (option)</label>
+        <input id="nat" type="text" placeholder="Ex: FRA" />
+      </div>
+
+      <div>
+        <button class="btn2 primary" id="btnGo" type="button">🔎 Ouvrir le classement</button>
+      </div>
+    </div>
+
+    <div class="box">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-weight:1000" id="t_hint_title">Astuce</div>
+          <div class="muted" id="t_hint_text" style="margin-top:6px;">
+            Si tu apparais en double (orthographe différente), garde le lien et on fera la fusion côté données.
+          </div>
+        </div>
+        <span class="pill"><span class="dot warn"></span><span id="t_hint_pill">Réclamation demain</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3 style="margin:0 0 10px 0" id="t_next">Étape suivante (demain)</h3>
+    <div class="muted" id="t_next_text" style="line-height:1.7">
+      On branchera cette page sur Supabase pour déposer une demande de correction (nom, club, sexe, âge, nationalité),
+      et on supprimera le localStorage partout (zéro fallback local).
+    </div>
+  </section>
+</main>
+
+<script>
+  // Génère un lien vers public-ranking.html en pré-remplissant la recherche via querystring
+  // (demain, on mettra aussi un vrai “ticket” Supabase)
+  const $ = (id)=>document.getElementById(id);
+
+  function buildUrl(){
+    const q = ($("q").value || "").trim();
+    const nat = ($("nat").value || "").trim();
+
+    const u = new URL("public-ranking.html", window.location.href);
+    // convention simple : public-ranking pourra lire ?q=...&nat=...
+    if (q) u.searchParams.set("q", q);
+    if (nat) u.searchParams.set("nat", nat);
+    return u.toString();
+  }
+
+  $("btnGo").addEventListener("click", ()=>{
+    location.href = buildUrl();
+  });
+
+  // i18n (minimal)
+  const I18N = {
+    fr:{ title:"MTB Points — Retrouve-moi", pill:"Rider lookup", h2:"Retrouve ton profil dans le classement",
+      intro:"Tape ton nom, email ou nationalité : on te génère un lien direct vers la page Classement avec la recherche pré-remplie. (Demain, on ajoutera la “réclamation” qui enregistre une demande dans Supabase.)",
+      ql:"Recherche (nom / email)", nl:"Nationalité (option)", hintT:"Astuce",
+      hint:"Si tu apparais en double (orthographe différente), garde le lien et on fera la fusion côté données.",
+      pill2:"Réclamation demain", next:"Étape suivante (demain)",
+      nextt:"On branchera cette page sur Supabase pour déposer une demande de correction (nom, club, sexe, âge, nationalité), et on supprimera le localStorage partout (zéro fallback local)."
+    },
+    en:{ title:"MTB Points — Find me", pill:"Rider lookup", h2:"Find your profile in the ranking",
+      intro:"Type your name, email or nationality: we generate a direct link to the Ranking page with prefilled search. (Tomorrow we’ll add a Supabase correction request.)",
+      ql:"Search (name / email)", nl:"Nationality (optional)", hintT:"Tip",
+      hint:"If you appear twice (different spelling), keep the link and we’ll merge data later.",
+      pill2:"Claim tomorrow", next:"Next step (tomorrow)",
+      nextt:"We’ll connect this page to Supabase to submit a correction request (name, team, sex, age, nationality), and remove localStorage everywhere."
+    },
+    de:{ title:"MTB Points — Finde mich", pill:"Rider lookup", h2:"Finde dein Profil im Ranking",
+      intro:"Name/Email/Nation eingeben: wir erstellen einen Direktlink zum Ranking mit vorgefüllter Suche. (Morgen kommt die Supabase-Korrekturanfrage.)",
+      ql:"Suche (Name / Email)", nl:"Nationalität (optional)", hintT:"Tipp",
+      hint:"Wenn du doppelt erscheinst (andere Schreibweise), Link behalten – wir mergen später.",
+      pill2:"Anfrage morgen", next:"Nächster Schritt (morgen)",
+      nextt:"Morgen verbinden wir Supabase für Korrekturanfragen und entfernen localStorage überall."
+    },
+    it:{ title:"MTB Points — Trovami", pill:"Rider lookup", h2:"Trova il tuo profilo in classifica",
+      intro:"Inserisci nome/email/nazionalità: generiamo un link diretto alla classifica con ricerca precompilata. (Domani aggiungiamo la richiesta su Supabase.)",
+      ql:"Ricerca (nome / email)", nl:"Nazionalità (opz.)", hintT:"Suggerimento",
+      hint:"Se appari due volte (grafia diversa), salva il link: faremo il merge dei dati.",
+      pill2:"Richiesta domani", next:"Prossimo passo (domani)",
+      nextt:"Collegheremo Supabase per richieste di correzione e rimuoveremo localStorage ovunque."
+    },
+    es:{ title:"MTB Points — Encuéntrame", pill:"Rider lookup", h2:"Encuentra tu perfil en el ranking",
+      intro:"Escribe tu nombre/email/nacionalidad: generamos un enlace directo al Ranking con búsqueda pre-rellenada. (Mañana añadimos la reclamación en Supabase.)",
+      ql:"Búsqueda (nombre / email)", nl:"Nacionalidad (opcional)", hintT:"Consejo",
+      hint:"Si apareces duplicado (otra ortografía), guarda el enlace y luego fusionamos los datos.",
+      pill2:"Reclamación mañana", next:"Siguiente paso (mañana)",
+      nextt:"Conectaremos Supabase para solicitudes de corrección y eliminaremos localStorage en todo el sitio."
+    }
+  };
+
+  function setLang(lang){
+    const d = I18N[lang] || I18N.fr;
+    document.documentElement.lang = lang;
+    document.title = d.title;
+
+    const set = (id, txt)=>{ const el = document.getElementById(id); if (el) el.textContent = txt; };
+    set("t_title", d.title);
+    set("t_pill", d.pill);
+    set("t_h2", d.h2);
+    set("t_intro", d.intro);
+    set("t_q_label", d.ql);
+    set("t_nat_label", d.nl);
+    set("t_hint_title", d.hintT);
+    set("t_hint_text", d.hint);
+    set("t_hint_pill", d.pill2);
+    set("t_next", d.next);
+    set("t_next_text", d.nextt);
+
+    localStorage.setItem("mtb.lang", lang); // (demain on enlève ce stockage local)
+  }
+
+  const saved = localStorage.getItem("mtb.lang");
+  setLang(saved || "fr");
+  document.querySelectorAll("[data-lang]").forEach(btn=>{
+    btn.addEventListener("click", ()=> setLang(btn.getAttribute("data-lang")));
+  });
+</script>
+
+</body>
+</html>
