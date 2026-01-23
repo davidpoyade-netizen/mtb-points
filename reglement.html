@@ -4,38 +4,166 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MTB Points — Règlement officiel</title>
+
+  <!-- Base + Thème nature (le thème DOIT être après) -->
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/theme-nature.css?v=8" />
+  <link rel="stylesheet" href="css/theme-nature.css?v=9" />
 
   <style>
+    /* Page-specific only */
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
     a{color:inherit}
+
     .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
-    header.header{position:sticky;top:0;z-index:20;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    header.header h1{margin:0;font-size:18px}
-    nav{display:flex;gap:10px;flex-wrap:wrap}
-    nav a{text-decoration:none;padding:8px 10px;border-radius:10px;font-weight:900;font-size:13px;color:var(--blue)}
-    nav a.active{background:rgba(47,111,62,.12)}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:var(--shadow);margin:14px 0}
-    h2.section{margin:0 0 10px 0;font-size:18px}
+
+    header.header{
+      position:sticky;top:0;z-index:20;
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:10px;
+      font-weight:900;
+      font-size:13px;
+      color:var(--blue);
+    }
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin:14px 0;
+    }
+
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2);
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .muted{color:var(--muted);font-size:13px;line-height:1.6}
+    .heroActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+    .btn2{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
+      cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(15,23,42,.10);border-color:rgba(47,111,62,.25)}
+    .btn2.primary{background:linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));border-color:rgba(37,90,49,1);color:#fff}
+    .btn2.primary:hover{background:linear-gradient(180deg, rgba(37,90,49,1), rgba(30,76,41,1));border-color:rgba(30,76,41,1)}
+
+    h2.section{margin:0 0 10px 0;font-size:18px;letter-spacing:-.15px}
     h3{margin:14px 0 6px 0;font-size:15px}
     p,li{font-size:14px;line-height:1.65}
-    ul{padding-left:18px}
-    code{background:rgba(255,255,255,.8);border:1px solid var(--border);border-radius:8px;padding:2px 6px}
-    .box{background:rgba(255,255,255,.78);border:1px solid var(--border);border-radius:18px;padding:14px;margin:12px 0}
+    ul{padding-left:18px;margin:8px 0}
+    ol{padding-left:18px;margin:8px 0}
+
+    code{
+      background:rgba(255,255,255,.75);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:2px 8px;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.75);
+      font-weight:1000;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
+
+    .box{
+      background:rgba(255,255,255,.78);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:14px;
+      margin:12px 0;
+      box-shadow:0 2px 10px rgba(15,23,42,.06);
+    }
     .callout{border-left:6px solid rgba(47,111,62,.65)}
-    .discipline-table{width:100%;border-collapse:collapse;margin-top:14px}
-    .discipline-table th,.discipline-table td{padding:12px;border-bottom:1px solid var(--border)}
-    .discipline-table th{background:rgba(47,111,62,.12);text-align:left}
-    footer{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+
+    .tocGrid{display:grid;grid-template-columns: 1fr 1fr;gap:10px;margin-top:10px}
+    @media(max-width:900px){.tocGrid{grid-template-columns:1fr}}
+    .tocLink{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:12px 12px;border:1px solid var(--border);border-radius:16px;
+      text-decoration:none;background:rgba(255,255,255,.78);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .tocLink:hover{transform:translateY(-1px);box-shadow:0 14px 22px rgba(15,23,42,.12);border-color:rgba(47,111,62,.25)}
+    .tocTitle{font-weight:1000}
+    .tocHint{color:var(--muted);font-size:12px}
+
+    /* Tables (disciplines) */
+    .discipline-table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:14px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      overflow:hidden;
+      background:rgba(255,255,255,.78);
+    }
+    .discipline-table thead{background:rgba(47,111,62,.12)}
+    .discipline-table th{padding:12px 12px;text-align:left;font-size:13px;letter-spacing:.2px}
+    .discipline-table td{padding:12px 12px;border-top:1px solid var(--border);font-size:14px}
+    .discipline-table tbody tr:hover{background:rgba(47,111,62,.06)}
+
+    footer{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
   </style>
 </head>
 
 <body class="theme-nature">
 
 <header class="header">
-  <h1>MTB Points — Règlement</h1>
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>MTB Points — Règlement</h1>
+      <span class="pill"><span class="dot ok"></span> Version publique</span>
+    </div>
+  </div>
+
+  <!-- ✅ Nouveau header demandé -->
   <nav>
     <a href="index.html">Accueil</a>
     <a href="public-ranking.html">Classement</a>
@@ -43,243 +171,230 @@
     <a href="challengemtbpoints.html">Challenge</a>
     <a href="reglement.html" class="active">Règlement</a>
     <a href="methodologie.html">Méthodologie</a>
+    <a href="help.html">Aide</a>
+    <a href="contact.html">Contact</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
   </nav>
 </header>
 
 <main class="wrap">
 
-<!-- 1. OBJET -->
-<section class="card" id="objet">
-  <h2 class="section">1. Objet</h2>
-  <p>
-    MTB Points est un système de classement destiné à évaluer la difficulté des épreuves de VTT
-    et à classer les cyclistes selon leurs performances, sur le modèle des systèmes de points utilisés
-    en sports d'endurance.
-  </p>
-</section>
+  <!-- HERO -->
+  <section class="card hero">
+    <div class="heroTop">
+      <div style="min-width:280px;flex:1">
+        <h2>Règlement officiel MTB Points</h2>
+        <div class="muted">
+          Objectif : définir les règles d’éligibilité, d’attribution des points, des classements, des challenges,
+          ainsi que les principes de contrôle, modération, responsabilités et données personnelles.
+          Les détails techniques (ScorePhys / ScoreTech, paramètres, formules détaillées) sont décrits dans
+          <a href="methodologie.html" style="color:var(--blue);font-weight:1000;text-decoration:none">Méthodologie</a>.
+        </div>
+      </div>
 
-<!-- 2. DEFINITIONS -->
-<section class="card" id="definitions">
+      <div style="min-width:260px;">
+        <div class="heroActions">
+          <a class="btn2 primary" href="challengemtbpoints.html">Voir les challenges</a>
+          <a class="btn2" href="public-ranking.html">Voir le classement</a>
+        </div>
+        <div class="muted" style="margin-top:8px;font-size:12px;">
+          Dernière mise à jour : <span id="lastUpdate">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOMMAIRE -->
+  <section class="card" id="sommaire">
+    <h2 class="section">Sommaire</h2>
+    <div class="tocGrid">
+      <a class="tocLink" href="#objet"><span class="tocTitle">1. Objet</span><span class="tocHint">But & principe</span></a>
+      <a class="tocLink" href="#definitions"><span class="tocTitle">2. Définitions</span><span class="tocHint">Termes clés</span></a>
+      <a class="tocLink" href="#disciplines"><span class="tocTitle">2 bis. Disciplines</span><span class="tocHint">XC auto + autres</span></a>
+      <a class="tocLink" href="#eligibilite"><span class="tocTitle">3. Éligibilité</span><span class="tocHint">Conditions</span></a>
+      <a class="tocLink" href="#mrs"><span class="tocTitle">4. Score Épreuve (MRS)</span><span class="tocHint">Difficulté</span></a>
+      <a class="tocLink" href="#points-coureur"><span class="tocTitle">5. Points coureur</span><span class="tocHint">Attribution</span></a>
+      <a class="tocLink" href="#classements"><span class="tocTitle">6. Classements</span><span class="tocHint">24 mois / Année</span></a>
+      <a class="tocLink" href="#import"><span class="tocTitle">7. Résultats & Import</span><span class="tocHint">Format</span></a>
+      <a class="tocLink" href="#controle"><span class="tocTitle">8. Contrôle & Modération</span><span class="tocHint">Anti-abus</span></a>
+      <a class="tocLink" href="#litiges"><span class="tocTitle">9. Litiges</span><span class="tocHint">Procédure</span></a>
+      <a class="tocLink" href="#challenges"><span class="tocTitle">10. Challenges</span><span class="tocHint">Badges</span></a>
+      <a class="tocLink" href="#evolution"><span class="tocTitle">11. Évolution</span><span class="tocHint">Mises à jour</span></a>
+      <a class="tocLink" href="#organisateurs"><span class="tocTitle">12. Organisateurs</span><span class="tocHint">Obligations</span></a>
+      <a class="tocLink" href="#responsabilite"><span class="tocTitle">13. Responsabilité</span><span class="tocHint">Limitation</span></a>
+      <a class="tocLink" href="#donnees"><span class="tocTitle">14. Données & RGPD</span><span class="tocHint">Vie privée</span></a>
+    </div>
+
+    <div class="box callout" style="margin-top:14px;">
+      <div style="font-weight:1000;">À retenir</div>
+      <ul style="margin:8px 0 0 18px;">
+        <li>Une <b>épreuve</b> doit avoir une <b>date</b> et une <b>trace GPX</b> analysable.</li>
+        <li>Les classements sont <b>séparés</b> par discipline / sexe / âge / type de vélo.</li>
+        <li>Les non-finishers (<code>DNF/DNS/OT/DSQ</code>) reçoivent <b>0 point</b>.</li>
+        <li>La discipline <b>reste déclarée par l’organisateur</b> ; l’automatique est une <b>aide</b>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 1. OBJET -->
+  <section class="card" id="objet">
+    <h2 class="section">1. Objet</h2>
+    <p>
+      MTB Points est un système de points destiné à évaluer la difficulté d’une épreuve VTT et à classer les cyclistes
+      en fonction de leurs performances. Il s’inspire du principe des points ITRA (trail), en intégrant les spécificités
+      du VTT (pente, terrain, effort).
+    </p>
+    <div class="box callout">
+      <div style="font-weight:1000;">Principe</div>
+      <p style="margin:8px 0 0 0;">
+        Une épreuve reçoit un score de difficulté (<b>MRS</b>). Chaque participant reçoit des points selon sa performance et son statut.
+      </p>
+    </div>
+  </section>
+
+  <!-- 2. DEFINITIONS -->
+ <section class="card" id="definitions">
   <h2 class="section">2. Définitions</h2>
+
   <ul>
-    <li><b>Épreuve (Race)</b> : course VTT identifiée par une date et un parcours.</li>
-    <li><b>Événement (Meeting)</b> : regroupement de plusieurs épreuves.</li>
-    <li><b>Trace GPX</b> : fichier servant aux calculs automatiques.</li>
-    <li><b>MRS</b> : MTB Race Score (0 à 100).</li>
-    <li><b>FIN / DNF / DNS / OT / DSQ</b> : statuts de course.</li>
+    <li>
+      <b>Épreuve (Race)</b> : course VTT définie par un format, une date et un parcours,
+      <b>obligatoirement rattachée à un événement</b>.
+    </li>
+
+    <li>
+      <b>Événement (Meeting)</b> : entité organisatrice regroupant
+      <b>une ou plusieurs épreuves</b> (ex. différents formats ou distances),
+      se déroulant sur une même période et sous une organisation commune.
+    </li>
+
+    <li>
+      <b>Trace GPX</b> : fichier de parcours servant aux calculs automatiques
+      (distance, dénivelé positif, profils altimétriques et scores).
+    </li>
+
+    <li>
+      <b>MRS</b> : <i>MTB Race Score</i>, score global de difficulté de l’épreuve,
+      exprimé sur une échelle de 0 à 100.
+    </li>
+
+    <li>
+      <b>ScorePhys</b> : score physique basé principalement sur la distance,
+      le dénivelé positif (D+) et la sévérité des pentes.
+    </li>
+
+    <li>
+      <b>ScoreTech</b> : score technique basé sur l’analyse du terrain et du tracé
+      (sinuosité, type de voies, technicité), issu notamment des données GPX et OSM
+      (voir Méthodologie).
+    </li>
+
+    <li>
+      <b>Statuts de résultat</b> :
+      <ul>
+        <li><code>FIN</code> : finisher (temps valide et dans la barrière horaire)</li>
+        <li><code>DNF</code> : abandon</li>
+        <li><code>DNS</code> : non-partant</li>
+        <li><code>OT</code> : hors barrière horaire</li>
+        <li><code>DSQ</code> : disqualifié</li>
+      </ul>
+    </li>
+
+    <li>
+      <b>Catégories d’âge</b> : les catégories d’âge utilisées par MTB Points sont
+      <b>celles définies par l’Union Cycliste Internationale (UCI)</b>.
+      Elles sont déterminées <b>uniquement à partir de l’année de naissance</b> du coureur,
+      indépendamment de la date exacte de l’épreuve.
+    </li>
+
+    <li>
+      <b>Seniors et Masters (UCI)</b> :
+      <ul>
+        <li>
+          <b>Seniors</b> : catégories Élite, U23 et Seniors,
+          conformément aux règlements UCI en vigueur.
+        </li>
+        <li>
+          <b>Masters</b> : catégories Master (Master 1 à Master 8 ou équivalent),
+          définies par tranches d’âge selon les règles UCI.
+        </li>
+      </ul>
+    </li>
   </ul>
 </section>
 
-<!-- 2 BIS. DISCIPLINES -->
-<section class="card" id="disciplines">
-  <h2 class="section">2 bis. Disciplines et classification des épreuves</h2>
 
-  <p>
-    MTB Points distingue plusieurs disciplines VTT.
-    Pour les formats Cross-Country (XC), une classification automatique indicative
-    peut être proposée à partir de l'analyse du fichier GPX.
-  </p>
+  <!-- 2 bis. DISCIPLINES (fusion + encadrement juridique) -->
+  <section class="card" id="disciplines">
+    <h2 class="section">2 bis. Disciplines et classification des épreuves</h2>
 
-  <div class="box callout">
-    <b>Principe fondamental</b><br>
-    La discipline finale d'une épreuve reste <b>déclarée par l'organisateur</b>.
-    Les outils automatiques constituent une aide à la classification et ne sont pas contractuels.
-  </div>
+    <p>
+      MTB Points distingue plusieurs disciplines VTT. Pour les formats Cross-Country (XC), une <b>classification automatique</b>
+      basée sur la <b>distance</b> et le <b>dénivelé positif (D+)</b> peut être proposée à partir de l’analyse GPX.
+    </p>
 
-  <h3>Disciplines Cross-Country (XC)</h3>
+    <div class="box callout">
+      <b>Principe fondamental</b><br>
+      La discipline finale d’une épreuve reste <b>déclarée par l’organisateur</b>.
+      La suggestion automatique constitue une <b>aide à la décision</b> (non contractuelle).
+      En cas de désaccord, la déclaration de l’organisateur prévaut, sous réserve de modération (section 8).
+    </div>
 
-  <table class="discipline-table">
-    <thead>
-      <tr>
-        <th>Discipline</th>
-        <th>Nom</th>
-        <th>Distance</th>
-        <th>D+</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>XCC</td><td>Short Track</td><td>&lt; 10 km</td><td>&lt; 300 m</td><td>Format court et explosif</td></tr>
-      <tr><td>XCO</td><td>Olympique</td><td>20–35 km</td><td>600–1200 m</td><td>Format olympique</td></tr>
-      <tr><td>XCR</td><td>XC longue distance</td><td>30–55 km</td><td>800–1800 m</td><td>Endurance renforcée</td></tr>
-      <tr><td>XCM</td><td>Marathon</td><td>60–99 km</td><td>1500–2999 m</td><td>Marathon VTT</td></tr>
-      <tr><td>XCM Ultra</td><td>Ultra</td><td>≥ 100 km</td><td>≥ 3000 m</td><td>Ultra-endurance</td></tr>
-    </tbody>
-  </table>
+    <h3>2 bis.1 Catégories XC (référentiel indicatif)</h3>
 
-  <h3>Fonctionnement du calcul automatique</h3>
-  <ul>
-    <li>Analyse distance et dénivelé du GPX</li>
-    <li>Comparaison aux seuils de référence</li>
-    <li>Suggestion d'une discipline avec niveau de confiance</li>
-    <li>Ajustement manuel toujours possible</li>
-  </ul>
+    <table class="discipline-table">
+      <thead>
+        <tr>
+          <th>Discipline</th>
+          <th>Nom conseillé</th>
+          <th>Distance</th>
+          <th>D+ typique</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>XCC</b></td>
+          <td>Short Track</td>
+          <td>&lt; 10 km</td>
+          <td>&lt; 300 m</td>
+          <td>Format court et explosif, courses rapides et intenses</td>
+        </tr>
+        <tr>
+          <td><b>XCO</b></td>
+          <td>Olympique</td>
+          <td>20 – 35 km</td>
+          <td>600 – 1 200 m</td>
+          <td>Format olympique standard, équilibre technique et physique</td>
+        </tr>
+        <tr>
+          <td><b>XCR</b></td>
+          <td>XC Race / XC longue distance</td>
+          <td>30 – 55 km</td>
+          <td>800 – 1 800 m</td>
+          <td>Format longue distance, plus exigeant physiquement</td>
+        </tr>
+        <tr>
+          <td><b>XCM</b></td>
+          <td>Marathon</td>
+          <td>≥ 60 km</td>
+          <td>≥ 1 500 m</td>
+          <td>Format marathon, grande endurance requise (3h-6h d'effort)</td>
+        </tr>
+        <tr>
+          <td><b>XCM Ultra</b></td>
+          <td>Ultra</td>
+          <td>≥ 100 km</td>
+          <td>≥ 3 000 m</td>
+          <td>Ultra-endurance, réservé aux très entraînés (&gt; 6h d'effort)</td>
+        </tr>
+      </tbody>
+    </table>
 
-  <h3>Autres disciplines</h3>
-  <ul>
-    <li><b>Enduro</b> : spéciales chronométrées</li>
-    <li><b>DH</b> : descente chronométrée</li>
-    <li><b>Gravel</b> : endurance sur terrain mixte</li>
-  </ul>
-</section>
-
-<!-- 2 TER. CATEGORIES D'EPREUVE -->
-<section class="card" id="categories">
-  <h2 class="section">2 ter. Catégories d'épreuve</h2>
-
-  <p>
-    Chaque épreuve est classée selon son niveau de compétitivité.
-    Cette catégorie pondère le score MRS de l'épreuve.
-  </p>
-
-  <table class="discipline-table">
-    <thead>
-      <tr>
-        <th>Catégorie</th>
-        <th>Description</th>
-        <th>Coefficient</th>
-        <th>Exemples</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><b>Locale</b></td>
-        <td>Compétition locale ou club</td>
-        <td>×0.70</td>
-        <td>Course club, rando chronométrée</td>
-      </tr>
-      <tr>
-        <td><b>Régionale</b></td>
-        <td>Épreuve régionale ou inter-clubs</td>
-        <td>×0.85</td>
-        <td>Championnat régional, circuit régional</td>
-      </tr>
-      <tr>
-        <td><b>Nationale</b></td>
-        <td>Épreuve nationale</td>
-        <td>×1.00</td>
-        <td>Championnat national, Coupe de France</td>
-      </tr>
-      <tr>
-        <td><b>Internationale</b></td>
-        <td>Épreuve internationale</td>
-        <td>×1.15</td>
-        <td>Course UCI, compétition européenne</td>
-      </tr>
-      <tr>
-        <td><b>Mondiale</b></td>
-        <td>Coupe du Monde / Jeux Olympiques</td>
-        <td>×1.30</td>
-        <td>Coupe du Monde UCI, Jeux Olympiques, Championnats du Monde</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="box callout">
-    <b>Calcul des points coureurs</b><br>
-    <code>Points = MRS × Coefficient_Catégorie × Performance_Relative</code>
-  </div>
-</section>
-
-<!-- 3. ELIGIBILITE -->
-<section class="card" id="eligibilite">
-  <h2 class="section">3. Éligibilité</h2>
-  <ul>
-    <li>Trace GPX analysable obligatoire</li>
-    <li>Résultats importés ou validés</li>
-    <li>Classements séparés par discipline, sexe, âge, type de vélo</li>
-  </ul>
-</section>
-
-<!-- 4. SCORE MRS -->
-<section class="card" id="mrs">
-  <h2 class="section">4. Score de difficulté (MRS)</h2>
-  <p>
-    Le MRS combine un score physique et un score technique.
-    Les formules détaillées sont décrites dans la page Méthodologie.
-  </p>
-</section>
-
-<!-- 5. POINTS COUREURS -->
-<section class="card" id="points">
-  <h2 class="section">5. Attribution des points</h2>
-  <p>
-    Les points dépendent du MRS, de la catégorie de l'épreuve et de la performance relative au vainqueur.
-  </p>
-
-  <div class="box callout">
-    <code>P₁ = clamp(round(200 × (MRS/100)^1.20 × M_catégorie), 0, 200)</code>
-  </div>
-
-  <ul>
-    <li>FIN : minimum 5 points</li>
-    <li>DNF / DNS / OT / DSQ : 0 point</li>
-  </ul>
-</section>
-
-<!-- 6. CLASSEMENTS -->
-<section class="card" id="classements">
-  <h2 class="section">6. Classements</h2>
-  <ul>
-    <li>Classement glissant 24 mois (Top N)</li>
-    <li>Classement par année civile</li>
-    <li>Classements par discipline : Global, XC-Global, XCC, XCO, XCR, XCM, XCM Ultra, DH, Enduro, Gravel</li>
-    <li>Classements séparés : Musculaire / E-bike</li>
-  </ul>
-</section>
-
-<!-- 7. IMPORT -->
-<section class="card" id="import">
-  <h2 class="section">7. Import des résultats</h2>
-  <p>
-    Les résultats sont importés via fichier (CSV/XLSX).
-    Tout statut non FIN entraîne 0 point.
-  </p>
-</section>
-
-<!-- 8. CONTROLE -->
-<section class="card" id="controle">
-  <h2 class="section">8. Contrôle et modération</h2>
-  <ul>
-    <li>Suppression possible en cas de fraude</li>
-    <li>Traçabilité recommandée (GPX, dates, organisateur)</li>
-  </ul>
-</section>
-
-<!-- 9. LITIGES -->
-<section class="card" id="litiges">
-  <h2 class="section">9. Litiges</h2>
-  <p>
-    Toute contestation doit être motivée et justifiée.
-    La décision finale appartient à MTB Points.
-  </p>
-</section>
-
-<!-- 10. CHALLENGES -->
-<section class="card" id="challenges">
-  <h2 class="section">10. Challenges et badges</h2>
-  <ul>
-    <li>Challenge points MTB</li>
-    <li>Challenge participation</li>
-    <li>Challenge distance</li>
-    <li>Challenge dénivelé</li>
-  </ul>
-
-  <div class="box callout">
-    Les 3 meilleurs d'un challenge peuvent recevoir une récompense physique.
-  </div>
-</section>
-
-</main>
-
-<footer>
-  MTB Points — Règlement officiel • Dernière mise à jour : <span id="date"></span>
-</footer>
-
-<script>
-  document.getElementById("date").textContent =
-    new Date().toLocaleDateString("fr-FR");
-</script>
-
-</body>
-</html>
+    <h3>2 bis.2 Comment fonctionne la suggestion automatique ?</h3>
+    <div class="box">
+      <b>Processus</b>
+      <ol>
+        <li>Analyse du fichier GPX : <b>distance</b> et <b>D+</b></li>
+        <
