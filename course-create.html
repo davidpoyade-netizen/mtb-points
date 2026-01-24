@@ -106,13 +106,21 @@
     input[type="checkbox"]:checked + .toggle .toggleSwitch{background:var(--green)}
     input[type="checkbox"]:checked + .toggle .toggleSwitch::after{transform:translateX(20px)}
     input[type="checkbox"]{display:none}
+
+    .noteAutoDisc{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .noteAutoDisc b{color:#0b1220}
   </style>
 </head>
 
 <body class="theme-nature">
 
-  <!-- Header commun -->
-  <div id="siteHeader"></div>
+  <!-- Header commun (header.html + header.js) -->
+  <div id="app-header"></div>
+  <script type="module" src="js/header.js"></script>
 
   <main class="wrap">
     <div class="card">
@@ -147,7 +155,7 @@
       <div class="filters">
         <div>
           <label class="lbl">Nom de l'épreuve <span class="req">*</span></label>
-          <input id="courseName" class="inp" type="text" placeholder="Ex : XCO Open 25km..." />
+          <input id="courseName" class="inp" type="text" placeholder="Ex : XCO Open 25 km..." />
         </div>
 
         <div class="grid2">
@@ -155,15 +163,28 @@
             <label class="lbl">Discipline <span class="req">*</span></label>
             <select id="disc" class="inp">
               <option value="">— Sélectionner —</option>
+
+              <!-- XC -->
               <option value="XCC">XCC (Short Track)</option>
               <option value="XCO">XCO (Olympique)</option>
-              <option value="XCR">XCR (Longue distance)</option>
+              <option value="XCR">XC Raid (ex XCR)</option>
+              <option value="XCE">XCE (Eliminator)</option>
+              <option value="XC Relais">XC Relais</option>
+
+              <!-- Marathon -->
               <option value="XCM">XCM (Marathon)</option>
               <option value="XCM Ultra">XCM Ultra</option>
+
+              <!-- Gravity / Other : choix manuel -->
               <option value="DH">DH (Descente)</option>
               <option value="Enduro">Enduro</option>
               <option value="Gravel">Gravel</option>
             </select>
+
+            <div class="noteAutoDisc" id="discHint">
+              💡 <b>Auto</b> : pour XC/XCM, la discipline peut être suggérée après analyse GPX (distance).
+              <br/>🛑 <b>Manuel</b> : DH / Enduro / Gravel ne sont jamais choisis automatiquement.
+            </div>
           </div>
 
           <div>
@@ -204,9 +225,10 @@
       <!-- Multi-tours -->
       <h3 class="sectionTitle">🔄 Multi-tours (optionnel)</h3>
       <div class="muted2" style="margin-bottom:10px">
-        Pour XCO: nombre de tours différent selon âge et sexe
+        Pour XCO : nombre de tours différent selon âge et sexe.
       </div>
 
+      <!-- ⚠️ Ne jamais supprimer : activation multi-laps -->
       <input type="checkbox" id="multiLapsEnabled" />
       <label for="multiLapsEnabled" class="toggle">
         <div class="toggleSwitch"></div>
@@ -279,31 +301,12 @@
 
   <!-- App -->
   <script type="module">
+    // ✅ Import du client Supabase depuis votre fichier
     import { supabase } from "./js/supabaseClient.js";
 
+    console.log("✅ Supabase importé depuis supabaseClient.js");
+
     const $ = (id) => document.getElementById(id);
-
-    // ----------------------------
-    // Header commun (header.html)
-    // ----------------------------
-    (async function loadHeader(){
-      const host = document.getElementById("siteHeader");
-      if (!host) return;
-      try {
-        const res = await fetch("header.html", { cache: "no-store" });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        host.innerHTML = await res.text();
-
-        // Active le lien courant si présent
-        const current = (location.pathname.split("/").pop() || "").toLowerCase();
-        host.querySelectorAll("nav a[href]").forEach((a) => {
-          const href = (a.getAttribute("href") || "").toLowerCase();
-          if (href === current) a.classList.add("active");
-        });
-      } catch (e) {
-        console.warn("[course-create] header.html non chargé", e);
-      }
-    })();
 
     // ----------------------------
     // Utils
@@ -426,6 +429,53 @@
     const multiLapsWrap = $("multiLapsWrap");
     const multiLapsGrid = $("multiLapsGrid");
 
+    // ----------------------------
+    // Auto discipline rules
+    // ----------------------------
+    const MANUAL_ONLY = new Set(["DH", "Enduro", "Gravel"]);
+    let discTouchedByUser = false;
+
+    selDisc?.addEventListener("change", () => {
+      discTouchedByUser = true;
+    });
+
+    function suggestDiscFromDistance(distanceKm){
+      // Heuristique simple (modifiable plus tard)
+      const d = Number(distanceKm);
+      if (!Number.isFinite(d)) return null;
+
+      // DH / Enduro / Gravel : jamais auto (même si la distance semble courte)
+      // (c'est géré par MANUAL_ONLY)
+      if (d < 12) return "XCO";        // formats courts -> XCO (ou XCC si tu préfères)
+      if (d < 35) return "XCO";        // XC typique
+      if (d < 80) return "XCM";        // marathon
+      return "XCM Ultra";              // très long
+    }
+
+    function maybeAutoSetDisc(){
+      // Si l'utilisateur a déjà choisi, on ne touche plus
+      if (discTouchedByUser) return;
+
+      const current = (selDisc?.value || "").trim();
+      if (MANUAL_ONLY.has(current)) return; // si déjà manuel-only, ne pas écraser
+
+      const dist = toNumberOrNull(inpDistance?.value);
+      if (dist == null) return;
+
+      // Ne jamais forcer DH/Enduro/Gravel automatiquement
+      const sug = suggestDiscFromDistance(dist);
+      if (!sug || MANUAL_ONLY.has(sug)) return;
+
+      // Si vide, on propose
+      if (!current) {
+        const allowed = Array.from(selDisc.options).map(o => o.value);
+        if (allowed.includes(sug)) selDisc.value = sug;
+      }
+    }
+
+    // ----------------------------
+    // Multi-laps grid
+    // ----------------------------
     const AGE_CATEGORIES = [
       { id: "U17", name: "U17" },
       { id: "U19", name: "U19" },
@@ -487,7 +537,7 @@
     }
 
     async function loadMeeting(){
-      const user = await requireAuth();
+      await requireAuth();
 
       const { data, error } = await supabase
         .from("meetings")
@@ -507,14 +557,11 @@
         throw new Error("Meeting not found");
       }
 
-      // si l'user n'est pas l'organizer, on laisse quand même afficher (si public),
-      // mais l'insert race exigera organizer_id = auth.uid() via policy.
       CURRENT_MEETING = data;
 
       inpEventId.value = data.name || "—";
       inpDate.value = data.date || "";
 
-      // bornes date si end_date
       if (data.date) inpDate.min = data.date;
       if (data.end_date) inpDate.max = data.end_date;
 
@@ -534,7 +581,7 @@
         eventInfo.textContent = `📍 ${loc} • 📅 ${d}${ed}`;
       }
 
-      return { user, meeting: data };
+      return data;
     }
 
     // ----------------------------
@@ -559,16 +606,12 @@
         const a = await window.analyzeGPX(file, { keepPoints: true });
         window.GPX_CACHE = a;
 
-        // Autofill
+        // Autofill distance / d+
         inpDistance.value = String(a.distanceKm ?? "");
         inpDplus.value = String(a.dplusM ?? "");
 
-        // Si discipline auto fournie
-        if (!selDisc.value && a?.discipline) {
-          const disc = String(a.discipline);
-          const allowed = Array.from(selDisc.options).map(o => o.value);
-          if (allowed.includes(disc)) selDisc.value = disc;
-        }
+        // Auto discipline (distance-based) sauf DH/Enduro/Gravel
+        maybeAutoSetDisc();
 
         showMsg("Analyse GPX terminée.", true);
       } catch (e) {
@@ -590,7 +633,6 @@
       inpDistance.value = "";
       inpDplus.value = "";
       showMsg("GPX effacé.", true);
-      // status box reste visible si déjà affiché
     });
 
     // ----------------------------
@@ -604,10 +646,9 @@
         const user = await requireAuth();
         if (!CURRENT_MEETING) await loadMeeting();
 
-        // Validations
         const name = (inpName.value || "").trim();
-        const disc = (selDisc.value || "").trim();
-        const level = (selCategory.value || "").trim();
+        const disc = (selDisc.value || "").trim();     // -> colonne disc (Supabase)
+        const level = (selCategory.value || "").trim(); // -> colonne level
 
         if (!name) throw new Error("Nom de l'épreuve obligatoire.");
         if (!disc) throw new Error("Discipline obligatoire.");
@@ -619,10 +660,8 @@
         }
 
         const raceId = makeIdFromName(name);
-
         const payloadMulti = readMultiLapsPayload();
 
-        // On stocke multi-laps dans ranking_options (sans casser l'existant)
         const ranking_options = {
           general: true,
           sex: true,
@@ -658,10 +697,15 @@
           comment: (inpComment.value || "").trim() || null
         };
 
-        const { error: insErr } = await supabase.from("races").insert(insertPayload);
-        if (insErr) throw insErr;
+        console.log("📤 Envoi vers Supabase:", insertPayload);
 
-        // Optionnel mais utile : push race_id dans meetings.race_ids
+        const { error: insErr } = await supabase.from("races").insert(insertPayload);
+        if (insErr) {
+          console.error("❌ Erreur Supabase:", insErr);
+          throw insErr;
+        }
+
+        // Ajoute l'id à meetings.race_ids (non bloquant)
         try {
           const next = Array.isArray(CURRENT_MEETING.race_ids) ? [...CURRENT_MEETING.race_ids] : [];
           if (!next.includes(raceId)) next.push(raceId);
@@ -694,6 +738,8 @@
     btnReset?.addEventListener("click", () => {
       inpName.value = "";
       selDisc.value = "";
+      discTouchedByUser = false;
+
       selCategory.value = "";
       inpStartTime.value = "";
       selEbike.value = "0";
@@ -717,7 +763,6 @@
     // Init
     // ----------------------------
     await loadMeeting();
-
   </script>
 </body>
 </html>
