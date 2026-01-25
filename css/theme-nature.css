@@ -57,3 +57,220 @@
 
 /* -------------------------------------------------
    2) BACKGROUND GLOBAL
+------------------------------------------------- */
+body{
+  background:
+    radial-gradient(1100px 420px at 10% 0%, rgba(63,143,78,.18), transparent 58%),
+    radial-gradient(900px 380px at 95% 10%, rgba(163,113,69,.14), transparent 55%),
+    linear-gradient(180deg, rgba(22,52,34,.05), transparent 35%),
+    var(--grain),
+    var(--bg);
+  color:var(--text);
+}
+
+::selection{ background:rgba(212,175,55,.35); }
+
+/* -------------------------------------------------
+   3) HEADER & NAV
+------------------------------------------------- */
+.header{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.70)),
+    var(--contours);
+  border-bottom:1px solid rgba(22,52,34,.14);
+}
+
+.nav a{
+  color:var(--moss);
+}
+.nav a:hover{
+  background:rgba(47,106,60,.10);
+}
+.nav a.active{
+  background:rgba(47,106,60,.14);
+  color:var(--leaf);
+}
+
+/* -------------------------------------------------
+   4) CARDS / SECTIONS
+------------------------------------------------- */
+.card,
+.panel,
+.kpi,
+.item{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,250,252,.92)),
+    var(--grain);
+  border:1px solid rgba(22,52,34,.14);
+  box-shadow:var(--shadow);
+}
+
+.empty{
+  border:1px dashed rgba(22,52,34,.22);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.94), rgba(248,250,252,.94)),
+    var(--grain);
+}
+
+/* -------------------------------------------------
+   5) HERO / TITRES
+------------------------------------------------- */
+.hero{
+  background:
+    radial-gradient(1100px 320px at 12% 0%, rgba(47,106,60,.18), transparent 60%),
+    radial-gradient(900px 320px at 95% 10%, rgba(163,113,69,.14), transparent 58%),
+    radial-gradient(700px 240px at 70% 80%, rgba(212,175,55,.10), transparent 55%),
+    var(--contours),
+    #fff;
+  border:1px solid rgba(22,52,34,.16);
+}
+
+.sectionTitle{
+  color:#0b1b12;
+}
+
+/* -------------------------------------------------
+   6) PILLS / BADGES SIMPLES
+------------------------------------------------- */
+.pill,
+.badge{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,250,252,.90));
+  border:1px solid rgba(22,52,34,.14);
+}
+
+.badge.gold{
+  background:
+    linear-gradient(180deg, rgba(243,211,106,.95), rgba(212,175,55,.92));
+  border-color:rgba(212,175,55,.45);
+  color:#2a210f;
+}
+
+/* -------------------------------------------------
+   7) BUTTONS
+------------------------------------------------- */
+.btn{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(245,247,245,.90));
+  border:1px solid rgba(22,52,34,.18);
+}
+
+.btn.primary{
+  color:#fff;
+  background:
+    linear-gradient(180deg, rgba(63,143,78,1), rgba(47,106,60,1));
+  border-color:transparent;
+  box-shadow:0 14px 28px rgba(47,106,60,.22);
+}
+
+.btn.primary:hover{
+  background:
+    linear-gradient(180deg, rgba(79,165,96,1), rgba(63,143,78,1));
+}
+
+/* -------------------------------------------------
+   8) INPUTS
+------------------------------------------------- */
+input,
+select{
+  border:1px solid rgba(22,52,34,.18);
+}
+
+input:focus,
+select:focus{
+  outline:3px solid var(--focus);
+  outline-offset:2px;
+}
+
+/* -------------------------------------------------
+   9) TABLES (CLASSEMENT)
+------------------------------------------------- */
+table thead th{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(250,251,250,.94)),
+    var(--contours);
+}
+
+table tbody tr:hover td{
+  background:rgba(47,106,60,.06);
+}
+
+/* -------------------------------------------------
+   10) GAMIFICATION
+------------------------------------------------- */
+
+/* Coins */
+.coinCounter{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(22,52,34,.14);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,250,252,.90));
+}
+.coinIcon{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  border:1px solid rgba(212,175,55,.45);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.8), transparent 35%),
+    linear-gradient(180deg, rgba(243,211,106,.95), rgba(212,175,55,.92));
+}
+.coinValue{
+  font-weight:1000;
+}
+
+/* Level bar */
+.levelBar{
+  height:12px;
+  border-radius:999px;
+  background:rgba(22,52,34,.08);
+  border:1px solid rgba(22,52,34,.12);
+  overflow:hidden;
+}
+.levelFill{
+  height:100%;
+  width:0%;
+  background:
+    linear-gradient(90deg, rgba(47,106,60,1), rgba(212,175,55,1));
+  transition:width .8s ease;
+}
+
+/* Badges grid */
+.badgeGrid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+@media(max-width:900px){
+  .badgeGrid{ grid-template-columns:repeat(2,1fr); }
+}
+.badgeCard{
+  padding:12px;
+  border-radius:16px;
+  border:1px solid rgba(22,52,34,.14);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,250,252,.92));
+}
+.badgeLocked{
+  opacity:.5;
+  filter:grayscale(.3);
+}
+
+/* -------------------------------------------------
+   11) MICRO-INTERACTIONS
+------------------------------------------------- */
+.btn:hover,
+.item:hover{
+  transform:translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .btn:hover,
+  .item:hover{
+    transform:none;
+  }
+}
