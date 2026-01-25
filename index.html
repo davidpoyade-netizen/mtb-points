@@ -18,6 +18,53 @@
     .muted{color:var(--muted)}
     .grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:14px;margin-top:14px}
     @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+<div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:12px;">
+  <div class="coinCounter pop">
+    <span class="coinIcon" aria-hidden="true"></span>
+    <div>
+      <div class="muted" style="font-size:12px; font-weight:900;">MTB Coins</div>
+      <div class="coinValue">1 240</div>
+    </div>
+  </div>
+
+  <div class="levelCard" style="min-width:320px; flex:1;">
+    <div class="levelTop">
+      <div class="levelTitle">Niveau Rider</div>
+      <div class="levelTag">Explorer</div>
+    </div>
+    <div class="levelBar"><div class="levelFill" style="width:62%;"></div></div>
+    <div class="levelMeta">
+      <span>XP: 620 / 1000</span>
+      <span>Prochain niveau: Finisher</span>
+    </div>
+  </div>
+</div>
+
+<div class="badgeGrid">
+  <div class="badgeCard">
+    <div class="badgeIcon">🌲</div>
+    <div class="badgeName">Forest Rider</div>
+    <div class="badgeDesc">5 courses en forêt</div>
+  </div>
+
+  <div class="badgeCard">
+    <div class="badgeIcon">⛰️</div>
+    <div class="badgeName">Climber</div>
+    <div class="badgeDesc">10 000 m D+ cumulés</div>
+  </div>
+
+  <div class="badgeCard badgeLocked">
+    <div class="badgeIcon">🪨</div>
+    <div class="badgeName">Rock Crusher</div>
+    <div class="badgeDesc">TechScore &gt; 80</div>
+  </div>
+
+  <div class="badgeCard">
+    <div class="badgeIcon">🔥</div>
+    <div class="badgeName">Regular</div>
+    <div class="badgeDesc">3 courses cette saison</div>
+  </div>
+</div>
 
     /* Header */
     header.header{
