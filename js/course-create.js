@@ -1,8 +1,9 @@
 // js/course-create.js - CORRIGÉ
-// MTB Points — course-create (organizer)
+// MTB Points – course-create (organizer)
 // ✅ Récupère et sauvegarde les points GPX
 // ✅ Active keepPoints: true pour avoir les points
 // ✅ Sauvegarde les points dans l'épreuve pour le profil altimétrique
+// ✅ CORRIGÉ: start_time au lieu de startTime pour Supabase
 
 (function () {
   const $ = (id) => document.getElementById(id);
@@ -159,7 +160,7 @@
       if (a.points && Array.isArray(a.points)) {
         console.log(`✅ ${a.points.length} points GPX récupérés et mis en cache`);
       } else {
-        console.warn("⚠️  Pas de points dans la réponse (serveur n'a peut-être pas renvoyé les points)");
+        console.warn("⚠️ Pas de points dans la réponse (serveur n'a peut-être pas renvoyé les points)");
       }
 
       // Cache global pour sauver l'épreuve
@@ -257,7 +258,7 @@
     const meetingId = selMeeting.value;
     const m = findMeetingSafe(meetingId);
 
-    // ✅ CORRIGÉ: Structure complète avec points GPX
+    // ✅ CORRIGÉ: Structure complète avec points GPX + start_time au lieu de startTime
     const ev = {
       id: makeIdFromName(inpName.value),
       name: inpName.value.trim(),
@@ -266,7 +267,7 @@
 
       // Infos
       level: selLevel?.value || null,
-      startTime: inpStartTime?.value || null,
+      start_time: inpStartTime?.value || null,  // ✅ CORRIGÉ: start_time au lieu de startTime
       ebike: (selEbike?.value === "1"),
       participantsCount: toNumberOrNull(inpParticipants?.value),
       comment: (inpComment?.value || "").trim() || null,
@@ -302,7 +303,7 @@
     if (ev.gpx.points && Array.isArray(ev.gpx.points)) {
       console.log(`💾 Sauvegarde de l'épreuve avec ${ev.gpx.points.length} points GPX`);
     } else {
-      console.warn("⚠️  Aucun point GPX à sauvegarder (vérifier que l'API renvoie bien les points)");
+      console.warn("⚠️ Aucun point GPX à sauvegarder (vérifier que l'API renvoie bien les points)");
     }
 
     // Sauvegarde via storage.js
@@ -339,5 +340,5 @@
   if (btnClearGPX) btnClearGPX.addEventListener("click", clearGPX);
   if (btnSave) btnSave.addEventListener("click", saveCourse);
 
-  console.log("✅ course-create.js chargé (version corrigée avec points GPX)");
+  console.log("✅ course-create.js chargé (version corrigée avec start_time et points GPX)");
 })();
