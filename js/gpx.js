@@ -1,11 +1,11 @@
-// js/gpx.js - CORRIGÉ
-// ✅ Récupère les points GPX depuis l'API
-// ✅ Gestion d'erreurs améliorée
-// ✅ Support pour keepPoints
+// js/gpx.js - VERSION CLIENT-SIDE
+// ✅ Analyse GPX directement dans le navigateur
+// ✅ Pas de serveur nécessaire
+// ✅ Zéro problème CORS
+// ✅ Compatible avec le code existant
 
 (function () {
-  const DEFAULT_API_BASE = "https://mtb-points.onrender.com";
-
+  
   function emitStatus(phase, message, progress) {
     try {
       window.dispatchEvent(
@@ -31,108 +31,174 @@
     });
   }
 
-  // ✅ CORRIGÉ: Meilleure extraction des points
-  function extractPoints(json) {
-    // Les points peuvent être dans différents endroits de la réponse
-    if (Array.isArray(json?.points)) return json.points;
-    if (Array.isArray(json?.meta?.points)) return json.meta.points;
-    if (Array.isArray(json?.data?.points)) return json.data.points;
-    return null;
+  // ===== ANALYSE GPX CLIENT-SIDE =====
+  
+  function parseGPX(gpxText) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(gpxText, 'text/xml');
+    
+    // Vérifier erreurs de parsing
+    const parserError = xmlDoc.querySelector('parsererror');
+    if (parserError) {
+      throw new Error('GPX XML invalide');
+    }
+    
+    // Extraire tous les points de trace
+    const points = [];
+    const trkpts = xmlDoc.querySelectorAll('trkpt');
+    
+    trkpts.forEach(trkpt => {
+      const lat = parseFloat(trkpt.getAttribute('lat'));
+      const lon = parseFloat(trkpt.getAttribute('lon'));
+      
+      const eleNode = trkpt.querySelector('ele');
+      const ele = eleNode ? parseFloat(eleNode.textContent) : 0;
+      
+      if (!isNaN(lat) && !isNaN(lon)) {
+        points.push({ lat, lon, ele });
+      }
+    });
+    
+    return points;
+  }
+  
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // Rayon Terre en mètres
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    
+    return R * c;
+  }
+  
+  function calculateStats(points) {
+    if (!points || points.length === 0) {
+      return {
+        distanceKm: 0,
+        dplusM: 0,
+        hasElevation: false
+      };
+    }
+    
+    let totalDistance = 0;
+    let elevationGain = 0;
+    let elevationLoss = 0;
+    let minElevation = Infinity;
+    let maxElevation = -Infinity;
+    
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      
+      // Distance
+      const distance = calculateDistance(p1.lat, p1.lon, p2.lat, p2.lon);
+      totalDistance += distance;
+      
+      // Dénivelé
+      const elevDiff = p2.ele - p1.ele;
+      if (elevDiff > 0) {
+        elevationGain += elevDiff;
+      } else {
+        elevationLoss += Math.abs(elevDiff);
+      }
+      
+      minElevation = Math.min(minElevation, p1.ele, p2.ele);
+      maxElevation = Math.max(maxElevation, p1.ele, p2.ele);
+    }
+    
+    return {
+      distanceKm: totalDistance / 1000,
+      dplusM: Math.round(elevationGain),
+      dminusM: Math.round(elevationLoss),
+      minElevation: Math.round(minElevation),
+      maxElevation: Math.round(maxElevation),
+      hasElevation: maxElevation > 0,
+      pointsCount: points.length
+    };
   }
 
   async function analyzeGPX(file, opts = {}) {
-    const apiBase = String(opts.apiBase || DEFAULT_API_BASE).replace(/\/+$/, "");
-    const timeoutMs = Number.isFinite(opts.timeoutMs) ? Number(opts.timeoutMs) : 45000;
-    const keepPoints = opts.keepPoints !== false; // par défaut true maintenant
+    const keepPoints = opts.keepPoints !== false;
 
     if (!file) throw new Error("Aucun fichier GPX.");
 
-    emitStatus("gpx", "Lecture du GPX…", 0.05);
-    const gpxText = await readFileText(file);
-    if (!gpxText || gpxText.length < 50) throw new Error("GPX vide ou invalide.");
-
-    emitStatus("gpx", "Envoi au serveur (analyse GPX)…", 0.15);
-
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), timeoutMs);
-
-    let resp;
     try {
-      resp = await fetch(`${apiBase}/api/analyze-gpx`, {
-        method: "POST",
-        headers: { "Content-Type": "application/gpx+xml" },
-        body: gpxText,
-        signal: ctrl.signal,
-      });
-    } catch (e) {
-      clearTimeout(t);
-      emitStatus("error", "Erreur réseau vers l'API d'analyse.", undefined);
+      emitStatus("gpx", "Lecture du GPX…", 0.1);
+      const gpxText = await readFileText(file);
       
-      // Message d'erreur plus détaillé
-      const errMsg = e.name === 'AbortError' 
-        ? "Timeout: l'API met trop de temps à répondre (>45s)"
-        : "Erreur réseau (API analyse GPX). Vérifie que Render est bien démarré et que CORS est configuré.";
-      
-      throw new Error(errMsg);
-    }
-    clearTimeout(t);
-
-    emitStatus("osm", "Analyse terrain OSM…", 0.65);
-
-    let json;
-    try {
-      json = await resp.json();
-    } catch (_) {
-      throw new Error(`Réponse API invalide (JSON). Status: ${resp.status}`);
-    }
-
-    if (!resp.ok || !json || json.ok === false) {
-      const err = json?.error || `HTTP ${resp.status}`;
-      emitStatus("error", String(err), undefined);
-      throw new Error(String(err));
-    }
-
-    const stats = json?.meta?.stats || {};
-    const tech = json?.tech || {};
-    const discipline = json?.discipline || null;
-
-    // ✅ CORRIGÉ: Construction de la réponse avec points
-    const out = {
-      fileName: file.name,
-      distanceKm: stats.distanceKm ?? null,
-      dplusM: stats.dplusM ?? null,
-      hasElevation: stats.hasElevation ?? null,
-      steep: stats.steep ?? null,
-      discipline: discipline,
-      techV2: {
-        techScoreV2: tech.techScoreV2 ?? null,
-        tech01: tech.tech01 ?? null,
-        details: tech.details ?? null,
-        surfaceEstimate: tech.surfaceEstimate ?? null,
-        osmOk: tech.osmOk ?? false,
-      },
-      phys: json?.phys ?? { score: null, effort: null, ipbOverall: null },
-      mrs: (typeof json?.mrs === "number") ? json.mrs : null,
-    };
-
-    // ✅ CORRIGÉ: Extraction et inclusion des points
-    if (keepPoints) {
-      const points = extractPoints(json);
-      if (points && Array.isArray(points) && points.length > 0) {
-        out.points = points;
-        console.log(`✅ ${points.length} points GPX récupérés`);
-      } else {
-        console.warn("⚠️  Aucun point dans la réponse API");
-        out.points = null;
+      if (!gpxText || gpxText.length < 50) {
+        throw new Error("GPX vide ou invalide.");
       }
-    }
 
-    emitStatus("done", "Analyse terminée.", 1);
-    return out;
+      emitStatus("gpx", "Analyse du parcours…", 0.3);
+      const points = parseGPX(gpxText);
+      
+      if (points.length === 0) {
+        throw new Error("Aucun point de trace trouvé dans le GPX.");
+      }
+      
+      console.log(`📍 ${points.length} points extraits`);
+
+      emitStatus("gpx", "Calcul des statistiques…", 0.6);
+      const stats = calculateStats(points);
+      
+      console.log("📊 Stats calculées:", stats);
+
+      // Détection de discipline basique
+      let discipline = null;
+      if (stats.distanceKm > 50) {
+        discipline = "enduro";
+      } else if (stats.dplusM / stats.distanceKm > 50) {
+        discipline = "enduro";
+      } else {
+        discipline = "xc";
+      }
+
+      const out = {
+        fileName: file.name,
+        distanceKm: stats.distanceKm,
+        dplusM: stats.dplusM,
+        hasElevation: stats.hasElevation,
+        steep: stats.dplusM / stats.distanceKm > 40, // Basique
+        discipline: discipline,
+        techV2: {
+          techScoreV2: null,
+          tech01: null,
+          details: "Analyse terrain non disponible (mode client-side)",
+          surfaceEstimate: null,
+          osmOk: false,
+        },
+        phys: { 
+          score: null, 
+          effort: null, 
+          ipbOverall: null 
+        },
+        mrs: null,
+      };
+
+      if (keepPoints) {
+        out.points = points;
+        console.log(`✅ ${points.length} points inclus dans la réponse`);
+      }
+
+      emitStatus("done", "Analyse terminée.", 1);
+      return out;
+      
+    } catch (error) {
+      emitStatus("error", error.message, undefined);
+      throw error;
+    }
   }
 
   // Export global
   window.analyzeGPX = analyzeGPX;
 
-  console.log("✅ gpx.js chargé (version corrigée avec points)");
+  console.log("✅ gpx.js chargé (MODE CLIENT-SIDE - Sans serveur)");
+  console.log("ℹ️  L'analyse GPX se fait directement dans le navigateur");
 })();
