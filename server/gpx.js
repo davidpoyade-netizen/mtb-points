@@ -2,6 +2,7 @@
 // ✅ Récupère les points GPX depuis l'API
 // ✅ Gestion d'erreurs améliorée
 // ✅ Support pour keepPoints
+// ✅ FIX: Envoi en JSON (pas en application/gpx+xml)
 
 (function () {
   const DEFAULT_API_BASE = "https://mtb-points.onrender.com";
@@ -37,6 +38,14 @@
     if (Array.isArray(json?.points)) return json.points;
     if (Array.isArray(json?.meta?.points)) return json.meta.points;
     if (Array.isArray(json?.data?.points)) return json.data.points;
+    
+    // ✅ NOUVEAU: Support pour le format GeoJSON
+    if (json?.data?.geojson?.features?.[0]?.geometry?.coordinates) {
+      const coords = json.data.geojson.features[0].geometry.coordinates;
+      // Convertir [lon, lat, ele] en {lat, lon, ele}
+      return coords.map(([lon, lat, ele]) => ({ lat, lon, ele: ele || 0 }));
+    }
+    
     return null;
   }
 
@@ -58,10 +67,11 @@
 
     let resp;
     try {
+      // ✅ FIX: Envoi en JSON au lieu de application/gpx+xml
       resp = await fetch(`${apiBase}/api/analyze-gpx`, {
         method: "POST",
-        headers: { "Content-Type": "application/gpx+xml" },
-        body: gpxText,
+        headers: { "Content-Type": "application/json" },  // ✅ Changé ici
+        body: JSON.stringify({ gpxContent: gpxText }),    // ✅ Changé ici
         signal: ctrl.signal,
       });
     } catch (e) {
@@ -92,15 +102,16 @@
       throw new Error(String(err));
     }
 
-    const stats = json?.meta?.stats || {};
+    // ✅ Support des deux formats de réponse
+    const stats = json?.meta?.stats || json?.data?.stats || {};
     const tech = json?.tech || {};
     const discipline = json?.discipline || null;
 
     // ✅ CORRIGÉ: Construction de la réponse avec points
     const out = {
       fileName: file.name,
-      distanceKm: stats.distanceKm ?? null,
-      dplusM: stats.dplusM ?? null,
+      distanceKm: stats.distanceKm ?? (stats.distance ? stats.distance / 1000 : null),
+      dplusM: stats.dplusM ?? stats.elevationGain ?? null,
       hasElevation: stats.hasElevation ?? null,
       steep: stats.steep ?? null,
       discipline: discipline,
@@ -134,5 +145,5 @@
   // Export global
   window.analyzeGPX = analyzeGPX;
 
-  console.log("✅ gpx.js chargé (version corrigée avec points)");
+  console.log("✅ gpx.js chargé (version corrigée avec format JSON)");
 })();
