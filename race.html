@@ -385,6 +385,10 @@
 
   function normalizeDbRow(row) {
     if (!row) return null;
+    
+    // ✅ Extraire les données depuis gpx si les colonnes sont vides
+    const gpx = row.gpx || {};
+    
     return {
       id: row.id,
       meetingId: row.meeting_id,
@@ -400,14 +404,17 @@
       feeds: row.feeds,
       sexAllowed: row.sex_allowed ?? row.sexAllowed ?? "all",
       comment: row.comment,
-      distanceKm: row.distance_km,
-      dplusM: row.dplus_m,
-      physScore: row.score_phys,
-      techScore: row.score_tech,
-      globalScore: row.score_global,
+      
+      // ✅ Fallback vers gpx si les colonnes sont vides
+      distanceKm: row.distance_km ?? gpx.distanceKm,
+      dplusM: row.dplus_m ?? gpx.dplusM,
+      physScore: row.score_phys ?? gpx.phys?.score,
+      techScore: row.score_tech ?? gpx.techV2?.techScoreV2,
+      globalScore: row.score_global ?? gpx.mrs,
+      
       lapsByCategorySex: row.laps_by_category_sex ?? row.lapsByCategorySex,
       analysis: row.analysis_json,
-      gpx: row.gpx,
+      gpx: row.gpx, // ✅ Garder l'objet gpx complet pour les points
       isPublished: row.is_published
     };
   }
@@ -481,6 +488,16 @@
 
   function renderUI(race, authed) {
     CURRENT_RACE = race;
+    
+    // ✅ DEBUG: Afficher la structure complète
+    console.log("=== RENDER UI DEBUG ===");
+    console.log("Race:", race);
+    console.log("Distance:", race.distanceKm, "km");
+    console.log("D+:", race.dplusM, "m");
+    console.log("Scores - Phys:", race.physScore, "Tech:", race.techScore, "Global:", race.globalScore);
+    console.log("GPX présent:", !!race.gpx);
+    console.log("Points:", extractPoints(race)?.length || 0);
+    console.log("======================");
 
     // Header
     $("raceName").textContent = race.name || "Épreuve";
@@ -518,13 +535,22 @@
     $("scorePhys").textContent = race.physScore ? Math.round(race.physScore) : "—";
     $("scoreTech").textContent = race.techScore ? Math.round(race.techScore) : "—";
     $("scoreGlobal").textContent = race.globalScore ? Math.round(race.globalScore) : "—";
+    
+    // ✅ Afficher un message si les scores ne sont pas disponibles
+    if (!race.physScore && !race.techScore && !race.globalScore) {
+      console.warn("⚠️ Scores non disponibles. L'analyse technique n'a pas été effectuée.");
+      $("scorePhysSub").textContent = "Non calculé";
+      $("scoreTechSub").textContent = "Analyse OSM requise";
+      $("scoreGlobalSub").textContent = "Non calculé";
+    }
 
     // Difficulté
     renderDifficulty(race.globalScore);
 
     // Surface
     const a = race.analysis || race.analysis_json || {};
-    const surf = a.surfaceEstimate || a.techV2?.surfaceEstimate || null;
+    const gpxData = race.gpx || {};
+    const surf = a.surfaceEstimate || a.techV2?.surfaceEstimate || gpxData.techV2?.surfaceEstimate || null;
     if (surf) renderSurfaceBars(surf);
 
     // Tours
