@@ -265,333 +265,409 @@
       <div class="kpi">
         <div class="muted">Global (MRS)</div>
         <div class="big" id="scoreGlobal">—</div>
-        <div class="sub">0.55 Phys + 0.45 Tech</div>
+        <div class="sub" id="scoreGlobalSub">Master Race Score</div>
       </div>
     </div>
   </section>
 
+  <!-- Détails -->
+  <section class="grid2" style="margin-top:18px">
+    <div class="panel">
+      <h3 style="margin:0 0 12px 0;font-size:16px">Détails pratiques</h3>
+      <table class="table">
+        <tr><td>Date</td><td id="raceDate">—</td></tr>
+        <tr><td>Heure</td><td id="raceTime">—</td></tr>
+        <tr><td>Discipline</td><td id="raceDisc">—</td></tr>
+        <tr><td>Niveau</td><td id="raceLevel">—</td></tr>
+        <tr><td>Type</td><td id="raceEbike">—</td></tr>
+        <tr><td>Barrière horaire</td><td id="raceCutoff">—</td></tr>
+        <tr><td>Lavage</td><td id="raceWash">—</td></tr>
+        <tr><td>Assistance mécanique</td><td id="raceMechanic">—</td></tr>
+        <tr><td>Ravitaillements</td><td id="raceFeeds">—</td></tr>
+        <tr><td>Sexe autorisé</td><td id="raceSex">—</td></tr>
+      </table>
+      <div style="margin-top:12px;padding:12px;background:rgba(31,122,77,0.1);border-radius:8px;font-size:13px">
+        <div style="font-weight:600;margin-bottom:4px">Note organisateur</div>
+        <div id="raceComment" style="color:#334155">—</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin:0 0 12px 0;font-size:16px">Tours par catégorie</h3>
+      <div id="lapsContainer">—</div>
+    </div>
+  </section>
+
+  <!-- Carte + Profil -->
+  <section class="panel" style="margin-top:18px">
+    <h3 style="margin:0 0 14px 0;font-size:16px">Tracé GPS</h3>
+    <div id="mapContainer"></div>
+    <div style="margin-top:8px;font-size:13px;color:var(--muted)" id="mapInfo">—</div>
+  </section>
+
   <!-- Profil altimétrique -->
-  <section class="panel elevation-section" id="elevationSection">
-    <h3>📊 Profil altimétrique</h3>
+  <section class="elevation-section" id="elevationSection">
+    <h3>Profil altimétrique</h3>
     <div id="elevationContent">
       <canvas id="elevationChart"></canvas>
     </div>
   </section>
 
-  <!-- Carte -->
-  <section class="panel" style="margin-top:18px">
-    <h3 style="margin:0 0 12px 0;font-size:16px">🗺️ Tracé GPS</h3>
-    <div id="mapContainer"></div>
-    <div class="muted" style="margin-top:8px;font-size:12px" id="mapInfo">—</div>
-  </section>
-
   <!-- Export PDF -->
   <section class="panel" style="margin-top:18px">
-    <h3 style="margin:0 0 12px 0;font-size:16px">📄 Export PDF</h3>
+    <h3 style="margin:0 0 12px 0;font-size:16px">Exports PDF</h3>
     <div class="btnRow">
-      <button class="btn2" id="pdfCoureur">👤 Fiche coureur</button>
-      <button class="btn2" id="pdfOrga">🏢 Fiche organisateur</button>
+      <button class="btn2" id="pdfCoureur">📄 Fiche coureur</button>
+      <button class="btn2" id="pdfOrga">📋 Fiche organisateur</button>
     </div>
   </section>
-
 </main>
 
-<!-- Scripts -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- ✅ SCRIPTS FIXES -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="js/supabase-init.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/pdf-export.js"></script>
 <script src="js/elevation-profile.js"></script>
 
+<!-- ✅ IMPORT SUPABASE EN MODULE -->
+<script type="module">
+  import { supabase } from './js/supabaseClient.js';
+  
+  // Rendre supabase disponible globalement pour le script ci-dessous
+  window.supabase = supabase;
+  
+  // Déclencher un événement quand Supabase est prêt
+  window.dispatchEvent(new Event('supabase-ready'));
+  console.log('✅ Supabase chargé et disponible globalement');
+</script>
+
+<!-- ✅ SCRIPT PRINCIPAL (attend que Supabase soit prêt) -->
 <script>
   const $ = (id) => document.getElementById(id);
-  const params = new URLSearchParams(location.search);
-  const raceId = params.get("id");
-  
+  const raceId = new URLSearchParams(location.search).get("id");
   let CURRENT_RACE = null;
   let elevationChart = null;
 
+  const KEY_RACES = "mtb.races.v1";
+  const KEY_MEETINGS = "mtb.meetings.v1";
+
+  function loadJSON(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
   function setStatus(ok, msg) {
-    console.log(ok ? `✅ ${msg}` : `❌ ${msg}`);
+    const dot = $("statusDot");
+    if (dot) dot.style.background = ok ? "#16a34a" : "#dc2626";
   }
 
-  function esc(s) {
-    return String(s ?? "").replace(/[&<>"']/g, (m) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[m]));
+  function findRaceLocal(id) {
+    const all = loadJSON(KEY_RACES);
+    return Array.isArray(all) ? all.find(r => r?.id === id) : null;
   }
 
-  // ============================================================================
-  // EXTRACTION DES POINTS GPX
-  // ============================================================================
   function extractPoints(race) {
-    if (!race) return null;
-
-    if (race.gpx?.points && Array.isArray(race.gpx.points) && race.gpx.points.length > 0) {
-      console.log(`✅ ${race.gpx.points.length} points GPX trouvés dans race.gpx.points`);
-      return race.gpx.points;
-    }
-
-    if (race.gpx_points && Array.isArray(race.gpx_points) && race.gpx_points.length > 0) {
-      console.log(`✅ ${race.gpx_points.length} points GPX trouvés dans race.gpx_points`);
-      return race.gpx_points;
-    }
-
-    if (race.points && Array.isArray(race.points) && race.points.length > 0) {
-      console.log(`✅ ${race.points.length} points GPX trouvés dans race.points`);
-      return race.points;
-    }
-
-    console.warn("⚠️  Aucun point GPX disponible");
-    return null;
+    const a = race?.analysis || race?.analysis_json || race?.raw || race?.gpx || {};
+    return (
+      race?.gpx?.points ||
+      race?.points ||
+      a?.points ||
+      a?.raw?.points ||
+      a?.rawServer?.points ||
+      a?.meta?.points ||
+      a?.rawServer?.meta?.points ||
+      null
+    );
   }
 
-  // ============================================================================
-  // FETCH RACE
-  // ============================================================================
+  function normalizeDbRow(row) {
+    if (!row) return null;
+    return {
+      id: row.id,
+      meetingId: row.meeting_id,
+      name: row.name,
+      date: row.date,
+      time: row.time ?? null,
+      disc: row.discipline,
+      level: row.level,
+      ebike: row.ebike,
+      cutoffTime: row.cutoff_time ?? row.cutoffTime,
+      wash: row.bike_wash ?? row.wash,
+      mechanic: row.mech_assist ?? row.mechanic,
+      feeds: row.feeds,
+      sexAllowed: row.sex_allowed ?? row.sexAllowed ?? "all",
+      comment: row.comment,
+      distanceKm: row.distance_km,
+      dplusM: row.dplus_m,
+      physScore: row.score_phys,
+      techScore: row.score_tech,
+      globalScore: row.score_global,
+      lapsByCategorySex: row.laps_by_category_sex ?? row.lapsByCategorySex,
+      analysis: row.analysis_json,
+      gpx: row.gpx,
+      isPublished: row.is_published
+    };
+  }
+
+  // ✅ ATTENDRE QUE SUPABASE SOIT PRÊT
+  async function waitForSupabase() {
+    if (window.supabase) return window.supabase;
+    
+    return new Promise((resolve) => {
+      window.addEventListener('supabase-ready', () => {
+        resolve(window.supabase);
+      }, { once: true });
+    });
+  }
+
   async function fetchRaceProper(id) {
-    let row = null;
-    let source = "—";
-    let authed = false;
-
-    // 1) Supabase
-    try {
-      const { data: { user }, error: authErr } = await supabase.auth.getUser();
-      authed = !authErr && user;
-
-      const { data, error } = await supabase
-        .from("races")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (!error && data) {
-        row = data;
-        source = authed ? "Supabase (preview)" : "Supabase (public)";
-        return { row, source, authed };
-      }
-    } catch (e) {
-      console.warn("Supabase non disponible:", e.message);
+    // 1) Essayer localStorage d'abord
+    const local = findRaceLocal(id);
+    if (local) {
+      console.log("✅ Épreuve trouvée dans localStorage");
+      return { row: local, source: "localStorage", authed: false };
     }
 
-    // 2) localStorage
-    if (typeof window.findStoredEvent === "function") {
-      row = window.findStoredEvent(id);
-      if (row) {
-        source = "localStorage";
-        return { row, source, authed: false };
-      }
-    }
+    console.log("Épreuve non trouvée dans localStorage, essai Supabase...");
 
     try {
-      const events = JSON.parse(localStorage.getItem("vtt_events_v1") || "[]");
-      row = events.find(e => e.id === id);
-      if (row) {
-        source = "localStorage (fallback)";
-        return { row, source, authed: false };
+      // 2) Attendre que Supabase soit prêt
+      const supabase = await waitForSupabase();
+      
+      if (!supabase) {
+        console.warn("Supabase non disponible");
+        return { row: null, source: "—", authed: false };
       }
-    } catch (e) {
-      console.error("Erreur localStorage:", e);
-    }
 
-    return { row: null, source: "Non trouvé", authed };
+      // 3) Vérifier si authentifié
+      let isAuthed = false;
+      try {
+        const { data: sess } = await supabase.auth.getSession();
+        isAuthed = !!sess?.session;
+      } catch (e) {
+        console.warn("Erreur vérification session:", e);
+      }
+
+      // 4) Requête Supabase
+      let q = supabase.from("races").select("*").eq("id", id);
+      if (!isAuthed) q = q.eq("is_published", true);
+
+      const { data, error } = await q.maybeSingle();
+
+      if (error) {
+        console.warn("Erreur Supabase:", error);
+        return { row: null, source: "Supabase (erreur)", authed: isAuthed };
+      }
+
+      if (data) {
+        console.log("✅ Épreuve trouvée dans Supabase");
+        return { 
+          row: normalizeDbRow(data), 
+          source: isAuthed ? "Supabase (preview)" : "Supabase", 
+          authed: isAuthed 
+        };
+      }
+
+      return { row: null, source: "—", authed: isAuthed };
+
+    } catch (e) {
+      console.error("Erreur fetchRaceProper:", e);
+      return { row: null, source: "Erreur", authed: false };
+    }
   }
 
-  // ============================================================================
-  // RENDER UI
-  // ============================================================================
-  function renderUI(row, authed) {
-    CURRENT_RACE = row;
+  function renderUI(race, authed) {
+    CURRENT_RACE = race;
 
-    // Nom et meta
-    $("raceName").textContent = row.name || "Sans nom";
-    $("raceMeta").innerHTML = `
-      📅 ${row.date || "—"} 
-      ${row.startTime ? `• 🕐 ${row.startTime}` : ""} 
-      • 🚴 ${row.disc || "—"}
-      ${row.category ? `• 📊 ${getCategoryLabel(row.category)}` : ""}
-      ${row.ebike ? " • ⚡ E-bike autorisé" : ""}
-    `;
+    // Header
+    $("raceName").textContent = race.name || "Épreuve";
+    $("raceMeta").textContent = `${race.disc || "—"} • ${race.level || "—"} • ${race.date || "—"}`;
+    $("raceDate").textContent = race.date || "—";
+    $("raceTime").textContent = race.time || "—";
+    $("raceDisc").textContent = race.disc || "—";
+    $("raceLevel").textContent = race.level || "—";
+    $("raceEbike").textContent = race.ebike ? "E-bike" : "Musculaire";
+    $("raceCutoff").textContent = race.cutoffTime || "—";
+    $("raceWash").textContent = race.wash || "—";
+    $("raceMechanic").textContent = race.mechanic || "—";
+    $("raceFeeds").textContent = race.feeds || "—";
+    $("raceSex").textContent = race.sexAllowed || "all";
+    $("raceComment").textContent = race.comment || "—";
 
     // KPIs
-    $("kpiDist").textContent = row.distanceKm ? row.distanceKm.toFixed(2) : "—";
-    $("kpiDplus").textContent = row.dplusM ? Math.round(row.dplusM) : "—";
-    $("kpiPublish").textContent = row.is_published ? "Publié" : "Brouillon";
-    $("kpiPublishSub").textContent = row.is_published ? "Visible publiquement" : "Privé";
+    $("kpiDist").textContent = race.distanceKm ? `${race.distanceKm.toFixed(2)}` : "—";
+    $("kpiDplus").textContent = race.dplusM ? `${Math.round(race.dplusM)}` : "—";
+    
+    // Statut publication
+    if (race.isPublished) {
+      $("kpiPublish").textContent = "Publié";
+      $("kpiPublishSub").textContent = "Visible publiquement";
+    } else if (authed) {
+      $("kpiPublish").textContent = "Brouillon";
+      $("kpiPublishSub").textContent = "Non publié";
+      $("adminActions").style.display = "block";
+    } else {
+      $("kpiPublish").textContent = "—";
+      $("kpiPublishSub").textContent = "—";
+    }
 
     // Scores
-    $("scorePhys").textContent = row.physScore ?? "—";
-    $("scorePhysSub").textContent = row.phys?.effort 
-      ? `Effort: ${row.phys.effort} • IPB: ${row.phys.ipbOverall ?? "—"}`
-      : "—";
+    $("scorePhys").textContent = race.physScore ? Math.round(race.physScore) : "—";
+    $("scoreTech").textContent = race.techScore ? Math.round(race.techScore) : "—";
+    $("scoreGlobal").textContent = race.globalScore ? Math.round(race.globalScore) : "—";
 
-    const techScore = row.techV2?.techScoreV2 ?? row.techScore ?? null;
-    $("scoreTech").textContent = techScore ?? "—";
-    $("scoreTechSub").textContent = techScore 
-      ? "TechScoreV2 (OSM + bonus GPX)"
-      : "Indisponible";
+    // Difficulté
+    renderDifficulty(race.globalScore);
 
-    $("scoreGlobal").textContent = row.globalScore ?? row.mrs ?? "—";
+    // Surface
+    const a = race.analysis || race.analysis_json || {};
+    const surf = a.surfaceEstimate || a.techV2?.surfaceEstimate || null;
+    if (surf) renderSurfaceBars(surf);
 
-    // Difficulté (calculée automatiquement)
-    if (row.difficulty || row.level) {
-      renderDifficulty(row.difficulty || calculateDifficulty(row));
-    }
-
-    // ✅ Surfaces OSM
-    if (row.techV2?.surfaceEstimate || row.surfaceEstimate) {
-      renderSurfaces(row.techV2?.surfaceEstimate || row.surfaceEstimate);
-    }
-
-    // Actions admin
-    if (authed && !row.is_published) {
-      $("adminActions").style.display = "block";
-    }
-
-    // Profil altimétrique
-    renderElevationProfile(row);
-
-    // Carte
-    renderMap(row);
+    // Tours
+    renderLaps(race.lapsByCategorySex);
 
     // QR Code
-    renderQr(raceId);
+    renderQr(race.id);
+
+    // Carte + Profil
+    renderMap(race);
+    renderElevationProfile(race);
   }
 
-  // ============================================================================
-  // CATÉGORIE D'ÉPREUVE
-  // ============================================================================
-  function getCategoryLabel(cat) {
-    const labels = {
-      "locale": "Locale",
-      "regionale": "Régionale",
-      "nationale": "Nationale",
-      "internationale": "Internationale",
-      "mondiale": "Mondiale"
-    };
-    return labels[cat] || cat;
-  }
-
-  // ============================================================================
-  // DIFFICULTÉ
-  // ============================================================================
-  function calculateDifficulty(race) {
-    // Calcul simple basé sur distance + D+
-    const dist = race.distanceKm || 0;
-    const dplus = race.dplusM || 0;
-    const ratio = dplus / (dist || 1);
+  function renderDifficulty(globalScore) {
+    if (!globalScore) return;
     
-    if (ratio > 60) return 5;
-    if (ratio > 45) return 4;
-    if (ratio > 30) return 3;
-    if (ratio > 15) return 2;
-    return 1;
-  }
-
-  function renderDifficulty(difficulty) {
     const box = $("difficultyBox");
-    const stars = $("difficultyStars");
+    const starsDiv = $("difficultyStars");
     const label = $("difficultyLabel");
     const desc = $("difficultyDesc");
 
-    if (!difficulty || typeof difficulty !== "number") return;
-
     box.style.display = "flex";
-    
-    const level = Math.min(5, Math.max(1, Math.round(difficulty)));
-    stars.innerHTML = Array.from({ length: 5 }, (_, i) => 
-      `<span class="star ${i < level ? "filled" : ""}">★</span>`
-    ).join("");
 
-    const labels = ["Facile", "Modéré", "Difficile", "Très difficile", "Extrême"];
-    label.textContent = labels[level - 1] || "Modéré";
-    desc.textContent = `Niveau de difficulté: ${level}/5 (calculé automatiquement)`;
+    let diff, hint, stars;
+    if (globalScore < 25) {
+      diff = "Facile";
+      hint = "Accessible aux débutants";
+      stars = 1;
+    } else if (globalScore < 50) {
+      diff = "Modéré";
+      hint = "Exigeant physiquement";
+      stars = 2;
+    } else if (globalScore < 75) {
+      diff = "Difficile";
+      hint = "Très exigeant";
+      stars = 3;
+    } else {
+      diff = "Extrême";
+      hint = "Réservé aux très entraînés";
+      stars = 4;
+    }
+
+    label.textContent = diff;
+    desc.textContent = hint;
+
+    starsDiv.innerHTML = "";
+    for (let i = 1; i <= 4; i++) {
+      const star = document.createElement("span");
+      star.className = i <= stars ? "star filled" : "star";
+      star.textContent = "★";
+      starsDiv.appendChild(star);
+    }
   }
 
-  // ============================================================================
-  // ✅ SURFACES OSM (route, piste large, mono-trace)
-  // ============================================================================
-  function renderSurfaces(estimate) {
+  function renderSurfaceBars(surf) {
     const box = $("surfaceBox");
     const container = $("surfaceBarContainer");
     const legend = $("surfaceLegend");
 
-    if (!estimate) return;
+    const r = surf.road || surf.route || 0;
+    const t = surf.track || surf.wideTrack || 0;
+    const s = surf.single || surf.singletrack || 0;
+    const total = r + t + s || 0.0001;
 
-    const { roadPct, trackPct, singlePct } = estimate;
-    if (roadPct == null && trackPct == null && singlePct == null) return;
+    const rP = (r / total) * 100;
+    const tP = (t / total) * 100;
+    const sP = Math.max(0, 100 - rP - tP);
 
     box.style.display = "block";
-
-    // Barre
-    const r = roadPct || 0;
-    const t = trackPct || 0;
-    const s = singlePct || 0;
-
     container.innerHTML = "";
-    
-    if (r > 0) {
+
+    if (rP > 0) {
       const bar = document.createElement("div");
       bar.className = "surface-bar road";
-      bar.style.width = r + "%";
-      bar.textContent = r.toFixed(0) + "%";
-      container.appendChild(bar);
-    }
-    
-    if (t > 0) {
-      const bar = document.createElement("div");
-      bar.className = "surface-bar track";
-      bar.style.width = t + "%";
-      bar.textContent = t.toFixed(0) + "%";
-      container.appendChild(bar);
-    }
-    
-    if (s > 0) {
-      const bar = document.createElement("div");
-      bar.className = "surface-bar single";
-      bar.style.width = s + "%";
-      bar.textContent = s.toFixed(0) + "%";
+      bar.style.width = `${rP}%`;
+      bar.textContent = rP > 10 ? `${rP.toFixed(0)}%` : "";
       container.appendChild(bar);
     }
 
-    // Légende
+    if (tP > 0) {
+      const bar = document.createElement("div");
+      bar.className = "surface-bar track";
+      bar.style.width = `${tP}%`;
+      bar.textContent = tP > 10 ? `${tP.toFixed(0)}%` : "";
+      container.appendChild(bar);
+    }
+
+    if (sP > 0) {
+      const bar = document.createElement("div");
+      bar.className = "surface-bar single";
+      bar.style.width = `${sP}%`;
+      bar.textContent = sP > 10 ? `${sP.toFixed(0)}%` : "";
+      container.appendChild(bar);
+    }
+
     legend.innerHTML = "";
     
-    if (r > 0) {
+    if (rP > 0) {
       const item = document.createElement("div");
       item.className = "surface-legend-item";
       item.innerHTML = `
         <div class="surface-legend-dot" style="background:#3b82f6"></div>
-        Route: ${r.toFixed(1)}%
+        Route: ${rP.toFixed(1)}%
       `;
       legend.appendChild(item);
     }
     
-    if (t > 0) {
+    if (tP > 0) {
       const item = document.createElement("div");
       item.className = "surface-legend-item";
       item.innerHTML = `
         <div class="surface-legend-dot" style="background:#f59e0b"></div>
-        Piste large: ${t.toFixed(1)}%
+        Piste large: ${tP.toFixed(1)}%
       `;
       legend.appendChild(item);
     }
     
-    if (s > 0) {
+    if (sP > 0) {
       const item = document.createElement("div");
       item.className = "surface-legend-item";
       item.innerHTML = `
         <div class="surface-legend-dot" style="background:#10b981"></div>
-        Mono-trace: ${s.toFixed(1)}%
+        Mono-trace: ${sP.toFixed(1)}%
       `;
       legend.appendChild(item);
     }
   }
 
-  // ============================================================================
-  // PROFIL ALTIMÉTRIQUE
-  // ============================================================================
+  function renderLaps(laps) {
+    const container = $("lapsContainer");
+    if (!laps || typeof laps !== "object" || !Object.keys(laps).length) {
+      container.innerHTML = "<div style='color:var(--muted)'>Aucune donnée</div>";
+      return;
+    }
+
+    let html = "<table class='table'><tr><th>Catégorie</th><th>Hommes</th><th>Femmes</th></tr>";
+    for (const [cat, v] of Object.entries(laps)) {
+      html += `<tr><td>${cat}</td><td>${v.M || "—"}</td><td>${v.F || "—"}</td></tr>`;
+    }
+    html += "</table>";
+    container.innerHTML = html;
+  }
+
   function renderElevationProfile(race) {
     const section = $("elevationSection");
     const content = $("elevationContent");
@@ -646,9 +722,6 @@
     }
   }
 
-  // ============================================================================
-  // CARTE LEAFLET
-  // ============================================================================
   function renderMap(race) {
     const container = $("mapContainer");
     const info = $("mapInfo");
@@ -704,9 +777,6 @@
     }
   }
 
-  // ============================================================================
-  // QR CODE
-  // ============================================================================
   function renderQr(id) {
     const container = $("qrContainer");
     if (!id) return;
@@ -729,9 +799,6 @@
     });
   }
 
-  // ============================================================================
-  // PUBLICATION
-  // ============================================================================
   async function publishRace() {
     const btn = $("btnPublish");
     const msg = $("publishMsg");
@@ -740,6 +807,8 @@
       btn.disabled = true;
       msg.textContent = "Publication…";
 
+      const supabase = await waitForSupabase();
+      
       const { error } = await supabase
         .from("races")
         .update({ is_published: true })
@@ -763,9 +832,6 @@
     }
   }
 
-  // ============================================================================
-  // PDF EXPORT
-  // ============================================================================
   function setupPdfButtons(getRace) {
     if (typeof window.exportRaceAsPdf === "function") {
       $("pdfCoureur")?.addEventListener("click", () => {
@@ -777,9 +843,6 @@
     }
   }
 
-  // ============================================================================
-  // MAIN
-  // ============================================================================
   async function main() {
     if (!raceId) {
       setStatus(false, "ID d'épreuve manquant");
