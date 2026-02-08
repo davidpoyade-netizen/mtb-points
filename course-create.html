@@ -698,8 +698,10 @@
           distance_km: toNumberOrNull(inpDistance.value),
           dplus_m: toIntOrNull(inpDplus.value),
 
-          // Données GPX (JSONB - contient seulement les points GPS)
-          gpx: window.GPX_CACHE?.points ?? null,
+          // Données GPX (JSONB - échantillonné 1 point sur 10 pour réduire la taille)
+          gpx: window.GPX_CACHE?.points 
+            ? window.GPX_CACHE.points.filter((p, i) => i % 10 === 0) 
+            : null,
           gpx_file_name: file ? file.name : null,
 
           // Options de classement
@@ -707,7 +709,9 @@
           comment: (inpComment.value || "").trim() || null
         };
 
+        const pointsCount = insertPayload.gpx?.length || 0;
         console.log("📤 Envoi vers Supabase:", insertPayload);
+        console.log(`📍 Points GPS envoyés: ${pointsCount} (échantillonnés depuis ${window.GPX_CACHE?.points?.length || 0})`);
 
         const { error: insErr } = await supabase.from("races").insert(insertPayload);
         if (insErr) {
