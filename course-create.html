@@ -648,8 +648,8 @@
         if (!CURRENT_MEETING) await loadMeeting();
 
         const name = (inpName.value || "").trim();
-        const disc = (selDisc.value || "").trim();     // -> colonne disc (Supabase)
-        const level = (selCategory.value || "").trim(); // -> colonne level
+        const disc = (selDisc.value || "").trim();     // ✅ colonne "disc" dans Supabase (PAS "discipline")
+        const level = (selCategory.value || "").trim(); // ✅ colonne "level"
 
         if (!name) throw new Error("Nom de l'épreuve obligatoire.");
         if (!disc) throw new Error("Discipline obligatoire.");
@@ -674,26 +674,35 @@
 
         const file = inpGpx.files?.[0] || null;
 
+        // ✅ Construction de l'objet à envoyer à Supabase
+        // IMPORTANT: Ne PAS inclure de champ "discipline" - la colonne s'appelle "disc"
         const insertPayload = {
+          // Identifiants
           id: raceId,
           organizer_id: user.id,
           meeting_id: CURRENT_MEETING.id,
 
+          // Informations de base
           name,
           date: CURRENT_MEETING.date || null,
           start_time: (inpStartTime.value || null),
 
-          disc,
+          // Discipline et catégorie
+          disc,   // ✅ Colonne "disc" dans Supabase (PAS "discipline")
           level,
 
+          // Options
           ebike: selEbike.value === "1",
 
+          // Statistiques parcours
           distance_km: toNumberOrNull(inpDistance.value),
           dplus_m: toIntOrNull(inpDplus.value),
 
-          gpx: window.GPX_CACHE ?? null,
+          // Données GPX (JSONB - contient seulement les points GPS)
+          gpx: window.GPX_CACHE?.points ?? null,
           gpx_file_name: file ? file.name : null,
 
+          // Options de classement
           ranking_options,
           comment: (inpComment.value || "").trim() || null
         };
