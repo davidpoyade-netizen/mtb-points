@@ -68,12 +68,23 @@
   }
 
   function extractPoints(race) {
-    // Essayer plusieurs sources pour les points GPX
+    // ✅ PRIORITÉ 1 : Si race.gpx est déjà un array de points
+    if (Array.isArray(race?.gpx)) {
+      console.log('📍 Points trouvés directement dans race.gpx:', race.gpx.length);
+      return race.gpx;
+    }
+    
+    // ✅ PRIORITÉ 2 : Essayer race.points
+    if (Array.isArray(race?.points)) {
+      console.log('📍 Points trouvés dans race.points:', race.points.length);
+      return race.points;
+    }
+    
+    // Essayer plusieurs sources pour les points GPX (legacy)
     const analysis = extractAnalysis(race);
     
     const pts =
       race?.gpx?.points ||
-      race?.points ||
       analysis?.points ||
       analysis?.raw?.points ||
       analysis?.rawServer?.points ||
@@ -81,7 +92,13 @@
       analysis?.rawServer?.meta?.points ||
       null;
     
-    return Array.isArray(pts) ? pts : null;
+    if (Array.isArray(pts)) {
+      console.log('📍 Points trouvés dans analysis:', pts.length);
+      return pts;
+    }
+    
+    console.warn('⚠️ Aucun point GPS trouvé');
+    return null;
   }
 
   function normalizeDbRow(row) {
@@ -93,7 +110,7 @@
       date: row.date,
       time: row.time ?? null,
 
-      disc: row.discipline,
+      disc: row.disc,  // ✅ Corrigé : colonne "disc" dans Supabase
       level: row.level,
       ebike: row.ebike,
 
@@ -155,13 +172,27 @@
     }
   }
 
+  // ✅ Calcul automatique du niveau de difficulté (5 niveaux)
   function difficultyLabel(globalScore) {
     const g = num(globalScore);
-    if (g == null) return { label: "—", hint: "Score global indisponible" };
-    if (g < 25) return { label: "Facile", hint: "Accessible" };
-    if (g < 50) return { label: "Modéré", hint: "Exigeant" };
-    if (g < 75) return { label: "Difficile", hint: "Très exigeant" };
-    return { label: "Extrême", hint: "Réservé aux très entraînés" };
+    if (g == null) return { label: "—", hint: "Score global indisponible", emoji: "" };
+    
+    if (g < 20) {
+      // Niveau 1: Facile
+      return { label: "🟢 Facile", hint: "Accessible aux débutants", emoji: "🟢" };
+    } else if (g < 40) {
+      // Niveau 2: Accessible
+      return { label: "🔵 Accessible", hint: "Bon niveau physique requis", emoji: "🔵" };
+    } else if (g < 60) {
+      // Niveau 3: Intermédiaire
+      return { label: "🟡 Intermédiaire", hint: "Exigeant physiquement et techniquement", emoji: "🟡" };
+    } else if (g < 80) {
+      // Niveau 4: Difficile
+      return { label: "🟠 Difficile", hint: "Très exigeant, expérience requise", emoji: "🟠" };
+    } else {
+      // Niveau 5: Très difficile / Expert
+      return { label: "🔴 Très difficile / Expert", hint: "Réservé aux très entraînés et expérimentés", emoji: "🔴" };
+    }
   }
 
   function renderHeader(race, sourceLabel) {
