@@ -370,10 +370,22 @@
   }
 
   function extractPoints(race) {
+    // ✅ PRIORITÉ 1 : Si race.gpx est déjà un array de points
+    if (Array.isArray(race?.gpx)) {
+      console.log('📍 Points trouvés directement dans race.gpx:', race.gpx.length);
+      return race.gpx;
+    }
+    
+    // ✅ PRIORITÉ 2 : Essayer race.points
+    if (Array.isArray(race?.points)) {
+      console.log('📍 Points trouvés dans race.points:', race.points.length);
+      return race.points;
+    }
+    
+    // Essayer les autres sources (legacy)
     const a = race?.analysis || race?.analysis_json || race?.raw || race?.gpx || {};
-    return (
+    const pts = (
       race?.gpx?.points ||
-      race?.points ||
       a?.points ||
       a?.raw?.points ||
       a?.rawServer?.points ||
@@ -381,6 +393,14 @@
       a?.rawServer?.meta?.points ||
       null
     );
+    
+    if (Array.isArray(pts)) {
+      console.log('📍 Points trouvés dans analysis:', pts.length);
+      return pts;
+    }
+    
+    console.warn('⚠️ Aucun point GPS trouvé');
+    return null;
   }
 
   function normalizeDbRow(row) {
@@ -395,7 +415,7 @@
       name: row.name,
       date: row.date,
       time: row.time ?? null,
-      disc: row.discipline,
+      disc: row.disc,  // ✅ Corrigé : colonne "disc" dans Supabase
       level: row.level,
       ebike: row.ebike,
       cutoffTime: row.cutoff_time ?? row.cutoffTime,
@@ -564,6 +584,7 @@
     renderElevationProfile(race);
   }
 
+  // ✅ Calcul automatique du niveau de difficulté
   function renderDifficulty(globalScore) {
     if (!globalScore) return;
     
@@ -574,30 +595,46 @@
 
     box.style.display = "flex";
 
-    let diff, hint, stars;
-    if (globalScore < 25) {
+    let diff, hint, emoji, stars;
+    
+    if (globalScore < 20) {
+      // Niveau 1
       diff = "Facile";
       hint = "Accessible aux débutants";
+      emoji = "🟢";
       stars = 1;
-    } else if (globalScore < 50) {
-      diff = "Modéré";
-      hint = "Exigeant physiquement";
+    } else if (globalScore < 40) {
+      // Niveau 2
+      diff = "Accessible";
+      hint = "Bon niveau physique requis";
+      emoji = "🔵";
       stars = 2;
-    } else if (globalScore < 75) {
-      diff = "Difficile";
-      hint = "Très exigeant";
+    } else if (globalScore < 60) {
+      // Niveau 3
+      diff = "Intermédiaire";
+      hint = "Exigeant physiquement et techniquement";
+      emoji = "🟡";
       stars = 3;
-    } else {
-      diff = "Extrême";
-      hint = "Réservé aux très entraînés";
+    } else if (globalScore < 80) {
+      // Niveau 4
+      diff = "Difficile";
+      hint = "Très exigeant, expérience requise";
+      emoji = "🟠";
       stars = 4;
+    } else {
+      // Niveau 5
+      diff = "Très difficile / Expert";
+      hint = "Réservé aux très entraînés et expérimentés";
+      emoji = "🔴";
+      stars = 5;
     }
 
-    label.textContent = diff;
-    desc.textContent = hint;
+    label.textContent = `${emoji} ${diff}`;
+    desc.textContent = `${hint} (MRS: ${Math.round(globalScore)})`;
 
+    // Afficher les étoiles (max 5)
     starsDiv.innerHTML = "";
-    for (let i = 1; i <= 4; i++) {
+    for (let i = 1; i <= 5; i++) {
       const star = document.createElement("span");
       star.className = i <= stars ? "star filled" : "star";
       star.textContent = "★";
