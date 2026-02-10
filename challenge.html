@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MTB Points — Challenge</title>
+
+  <!-- Base + thème (le thème DOIT être après) -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/theme-nature.css?v=7">
+
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
+    a{color:inherit}
+    .wrap{max-width:1200px;margin:22px auto;padding:0 16px}
+    .muted{color:var(--muted);line-height:1.6}
+
+    /* Header */
+    header.header{
+      position:sticky;top:0;z-index:20;
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    header.header h1{margin:0;font-size:18px;letter-spacing:.2px}
+
+    nav{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    nav a{
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:10px;
+      font-weight:900;
+      font-size:13px;
+      color: var(--blue);
+    }
+    nav a:hover{background:rgba(47,111,62,.10)}
+    nav a.active{background:rgba(47,111,62,.12);color:var(--blue2)}
+
+    /* Brand */
+    .brandRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .brandLogo{
+      width:44px;height:44px;border-radius:14px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 12px 22px rgba(15,23,42,.18);
+      background:#fff;
+    }
+    .brandLogo img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* Layout blocks */
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin:14px 0;
+    }
+    .hero{
+      border-radius:22px;
+      padding:18px;
+      border:1px solid var(--border);
+      background:
+        radial-gradient(900px 260px at 12% 0%, rgba(47,111,62,.18), transparent 60%),
+        radial-gradient(700px 240px at 95% 10%, rgba(120,76,36,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.78));
+      box-shadow:var(--shadow2);
+    }
+    .heroTop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+    .hero h2{margin:0;font-size:24px;letter-spacing:-.25px}
+    .heroCoins{
+      width:112px;height:112px;border-radius:22px;overflow:hidden;
+      border:1px solid rgba(40,60,40,.18);
+      box-shadow:0 18px 38px rgba(15,23,42,.16);
+      background:rgba(255,255,255,.75);
+    }
+    .heroCoins img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* Buttons */
+    .btn2{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:rgba(255,255,255,.78);
+      cursor:pointer;font-weight:1000;color:var(--text);
+      text-decoration:none;white-space:nowrap;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .btn2:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(15,23,42,.10);border-color:rgba(47,111,62,.25)}
+    .btn2.primary{background:linear-gradient(180deg, rgba(47,111,62,1), rgba(37,90,49,1));border-color:rgba(37,90,49,1);color:#fff}
+    .btn2.primary:hover{background:linear-gradient(180deg, rgba(37,90,49,1), rgba(30,76,41,1));border-color:rgba(30,76,41,1)}
+
+    /* Pills / badges */
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.75);
+      font-weight:1000;font-size:12px;white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.err{background:var(--err)}
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+    /* Challenge cards */
+    .challengeGrid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+    @media(max-width:980px){.challengeGrid{grid-template-columns:1fr}}
+
+    .chCard{
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:14px;
+      background:rgba(255,255,255,.78);
+      box-shadow:0 2px 12px rgba(15,23,42,.06);
+    }
+    .chHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .chTitle{margin:0;font-size:16px;letter-spacing:-.15px;font-weight:1100}
+    .chDesc{margin:8px 0 0 0;color:#223024;line-height:1.6;font-size:14px}
+
+    .badges{
+      display:flex;flex-wrap:wrap;gap:8px;margin-top:10px
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:rgba(255,255,255,.75);
+      font-weight:1000;font-size:12px;white-space:nowrap;
+    }
+    .b-bronze{border-color:rgba(245,158,11,.35)}
+    .b-silver{border-color:rgba(148,163,184,.45)}
+    .b-gold{border-color:rgba(251,191,36,.45)}
+    .b-legend{border-color:rgba(168,85,247,.38)}
+    .b-finish{border-color:rgba(34,197,94,.30)}
+    .b-miles{border-color:rgba(59,130,246,.25)}
+    .b-elev{border-color:rgba(239,68,68,.22)}
+
+    /* Leaderboard */
+    .panel{
+      border:1px solid var(--border);
+      border-radius:22px;
+      background:rgba(255,255,255,.82);
+      box-shadow:0 10px 22px rgba(15,23,42,.08);
+      overflow:hidden;
+      position:sticky;
+      top:92px;
+    }
+    @media(max-width:980px){.panel{position:relative;top:auto}}
+
+    .panelHead{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;
+      background:rgba(255,255,255,.70);
+    }
+    .panelHead h3{margin:0;font-size:14px}
+    .panelBody{padding:12px 14px}
+
+    .filters{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    label{display:block;font-weight:1000;font-size:12px;color:var(--text)}
+    select, input{
+      width:100%;
+      padding:10px;margin-top:6px;
+      border:1px solid rgba(40,60,40,.20);
+      border-radius:12px;
+      background:rgba(255,255,255,.82);
+      font-size:14px;
+    }
+
+    .miniList{margin:10px 0 0 0;padding:0;list-style:none;display:grid;gap:8px}
+    .miniItem{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      border:1px solid rgba(40,60,40,.10);
+      border-radius:16px;
+      padding:10px;
+      background:rgba(255,255,255,.72);
+    }
+    .left{display:flex;gap:10px;align-items:center;min-width:0}
+    .medal{font-size:16px}
+    .name{font-weight:1000;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+    .rightScore{font-weight:1100;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .sub{font-size:12px;color:var(--muted);margin-top:8px}
+
+    .empty{
+      margin-top:10px;
+      border:1px dashed var(--border);
+      border-radius:16px;
+      padding:10px;
+      background:rgba(255,255,255,.70);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    footer{padding:26px 16px;text-align:center;color:var(--muted);font-size:13px}
+    a:focus, button:focus, input:focus, select:focus{outline:3px solid rgba(47,111,62,.25);outline-offset:2px}
+  </style>
+</head>
+
+<body class="theme-nature">
+
+<header class="header">
+  <div class="brandRow">
+    <div class="brandLogo" title="MTB Points">
+      <img src="img/mtbpoints-coins.png" alt="MTB Points — Coins">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h1>MTB Points — Challenge</h1>
+      <span class="pill"><span class="dot ok"></span> Badges & classements</span>
+    </div>
+  </div>
+
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="public-ranking.html">Classement</a>
+    <a href="meetings.html">Événements</a>
+    <a href="challengemtbpoints.html" class="active">Challenge</a>
+    <a href="reglement.html">Règlement</a>
+    <a href="methodologie.html">Méthodologie</a>
+    <a href="about.html">À propos</a>
+    <a href="login.html">Connexion</a>
+  </nav>
+</header>
+
+<main class="wrap">
+
+  <section class="card hero">
+    <div class="heroTop">
+      <div style="min-width:280px;flex:1">
+        <h2>Badges MTB Points</h2>
+        <p class="muted" style="margin:10px 0 0 0;">
+          Le Challenge récompense la <b>performance</b> (points), la <b>régularité</b> (finishers),
+          l’<b>endurance</b> (km) et le <b>dénivelé</b> (D+). Les seuils sont visibles ci-dessous.
+        </p>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <a class="btn2 primary" href="public-ranking.html">Voir le classement</a>
+          <a class="btn2" href="reglement.html#challenges">Règles du Challenge</a>
+        </div>
+      </div>
+
+      <div class="heroCoins" aria-label="Logo coins">
+        <img src="img/mtbpoints-coins.png" alt="MTB Points coins">
+      </div>
+    </div>
+  </section>
+
+  <div class="grid">
+
+    <!-- LEFT: Challenges -->
+    <div class="card">
+      <h2 style="margin:0;font-size:18px;letter-spacing:-.15px">Les Challenges</h2>
+      <p class="muted" style="margin:8px 0 0 0;">
+        Tu peux afficher le leaderboard (à droite) selon une source de données :
+        <b>Supabase</b> si les vues existent, sinon <b>localStorage</b>.
+      </p>
+
+      <div class="challengeGrid">
+
+        <div class="chCard">
+          <div class="chHead">
+            <h3 class="chTitle">🔥 Challenge MTB Points</h3>
+            <span class="pill"><span class="dot"></span> Points</span>
+          </div>
+          <p class="chDesc">Objectif : cumuler des points MTB sur la période (ex: 24 mois glissants).</p>
+          <div class="badges">
+            <span class="badge b-bronze">🥉 500</span>
+            <span class="badge b-silver">🥈 750</span>
+            <span class="badge b-gold">🥇 1000</span>
+            <span class="badge b-legend">🟣 2000 Legend</span>
+          </div>
+        </div>
+
+        <div class="chCard">
+          <div class="chHead">
+            <h3 class="chTitle">🏁 Challenge Engagement</h3>
+            <span class="pill"><span class="dot"></span> Finishers</span>
+          </div>
+          <p class="chDesc">Objectif : terminer des courses (statut FIN). Valorise la régularité.</p>
+          <div class="badges">
+            <span class="badge b-finish">🏁 5</span>
+            <span class="badge b-finish">🏁 10</span>
+            <span class="badge b-finish">🏁 20</span>
+          </div>
+        </div>
+
+        <div class="chCard">
+          <div class="chHead">
+            <h3 class="chTitle">🚴 Challenge Endurance</h3>
+            <span class="pill"><span class="dot"></span> Distance</span>
+          </div>
+          <p class="chDesc">Objectif : cumuler une distance totale (km) sur la période.</p>
+          <div class="badges">
+            <span class="badge b-miles">🚴 500 km</span>
+            <span class="badge b-miles">🚴 1000 km</span>
+            <span class="badge b-miles">🚴 3000 km</span>
+          </div>
+        </div>
+
+        <div class="chCard">
+          <div class="chHead">
+            <h3 class="chTitle">⛰️ Challenge Dénivelé</h3>
+            <span class="pill"><span class="dot"></span> D+</span>
+          </div>
+          <p class="chDesc">Objectif : cumuler un dénivelé positif total (m) sur la période.</p>
+          <div class="badges">
+            <span class="badge b-elev">⛰️ +10 000 m</span>
+            <span class="badge b-elev">⛰️ +25 000 m</span>
+            <span class="badge b-elev">⛰️ +50 000 m</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card" style="margin:12px 0 0 0;background:rgba(255,255,255,.78)">
+        <h3 style="margin:0;font-size:15px">🎖️ Récompenses (option)</h3>
+        <p class="muted" style="margin:8px 0 0 0;">
+          Les Top 3 d’un challenge sur une saison peuvent recevoir une médaille physique.
+          Conditions : résultats publiés, validés et anti-fraude appliqué.
+        </p>
+      </div>
+    </div>
+
+    <!-- RIGHT: Leaderboard -->
+    <aside class="panel">
+      <div class="panelHead">
+        <h3>🏆 Leaderboard (aperçu)</h3>
+        <span class="pill"><span class="dot warn"></span><span id="sourceLabel">—</span></span>
+      </div>
+
+      <div class="panelBody">
+        <div class="filters">
+          <div>
+            <label for="challengeType">Challenge</label>
+            <select id="challengeType">
+              <option value="points">MTB Points (points)</option>
+              <option value="finishers">Engagement (finishers)</option>
+              <option value="distance">Endurance (km)</option>
+              <option value="elevation">Dénivelé (D+)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="sex">Sexe</label>
+            <select id="sex">
+              <option value="">Tous</option>
+              <option value="M">Hommes</option>
+              <option value="F">Femmes</option>
+            </select>
+          </div>
+        </div>
+
+        <ul class="miniList" id="leaderList">
+          <li class="miniItem">
+            <div class="left"><span class="medal">…</span><span class="name">Chargement…</span></div>
+            <span class="rightScore">—</span>
+          </li>
+        </ul>
+
+        <div class="empty" id="emptyBox" style="display:none;">
+          Aucune donnée disponible pour cette vue.
+        </div>
+
+        <div class="sub" id="hint">
+          Source : —
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+</main>
+
+<footer>
+  MTB Points — Challenge • Dernière mise à jour : <span id="lastUpdate">—</span>
+</footer>
+
+<script type="module">
+  const $ = (id)=>document.getElementById(id);
+  const medals = ["🥇","🥈","🥉"];
+  const esc = (s)=>String(s??"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const num = (x)=>{ const n = Number(String(x??"").replace(",", ".").trim()); return Number.isFinite(n) ? n : null; };
+
+  function safeJson(key){
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(_){ return null; }
+  }
+
+  function setSource(label, hint){
+    $("sourceLabel").textContent = label || "—";
+    $("hint").textContent = hint || "Source : —";
+  }
+
+  function renderList(rows){
+    const ul = $("leaderList");
+    const empty = $("emptyBox");
+
+    if (!rows || !rows.length){
+      ul.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    ul.innerHTML = rows.slice(0, 10).map((r, i) => `
+      <li class="miniItem">
+        <div class="left">
+          <span class="medal">${medals[i] || "•"}</span>
+          <span class="name">${esc(r.name || "—")}</span>
+        </div>
+        <span class="rightScore">${esc(String(r.value ?? "—"))}</span>
+      </li>
+    `).join("");
+  }
+
+  async function loadFromSupabase(type, sex){
+    try{
+      const { supabase } = await import("./js/supabaseClient.js");
+
+      // Option 1: vue dédiée challenge (si tu l’ajoutes plus tard)
+      // v_public_challenge_ranking : columns idea -> name, sex, challenge_type, value
+      try{
+        const { data, error } = await supabase
+          .from("v_public_challenge_ranking")
+          .select("*")
+          .eq("challenge_type", type)
+          .limit(200);
+
+        if (error) throw error;
+
+        const rows = (data || [])
+          .filter(r => !sex || String(r.sex||"").toUpperCase() === sex)
+          .map(r => ({ name: r.name ?? r.rider_name, value: r.value ?? r.score ?? r.points }));
+
+        return { ok:true, rows: rows.sort((a,b)=>(Number(b.value)||0)-(Number(a.value)||0)), hint:"Source : Supabase (v_public_challenge_ranking)", label:"Supabase" };
+      } catch(_) {
+        // Option 2 fallback: utiliser v_public_ranking = points
+        if (type !== "points") throw new Error("No challenge view for this type");
+
+        const { data, error } = await supabase
+          .from("v_public_ranking")
+          .select("*")
+          .order("score", { ascending:false })
+          .limit(50);
+
+        if (error) throw error;
+
+        const rows = (data || [])
+          .filter(r => !sex || String(r.sex||"").toUpperCase() === sex)
+          .map(r => ({ name: r.name ?? `${r.last_name||""} ${r.first_name||""}`.trim(), value: Number(r.score ?? 0) }));
+
+        return { ok:true, rows, hint:"Source : Supabase (v_public_ranking) — points", label:"Supabase" };
+      }
+    } catch(e){
+      return { ok:false, rows:[], hint:"Source : Supabase indisponible", label:"Local" };
+    }
+  }
+
+  function loadFromLocal(type, sex){
+    // localStorage: mtb.results.v1 -> on agrège points + options distance/d+ si présents
+    const results = safeJson("mtb.results.v1");
+    if (!Array.isArray(results) || !results.length){
+      return { rows: [], hint:"Source : localStorage (mtb.results.v1) — vide", label:"Local" };
+    }
+
+    // tentative champs possibles
+    const map = new Map();
+    for (const r of results){
+      const s = String(r.sex ?? r.gender ?? r.sexe ?? "").trim().toUpperCase();
+      if (sex && s !== sex) continue;
+
+      const name = String(r.riderName ?? r.name ?? r.nom ?? r.athlete ?? "").trim() || "—";
+      if (name === "—") continue;
+
+      let val = 0;
+
+      if (type === "points"){
+        val = num(r.points ?? r.score ?? r.mtbPoints) ?? 0;
+      } else if (type === "finishers"){
+        // FIN => +1
+        const st = String(r.status ?? r.stat ?? r.etat ?? "").trim().toUpperCase();
+        const hasTime = String(r.time ?? r.temps ?? "").trim().length > 0;
+        const isFin = st ? (st === "FIN") : hasTime;
+        val = isFin ? 1 : 0;
+      } else if (type === "distance"){
+        val = num(r.distance_km ?? r.distance ?? r.km) ?? 0;
+      } else if (type === "elevation"){
+        val = num(r.elev_gain ?? r.dplus ?? r.d+ ?? r.denivele ?? r.denivele_plus) ?? 0;
+      }
+
+      if (!map.has(name)) map.set(name, 0);
+      map.set(name, map.get(name) + val);
+    }
+
+    const rows = Array.from(map.entries())
+      .map(([name, value]) => ({ name, value: Math.round(value) }))
+      .sort((a,b) => (Number(b.value)||0) - (Number(a.value)||0))
+      .slice(0, 10);
+
+    const hint =
+      type === "points" ? "Source : localStorage (mtb.results.v1) — points" :
+      type === "finishers" ? "Source : localStorage (mtb.results.v1) — finishers" :
+      type === "distance" ? "Source : localStorage (mtb.results.v1) — km (si présent)" :
+      "Source : localStorage (mtb.results.v1) — D+ (si présent)";
+
+    return { rows, hint, label:"Local" };
+  }
+
+  async function refresh(){
+    const type = $("challengeType").value;
+    const sex = $("sex").value;
+
+    // try Supabase first
+    const supa = await loadFromSupabase(type, sex);
+    if (supa.ok && supa.rows.length){
+      setSource(supa.label, supa.hint);
+      renderList(supa.rows);
+      return;
+    }
+
+    // fallback local
+    const local = loadFromLocal(type, sex);
+    setSource(local.label, local.hint);
+    renderList(local.rows);
+  }
+
+  $("challengeType").addEventListener("change", refresh);
+  $("sex").addEventListener("change", refresh);
+
+  const d = new Date().toLocaleDateString("fr-FR");
+  $("lastUpdate").textContent = d;
+
+  await refresh();
+</script>
+
+</body>
+</html>
