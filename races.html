@@ -4,116 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Épreuves — MTB Points</title>
-
-  <!-- Base design system -->
-  <link rel="stylesheet" href="./css/style.css" />
-  <!-- Optionnel (si tu as ton thème nature) -->
-  <link rel="stylesheet" href="./css/theme-nature.css" />
-
+  <link rel="stylesheet" href="style.css" />
   <style>
-    /* Page-specific UI */
-    .heroTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
-    }
-    .dot{width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block}
-    .dot.ok{background:var(--ok)}
-    .dot.warn{background:var(--warn)}
-    .dot.err{background:var(--err)}
-
-    .filters{
-      margin-top:12px;
-      display:grid;
-      grid-template-columns: 1.2fr 220px 220px 220px 180px;
-      gap:10px;align-items:end;
-    }
-    @media(max-width:1100px){
-      .filters{grid-template-columns: 1fr 1fr;}
-      .filters .spanAll{grid-column:1/-1}
-    }
-    label{display:block;font-weight:1000;font-size:12px;color:#0f172a}
-    input,select{
-      width:100%;
-      padding:10px;margin-top:6px;
-      border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:14px;
-    }
-
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;cursor:pointer;font-weight:1000;color:var(--text);
-      text-decoration:none;white-space:nowrap;
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(2,6,23,.08);border-color:#dbeafe}
-    .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-    .btn.primary:hover{background:var(--blue2);border-color:var(--blue2)}
-    .btn.ghost{background:#f8fafc}
-
-    .rowActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .empty{
-      margin-top:14px;border:1px dashed var(--border);
-      border-radius:16px;padding:14px;color:var(--muted2);background:#fff;
-    }
-
-    .grid{
+    .raceGrid{
       margin-top:14px;
       display:grid;
-      grid-template-columns:repeat(2, minmax(0, 1fr));
+      grid-template-columns:repeat(2, minmax(0,1fr));
       gap:12px;
     }
-    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
-
+    @media(max-width:900px){ .raceGrid{grid-template-columns:1fr} }
     .raceCard{
       border:1px solid var(--border);
       border-radius:18px;
       background:#fff;
       padding:14px;
       box-shadow:0 2px 10px rgba(2,6,23,.05);
-      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
     }
-    .raceCard:hover{
-      transform:translateY(-1px);
-      box-shadow:0 16px 32px rgba(2,6,23,.10);
-      border-color:#dbeafe;
-    }
-    .topline{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
-    .title{font-weight:1000;font-size:16px;letter-spacing:-.2px;margin:0}
-    .sub{color:var(--muted2);font-size:12px;line-height:1.4;margin-top:4px}
-    .badges{display:flex;gap:8px;flex-wrap:wrap}
+    .raceCard h3{margin:0 0 8px 0; font-size:16px; letter-spacing:-.2px}
+    .raceMeta{color:var(--muted2); font-size:13px; line-height:1.55}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .badge{
       display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--border);
-      background:#fff;
-      font-weight:1000;
-      font-size:12px;
-      white-space:nowrap;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+      background:#fff;font-weight:900;font-size:12px;white-space:nowrap;
     }
     .badge.blue{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
     .badge.gray{background:#f1f5f9;border-color:#e2e8f0;color:#0f172a}
     .badge.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
-
-    .kpis{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0, 1fr));
-      gap:10px;
-    }
-    @media(max-width:520px){ .kpis{grid-template-columns:1fr} }
-    .kpi{
-      border:1px solid #eef2f7;border-radius:14px;padding:10px;background:#fff;
-    }
-    .kpiLabel{color:#64748b;font-size:12px;font-weight:900}
-    .kpiValue{font-weight:1000;font-size:14px;margin-top:3px}
-    .kpiValue .muted{font-weight:800}
-
-    .cardFoot{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center}
-    .small{font-size:12px;color:var(--muted2)}
+    .rowActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    code{background:#f1f5f9;padding:2px 6px;border-radius:8px}
   </style>
 </head>
 
@@ -121,7 +40,8 @@
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <h1>MTB Points — Épreuves</h1>
-    <span class="pill" id="pillScope"><span class="dot"></span><span id="pillScopeTxt">Toutes les épreuves</span></span>
+    <span class="pill"><span class="dot ok"></span><span id="pillCount">0</span> épreuve(s)</span>
+    <span class="pill"><span class="dot"></span><span id="pillStatus">Chargement…</span></span>
   </div>
 
   <nav class="nav">
@@ -129,18 +49,11 @@
     <a href="public-ranking.html">Classement</a>
     <a href="meetings.html">Événements</a>
     <a href="races.html" class="active">Épreuves</a>
-    <a href="challengemtbpoints.html">Challenge</a>
-    <a href="reglement.html">Règlement</a>
-    <a href="methodologie.html">Méthodologie</a>
-    <a href="help.html">Aide</a>
-    <a href="contact.html">Contact</a>
-    <a href="about.html">À propos</a>
     <a href="login.html">Connexion</a>
   </nav>
 
   <div class="headerRight">
-    <a class="btn ghost" href="meetings.html">📅 Meetings</a>
-    <a class="btn primary" id="btnCreateRace" href="course-create.html">➕ Créer une épreuve</a>
+    <a class="btn ghost" href="course-create.html">➕ Créer une épreuve</a>
   </div>
 </header>
 
@@ -148,383 +61,127 @@
   <div class="card">
     <section class="hero">
       <div class="heroTop">
-        <div style="min-width:280px;flex:1">
-          <h2 style="margin:0;font-size:22px;letter-spacing:-.2px">Explorer les épreuves</h2>
-          <p class="muted" style="margin:6px 0 0 0;line-height:1.55;color:#334155">
-            Recherche, filtres et accès direct à la fiche épreuve. Compatible
-            <code>?meeting_id=...</code> pour afficher uniquement les épreuves d’un événement.
+        <div>
+          <h2 style="margin:0">Épreuves d’un événement</h2>
+          <p class="heroMeta" style="margin:8px 0 0 0">
+            Filtre auto via <code>?meeting_id=...</code>
           </p>
-        </div>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <span class="pill"><span class="dot ok"></span><span id="pillCount">0</span> épreuve(s)</span>
-          <span class="pill"><span class="dot"></span><span id="pillStatus">Chargement…</span></span>
         </div>
       </div>
 
       <div class="rowActions">
-        <a class="btn ghost" id="btnOpenMeeting" href="#" style="display:none;">🏁 Ouvrir l’événement</a>
-        <a class="btn ghost" id="btnClearScope" href="races.html" style="display:none;">↩️ Voir toutes les épreuves</a>
+        <a class="btn ghost" id="btnAll" href="races.html" style="display:none;">↩️ Voir toutes les épreuves</a>
+        <a class="btn ghost" id="btnMeeting" href="meetings.html">🏁 Retour aux événements</a>
       </div>
 
-      <div class="filters">
-        <div class="spanAll" style="grid-column:1/2">
-          <label for="q">Recherche</label>
-          <input id="q" type="text" placeholder="Nom d’épreuve, lieu, discipline…" />
-        </div>
-
-        <div>
-          <label for="disc">Discipline</label>
-          <select id="disc">
-            <option value="">Toutes</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="ebike">E-bike</label>
-          <select id="ebike">
-            <option value="">Tous</option>
-            <option value="false">Musculaire</option>
-            <option value="true">Assistance électrique</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="sortBy">Tri</label>
-          <select id="sortBy">
-            <option value="date_desc">Date ↓</option>
-            <option value="date_asc">Date ↑</option>
-            <option value="name_asc">Nom A→Z</option>
-            <option value="score_desc">Score ↓</option>
-          </select>
-        </div>
-
-        <div>
-          <button class="btn primary" id="btnReset" type="button">Réinitialiser</button>
-        </div>
-      </div>
+      <p class="heroDesc" id="scopeLine" style="margin:10px 0 0 0"></p>
     </section>
 
-    <div id="list" class="grid" aria-live="polite" style="margin-top:14px;"></div>
-    <div id="empty" class="empty" style="display:none;"></div>
+    <div id="racesList" class="raceGrid" style="margin-top:14px;">Chargement…</div>
+    <div id="empty" class="pill" style="margin-top:14px; display:none;"></div>
 
-    <div style="margin-top:14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-      <div class="small" id="hintLine">Source: Supabase</div>
-      <div class="small" id="debugLine"></div>
-    </div>
+    <div class="muted2" id="debug" style="margin-top:12px;"></div>
   </div>
 </main>
 
 <script type="module">
-  import { supabase } from "./js/supabaseClient.js";
+  // ✅ IMPORTANT: ton fichier est à la racine
+  import { supabase } from "./supabaseClient.js";
 
   const $ = (id)=>document.getElementById(id);
-  const params = new URLSearchParams(location.search);
 
-  // Compat: meeting_id (ancien) OU meetingId (nouveau)
+  const params = new URLSearchParams(window.location.search);
   const meetingId = params.get("meeting_id") || params.get("meetingId") || null;
 
-  const pillScope = $("pillScope");
-  const pillScopeTxt = $("pillScopeTxt");
+  const listEl = $("racesList");
+  const emptyEl = $("empty");
   const pillCount = $("pillCount");
   const pillStatus = $("pillStatus");
-  const btnOpenMeeting = $("btnOpenMeeting");
-  const btnClearScope = $("btnClearScope");
-  const btnCreateRace = $("btnCreateRace");
-
-  const listEl = $("list");
-  const emptyEl = $("empty");
-
-  const qEl = $("q");
-  const discEl = $("disc");
-  const ebikeEl = $("ebike");
-  const sortByEl = $("sortBy");
-  const btnReset = $("btnReset");
-
-  const hintLine = $("hintLine");
-  const debugLine = $("debugLine");
+  const scopeLine = $("scopeLine");
+  const debugEl = $("debug");
+  const btnAll = $("btnAll");
 
   const esc = (s)=>String(s??"").replace(/[&<>"']/g, m => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   }[m]));
 
-  const num = (x)=>{
-    const n = Number(String(x??"").replace(",", ".").trim());
-    return Number.isFinite(n) ? n : null;
-  };
-
-  function setScopePill(text, kind){
-    if (pillScopeTxt) pillScopeTxt.textContent = text || "—";
-    const dot = pillScope?.querySelector(".dot");
-    if (dot){
-      dot.classList.remove("ok","warn","err");
-      if (kind) dot.classList.add(kind);
-    }
-  }
-
-  function fmtDate(iso){
-    if (!iso) return "—";
-    // ISO YYYY-MM-DD (Supabase)
-    return iso;
-  }
-
-  function ebikeLabel(v){
-    if (v === true) return "Assistance électrique";
-    if (v === false) return "Musculaire";
-    return "—";
-  }
-
-  function normalizeDisc(d){
-    const s = String(d ?? "").trim();
-    return s || "—";
-  }
-
-  function raceCard(r){
-    const meetingName = r?.meetings?.name || r?.meeting_name || null;
-    const meetingLoc  = r?.meetings?.location || r?.meeting_location || null;
-
-    const distance = num(r.distance_km);
-    const dplus = num(r.dplus_m);
-
-    const phys = num(r.score_phys);
-    const tech = num(r.score_tech);
-    const global = num(r.score_global);
-
-    const badges = [];
-    badges.push(`<span class="badge blue">🏁 ${esc(normalizeDisc(r.disc))}</span>`);
-    if (r.ebike === true) badges.push(`<span class="badge ok">⚡ E-bike</span>`);
-    if (r.ebike === false) badges.push(`<span class="badge gray">🚴 Musculaire</span>`);
-    if (r.level) badges.push(`<span class="badge gray">📍 ${esc(r.level)}</span>`);
-
-    const meetingLine = meetingName
-      ? `🏟️ ${esc(meetingName)}${meetingLoc ? ` • ${esc(meetingLoc)}` : ""}`
-      : null;
-
-    const metaBits = [
-      `📅 ${esc(fmtDate(r.date))}`,
-      meetingLine
-    ].filter(Boolean).join(" • ");
-
-    const hrefRace = `event.html?id=${encodeURIComponent(r.id)}`; // fiche épreuve existante dans ton projet
-    const hrefMeeting = r.meeting_id ? `meeting.html?id=${encodeURIComponent(r.meeting_id)}` : null;
-
-    return `
-      <article class="raceCard">
-        <div class="topline">
-          <div style="min-width:240px;flex:1">
-            <h3 class="title">${esc(r.name || "Épreuve")}</h3>
-            <div class="sub">${metaBits || "—"}</div>
-          </div>
-          <div class="badges">${badges.join("")}</div>
-        </div>
-
-        <div class="kpis">
-          <div class="kpi">
-            <div class="kpiLabel">Distance</div>
-            <div class="kpiValue">${distance != null ? esc(distance.toFixed(1)) : "—"} <span class="muted">km</span></div>
-          </div>
-          <div class="kpi">
-            <div class="kpiLabel">D+</div>
-            <div class="kpiValue">${dplus != null ? esc(String(Math.round(dplus))) : "—"} <span class="muted">m</span></div>
-          </div>
-          <div class="kpi">
-            <div class="kpiLabel">Score global</div>
-            <div class="kpiValue">${global != null ? esc(String(Math.round(global))) : "—"} <span class="muted">/100</span></div>
-          </div>
-        </div>
-
-        <div class="cardFoot">
-          <div class="small">
-            Phys: <b>${phys != null ? esc(String(Math.round(phys))) : "—"}</b> •
-            Tech: <b>${tech != null ? esc(String(Math.round(tech))) : "—"}</b> •
-            Mode: <b>${esc(ebikeLabel(r.ebike))}</b>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            ${hrefMeeting ? `<a class="btn ghost" href="${hrefMeeting}">🏁 Événement</a>` : ""}
-            <a class="btn primary" href="${hrefRace}">👁️ Fiche épreuve</a>
-          </div>
-        </div>
-      </article>
-    `;
-  }
-
-  let ALL = [];
-
-  function fillDiscs(rows){
-    const set = new Set(rows.map(r => String(r.disc ?? "").trim()).filter(Boolean));
-    const discs = Array.from(set).sort((a,b)=>a.localeCompare(b));
-    const keep = discEl.value;
-    discEl.innerHTML = `<option value="">Toutes</option>` + discs.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join("");
-    if (keep) discEl.value = keep;
-  }
-
-  function applyFilters(rows){
-    const q = (qEl.value || "").trim().toLowerCase();
-    const disc = (discEl.value || "").trim();
-    const ebike = (ebikeEl.value || "").trim(); // "", "true", "false"
-
-    return rows.filter(r=>{
-      if (disc && String(r.disc||"").trim() !== disc) return false;
-
-      if (ebike){
-        const want = ebike === "true";
-        if (r.ebike !== want) return false;
-      }
-
-      if (q){
-        const meetingName = r?.meetings?.name || "";
-        const meetingLoc  = r?.meetings?.location || "";
-        const hay = `${r.name||""} ${r.disc||""} ${r.level||""} ${meetingName} ${meetingLoc}`.toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    });
-  }
-
-  function sortRows(rows){
-    const s = sortByEl.value || "date_desc";
-    const a = rows.slice();
-
-    a.sort((x,y)=>{
-      if (s === "name_asc"){
-        return String(x.name||"").toLowerCase().localeCompare(String(y.name||"").toLowerCase());
-      }
-      if (s === "date_asc"){
-        return String(x.date||"").localeCompare(String(y.date||""));
-      }
-      if (s === "score_desc"){
-        return (num(y.score_global) ?? -1) - (num(x.score_global) ?? -1);
-      }
-      // date_desc default
-      return String(y.date||"").localeCompare(String(x.date||""));
-    });
-
-    return a;
-  }
-
-  function render(){
-    const filtered = sortRows(applyFilters(ALL));
-
-    pillCount.textContent = String(filtered.length);
-
-    if (!filtered.length){
-      listEl.innerHTML = "";
-      emptyEl.style.display = "block";
-      emptyEl.innerHTML = meetingId
-        ? `Aucune épreuve trouvée pour cet événement (meeting_id: <code>${esc(meetingId)}</code>).`
-        : `Aucune épreuve trouvée avec ces filtres.`;
-      return;
-    }
-
-    emptyEl.style.display = "none";
-    listEl.innerHTML = filtered.map(raceCard).join("");
-  }
-
-  async function loadMeetingHeader(){
-    if (!meetingId) return;
-
-    try{
-      const { data, error } = await supabase
-        .from("meetings")
-        .select("id,name,date,location,is_published")
-        .eq("id", meetingId)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (data){
-        setScopePill(`Épreuves de l’événement: ${data.name || meetingId}`, "ok");
-        if (btnOpenMeeting){
-          btnOpenMeeting.href = `meeting.html?id=${encodeURIComponent(meetingId)}`;
-          btnOpenMeeting.style.display = "inline-flex";
-        }
-        if (btnClearScope) btnClearScope.style.display = "inline-flex";
-
-        // Pour course-create: conserver meetingId
-        if (btnCreateRace){
-          btnCreateRace.href = `course-create.html?meetingId=${encodeURIComponent(meetingId)}`;
-        }
-      } else {
-        setScopePill(`Meeting introuvable: ${meetingId}`, "warn");
-        if (btnClearScope) btnClearScope.style.display = "inline-flex";
-      }
-    } catch(e){
-      console.warn("[races] meeting header load failed:", e);
-      setScopePill(`Meeting: ${meetingId} (erreur chargement)`, "warn");
-      if (btnClearScope) btnClearScope.style.display = "inline-flex";
-    }
+  function badge(label, cls="gray"){
+    return `<span class="badge ${cls}">${label}</span>`;
   }
 
   async function loadRaces(){
     pillStatus.textContent = "Chargement…";
+    debugEl.textContent = "";
     emptyEl.style.display = "none";
-    listEl.innerHTML = "";
 
-    await loadMeetingHeader();
+    if (meetingId){
+      scopeLine.innerHTML = `Filtre événement : <code>${esc(meetingId)}</code>`;
+      btnAll.style.display = "inline-flex";
+    } else {
+      scopeLine.textContent = "Aucun meeting_id fourni → affichage de toutes les épreuves (limite 2000).";
+    }
 
     try{
-      // Join meeting (si FK races.meeting_id -> meetings.id)
       let q = supabase
         .from("races")
-        .select("id,name,date,disc,ebike,level,distance_km,dplus_m,score_phys,score_tech,score_global,meeting_id,meetings(name,location,date)")
+        .select("id,name,date,disc,ebike,level,distance_km,dplus_m,participants,score_phys,score_tech,score_global,meeting_id")
         .order("date", { ascending: false })
-        .limit(5000);
+        .limit(2000);
 
       if (meetingId) q = q.eq("meeting_id", meetingId);
 
       const { data, error } = await q;
       if (error) throw error;
 
-      ALL = (data || []).map(r => ({
-        ...r,
-        // normalise bool
-        ebike: (r.ebike === true),
-        disc: r.disc ?? null
-      }));
-
-      fillDiscs(ALL);
+      const rows = data || [];
+      pillCount.textContent = String(rows.length);
       pillStatus.textContent = "OK";
-      hintLine.textContent = "Source: Supabase (races + meetings)";
-      debugLine.textContent = "";
-      render();
-    } catch(e){
-      console.error("[races] load failed:", e);
-      pillStatus.textContent = "Erreur";
-      hintLine.textContent = "⚠️ Impossible de charger Supabase (RLS / config / vue).";
-      debugLine.textContent = e?.message ? String(e.message).slice(0, 120) : "";
 
-      ALL = [];
+      if (!rows.length){
+        listEl.innerHTML = "";
+        emptyEl.style.display = "inline-flex";
+        emptyEl.innerHTML = meetingId
+          ? `Aucune épreuve pour cet événement.`
+          : `Aucune épreuve trouvée.`;
+        return;
+      }
+
+      listEl.innerHTML = rows.map(r => {
+        const b = [];
+        b.push(badge(`🏁 ${esc(r.disc || "—")}`, "blue"));
+        if (r.ebike === true) b.push(badge("⚡ E-bike", "ok"));
+        if (r.ebike === false) b.push(badge("🚴 Musculaire", "gray"));
+        if (r.level) b.push(badge(`📍 ${esc(r.level)}`, "gray"));
+
+        return `
+          <article class="raceCard">
+            <h3>${esc(r.name || "Épreuve")}</h3>
+            <div class="raceMeta">
+              ${r.date ? `📅 ${esc(r.date)}` : "📅 —"}
+              ${r.meeting_id ? ` • 🧷 meeting_id: ${esc(r.meeting_id)}` : ""}
+              <br/>
+              Distance: <b>${r.distance_km ?? "?"}</b> km • D+: <b>${r.dplus_m ?? "?"}</b> m • Participants: <b>${r.participants ?? "?"}</b><br/>
+              Score global: <b>${r.score_global ?? "-"}</b> (Phys ${r.score_phys ?? "-"} / Tech ${r.score_tech ?? "-"})
+            </div>
+            <div class="badges">${b.join("")}</div>
+            <div class="rowActions" style="margin-top:12px">
+              <a class="btn primary" href="event.html?id=${encodeURIComponent(r.id)}">👁️ Fiche épreuve</a>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+    } catch(e){
+      console.error(e);
+      pillStatus.textContent = "Erreur";
       listEl.innerHTML = "";
-      emptyEl.style.display = "block";
-      emptyEl.innerHTML = `
-        ❌ Erreur de chargement des épreuves.<br/>
-        Vérifie: accès public à <code>races</code>, relation <code>meeting_id</code>, et RLS/policies.
-      `;
+      emptyEl.style.display = "inline-flex";
+      emptyEl.innerHTML = "❌ Erreur de chargement Supabase (RLS / clé / URL / CORS).";
+      debugEl.textContent = e?.message ? String(e.message) : "Erreur inconnue";
     }
   }
 
-  // Bind UI
-  btnReset.addEventListener("click", ()=>{
-    qEl.value = "";
-    discEl.value = "";
-    ebikeEl.value = "";
-    sortByEl.value = "date_desc";
-    render();
-  });
-
-  [qEl, discEl, ebikeEl, sortByEl].forEach(el=>{
-    el.addEventListener("input", render);
-    el.addEventListener("change", render);
-  });
-
-  // Init scope pill
-  if (!meetingId){
-    setScopePill("Toutes les épreuves", null);
-  } else {
-    setScopePill(`Meeting: ${meetingId}`, null);
-  }
-
-  await loadRaces();
+  loadRaces();
 </script>
 </body>
 </html>
