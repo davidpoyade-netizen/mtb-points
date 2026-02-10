@@ -74,7 +74,36 @@
       return race.gpx;
     }
     
-    // ✅ PRIORITÉ 2 : Essayer race.points
+    // ✅ PRIORITÉ 1.5 : Si race.gpx est un STRING JSON, le parser
+    if (typeof race?.gpx === 'string' && race.gpx.length > 0) {
+      try {
+        const parsed = JSON.parse(race.gpx);
+        
+        // Si c'est directement un array
+        if (Array.isArray(parsed)) {
+          console.log('📍 Points parsés depuis string JSON (array direct):', parsed.length);
+          return parsed;
+        }
+        
+        // Si c'est un objet avec .points
+        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.points)) {
+          console.log('📍 Points parsés depuis string JSON (objet.points):', parsed.points.length);
+          return parsed.points;
+        }
+        
+        console.warn('⚠️ String JSON parsé mais structure inconnue:', parsed);
+      } catch (e) {
+        console.warn('⚠️ Impossible de parser gpx string:', e.message);
+      }
+    }
+    
+    // ✅ PRIORITÉ 2 : Si race.gpx est un objet avec .points
+    if (race?.gpx && typeof race.gpx === 'object' && Array.isArray(race.gpx.points)) {
+      console.log('📍 Points trouvés dans race.gpx.points:', race.gpx.points.length);
+      return race.gpx.points;
+    }
+    
+    // ✅ PRIORITÉ 3 : Essayer race.points
     if (Array.isArray(race?.points)) {
       console.log('📍 Points trouvés dans race.points:', race.points.length);
       return race.points;
