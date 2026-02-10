@@ -1,248 +1,440 @@
-const express = require('express');
-const cors = require('cors');
-const togeojson = require('@mapbox/togeojson');
-const DOMParser = require('xmldom').DOMParser;
+// server-COMPLET.js
+// MTB Points — API COMPLÈTE avec MÉTHODOLOGIE OFFICIELLE
+// ✅ ScorePhys avec IPB
+// ✅ ScoreTech V2 Hybrid (OSM + bonus GPX capé)
+// ✅ MRS = 0.55 × ScorePhys + 0.45 × ScoreTech
+// ✅ Points GPX renvoyés dans la réponse
+
+import express from "express";
+import cors from "cors";
+
+import { parseGpxToPoints } from "./lib/parseGpx.js";
+import { computeStatsFromPoints } from "./lib/stats.js";
+import { inferDiscipline } from "./lib/discipline.js";
+import { computeSurfaceEstimateFromOsmSamples } from "./lib/surfaceEstimate.js";
+import { computeScorePhys } from "./lib/scorePhys.js";
+import { computeScoreTechV2 } from "./scoretech_v2_osm.js";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// ===== CONFIGURATION CORS =====
-const corsOptions = {
-  origin: [
-    'https://davidpoyade-netizen.github.io',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ],
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Accept'],
-  credentials: true,
-  optionsSuccessStatus: 200
-};
+// ============================================================================
+// CONFIGURATION CORS
+// ============================================================================
 
-app.use(cors(corsOptions));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+const ALLOWED_ORIGINS = [
+  "https://davidpoyade-netizen.github.io",
+  "https://www.davidpoyade-netizen.github.io",
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
 
-// Middleware de logging
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  console.log('Origin:', req.headers.origin);
-  next();
-});
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) {
+        console.log(`✅ CORS OK: ${origin}`);
+        return callback(null, true);
+      }
+      console.warn(`❌ CORS bloqué: ${origin}`);
+      return callback(null, false);
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
+    maxAge: 86400,
+  })
+);
 
-// ===== ROUTES =====
+app.options("*", cors());
 
-// Route racine
-app.get('/', (req, res) => {
-  res.json({ 
-    ok: true,
-    service: 'MTB Points API',
-    version: '2.0.0',
+// ============================================================================
+// BODY PARSER
+// ============================================================================
+
+app.use(
+  express.text({
+    type: ["application/gpx+xml", "application/xml", "text/xml", "text/plain"],
+    limit: "10mb",
+  })
+);
+
+app.use(express.json({ limit: "10mb" }));
+
+// ============================================================================
+// HEALTHCHECK
+// ============================================================================
+
+app.get(["/", "/health", "/_health"], (_req, res) => {
+  res.status(200).json({ 
+    ok: true, 
+    service: "MTB Points API - MÉTHODOLOGIE OFFICIELLE",
+    version: "3.0.0",
+    features: ["ScorePhys + IPB", "ScoreTech V2 Hybrid", "MRS", "Barres surface"],
     timestamp: new Date().toISOString()
   });
 });
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ 
-    ok: true,
-    status: 'healthy', 
-    uptime: process.uptime() 
-  });
+app.get("/api/health", (_, res) => {
+  res.json({ ok: true, timestamp: new Date().toISOString() });
 });
 
-// Analyse GPX
-app.post('/api/analyze-gpx', async (req, res) => {
-  try {
-    console.log('📥 Requête d\'analyse GPX reçue');
-    console.log('Body keys:', Object.keys(req.body));
-    
-    const { gpxContent } = req.body;
-    
-    // Validation du contenu
-    if (!gpxContent) {
-      console.warn('⚠️ GPX manquant');
-      return res.status(400).json({ 
-        ok: false,
-        error: 'Contenu GPX manquant',
-        details: 'Le champ gpxContent est requis'
-      });
-    }
+// ============================================================================
+// HELPERS
+// ============================================================================
 
-    if (typeof gpxContent !== 'string') {
-      console.warn('⚠️ GPX pas une string:', typeof gpxContent);
-      return res.status(400).json({ 
-        ok: false,
-        error: 'Format GPX invalide',
-        details: 'gpxContent doit être une chaîne de caractères XML'
-      });
-    }
-
-    if (gpxContent.length < 50) {
-      console.warn('⚠️ GPX trop court:', gpxContent.length, 'caractères');
-      return res.status(400).json({ 
-        ok: false,
-        error: 'GPX trop court',
-        details: `Le fichier GPX est trop court (${gpxContent.length} caractères)`
-      });
-    }
-
-    console.log('📊 Parsing du GPX... (', gpxContent.length, 'caractères)');
-    
-    // Parser le XML
-    const gpxDoc = new DOMParser().parseFromString(gpxContent, 'text/xml');
-    
-    // Vérifier les erreurs de parsing
-    const parserError = gpxDoc.getElementsByTagName('parsererror');
-    if (parserError.length > 0) {
-      console.error('❌ Erreur de parsing XML');
-      return res.status(400).json({ 
-        ok: false,
-        error: 'XML invalide',
-        details: 'Le fichier GPX contient des erreurs XML'
-      });
-    }
-    
-    // Convertir en GeoJSON
-    const geojson = togeojson.gpx(gpxDoc);
-    
-    if (!geojson || !geojson.features || geojson.features.length === 0) {
-      console.error('❌ Aucune feature dans le GeoJSON');
-      return res.status(400).json({ 
-        ok: false,
-        error: 'GPX vide',
-        details: 'Aucune trace trouvée dans le fichier GPX'
-      });
-    }
-
-    console.log('✅ GeoJSON créé:', geojson.features.length, 'features');
-
-    // Extraire les coordonnées
-    const feature = geojson.features[0];
-    let coordinates = [];
-
-    if (feature.geometry.type === 'LineString') {
-      coordinates = feature.geometry.coordinates;
-    } else if (feature.geometry.type === 'MultiLineString') {
-      coordinates = feature.geometry.coordinates.flat();
-    } else {
-      console.error('❌ Type de géométrie non supporté:', feature.geometry.type);
-      return res.status(400).json({ 
-        ok: false,
-        error: 'Type de trace non supporté',
-        details: `Type de géométrie: ${feature.geometry.type}`
-      });
-    }
-
-    if (coordinates.length === 0) {
-      console.error('❌ Aucune coordonnée');
-      return res.status(400).json({ 
-        ok: false,
-        error: 'GPX vide',
-        details: 'Aucun point de trace trouvé'
-      });
-    }
-
-    console.log('📈 Calcul des statistiques...', coordinates.length, 'points');
-    
-    // Calculer les statistiques
-    const stats = calculateStats(coordinates);
-    
-    console.log('✅ Statistiques:', stats);
-
-    res.json({
-      ok: true,
-      success: true,
-      data: {
-        geojson,
-        stats
+function withTimeout(promise, ms, label = "timeout") {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${label} after ${ms}ms`)), ms);
+    promise.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(t);
+        reject(e);
       }
-    });
+    );
+  });
+}
 
-  } catch (error) {
-    console.error('❌ Erreur serveur:', error);
-    res.status(500).json({ 
-      ok: false,
-      error: 'Erreur serveur',
-      details: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+function isNetworkishError(msg) {
+  return /overpass|timeout|fetch|network|socket|ECONNRESET|ETIMEDOUT|ENOTFOUND|EAI_AGAIN/i.test(
+    String(msg || "")
+  );
+}
+
+function validateGpx(points, stats) {
+  const MIN_DISTANCE_KM = 3.0;
+  const MIN_POINTS = 30;
+  const MIN_ELE_RATIO = 0.80;
+  const MIN_PTS_PER_KM = 5;
+  const MIN_DPLUS_M = 10;
+
+  if (!points || points.length < 2) {
+    return { ok: false, status: 400, error: "Aucun point <trkpt> exploitable." };
   }
-});
 
-// ===== CALCUL DES STATISTIQUES =====
-function calculateStats(coordinates) {
-  if (!coordinates || coordinates.length === 0) {
+  if (!stats?.hasElevation) {
+    return {
+      ok: false,
+      status: 400,
+      error: "GPX sans altitude (<ele>) : refusé. Exporte un GPX avec élévation.",
+    };
+  }
+
+  const totalPts = points.length;
+  const elePts = points.reduce((n, p) => (Number.isFinite(Number(p?.ele)) ? n + 1 : n), 0);
+  const eleRatio = totalPts ? elePts / totalPts : 0;
+
+  if (eleRatio < MIN_ELE_RATIO) {
+    return {
+      ok: false,
+      status: 400,
+      error: `Altitude insuffisante: ${Math.round(eleRatio * 100)}% de points avec <ele> (min ${Math.round(MIN_ELE_RATIO * 100)}%).`,
+    };
+  }
+
+  if (totalPts < MIN_POINTS) {
+    return {
+      ok: false,
+      status: 400,
+      error: `GPX trop court: ${totalPts} points (min ${MIN_POINTS}).`,
+    };
+  }
+
+  const distKm = Number(stats?.distanceKm ?? 0);
+  if (!Number.isFinite(distKm) || distKm < MIN_DISTANCE_KM) {
+    return {
+      ok: false,
+      status: 400,
+      error: `Distance trop faible: ${distKm.toFixed(2)} km (min ${MIN_DISTANCE_KM.toFixed(1)} km).`,
+    };
+  }
+
+  const density = distKm > 0 ? totalPts / distKm : totalPts;
+  if (density < MIN_PTS_PER_KM) {
+    return {
+      ok: false,
+      status: 400,
+      error: `GPX trop peu échantillonné: ${density.toFixed(1)} pts/km (min ${MIN_PTS_PER_KM} pts/km).`,
+    };
+  }
+
+  const dplus = Number(stats?.dplusM ?? 0);
+  if (!Number.isFinite(dplus) || dplus < MIN_DPLUS_M) {
+    return {
+      ok: false,
+      status: 400,
+      error: `D+ trop faible: ${Math.round(dplus)} m (min ${MIN_DPLUS_M} m).`,
+    };
+  }
+
+  return { ok: true };
+}
+
+/**
+ * Calcule le MRS (Score Global) selon la méthodologie officielle
+ * MRS = round(0.55 × ScorePhys + 0.45 × ScoreTech)
+ */
+function computeMRS(scorePhys, scoreTech) {
+  if (scorePhys == null || scoreTech == null) {
     return null;
   }
 
-  let totalDistance = 0;
-  let totalElevationGain = 0;
-  let totalElevationLoss = 0;
-  let minElevation = Infinity;
-  let maxElevation = -Infinity;
+  const phys = Number(scorePhys);
+  const tech = Number(scoreTech);
 
-  for (let i = 0; i < coordinates.length - 1; i++) {
-    const [lon1, lat1, ele1] = coordinates[i];
-    const [lon2, lat2, ele2] = coordinates[i + 1];
-
-    // Distance (Haversine)
-    const R = 6371000;
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-
-    totalDistance += distance;
-
-    // Dénivelé
-    if (ele1 !== undefined && ele2 !== undefined) {
-      const elevDiff = ele2 - ele1;
-      if (elevDiff > 0) {
-        totalElevationGain += elevDiff;
-      } else {
-        totalElevationLoss += Math.abs(elevDiff);
-      }
-
-      minElevation = Math.min(minElevation, ele1, ele2);
-      maxElevation = Math.max(maxElevation, ele1, ele2);
-    }
+  if (!Number.isFinite(phys) || !Number.isFinite(tech)) {
+    return null;
   }
 
-  return {
-    distance: Math.round(totalDistance),
-    elevationGain: Math.round(totalElevationGain),
-    elevationLoss: Math.round(totalElevationLoss),
-    minElevation: minElevation === Infinity ? 0 : Math.round(minElevation),
-    maxElevation: maxElevation === -Infinity ? 0 : Math.round(maxElevation),
-    pointsCount: coordinates.length
-  };
+  // Méthodologie officielle : 55% Phys + 45% Tech
+  const mrs = Math.round(0.55 * phys + 0.45 * tech);
+
+  // Borné sur 0-100
+  return Math.max(0, Math.min(100, mrs));
 }
 
-// 404
-app.use((req, res) => {
-  res.status(404).json({ 
-    ok: false,
-    error: 'Route non trouvée',
-    path: req.path 
+// ============================================================================
+// ENDPOINT: GET (info)
+// ============================================================================
+
+for (const p of ["/api/analyze-gpx", "/api/analyze-gpx-lite"]) {
+  app.get(p, (_, res) => {
+    res.status(405).json({
+      ok: false,
+      error: "Utilise POST avec un GPX en body (Content-Type: application/gpx+xml).",
+    });
   });
+}
+
+// ============================================================================
+// ENDPOINT: /api/analyze-gpx-lite (GPX only, pas d'OSM)
+// ============================================================================
+
+app.post("/api/analyze-gpx-lite", (req, res) => {
+  const t0 = Date.now();
+
+  try {
+    const gpxText = typeof req.body === "string" ? req.body : "";
+    if (!gpxText || gpxText.length < 50) {
+      return res.status(400).json({ ok: false, error: "GPX vide ou invalide." });
+    }
+
+    console.log(`📄 Parsing GPX (${gpxText.length} bytes)...`);
+    const points = parseGpxToPoints(gpxText);
+    if (!points || points.length < 2) {
+      return res.status(400).json({ ok: false, error: "Aucun point <trkpt> exploitable." });
+    }
+
+    console.log(`✅ ${points.length} points extraits`);
+
+    const stats = computeStatsFromPoints(points);
+
+    const v = validateGpx(points, stats);
+    if (!v.ok) return res.status(v.status).json({ ok: false, error: v.error });
+
+    // ✅ SCORE PHYSIQUE
+    const physResult = computeScorePhys(points);
+    console.log(`📊 ScorePhys: ${physResult.scorePhys}`);
+
+    const discipline = inferDiscipline({
+      distanceKm: stats.distanceKm,
+      dplusM: stats.dplusM,
+      hasElevation: stats.hasElevation,
+      steep: stats.steep,
+      techScoreV2: null,
+    });
+
+    return res.json({
+      ok: true,
+      points: points,
+      scores: {
+        physScore: physResult.scorePhys,
+        physDetails: physResult.details,
+        techScore: null,
+        globalScore: null,
+        note: "lite: pas d'OSM, donc pas de ScoreTech ni MRS"
+      },
+      discipline,
+      meta: {
+        ms: Date.now() - t0,
+        pointsCount: points.length,
+        stats: {
+          distanceKm: stats.distanceKm,
+          dplusM: stats.dplusM,
+          hasElevation: stats.hasElevation,
+        },
+      },
+    });
+  } catch (e) {
+    console.error("❌ Erreur /api/analyze-gpx-lite:", e);
+    const msg = e?.message ? String(e.message) : "Erreur serveur.";
+    return res.status(500).json({ ok: false, error: msg });
+  }
 });
 
-// Démarrage
-app.listen(PORT, () => {
-  console.log('🚀 MTB Points API démarré');
-  console.log(`📡 Port: ${PORT}`);
-  console.log(`🌍 Environnement: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`✅ CORS: ${corsOptions.origin.join(', ')}`);
+// ============================================================================
+// ENDPOINT: /api/analyze-gpx (FULL MÉTHODOLOGIE OFFICIELLE)
+// ============================================================================
+
+app.post("/api/analyze-gpx", async (req, res) => {
+  const t0 = Date.now();
+
+  try {
+    const gpxText = typeof req.body === "string" ? req.body : "";
+    if (!gpxText || gpxText.length < 50) {
+      return res.status(400).json({ ok: false, error: "GPX vide ou invalide." });
+    }
+
+    console.log(`📄 Parsing GPX (${gpxText.length} bytes)...`);
+    const points = parseGpxToPoints(gpxText);
+    if (!points || points.length < 2) {
+      return res.status(400).json({ ok: false, error: "Aucun point <trkpt> exploitable." });
+    }
+
+    console.log(`✅ ${points.length} points extraits`);
+
+    const stats = computeStatsFromPoints(points);
+
+    const v = validateGpx(points, stats);
+    if (!v.ok) return res.status(v.status).json({ ok: false, error: v.error });
+
+    console.log(`📊 Stats: ${stats.distanceKm.toFixed(2)} km, D+ ${stats.dplusM.toFixed(0)} m`);
+
+    // ✅ SCORE PHYSIQUE (avec IPB)
+    console.log(`💪 Calcul ScorePhys...`);
+    const physResult = computeScorePhys(points);
+    console.log(`✅ ScorePhys: ${physResult.scorePhys} (IPB: ${physResult.details.ipb})`);
+
+    // ✅ SCORE TECHNIQUE V2 HYBRID (OSM + bonus GPX)
+    const OSM_TIMEOUT_MS = 25000;
+
+    let tech = null;
+    let osmOk = true;
+
+    try {
+      console.log(`🌍 Lancement ScoreTech V2 Hybrid (OSM + GPX)...`);
+      tech = await withTimeout(
+        computeScoreTechV2(points, {
+          osmSampleEveryM: 300,
+          overpassRadiusM: 20,
+          minCoverage: 0.20,
+          overpassTimeoutSec: 12,
+          fetchTimeoutMs: 12000,
+          overpassConcurrency: 5,
+          cacheDir: ".cache/osm",
+        }),
+        OSM_TIMEOUT_MS,
+        "Overpass/OSM"
+      );
+      console.log(`✅ ScoreTech V2: ${tech?.techScoreV2 ?? 'null'}`);
+    } catch (e) {
+      console.error(`⚠️ OSM échoué:`, e.message);
+      osmOk = false;
+      tech = { techScoreV2: null, details: { error: String(e?.message || e) } };
+    }
+
+    const surfaceEstimate =
+      tech?.surfaceEstimate ??
+      computeSurfaceEstimateFromOsmSamples(tech?.details?.osmSamples || []) ??
+      null;
+
+    // ✅ MRS (SCORE GLOBAL)
+    const globalScore = computeMRS(physResult.scorePhys, tech?.techScoreV2);
+    console.log(`🎯 MRS (Score Global): ${globalScore}`);
+
+    const discipline = inferDiscipline({
+      distanceKm: stats.distanceKm,
+      dplusM: stats.dplusM,
+      hasElevation: stats.hasElevation,
+      steep: stats.steep,
+      techScoreV2: tech?.techScoreV2 ?? null,
+    });
+
+    const response = {
+      ok: true,
+      points: points,
+      scores: {
+        // Score Physique
+        physScore: physResult.scorePhys,
+        physDetails: physResult.details,
+
+        // Score Technique V2
+        techScore: tech?.techScoreV2,
+        techDetails: tech?.details,
+        
+        // Score Global (MRS)
+        globalScore: globalScore,
+        
+        // Formule
+        formula: {
+          scorePhys: "0.70×EffortNorm + 0.30×IPB_norm",
+          scoreTech: "0.80×OSM + min(0.20×GPX, 0.15)",
+          mrs: "0.55×ScorePhys + 0.45×ScoreTech"
+        }
+      },
+      tech: {
+        osmOk: osmOk && tech?.techScoreV2 != null,
+        surfaceEstimate,
+      },
+      discipline,
+      meta: {
+        ms: Date.now() - t0,
+        pointsCount: points.length,
+        stats: {
+          distanceKm: stats.distanceKm,
+          dplusM: stats.dplusM,
+          hasElevation: stats.hasElevation,
+        },
+      },
+    };
+
+    console.log(`✅ Réponse complète (${points.length} points inclus)`);
+    console.log(`📊 Scores finaux: Phys=${physResult.scorePhys}, Tech=${tech?.techScoreV2}, MRS=${globalScore}`);
+    
+    return res.json(response);
+
+  } catch (e) {
+    console.error("❌ Erreur /api/analyze-gpx:", e);
+    const msg = e?.message ? String(e.message) : "Erreur serveur.";
+    const status = isNetworkishError(msg) ? 502 : 500;
+    return res.status(status).json({ ok: false, error: msg });
+  }
 });
 
-process.on('SIGTERM', () => {
-  console.log('👋 Arrêt du serveur...');
-  process.exit(0);
+// ============================================================================
+// LISTEN
+// ============================================================================
+
+const PORT = process.env.PORT ? Number(process.env.PORT) : 8787;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`
+╔══════════════════════════════════════════════════════════════╗
+║            MTB POINTS API v3.0 - MÉTHODOLOGIE OFFICIELLE     ║
+╟──────────────────────────────────────────────────────────────╢
+║  🚀 Server: http://0.0.0.0:${PORT}                                 ║
+║  ✅ CORS origins: ${ALLOWED_ORIGINS.length} autorisées                        ║
+║                                                              ║
+║  📊 SCORES CALCULÉS:                                         ║
+║     • ScorePhys (avec IPB)                                   ║
+║     • ScoreTech V2 Hybrid (OSM 80% + GPX 20% capé)           ║
+║     • MRS = 0.55×Phys + 0.45×Tech                            ║
+║     • Barres de surface (route/piste/monotrace)              ║
+║                                                              ║
+║  🔗 Endpoints:                                               ║
+║     GET  /health                                             ║
+║     POST /api/analyze-gpx         (FULL avec OSM)            ║
+║     POST /api/analyze-gpx-lite    (sans OSM)                 ║
+╚══════════════════════════════════════════════════════════════╝
+  `);
+  console.log("CORS origins autorisées:");
+  ALLOWED_ORIGINS.forEach(o => console.log(`  - ${o}`));
+  console.log("");
 });
