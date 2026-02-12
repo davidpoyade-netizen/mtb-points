@@ -1,29 +1,14 @@
 {
   "name": "mtb-points-backend",
-  "version": "3.0.0",
-  "description": "MTB Points API - Méthodologie Officielle (ScorePhys + IPB, ScoreTech V2 Hybrid, MRS)",
+  "version": "4.0.0",
   "type": "module",
-  "main": "server-COMPLET.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node server-COMPLET.js",
-    "dev": "node --watch server-COMPLET.js",
-    "test": "echo \"Tests non implémentés\" && exit 0"
+    "start": "node server.js"
   },
-  "keywords": [
-    "mtb",
-    "vtt",
-    "gpx",
-    "scoring",
-    "osm",
-    "overpass",
-    "mtb-points"
-  ],
-  "author": "David Poyade",
-  "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "fast-xml-parser": "^4.3.2"
+    "cors": "^2.8.5"
   },
   "engines": {
     "node": ">=18.0.0"
