@@ -460,6 +460,8 @@
       physScore: row.score_phys ?? gpx.phys?.score,
       techScore: row.score_tech ?? gpx.techV2?.techScoreV2,
       globalScore: row.score_global ?? gpx.mrs,
+      ipb: row.ipb ?? null,
+      surfaceEstimate: row.surface_estimate ?? null, // ✅ Barres de surface depuis Supabase
       
       lapsByCategorySex: row.laps_by_category_sex ?? row.lapsByCategorySex,
       analysis: row.analysis_json,
@@ -585,6 +587,19 @@
     $("scoreTech").textContent = race.techScore ? Math.round(race.techScore) : "—";
     $("scoreGlobal").textContent = race.globalScore ? Math.round(race.globalScore) : "—";
     
+    // Sous-titres avec IPB
+    if (race.physScore) {
+      $("scorePhysSub").textContent = race.ipb 
+        ? `IPB: ${Number(race.ipb).toFixed(1)} • Effort`
+        : "Effort • Distance";
+    }
+    if (race.techScore) {
+      $("scoreTechSub").textContent = "OSM Hybrid ✅";
+    }
+    if (race.globalScore) {
+      $("scoreGlobalSub").textContent = `MRS = 0.55×Phys + 0.45×Tech`;
+    }
+    
     // ✅ Afficher un message si les scores ne sont pas disponibles
     if (!race.physScore && !race.techScore && !race.globalScore) {
       console.warn("⚠️ Scores non disponibles. L'analyse technique n'a pas été effectuée.");
@@ -596,10 +611,14 @@
     // Difficulté
     renderDifficulty(race.globalScore);
 
-    // Surface
+    // Surface : lire depuis race.surfaceEstimate (Supabase) en priorité
     const a = race.analysis || race.analysis_json || {};
     const gpxData = race.gpx || {};
-    const surf = a.surfaceEstimate || a.techV2?.surfaceEstimate || gpxData.techV2?.surfaceEstimate || null;
+    const surf = race.surfaceEstimate
+      || a.surfaceEstimate 
+      || a.techV2?.surfaceEstimate 
+      || gpxData.techV2?.surfaceEstimate 
+      || null;
     if (surf) renderSurfaceBars(surf);
 
     // Tours
@@ -676,14 +695,24 @@
     const container = $("surfaceBarContainer");
     const legend = $("surfaceLegend");
 
-    const r = surf.road || surf.route || 0;
-    const t = surf.track || surf.wideTrack || 0;
-    const s = surf.single || surf.singletrack || 0;
-    const total = r + t + s || 0.0001;
-
-    const rP = (r / total) * 100;
-    const tP = (t / total) * 100;
-    const sP = Math.max(0, 100 - rP - tP);
+    // ✅ Support format backend {roadPct, trackPct, singlePct} ET format legacy {road, track, single}
+    let rP, tP, sP;
+    if (surf.roadPct !== undefined || surf.trackPct !== undefined) {
+      // Format backend MTB Points (valeurs déjà en %)
+      rP = Number(surf.roadPct  ?? 0);
+      tP = Number(surf.trackPct ?? 0);
+      sP = Number(surf.singlePct ?? Math.max(0, 100 - rP - tP));
+    } else {
+      // Format legacy (fractions 0-1 ou valeurs brutes)
+      const r = Number(surf.road || surf.route || 0);
+      const t = Number(surf.track || surf.wideTrack || 0);
+      const s = Number(surf.single || surf.singletrack || 0);
+      const total = r + t + s || 0.0001;
+      rP = (r / total) * 100;
+      tP = (t / total) * 100;
+      sP = Math.max(0, 100 - rP - tP);
+    }
+    if (rP === 0 && tP === 0 && sP === 0) return;
 
     box.style.display = "block";
     container.innerHTML = "";

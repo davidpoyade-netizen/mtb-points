@@ -191,11 +191,12 @@
             <label class="lbl">Catégorie d'épreuve <span class="req">*</span></label>
             <select id="category" class="inp">
               <option value="">— Sélectionner —</option>
-              <option value="locale">Locale (×0.70)</option>
-              <option value="regionale">Régionale (×0.85)</option>
-              <option value="nationale">Nationale (×1.00)</option>
-              <option value="internationale">Internationale (×1.15)</option>
-              <option value="mondiale">Mondiale (×1.30)</option>
+              <option value="local">Locale (×0.70)</option>
+              <option value="regional">Régionale (×0.85)</option>
+              <option value="national">Nationale (×1.00)</option>
+              <option value="international">Internationale (×1.15)</option>
+              <option value="europe">Européenne (×1.20)</option>
+              <option value="world">Mondiale (×1.30)</option>
             </select>
             <div class="muted2" style="margin-top:4px">Pondère le score de l'épreuve</div>
           </div>
@@ -587,11 +588,49 @@
     // ----------------------------
     // GPX Analysis
     // ----------------------------
+    // ✅ URL du backend MTB Points (Render.com)
+    // ⚠️ IMPORTANT : Remplace par ton URL Render réelle
+    const BACKEND_URL = (window.MTB_BACKEND_URL || "https://mtb-points-backend.onrender.com").replace(/\/$/, "");
+
     window.GPX_CACHE = null;
+    window.SCORES_CACHE = null; // ✅ Cache des scores backend
+
+    async function callBackendAnalysis(file) {
+      // Lit le fichier GPX comme texte et envoie au backend
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const gpxText = e.target.result;
+          try {
+            console.log(`🌍 Envoi GPX au backend (${BACKEND_URL})...`);
+            const resp = await fetch(`${BACKEND_URL}/api/analyze-gpx`, {
+              method: "POST",
+              headers: { "Content-Type": "application/gpx+xml" },
+              body: gpxText,
+              signal: AbortSignal.timeout(35000) // 35s timeout
+            });
+
+            if (!resp.ok) {
+              const err = await resp.json().catch(() => ({}));
+              throw new Error(err.error || `Backend HTTP ${resp.status}`);
+            }
+
+            const data = await resp.json();
+            console.log("✅ Backend réponse:", data);
+            resolve(data);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = () => reject(new Error("Lecture fichier impossible"));
+        reader.readAsText(file);
+      });
+    }
 
     async function runAnalysisFromFile(file) {
       showMsg("", true);
       window.GPX_CACHE = null;
+      window.SCORES_CACHE = null;
 
       if (!file) return;
 
@@ -603,6 +642,8 @@
       try {
         pickedFileName.textContent = `📄 ${file.name}`;
 
+        // ─── ÉTAPE 1 : Analyse client-side (distance, D+, points) ───
+        showMsg("🔍 Analyse GPX en cours...", true);
         const a = await window.analyzeGPX(file, { keepPoints: true });
         window.GPX_CACHE = a;
 
@@ -613,7 +654,43 @@
         // Auto discipline (distance-based) sauf DH/Enduro/Gravel
         maybeAutoSetDisc();
 
-        showMsg("Analyse GPX terminée.", true);
+        showMsg("📊 Analyse GPX terminée. Calcul des scores (OSM)...", true);
+        console.log("📍 GPX local OK:", a.points?.length, "points");
+
+        // ─── ÉTAPE 2 : Analyse backend (ScorePhys + ScoreTech + MRS) ───
+        try {
+          const backendData = await callBackendAnalysis(file);
+
+          if (backendData.ok && backendData.scores) {
+            window.SCORES_CACHE = {
+              physScore: backendData.scores.physScore,
+              techScore: backendData.scores.techScore,
+              globalScore: backendData.scores.globalScore,
+              ipb: backendData.scores.physDetails?.ipb,
+              surfaceEstimate: backendData.tech?.surfaceEstimate || null,
+            };
+
+            const phys = backendData.scores.physScore ?? "—";
+            const tech = backendData.scores.techScore ?? "—";
+            const mrs  = backendData.scores.globalScore ?? "—";
+
+            showMsg(
+              `✅ Analyse complète — ScorePhys: ${phys} | ScoreTech: ${tech} | MRS: ${mrs}`,
+              true
+            );
+            console.log("🎯 Scores calculés:", window.SCORES_CACHE);
+          } else {
+            throw new Error(backendData.error || "Réponse backend invalide");
+          }
+        } catch (backendErr) {
+          // Backend indisponible : on continue sans les scores (non bloquant)
+          console.warn("⚠️ Backend indisponible, scores non calculés:", backendErr.message);
+          showMsg(
+            "✅ GPX analysé. ⚠️ Scores non disponibles (backend indisponible) — le parcours sera sauvegardé sans scores.",
+            true
+          );
+        }
+
       } catch (e) {
         console.error(e);
         showMsg("Analyse GPX impossible (voir console).", false);
@@ -647,8 +724,8 @@
         if (!CURRENT_MEETING) await loadMeeting();
 
         const name = (inpName.value || "").trim();
-        const disc = (selDisc.value || "").trim();     // -> colonne disc (Supabase)
-        const level = (selCategory.value || "").trim(); // -> colonne level
+        const disc = (selDisc.value || "").trim();     // ✅ colonne "disc" dans Supabase (PAS "discipline")
+        const level = (selCategory.value || "").trim(); // ✅ colonne "level"
 
         if (!name) throw new Error("Nom de l'épreuve obligatoire.");
         if (!disc) throw new Error("Discipline obligatoire.");
@@ -673,31 +750,51 @@
 
         const file = inpGpx.files?.[0] || null;
 
+        // ✅ Construction de l'objet à envoyer à Supabase
+        // IMPORTANT: Ne PAS inclure de champ "discipline" - la colonne s'appelle "disc"
         const insertPayload = {
+          // Identifiants
           id: raceId,
           organizer_id: user.id,
           meeting_id: CURRENT_MEETING.id,
 
+          // Informations de base
           name,
           date: CURRENT_MEETING.date || null,
           start_time: (inpStartTime.value || null),
 
-          disc,
+          // Discipline et catégorie
+          disc,   // ✅ Colonne "disc" dans Supabase (PAS "discipline")
           level,
 
+          // Options
           ebike: selEbike.value === "1",
 
+          // Statistiques parcours
           distance_km: toNumberOrNull(inpDistance.value),
           dplus_m: toIntOrNull(inpDplus.value),
 
-          gpx: window.GPX_CACHE ?? null,
+          // ✅ SCORES (depuis le backend)
+          score_phys:   window.SCORES_CACHE?.physScore   ?? null,
+          score_tech:   window.SCORES_CACHE?.techScore   ?? null,
+          score_global: window.SCORES_CACHE?.globalScore ?? null,
+          ipb:          window.SCORES_CACHE?.ipb         ?? null,
+          surface_estimate: window.SCORES_CACHE?.surfaceEstimate ?? null,
+
+          // Données GPX (JSONB - échantillonné 1 point sur 10 pour réduire la taille)
+          gpx: window.GPX_CACHE?.points 
+            ? window.GPX_CACHE.points.filter((p, i) => i % 10 === 0) 
+            : null,
           gpx_file_name: file ? file.name : null,
 
+          // Options de classement
           ranking_options,
           comment: (inpComment.value || "").trim() || null
         };
 
+        const pointsCount = insertPayload.gpx?.length || 0;
         console.log("📤 Envoi vers Supabase:", insertPayload);
+        console.log(`📍 Points GPS envoyés: ${pointsCount} (échantillonnés depuis ${window.GPX_CACHE?.points?.length || 0})`);
 
         const { error: insErr } = await supabase.from("races").insert(insertPayload);
         if (insErr) {
