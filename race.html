@@ -501,6 +501,9 @@
       console.log("🔍 DEBUG normalizeDbRow - gpx type:", typeof row.gpx, Array.isArray(row.gpx) ? `array[${row.gpx.length}]` : "");
       console.log("🔍 DEBUG techScore trouvé:", techScore, "| surfaceEstimate:", surfaceEstimate);
     }
+
+    return {
+      id: row.id,
       meetingId: row.meeting_id,
       name: row.name,
       date: row.date,

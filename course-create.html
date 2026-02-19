@@ -627,6 +627,44 @@
       });
     }
 
+    // ─── Score Physique client-side (fallback si backend indisponible) ───
+    function _hvs(lat1, lon1, lat2, lon2) {
+      const R=6371000, r=d=>d*Math.PI/180;
+      const dLat=r(lat2-lat1), dLon=r(lon2-lon1);
+      const a=Math.sin(dLat/2)**2+Math.cos(r(lat1))*Math.cos(r(lat2))*Math.sin(dLon/2)**2;
+      return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    }
+    function computeScorePhysLocal(points) {
+      if (!Array.isArray(points) || points.length < 2) return null;
+      let distM=0, dplus=0, hasEle=false, ipbSum=0, ipbDist=0;
+      for (let i=1; i<points.length; i++) {
+        const a=points[i-1], b=points[i];
+        const d=_hvs(+a.lat,+a.lon,+b.lat,+b.lon);
+        if (!isFinite(d)||d<=0) continue;
+        distM+=d;
+        const e1=+a.ele, e2=+b.ele;
+        if (!isFinite(e1)||!isFinite(e2)) continue;
+        hasEle=true;
+        if (e2>e1) dplus+=e2-e1;
+        if (d>=3&&d<=80&&Math.abs(e2-e1)<=25) {
+          const g=Math.abs((e2-e1)/d)*100;
+          if (g>=10) ipbSum+=d*(g-10)**2;
+          ipbDist+=d;
+        }
+      }
+      if (!hasEle) return null;
+      const D=distM/1000;
+      const ipb=ipbDist>0?ipbSum/ipbDist:0;
+      const eN=Math.min(1,(Math.sqrt(D)+dplus/1000)/10);
+      const iN=Math.min(1,ipb/120);
+      return {
+        scorePhys: Math.round(100*Math.min(1,0.70*eN+0.30*iN)),
+        ipb: parseFloat(ipb.toFixed(2)),
+        distanceKm: parseFloat(D.toFixed(2)),
+        dplusM: Math.round(dplus)
+      };
+    }
+
     async function runAnalysisFromFile(file) {
       showMsg("", true);
       window.GPX_CACHE = null;
@@ -647,48 +685,73 @@
         const a = await window.analyzeGPX(file, { keepPoints: true });
         window.GPX_CACHE = a;
 
-        // Autofill distance / d+
-        inpDistance.value = String(a.distanceKm ?? "");
-        inpDplus.value = String(a.dplusM ?? "");
+        // ✅ Normaliser la structure : gpx.js peut mettre les stats à différents niveaux
+        const distanceKm = a.distanceKm ?? a.stats?.distanceKm ?? a.meta?.stats?.distanceKm ?? null;
+        const dplusM     = a.dplusM     ?? a.stats?.dplusM     ?? a.meta?.stats?.dplusM     ?? null;
 
-        // Auto discipline (distance-based) sauf DH/Enduro/Gravel
+        console.log("📍 GPX local OK:", a.points?.length, "pts — dist:", distanceKm, "km — D+:", dplusM, "m");
+        if (distanceKm == null || dplusM == null) {
+          console.warn("⚠️ Structure GPX_CACHE:", JSON.stringify(a).slice(0, 400));
+        }
+
+        inpDistance.value = distanceKm != null ? String(distanceKm) : "";
+        inpDplus.value    = dplusM     != null ? String(dplusM)     : "";
+
         maybeAutoSetDisc();
 
-        showMsg("📊 Analyse GPX terminée. Calcul des scores (OSM)...", true);
-        console.log("📍 GPX local OK:", a.points?.length, "points");
+        // ─── ÉTAPE 2 : Score Physique client-side (toujours disponible) ───
+        const localScores = computeScorePhysLocal(a.points || []);
+        if (localScores) {
+          window.SCORES_CACHE = {
+            physScore:    localScores.scorePhys,
+            techScore:    null,
+            globalScore:  localScores.scorePhys,
+            ipb:          localScores.ipb,
+            surfaceEstimate: null,
+          };
+          console.log("⚙️ Score Phys local:", localScores.scorePhys, "| IPB:", localScores.ipb);
+        }
 
-        // ─── ÉTAPE 2 : Analyse backend (ScorePhys + ScoreTech + MRS) ───
+        showMsg("📊 GPX analysé. Calcul du score technique OSM...", true);
+
+        // ─── ÉTAPE 3 : Backend OSM (ScoreTech + MRS complet) ───
         try {
           const backendData = await callBackendAnalysis(file);
+          if (!backendData.ok) throw new Error(backendData.error || "Réponse backend invalide");
 
-          if (backendData.ok && backendData.scores) {
-            window.SCORES_CACHE = {
-              physScore: backendData.scores.physScore,
-              techScore: backendData.scores.techScore,
-              globalScore: backendData.scores.globalScore,
-              ipb: backendData.scores.physDetails?.ipb,
-              surfaceEstimate: backendData.tech?.surfaceEstimate || null,
-            };
+          // ✅ Le backend /api/analyze-gpx retourne: tech.techScoreV2, tech.surfaceEstimate
+          //    et potentiellement scores.physScore si calculé côté serveur
+          const techScoreV2     = backendData.tech?.techScoreV2    ?? backendData.scores?.techScore   ?? null;
+          const surfaceEstimate = backendData.tech?.surfaceEstimate ?? null;
+          const physServer      = backendData.scores?.physScore     ?? backendData.phys?.scorePhys    ?? null;
+          const globalServer    = backendData.scores?.globalScore   ?? backendData.mrs                ?? null;
+          const ipbServer       = backendData.scores?.physDetails?.ipb ?? backendData.phys?.details?.ipb ?? null;
 
-            const phys = backendData.scores.physScore ?? "—";
-            const tech = backendData.scores.techScore ?? "—";
-            const mrs  = backendData.scores.globalScore ?? "—";
-
-            showMsg(
-              `✅ Analyse complète — ScorePhys: ${phys} | ScoreTech: ${tech} | MRS: ${mrs}`,
-              true
-            );
-            console.log("🎯 Scores calculés:", window.SCORES_CACHE);
-          } else {
-            throw new Error(backendData.error || "Réponse backend invalide");
-          }
-        } catch (backendErr) {
-          // Backend indisponible : on continue sans les scores (non bloquant)
-          console.warn("⚠️ Backend indisponible, scores non calculés:", backendErr.message);
-          showMsg(
-            "✅ GPX analysé. ⚠️ Scores non disponibles (backend indisponible) — le parcours sera sauvegardé sans scores.",
-            true
+          const physFinal  = physServer  ?? window.SCORES_CACHE?.physScore ?? null;
+          const globalFinal= globalServer ?? (
+            physFinal && techScoreV2
+              ? Math.round(0.55 * physFinal + 0.45 * techScoreV2)
+              : physFinal ?? null
           );
+
+          window.SCORES_CACHE = {
+            physScore:    physFinal,
+            techScore:    techScoreV2,
+            globalScore:  globalFinal,
+            ipb:          ipbServer ?? window.SCORES_CACHE?.ipb ?? null,
+            surfaceEstimate,
+          };
+
+          const phys = window.SCORES_CACHE.physScore ?? "—";
+          const tech = window.SCORES_CACHE.techScore ?? "—";
+          const mrs  = window.SCORES_CACHE.globalScore ?? "—";
+          showMsg(`✅ Analyse complète — ScorePhys: ${phys} | ScoreTech: ${tech} | MRS: ${mrs}`, true);
+          console.log("🎯 Scores finaux:", window.SCORES_CACHE);
+
+        } catch (backendErr) {
+          console.warn("⚠️ Backend indisponible:", backendErr.message);
+          const phys = window.SCORES_CACHE?.physScore ?? "—";
+          showMsg(`✅ GPX analysé — ScorePhys (local): ${phys} | ⚠️ ScoreTech indisponible (backend OSM)`, true);
         }
 
       } catch (e) {
@@ -732,9 +795,24 @@
         if (!level) throw new Error("Catégorie d'épreuve obligatoire.");
 
         // GPX obligatoire
-        if (!window.GPX_CACHE || !toNumberOrNull(inpDistance.value) || !toIntOrNull(inpDplus.value)) {
-          throw new Error("GPX obligatoire : analyse manquante (distance / D+).");
+        if (!window.GPX_CACHE) {
+          throw new Error("GPX obligatoire : veuillez charger un fichier GPX.");
         }
+        // Récupérer distance/D+ depuis le cache si les champs sont vides
+        const distVal = toNumberOrNull(inpDistance.value)
+          ?? window.GPX_CACHE?.distanceKm
+          ?? window.GPX_CACHE?.stats?.distanceKm
+          ?? null;
+        const dplusVal = toIntOrNull(inpDplus.value)
+          ?? window.GPX_CACHE?.dplusM
+          ?? window.GPX_CACHE?.stats?.dplusM
+          ?? null;
+        if (!distVal || !dplusVal) {
+          throw new Error(`GPX analysé mais distance (${distVal}) ou D+ (${dplusVal}) manquant. Vérifiez le fichier GPX.`);
+        }
+        // Mettre à jour les champs si vides
+        if (!inpDistance.value) inpDistance.value = String(distVal);
+        if (!inpDplus.value)    inpDplus.value    = String(dplusVal);
 
         const raceId = makeIdFromName(name);
         const payloadMulti = readMultiLapsPayload();
@@ -771,8 +849,8 @@
           ebike: selEbike.value === "1",
 
           // Statistiques parcours
-          distance_km: toNumberOrNull(inpDistance.value),
-          dplus_m: toIntOrNull(inpDplus.value),
+          distance_km: distVal,
+          dplus_m: dplusVal,
 
           // ✅ SCORES (depuis le backend)
           score_phys:   window.SCORES_CACHE?.physScore   ?? null,
@@ -789,7 +867,20 @@
 
           // Options de classement
           ranking_options,
-          comment: (inpComment.value || "").trim() || null
+          comment: (inpComment.value || "").trim() || null,
+
+          // ✅ Sauvegarder les scores dans analysis_json pour que race.html puisse les lire
+          analysis_json: window.SCORES_CACHE ? {
+            physScore:      window.SCORES_CACHE.physScore,
+            techScoreV2:    window.SCORES_CACHE.techScore,
+            mrs:            window.SCORES_CACHE.globalScore,
+            ipb:            window.SCORES_CACHE.ipb,
+            surfaceEstimate: window.SCORES_CACHE.surfaceEstimate,
+            tech: {
+              techScoreV2:    window.SCORES_CACHE.techScore,
+              surfaceEstimate: window.SCORES_CACHE.surfaceEstimate,
+            }
+          } : null
         };
 
         const pointsCount = insertPayload.gpx?.length || 0;
