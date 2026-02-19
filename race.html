@@ -442,12 +442,23 @@
       try { gpx = JSON.parse(gpx); } catch { gpx = {}; }
     }
     
+    // Parser analysis_json si présent (contient les résultats du backend OSM)
+    let aj = row.analysis_json || {};
+    if (typeof aj === 'string') {
+      try { aj = JSON.parse(aj); } catch { aj = {}; }
+    }
+    // analysis_json peut avoir différentes structures selon la version du backend
+    const ajTech   = aj.tech   || aj.techV2   || aj.rawServer?.tech || {};
+    const ajServer = aj.rawServer || {};
+
     // Chercher scores dans toutes les structures possibles
     const physScore = row.score_phys
       ?? gpx.score_phys
       ?? gpx.physScore
       ?? gpx.phys?.score
       ?? gpx.phys?.scorePhys
+      ?? aj.physScore
+      ?? aj.phys?.score
       ?? null;
 
     const techScore = row.score_tech
@@ -455,22 +466,41 @@
       ?? gpx.techScore
       ?? gpx.techV2?.techScoreV2
       ?? gpx.tech?.techScoreV2
+      ?? aj.techScoreV2
+      ?? aj.techScore
+      ?? ajTech.techScoreV2
+      ?? ajServer.tech?.techScoreV2
       ?? null;
 
     const globalScore = row.score_global
       ?? gpx.score_global
       ?? gpx.globalScore
       ?? gpx.mrs
+      ?? aj.globalScore
+      ?? aj.mrs
       ?? null;
 
     const surfaceEstimate = row.surface_estimate
       ?? gpx.surfaceEstimate
       ?? gpx.techV2?.surfaceEstimate
       ?? gpx.tech?.surfaceEstimate
+      ?? aj.surfaceEstimate
+      ?? ajTech.surfaceEstimate
+      ?? ajServer.tech?.surfaceEstimate
+      ?? null;
+
+    const ipb = row.ipb
+      ?? gpx.ipb
+      ?? aj.ipb
+      ?? aj.phys?.ipb
       ?? null;
     
-    return {
-      id: row.id,
+    // ── DEBUG: montrer la structure réelle pour identifier où sont les scores ──
+    if (!row.score_phys && !row.score_tech) {
+      console.log("🔍 DEBUG normalizeDbRow - analysis_json structure:", JSON.stringify(aj).slice(0, 500));
+      console.log("🔍 DEBUG normalizeDbRow - gpx type:", typeof row.gpx, Array.isArray(row.gpx) ? `array[${row.gpx.length}]` : "");
+      console.log("🔍 DEBUG techScore trouvé:", techScore, "| surfaceEstimate:", surfaceEstimate);
+    }
       meetingId: row.meeting_id,
       name: row.name,
       date: row.date,
@@ -490,7 +520,7 @@
       physScore,
       techScore,
       globalScore,
-      ipb: row.ipb ?? gpx.ipb ?? null,
+      ipb,
       surfaceEstimate,
       
       lapsByCategorySex: row.laps_by_category_sex ?? row.lapsByCategorySex,
