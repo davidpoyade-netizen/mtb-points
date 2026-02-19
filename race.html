@@ -435,8 +435,39 @@
   function normalizeDbRow(row) {
     if (!row) return null;
     
-    // ✅ Extraire les données depuis gpx si les colonnes sont vides
-    const gpx = row.gpx || {};
+    // ✅ Extraire les données depuis gpx si les colonnes dédiées sont vides
+    // Le champ gpx peut contenir {distanceKm, dplusM, phys, techV2, mrs, surfaceEstimate, ...}
+    let gpx = row.gpx || {};
+    if (typeof gpx === 'string') {
+      try { gpx = JSON.parse(gpx); } catch { gpx = {}; }
+    }
+    
+    // Chercher scores dans toutes les structures possibles
+    const physScore = row.score_phys
+      ?? gpx.score_phys
+      ?? gpx.physScore
+      ?? gpx.phys?.score
+      ?? gpx.phys?.scorePhys
+      ?? null;
+
+    const techScore = row.score_tech
+      ?? gpx.score_tech
+      ?? gpx.techScore
+      ?? gpx.techV2?.techScoreV2
+      ?? gpx.tech?.techScoreV2
+      ?? null;
+
+    const globalScore = row.score_global
+      ?? gpx.score_global
+      ?? gpx.globalScore
+      ?? gpx.mrs
+      ?? null;
+
+    const surfaceEstimate = row.surface_estimate
+      ?? gpx.surfaceEstimate
+      ?? gpx.techV2?.surfaceEstimate
+      ?? gpx.tech?.surfaceEstimate
+      ?? null;
     
     return {
       id: row.id,
@@ -444,7 +475,7 @@
       name: row.name,
       date: row.date,
       time: row.time ?? null,
-      disc: row.disc,  // ✅ Corrigé : colonne "disc" dans Supabase
+      disc: row.disc,
       level: row.level,
       ebike: row.ebike,
       cutoffTime: row.cutoff_time ?? row.cutoffTime,
@@ -454,18 +485,17 @@
       sexAllowed: row.sex_allowed ?? row.sexAllowed ?? "all",
       comment: row.comment,
       
-      // ✅ Fallback vers gpx si les colonnes sont vides
-      distanceKm: row.distance_km ?? gpx.distanceKm,
-      dplusM: row.dplus_m ?? gpx.dplusM,
-      physScore: row.score_phys ?? gpx.phys?.score,
-      techScore: row.score_tech ?? gpx.techV2?.techScoreV2,
-      globalScore: row.score_global ?? gpx.mrs,
-      ipb: row.ipb ?? null,
-      surfaceEstimate: row.surface_estimate ?? null, // ✅ Barres de surface depuis Supabase
+      distanceKm: row.distance_km ?? gpx.distanceKm ?? null,
+      dplusM: row.dplus_m ?? gpx.dplusM ?? null,
+      physScore,
+      techScore,
+      globalScore,
+      ipb: row.ipb ?? gpx.ipb ?? null,
+      surfaceEstimate,
       
       lapsByCategorySex: row.laps_by_category_sex ?? row.lapsByCategorySex,
       analysis: row.analysis_json,
-      gpx: row.gpx, // ✅ Garder l'objet gpx complet pour les points
+      gpx: row.gpx,
       isPublished: row.is_published
     };
   }
@@ -537,9 +567,69 @@
     }
   }
 
+  // ============================================================================
+  // CALCUL SCORE PHYSIQUE CLIENT-SIDE (fallback si colonnes absentes en BDD)
+  // ============================================================================
+  function _haversineM(lat1, lon1, lat2, lon2) {
+    const R = 6371000, r = d => d * Math.PI / 180;
+    const dLat = r(lat2-lat1), dLon = r(lon2-lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(r(lat1))*Math.cos(r(lat2))*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function computeScorePhysClient(points) {
+    if (!Array.isArray(points) || points.length < 2) return null;
+    let distM = 0, dplus = 0, hasEle = false;
+    let ipbSum = 0, ipbDist = 0;
+    for (let i = 1; i < points.length; i++) {
+      const a = points[i-1], b = points[i];
+      const d = _haversineM(a.lat, a.lon, b.lat, b.lon);
+      if (!Number.isFinite(d) || d <= 0) continue;
+      distM += d;
+      const e1 = Number(a.ele), e2 = Number(b.ele);
+      if (!Number.isFinite(e1) || !Number.isFinite(e2)) continue;
+      hasEle = true;
+      const de = e2 - e1;
+      if (de > 0) dplus += de;
+      // IPB contribution
+      if (d >= 3 && d <= 80 && Math.abs(de) <= 25) {
+        const grade = Math.abs(de / d) * 100;
+        if (grade >= 10) ipbSum += d * Math.pow(grade - 10, 2);
+        ipbDist += d;
+      }
+    }
+    if (!hasEle) return null;
+    const D = distM / 1000;
+    const ipb = ipbDist > 0 ? ipbSum / ipbDist : 0;
+    const effortBase = Math.sqrt(D) + (dplus / 1000);
+    const effortNorm = Math.min(1, effortBase / 10);
+    const ipbNorm = Math.min(1, ipb / 120);
+    const score = Math.round(100 * Math.min(1, 0.70 * effortNorm + 0.30 * ipbNorm));
+    return { scorePhys: score, ipb: parseFloat(ipb.toFixed(2)), distanceKm: parseFloat(D.toFixed(2)), dplusM: Math.round(dplus) };
+  }
+
   function renderUI(race, authed) {
     CURRENT_RACE = race;
-    
+
+    // ── Fallback : calculer les scores côté client si absents de la BDD ──
+    const pts = extractPoints(race);
+    if ((race.physScore == null || race.physScore === undefined) && pts && pts.length >= 2) {
+      console.log("⚙️ Scores absents en BDD → calcul client-side depuis GPX...");
+      const computed = computeScorePhysClient(pts);
+      if (computed) {
+        race.physScore   = computed.scorePhys;
+        race.ipb         = computed.ipb;
+        // Si pas de distanceKm en BDD, utiliser celle calculée depuis les points
+        if (!race.distanceKm) race.distanceKm = computed.distanceKm;
+        if (!race.dplusM)     race.dplusM     = computed.dplusM;
+        // Score global = physique seul si pas de techScore
+        if (!race.globalScore && !race.techScore) {
+          race.globalScore = race.physScore; // approximation : MRS ≈ Phys si pas de tech
+        }
+        console.log(`✅ Score Phys calculé client-side: ${race.physScore} (IPB: ${race.ipb})`);
+      }
+    }
+
     // ✅ DEBUG: Afficher la structure complète
     console.log("=== RENDER UI DEBUG ===");
     console.log("Race:", race);
@@ -547,7 +637,7 @@
     console.log("D+:", race.dplusM, "m");
     console.log("Scores - Phys:", race.physScore, "Tech:", race.techScore, "Global:", race.globalScore);
     console.log("GPX présent:", !!race.gpx);
-    console.log("Points:", extractPoints(race)?.length || 0);
+    console.log("Points:", pts?.length || 0);
     console.log("======================");
 
     // Header
@@ -583,28 +673,27 @@
     }
 
     // Scores
-    $("scorePhys").textContent = race.physScore ? Math.round(race.physScore) : "—";
-    $("scoreTech").textContent = race.techScore ? Math.round(race.techScore) : "—";
-    $("scoreGlobal").textContent = race.globalScore ? Math.round(race.globalScore) : "—";
+    $("scorePhys").textContent = race.physScore != null ? Math.round(race.physScore) : "—";
+    $("scoreTech").textContent = race.techScore != null ? Math.round(race.techScore) : "—";
+    $("scoreGlobal").textContent = race.globalScore != null ? Math.round(race.globalScore) : "—";
     
     // Sous-titres avec IPB
-    if (race.physScore) {
+    if (race.physScore != null) {
       $("scorePhysSub").textContent = race.ipb 
-        ? `IPB: ${Number(race.ipb).toFixed(1)} • Effort`
+        ? `IPB: ${Number(race.ipb).toFixed(1)} • calculé GPX`
         : "Effort • Distance";
-    }
-    if (race.techScore) {
-      $("scoreTechSub").textContent = "OSM Hybrid ✅";
-    }
-    if (race.globalScore) {
-      $("scoreGlobalSub").textContent = `MRS = 0.55×Phys + 0.45×Tech`;
-    }
-    
-    // ✅ Afficher un message si les scores ne sont pas disponibles
-    if (!race.physScore && !race.techScore && !race.globalScore) {
-      console.warn("⚠️ Scores non disponibles. L'analyse technique n'a pas été effectuée.");
+    } else {
       $("scorePhysSub").textContent = "Non calculé";
+    }
+    if (race.techScore != null) {
+      $("scoreTechSub").textContent = "OSM Hybrid ✅";
+    } else {
       $("scoreTechSub").textContent = "Analyse OSM requise";
+    }
+    if (race.globalScore != null) {
+      const formula = race.techScore != null ? "MRS = 0.55×Phys + 0.45×Tech" : "Score physique (OSM manquant)";
+      $("scoreGlobalSub").textContent = formula;
+    } else {
       $("scoreGlobalSub").textContent = "Non calculé";
     }
 
