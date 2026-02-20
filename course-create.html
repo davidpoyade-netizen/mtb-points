@@ -595,19 +595,29 @@
     window.GPX_CACHE = null;
     window.SCORES_CACHE = null; // ✅ Cache des scores backend
 
+    // ─── Ping pour réveiller le backend Render.com (free tier dort après 15min) ───
+    async function wakeUpBackend() {
+      try {
+        console.log("🔔 Ping backend pour réveil...");
+        await fetch(`${BACKEND_URL}/health`, { signal: AbortSignal.timeout(5000) });
+      } catch (e) {
+        // Pas grave, le backend se réveille via la vraie requête
+      }
+    }
+
     async function callBackendAnalysis(file) {
-      // Lit le fichier GPX comme texte et envoie au backend
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = async (e) => {
           const gpxText = e.target.result;
           try {
             console.log(`🌍 Envoi GPX au backend (${BACKEND_URL})...`);
+            // ✅ 70s timeout pour laisser le temps au backend Render de se réveiller
             const resp = await fetch(`${BACKEND_URL}/api/analyze-gpx`, {
               method: "POST",
               headers: { "Content-Type": "application/gpx+xml" },
               body: gpxText,
-              signal: AbortSignal.timeout(35000) // 35s timeout
+              signal: AbortSignal.timeout(70000)
             });
 
             if (!resp.ok) {
@@ -616,7 +626,7 @@
             }
 
             const data = await resp.json();
-            console.log("✅ Backend réponse:", data);
+            console.log("✅ Backend réponse complète:", JSON.stringify(data).slice(0, 800));
             resolve(data);
           } catch (err) {
             reject(err);
@@ -712,46 +722,60 @@
           console.log("⚙️ Score Phys local:", localScores.scorePhys, "| IPB:", localScores.ipb);
         }
 
-        showMsg("📊 GPX analysé. Calcul du score technique OSM...", true);
+        showMsg("📊 GPX analysé. Connexion au serveur OSM... ⏳ (30-60s si serveur endormi)", true);
 
-        // ─── ÉTAPE 3 : Backend OSM (ScoreTech + MRS complet) ───
+        // ─── ÉTAPE 3 : Backend OSM (ScoreTech + surfaces) ───
         try {
+          // Ping de réveil (non bloquant, pour réchauffer le backend Render)
+          wakeUpBackend();
+
           const backendData = await callBackendAnalysis(file);
           if (!backendData.ok) throw new Error(backendData.error || "Réponse backend invalide");
 
-          // ✅ Le backend /api/analyze-gpx retourne: tech.techScoreV2, tech.surfaceEstimate
-          //    et potentiellement scores.physScore si calculé côté serveur
-          const techScoreV2     = backendData.tech?.techScoreV2    ?? backendData.scores?.techScore   ?? null;
+          // ✅ Structure réelle du backend /api/analyze-gpx :
+          //    backendData.tech.techScoreV2
+          //    backendData.tech.surfaceEstimate
+          //    backendData.meta.stats.distanceKm / dplusM
+          //    (pas de backendData.scores — le scorePhys vient du client)
+          const techScoreV2     = backendData.tech?.techScoreV2 ?? null;
           const surfaceEstimate = backendData.tech?.surfaceEstimate ?? null;
-          const physServer      = backendData.scores?.physScore     ?? backendData.phys?.scorePhys    ?? null;
-          const globalServer    = backendData.scores?.globalScore   ?? backendData.mrs                ?? null;
-          const ipbServer       = backendData.scores?.physDetails?.ipb ?? backendData.phys?.details?.ipb ?? null;
 
-          const physFinal  = physServer  ?? window.SCORES_CACHE?.physScore ?? null;
-          const globalFinal= globalServer ?? (
-            physFinal && techScoreV2
-              ? Math.round(0.55 * physFinal + 0.45 * techScoreV2)
-              : physFinal ?? null
-          );
+          console.log("🔬 tech brut:", JSON.stringify(backendData.tech).slice(0, 400));
+          console.log("   techScoreV2:", techScoreV2, "| surfaceEstimate:", JSON.stringify(surfaceEstimate));
+
+          const physFinal = window.SCORES_CACHE?.physScore ?? null;
+          const globalFinal = (physFinal != null && techScoreV2 != null)
+            ? Math.round(0.55 * physFinal + 0.45 * techScoreV2)
+            : physFinal ?? null;
 
           window.SCORES_CACHE = {
-            physScore:    physFinal,
-            techScore:    techScoreV2,
-            globalScore:  globalFinal,
-            ipb:          ipbServer ?? window.SCORES_CACHE?.ipb ?? null,
+            physScore:       physFinal,
+            techScore:       techScoreV2,
+            globalScore:     globalFinal,
+            ipb:             window.SCORES_CACHE?.ipb ?? null,
             surfaceEstimate,
           };
 
           const phys = window.SCORES_CACHE.physScore ?? "—";
           const tech = window.SCORES_CACHE.techScore ?? "—";
           const mrs  = window.SCORES_CACHE.globalScore ?? "—";
-          showMsg(`✅ Analyse complète — ScorePhys: ${phys} | ScoreTech: ${tech} | MRS: ${mrs}`, true);
+          const surfOk = surfaceEstimate ? "✅" : "⚠️ (données OSM insuffisantes)";
+
+          showMsg(
+            `✅ Analyse complète — ScorePhys: ${phys} | ScoreTech: ${tech} | MRS: ${mrs} | Surfaces: ${surfOk}`,
+            true
+          );
           console.log("🎯 Scores finaux:", window.SCORES_CACHE);
 
         } catch (backendErr) {
           console.warn("⚠️ Backend indisponible:", backendErr.message);
           const phys = window.SCORES_CACHE?.physScore ?? "—";
-          showMsg(`✅ GPX analysé — ScorePhys (local): ${phys} | ⚠️ ScoreTech indisponible (backend OSM)`, true);
+          showMsg(
+            `✅ GPX analysé — ScorePhys (local): ${phys} | ❌ ScoreTech indisponible
+⚠️ Raison: ${backendErr.message}
+💡 Le backend Render.com est peut-être endormi — réessayez dans 1 min.`,
+            true
+          );
         }
 
       } catch (e) {

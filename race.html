@@ -250,7 +250,13 @@
 
   <!-- Scores -->
   <section class="panel" style="margin-top:18px">
-    <h3 style="margin:0 0 12px 0;font-size:16px">Scores officiels MTB Points</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+      <h3 style="margin:0;font-size:16px">Scores officiels MTB Points</h3>
+      <button class="btn2" id="btnRecalcOSM" style="font-size:12px;padding:8px 12px;display:none">
+        🔄 Recalculer score OSM
+      </button>
+    </div>
+    <div id="osmStatus" style="display:none;margin-bottom:10px;padding:10px;border-radius:10px;font-size:13px;background:rgba(245,158,11,0.1);border:1px solid #f59e0b;color:#92400e"></div>
     <div class="kpis">
       <div class="kpi">
         <div class="muted">Physique</div>
@@ -722,6 +728,17 @@
       $("scoreTechSub").textContent = "OSM Hybrid ✅";
     } else {
       $("scoreTechSub").textContent = "Analyse OSM requise";
+      // Afficher le bouton recalcul et le message si les points GPX sont dispo
+      const hasGpxPoints = !!(extractPoints(race)?.length >= 2);
+      if (hasGpxPoints) {
+        const btn = $("btnRecalcOSM");
+        const status = $("osmStatus");
+        if (btn) btn.style.display = "inline-flex";
+        if (status) {
+          status.style.display = "block";
+          status.textContent = "⚠️ Score technique OSM non calculé. Cliquez sur « Recalculer score OSM » pour lancer l'analyse (serveur Render, 30-60s).";
+        }
+      }
     }
     if (race.globalScore != null) {
       const formula = race.techScore != null ? "MRS = 0.55×Phys + 0.45×Tech" : "Score physique (OSM manquant)";
@@ -1124,6 +1141,107 @@
     }
   }
 
+  // ─── Recalcul OSM pour les épreuves sans scoreTech ───
+  const BACKEND_URL = (window.MTB_BACKEND_URL || "https://mtb-points-backend.onrender.com").replace(/\/$/, "");
+
+  async function recalcOSM() {
+    const btn = $("btnRecalcOSM");
+    const status = $("osmStatus");
+    const points = CURRENT_RACE ? extractPoints(CURRENT_RACE) : null;
+
+    if (!points || points.length < 2) {
+      status.style.display = "block";
+      status.textContent = "❌ Aucun point GPX disponible pour recalculer.";
+      return;
+    }
+
+    btn.disabled = true;
+    status.style.display = "block";
+    status.textContent = "⏳ Connexion au serveur OSM... (30-60s si endormi)";
+
+    try {
+      // Reconstruire un GPX minimal depuis les points
+      const gpxLines = [
+        '<?xml version="1.0"?><gpx version="1.1" creator="MTBPoints">',
+        '<trk><trkseg>',
+        ...points.map(p => `<trkpt lat="${p.lat}" lon="${p.lon}">${p.ele != null ? `<ele>${p.ele}</ele>` : ''}</trkpt>`),
+        '</trkseg></trk></gpx>'
+      ];
+      const gpxText = gpxLines.join('
+');
+
+      const resp = await fetch(`${BACKEND_URL}/api/analyze-gpx`, {
+        method: "POST",
+        headers: { "Content-Type": "application/gpx+xml" },
+        body: gpxText,
+        signal: AbortSignal.timeout(70000)
+      });
+
+      if (!resp.ok) {
+        const e = await resp.json().catch(() => ({}));
+        throw new Error(e.error || `HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      console.log("🔬 OSM recalc réponse:", JSON.stringify(data).slice(0, 600));
+
+      const techScoreV2     = data.tech?.techScoreV2 ?? null;
+      const surfaceEstimate = data.tech?.surfaceEstimate ?? null;
+
+      if (techScoreV2 == null) {
+        status.textContent = `⚠️ Backend OK mais OSM insuffisant (peu de données pour ce tracé). techScoreV2: ${techScoreV2}`;
+        return;
+      }
+
+      const physScore = CURRENT_RACE?.physScore ?? null;
+      const globalScore = physScore != null
+        ? Math.round(0.55 * physScore + 0.45 * techScoreV2)
+        : null;
+
+      // Afficher immédiatement
+      $("scoreTech").textContent = Math.round(techScoreV2);
+      $("scoreTechSub").textContent = "OSM Hybrid ✅ (recalculé)";
+      if (globalScore != null) {
+        $("scoreGlobal").textContent = Math.round(globalScore);
+        $("scoreGlobalSub").textContent = "MRS = 0.55×Phys + 0.45×Tech";
+      }
+      if (surfaceEstimate) renderSurfaceBars(surfaceEstimate);
+
+      // Sauvegarder dans Supabase si possible
+      try {
+        const supabase = await waitForSupabase();
+        if (supabase && raceId) {
+          await supabase.from("races").update({
+            score_tech:       techScoreV2,
+            score_global:     globalScore,
+            surface_estimate: surfaceEstimate,
+            analysis_json: {
+              ...(typeof CURRENT_RACE?.analysis === 'object' ? CURRENT_RACE.analysis : {}),
+              techScoreV2,
+              surfaceEstimate,
+              mrs: globalScore,
+              tech: { techScoreV2, surfaceEstimate }
+            }
+          }).eq("id", raceId);
+          status.style.background = "rgba(16,185,129,0.1)";
+          status.style.borderColor = "#10b981";
+          status.style.color = "#065f46";
+          status.textContent = `✅ Score Tech: ${Math.round(techScoreV2)} | MRS: ${globalScore ?? "—"} — Sauvegardé en base !`;
+          btn.style.display = "none";
+        }
+      } catch (saveErr) {
+        console.warn("Sauvegarde Supabase échouée:", saveErr);
+        status.textContent = `✅ Score Tech: ${Math.round(techScoreV2)} (non sauvegardé en base : ${saveErr.message})`;
+      }
+
+    } catch (err) {
+      console.error("OSM recalc error:", err);
+      status.textContent = `❌ Erreur: ${err.message} — Le backend est peut-être endormi, réessayez dans 1 min.`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
   window.addEventListener("resize", () => {
     if (elevationChart) {
       elevationChart.resize();
@@ -1131,6 +1249,9 @@
   });
 
   main();
+  document.addEventListener("click", (e) => {
+    if (e.target.id === "btnRecalcOSM") recalcOSM();
+  });
 </script>
 
 </body>
