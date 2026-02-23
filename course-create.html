@@ -590,18 +590,21 @@
     // ----------------------------
     // ✅ URL du backend MTB Points (Render.com)
     // ⚠️ IMPORTANT : Remplace par ton URL Render réelle
-    const BACKEND_URL = (window.MTB_BACKEND_URL || "https://mtb-points-backend.onrender.com").replace(/\/$/, "");
+    const BACKEND_URL = (window.MTB_BACKEND_URL || "https://mtb-points-production.up.railway.app").replace(/\/$/, "");
 
     window.GPX_CACHE = null;
     window.SCORES_CACHE = null; // ✅ Cache des scores backend
 
-    // ─── Ping pour réveiller le backend Render.com (free tier dort après 15min) ───
+    // ─── Ping pour réveiller le backend Render.com (sans CORS, no-cors mode) ───
     async function wakeUpBackend() {
       try {
-        console.log("🔔 Ping backend pour réveil...");
-        await fetch(`${BACKEND_URL}/health`, { signal: AbortSignal.timeout(5000) });
+        console.log("🔔 Ping backend pour réveil (no-cors)...");
+        // no-cors : ne lit pas la réponse mais réveille le serveur
+        await fetch(`${BACKEND_URL}/`, { method: "GET", mode: "no-cors", signal: AbortSignal.timeout(8000) });
+        console.log("🔔 Ping envoyé, attente 3s...");
+        await new Promise(r => setTimeout(r, 3000));
       } catch (e) {
-        // Pas grave, le backend se réveille via la vraie requête
+        console.log("🔔 Ping terminé (erreur ignorée):", e.message);
       }
     }
 
@@ -770,12 +773,11 @@
         } catch (backendErr) {
           console.warn("⚠️ Backend indisponible:", backendErr.message);
           const phys = window.SCORES_CACHE?.physScore ?? "—";
-          showMsg(
-            `✅ GPX analysé — ScorePhys (local): ${phys} | ❌ ScoreTech indisponible
-⚠️ Raison: ${backendErr.message}
-💡 Le backend Render.com est peut-être endormi — réessayez dans 1 min.`,
-            true
-          );
+          const isCors = backendErr.message === "Failed to fetch";
+          const hint = isCors
+            ? "🔴 CORS bloqué : le backend Render.com est endormi. Patientez 60s puis rechargez le GPX."
+            : `Raison: ${backendErr.message}`;
+          showMsg(`✅ GPX analysé — ScorePhys (local): ${phys} | ❌ ScoreTech indisponible — ${hint}`, true);
         }
 
       } catch (e) {

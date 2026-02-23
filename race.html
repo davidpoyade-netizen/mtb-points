@@ -1142,7 +1142,7 @@
   }
 
   // ─── Recalcul OSM pour les épreuves sans scoreTech ───
-  const BACKEND_URL = (window.MTB_BACKEND_URL || "https://mtb-points-backend.onrender.com").replace(/\/$/, "");
+  const BACKEND_URL = (window.MTB_BACKEND_URL || "https://mtb-points-production.up.railway.app").replace(/\/$/, "");
 
   async function recalcOSM() {
     const btn = $("btnRecalcOSM");
